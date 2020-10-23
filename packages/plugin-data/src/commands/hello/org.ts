@@ -8,15 +8,15 @@
 import { flags, SfdxCommand } from '@salesforce/command';
 import { Messages } from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
-import { HelloOrg } from '@salesforce/template-lib';
+import { HelloOrg } from '@salesforce/data';
 
 // Initialize Messages with the current plugin directory
-Messages.importMessagesDirectory(__dirname, true, '@salesforce/plugin-template');
+Messages.importMessagesDirectory(__dirname, true, '@salesforce/plugin-data');
 
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
 // TODO: replace the package name with your new package's name
-const messages = Messages.loadMessages('@salesforce/plugin-template', 'org');
+const messages = Messages.loadMessages('@salesforce/plugin-data', 'org');
 
 export default class Org extends SfdxCommand {
   public static description = messages.getMessage('commandDescription');

@@ -1,9 +1,9 @@
 {
-  "name": "@salesforce/template-lib",
-  "version": "1.0.0",
-  "description": "A template library that lives in a lerna project",
+  "name": "@salesforce/data",
+  "version": "0.0.3",
+  "description": "A library for importing and exporting salesforce data",
   "author": "Salesforce",
-  "homepage": "https://github.com/salesforcecli/lerna-template/tree/master/packages/template-lib#readme",
+  "homepage": "https://github.com/salesforcecli/data/tree/master/packages/data#readme",
   "license": "BSD-3-Clause",
   "files": [
     "/lib",
@@ -11,11 +11,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/salesforcecli/lerna-template.git"
+    "url": "git+https://github.com/salesforcecli/data.git"
   },
   "bugs": "https://github.com/forcedotcom/cli/issues",
   "publishConfig": {
-    "access": "public"
+    "access": "restricted"
   },
   "main": "lib/exported",
   "scripts": {
