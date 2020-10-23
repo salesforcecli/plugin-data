@@ -16,7 +16,7 @@
     "/messages",
     "/oclif.manifest.json"
   ],
-  "homepage": "https://github.com/salesforcecli/lerna-template",
+  "homepage": "https://github.com/salesforcecli/data",
   "keywords": [
     "force",
     "salesforce",
@@ -25,7 +25,7 @@
     "sfdx-plugin"
   ],
   "license": "BSD-3-Clause",
-  "repository": "salesforcecli/lerna-template",
+  "repository": "salesforcecli/data",
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "build": "lerna run build",
@@ -78,6 +78,6 @@
     }
   },
   "publishConfig": {
-    "access": "public"
+    "access": "restricted"
   }
 }

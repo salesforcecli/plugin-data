@@ -1,9 +1,9 @@
 {
-  "name": "@salesforce/plugin-template",
-  "version": "1.0.0",
-  "description": "A template plugin that lives in a lerna project",
+  "name": "@salesforce/plugin-data",
+  "version": "0.0.1",
+  "description": "Plugin for salesforce data commands",
   "author": "Salesforce",
-  "homepage": "https://github.com/salesforcecli/lerna-template/tree/master/packages/plugin-template#readme",
+  "homepage": "https://github.com/salesforcecli/data/tree/master/packages/plugin-data#readme",
   "license": "BSD-3-Clause",
   "oclif": {
     "commands": "./lib/commands",
@@ -24,11 +24,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/salesforcecli/lerna-template.git"
+    "url": "git+https://github.com/salesforcecli/data.git"
   },
   "bugs": "https://github.com/forcedotcom/cli/issues",
   "publishConfig": {
-    "access": "public"
+    "access": "restricted"
   },
   "scripts": {
     "build": "sf-build",
@@ -49,7 +49,7 @@
     "@oclif/config": "^1",
     "@salesforce/command": "^3.0.3",
     "@salesforce/core": "^2.13.0",
-    "@salesforce/template-lib": "^1.0.0",
+    "@salesforce/data": "^0.0.1",
     "@salesforce/ts-types": "^1.4.3",
     "tslib": "^1"
   },

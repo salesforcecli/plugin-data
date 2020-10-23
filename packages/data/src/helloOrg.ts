@@ -10,8 +10,8 @@ import { AsyncCreatable } from '@salesforce/kit';
 import { ensure, Nullable } from '@salesforce/ts-types';
 
 // Initialize Messages with the current plugin directory
-Messages.importMessagesDirectory(__dirname, true, '@salesforce/template');
-const messages = Messages.loadMessages('@salesforce/template', 'org');
+Messages.importMessagesDirectory(__dirname, true, '@salesforce/data');
+const messages = Messages.loadMessages('@salesforce/data', 'org');
 
 export class HelloOrg extends AsyncCreatable<HelloOrg.Options> {
   private logger!: Logger;
