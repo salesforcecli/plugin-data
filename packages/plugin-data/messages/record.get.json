@@ -1,0 +1,14 @@
+{
+  "description": "displays a single record",
+  "sObjectType": "the type of the record you’re retrieving",
+  "sObjectId": "the ID of the record you’re retrieving",
+  "where": "a list of <fieldName>=<value> pairs to search for",
+  "useToolingApi": "retrieve the record with Tooling API",
+  "examples": [
+    "sfdx force:data:record:get -s Account -i 001D000000Kv3dl",
+    "sfdx force:data:record:get -s Account -w \"Name=Acme\"",
+    "sfdx force:data:record:get -s Account -w \"Name='Universal Containers'\"",
+    "sfdx force:data:record:get -s Account -w \"Name='Universal Containers' Phone='(123) 456-7890'\"",
+    "sfdx force:data:record:get -t -s TraceFlag -i 7tf170000009cUBAAY --perflog --json"
+  ]
+}

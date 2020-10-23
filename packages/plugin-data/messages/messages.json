@@ -1,0 +1,8 @@
+{
+  "perfLogLevelOption": "get API performance data",
+  "perfLogLevelOptionLong": "Gets data on API performance metrics from the server. The data is stored in $HOME/.sfdx/apiPerformanceLog.json",
+  "NeitherSobjectidNorWhereError": "Either --where or --sobjectid flags must be specified",
+  "NeitherSobjectidNorWhereErrorActions": "Provide values for either --where or --sobjectid flags",
+  "BothSobjectidAndWhereError": "Both --where and --sobjectid flags are specified",
+  "BothSobjectidAndWhereErrorActions": "Provide values for either --where or --sobjectid flags but not both"
+}
