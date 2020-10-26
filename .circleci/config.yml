@@ -21,7 +21,7 @@ workflows:
       # - release-management/test-package:
       #     name: node-12
       - release-management/release-lerna-packages:
-          sign: "plugin-data template-lib"
+          sign: packages/plugin-data packages/data
           dryrun: true
           # requires:
           #   - node-latest
