@@ -23,7 +23,7 @@ workflows:
       #     name: node-12
       - release-management/release-lerna-packages:
           sign: packages/plugin-data packages/data
-          dryrun: true
+          tag: orb
           # requires:
           #   - node-latest
           filters:
