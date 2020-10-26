@@ -12,19 +12,19 @@ workflows:
       #     filters:
       #       branches:
       #         ignore: master
-      - release-management/test-package:
-          name: node-latest
-          node_version: latest
-          filters:
-            branches:
-              only: mdonnalley/data
+      # - release-management/test-package:
+      #     name: node-latest
+      #     node_version: latest
+      #     filters:
+      #       branches:
+      #         only: mdonnalley/data
       # - release-management/test-package:
       #     name: node-12
       - release-management/release-lerna-packages:
           sign: "plugin-data"
           dryrun: true
-          requires:
-            - node-latest
+          # requires:
+          #   - node-latest
           filters:
             branches:
               only: mdonnalley/data
