@@ -13,6 +13,7 @@ import { ensure, Nullable } from '@salesforce/ts-types';
 Messages.importMessagesDirectory(__dirname, true, '@salesforce/data');
 const messages = Messages.loadMessages('@salesforce/data', 'org');
 
+// comment
 export class HelloOrg extends AsyncCreatable<HelloOrg.Options> {
   private logger!: Logger;
   private connection: Connection;
