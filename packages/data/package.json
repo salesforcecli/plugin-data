@@ -15,7 +15,7 @@
   },
   "bugs": "https://github.com/forcedotcom/cli/issues",
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   },
   "main": "lib/exported",
   "scripts": {
