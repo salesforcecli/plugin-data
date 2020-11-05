@@ -18,7 +18,7 @@ Messages.importMessagesDirectory(__dirname, true, '@salesforce/plugin-data');
 // TODO: replace the package name with your new package's name
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'org');
 
-// comment
+// comment asdf
 export default class Org extends SfdxCommand {
   public static description = messages.getMessage('commandDescription');
 
