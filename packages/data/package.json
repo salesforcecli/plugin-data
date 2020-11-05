@@ -1,6 +1,6 @@
 {
   "name": "@salesforce/data",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A library for importing and exporting salesforce data",
   "author": "Salesforce",
   "homepage": "https://github.com/salesforcecli/data/tree/master/packages/data#readme",
