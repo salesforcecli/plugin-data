@@ -1,3 +1,19 @@
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+# 0.1.0 (2020-11-05)
+
+
+### Features
+
+* add a comment ([be4549a](https://github.com/salesforcecli/data/commit/be4549a670fe9f887855d68c4e3d7157629bd82b))
+
+
+
+
+
 # Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
