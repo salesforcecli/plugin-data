@@ -63,11 +63,8 @@ function parseKeyValueSequence(text: string): string[] {
   const keyValuePairs: string[] = [];
 
   const trimmedText = text.trim();
-  // eslint-disable-next-line @typescript-eslint/prefer-for-of
-  for (let i = 0; i < trimmedText.length; i++) {
-    const currentChar = trimmedText[i];
-    // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
-    const isSeparator = currentChar.match(separator);
+  for (const currentChar of trimmedText) {
+    const isSeparator = separator.exec(currentChar);
 
     if (currentChar === "'" && !inDoubleQuote) {
       inSingleQuote = !inSingleQuote;
@@ -111,6 +108,9 @@ export class SObject {
     this.sObjectType = options.sObjectType;
   }
 
+  /**
+   * Insert new sobject with the provided key=value string (e.g. 'name=Acme foo=bar')
+   */
   public async insert(values: string): Promise<SObjectResult> {
     const insertObject = stringToDictionary(values);
     const results = this.useToolingApi
@@ -120,6 +120,9 @@ export class SObject {
     return this.normalize<SObjectResult>(results);
   }
 
+  /**
+   * Delete the sobject with the given sobject id
+   */
   public async delete(sObjectId: string): Promise<SObjectResult> {
     const results = this.useToolingApi
       ? await this.connection.tooling.destroy(this.sObjectType, sObjectId)
@@ -127,6 +130,9 @@ export class SObject {
     return this.normalize<SObjectResult>(results);
   }
 
+  /**
+   * Retrieve the sobject with the given sobject id
+   */
   public async retrieve(sObjectId: string): Promise<SObjectRecord> {
     const record = this.useToolingApi
       ? await this.connection.tooling.retrieve(this.sObjectType, sObjectId)
@@ -134,6 +140,9 @@ export class SObject {
     return this.normalize<SObjectRecord>(record);
   }
 
+  /**
+   * Update the sobject with the provided sobject id with the provided key=value string (e.g. 'name=Acme foo=bar')
+   */
   public async update(sObjectId: string, values: string): Promise<SObjectResult> {
     const updateObject: SObjectRecord = stringToDictionary(values);
     updateObject.Id = sObjectId;
@@ -143,6 +152,9 @@ export class SObject {
     return this.normalize<SObjectResult>(results);
   }
 
+  /**
+   * Query for an sobject that matches the provided where clause
+   */
   public async query(where: string): Promise<SObjectRecord> {
     const queryObject = stringToDictionary(where);
     const records = this.useToolingApi

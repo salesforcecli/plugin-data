@@ -70,6 +70,7 @@
     "@salesforce/core": "^2.13.0",
     "@salesforce/data": "^0.0.6",
     "@salesforce/ts-types": "^1.4.3",
+    "jsforce": "^1.10.0",
     "tslib": "^1"
   },
   "devDependencies": {
