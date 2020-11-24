@@ -1,7 +1,7 @@
 ---
 version: 2.1
 orbs:
-  release-management: salesforce/npm-release-management@3
+  release-management: salesforce/npm-release-management@4
 
 workflows:
   version: 2
@@ -16,8 +16,9 @@ workflows:
           node_version: latest
       - release-management/test-package:
           name: node-12
-      - release-management/release-package:
-          sign: true
+      - release-management/release-lerna-packages:
+          sign: packages/plugin-data
+          tag: test
           requires:
             - node-latest
           filters:
