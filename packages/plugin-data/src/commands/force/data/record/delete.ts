@@ -9,7 +9,7 @@ import * as os from 'os';
 
 import { flags, FlagsConfig } from '@salesforce/command';
 import { Messages, SfdxError } from '@salesforce/core';
-import { SObject, SObjectResult } from '@salesforce/data';
+import { RecordResult } from 'jsforce';
 import { DataCommand } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -52,22 +52,17 @@ export default class Delete extends DataCommand {
     }),
   };
 
-  public async run(): Promise<SObjectResult> {
+  public async run(): Promise<RecordResult> {
     this.validateIdXorWhereFlags();
 
     this.ux.startSpinner('Deleting Record');
-
-    const sobject = new SObject({
-      connection: await this.getConnection(),
-      sObjectType: this.flags.sobjecttype,
-      useToolingApi: this.flags.usetoolingapi,
-    });
-
     let status = 'Success';
 
     try {
-      const sObjectId = this.flags.sobjectid || (await sobject.query(this.flags.where)).Id;
-      const result = await sobject.delete(sObjectId);
+      const sobject = this.getConnection().sobject(this.flags.sobjecttype);
+      const sObjectId = this.flags.sobjectid || (await this.query(sobject, this.flags.where)).Id;
+      const result = this.normalize<RecordResult>(await sobject.destroy(sObjectId));
+
       if (result.success) {
         this.ux.log(messages.getMessage('deleteSuccess', [sObjectId]));
       } else {

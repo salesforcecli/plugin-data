@@ -7,9 +7,8 @@
 
 import { SfdxCommand } from '@salesforce/command';
 import { Messages, SfdxError, Org } from '@salesforce/core';
-import { SObjectErrorResult } from '@salesforce/data';
 import { AnyJson, Dictionary } from '@salesforce/ts-types';
-import { BaseConnection } from 'jsforce';
+import { BaseConnection, ErrorResult, Record, SObject } from 'jsforce';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
@@ -36,10 +35,11 @@ interface Response {
 type ConnectionInternals = { callOptions?: { perfOption?: string } };
 
 const originalRequestMethod = HttpApi.prototype.request;
-HttpApi.prototype.request = function (req: unknown, ...args: unknown[]) {
+HttpApi.prototype.request = function (req: unknown, ...args: unknown[]): unknown {
   this.once('response', (response: Response) => {
     const metrics = response.headers.perfmetrics;
     if (metrics) {
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       DataCommand.addMetric({
         requestPath: response.req.path,
         perfMetrics: JSON.parse(metrics),
@@ -50,10 +50,10 @@ HttpApi.prototype.request = function (req: unknown, ...args: unknown[]) {
 };
 
 export abstract class DataCommand extends SfdxCommand {
+  private static metrics: Metric[] = [];
   // Ensured by requiresUsername
   public org!: Org;
 
-  private static metrics: Metric[] = [];
   public static addMetric(metric: Metric): void {
     DataCommand.metrics.push(metric);
   }
@@ -76,7 +76,7 @@ export abstract class DataCommand extends SfdxCommand {
     }
   }
 
-  public collectErrorMessages(result: SObjectErrorResult): string {
+  public collectErrorMessages(result: ErrorResult): string {
     let errors = '';
     if (result.errors) {
       errors = '\nErrors:\n';
@@ -95,7 +95,7 @@ export abstract class DataCommand extends SfdxCommand {
   }
 
   public getConnection(): BaseConnection {
-    let connection: BaseConnection & ConnectionInternals = this.flags.useToolingApi
+    const connection: BaseConnection & ConnectionInternals = this.flags.useToolingApi
       ? this.org.getConnection().tooling
       : this.org.getConnection();
 
@@ -106,6 +106,23 @@ export abstract class DataCommand extends SfdxCommand {
       connection.callOptions.perfOption = 'MINIMUM';
     }
     return connection;
+  }
+
+  public async query(sobject: SObject<object>, where: string): Promise<Record<AnyJson>> {
+    const queryObject = this.stringToDictionary(where);
+    const records = await sobject.find(queryObject, 'id');
+    if (!records || records.length === 0) {
+      throw new SfdxError('DataRecordGetNoRecord', messages.getMessage('DataRecordGetNoRecord'));
+    }
+
+    if (records.length > 1) {
+      throw new SfdxError(
+        'DataRecordGetMultipleRecords',
+        messages.getMessage('DataRecordGetMultipleRecords', [where, this.flags.sobjecttype, records.length])
+      );
+    }
+
+    return this.normalize<Record<AnyJson>>(records);
   }
 
   protected stringToDictionary(str: string): Dictionary<string> {

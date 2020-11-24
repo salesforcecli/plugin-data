@@ -14,9 +14,6 @@ workflows:
       - release-management/test-package:
           name: node-latest
           node_version: latest
-          filters:
-            branches:
-              only: mdonnalley/data
       - release-management/test-package:
           name: node-12
       - release-management/release-lerna-packages:

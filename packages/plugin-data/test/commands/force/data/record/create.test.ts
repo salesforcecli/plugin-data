@@ -47,7 +47,7 @@ describe('force:data:record:create', () => {
       '"Name=Acme"',
       '--json',
     ])
-    .it('should delete the sobject by sobjectid', (ctx) => {
+    .it('should create a new sobject', (ctx) => {
       const result = JSON.parse(ctx.stdout);
       expect(result.status).to.equal(0);
       expect(result.result.Id).to.equal('0011100001zhhyUAAQ');

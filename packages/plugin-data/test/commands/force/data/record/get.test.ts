@@ -72,4 +72,23 @@ describe('force:data:record:get', () => {
       const result = JSON.parse(ctx.stdout);
       expect(result.status).to.equal(1);
     });
+
+  test
+    .withOrg({ username: 'test@org.com' }, true)
+    .stdout()
+    .command([
+      'force:data:record:get',
+      '--targetusername',
+      'test@org.com',
+      '--sobjecttype',
+      'Account',
+      '--where',
+      '"Name"',
+      '--json',
+    ])
+    .it('should throw an error if values provided to where flag are invalid', (ctx) => {
+      const result = JSON.parse(ctx.stdout);
+      expect(result.status).to.equal(1);
+      expect(result.message).to.equal('Malformed key=value pair for value: Name');
+    });
 });

@@ -9,8 +9,8 @@ import * as os from 'os';
 
 import { flags, FlagsConfig } from '@salesforce/command';
 import { Messages } from '@salesforce/core';
-import { SObject, SObjectRecord } from '@salesforce/data';
-import { ensureString } from '@salesforce/ts-types';
+import { Record } from 'jsforce';
+import { AnyJson } from '@salesforce/ts-types';
 import { DataCommand } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -53,17 +53,12 @@ export default class Get extends DataCommand {
     }),
   };
 
-  public async run(): Promise<SObjectRecord> {
+  public async run(): Promise<Record<AnyJson>> {
     this.validateIdXorWhereFlags();
 
     this.ux.startSpinner('Getting Record');
-    const sobject = new SObject({
-      connection: await this.getConnection(),
-      sObjectType: this.flags.sobjecttype,
-      useToolingApi: this.flags.usetoolingapi,
-    });
-
-    const sObjectId = ensureString(this.flags.sobjectid || (await sobject.query(this.flags.where)).Id);
+    const sobject = this.getConnection().sobject(this.flags.sobjecttype);
+    const sObjectId = this.flags.sobjectid || (await this.query(sobject, this.flags.where)).Id;
     const result = await sobject.retrieve(sObjectId);
     if (!this.flags.json) this.ux.logJson(result);
     this.ux.stopSpinner();

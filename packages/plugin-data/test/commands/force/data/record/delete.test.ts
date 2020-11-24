@@ -65,4 +65,26 @@ describe('force:data:record:delete', () => {
       const result = JSON.parse(ctx.stdout);
       expect(result.status).to.equal(1);
     });
+
+  test
+    .withOrg({ username: 'test@org.com' }, true)
+    .withConnectionRequest(() => {
+      return Promise.resolve({});
+    })
+    .stdout()
+    .command([
+      'force:data:record:delete',
+      '--targetusername',
+      'test@org.com',
+      '--sobjecttype',
+      'Account',
+      '--where',
+      '"Name=Acme"',
+      '--json',
+    ])
+    .it('should throw an error if the where flag returns nothing', (ctx) => {
+      const result = JSON.parse(ctx.stdout);
+      expect(result.status).to.equal(1);
+      expect(result.name).to.equal('DataRecordGetNoRecord');
+    });
 });

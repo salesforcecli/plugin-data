@@ -9,7 +9,7 @@ import * as os from 'os';
 
 import { flags, FlagsConfig } from '@salesforce/command';
 import { Messages, SfdxError } from '@salesforce/core';
-import { SObject, SObjectResult } from '@salesforce/data';
+import { RecordResult } from 'jsforce';
 import { DataCommand } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -58,21 +58,18 @@ export default class Update extends DataCommand {
     }),
   };
 
-  public async run(): Promise<SObjectResult> {
+  public async run(): Promise<RecordResult> {
     this.validateIdXorWhereFlags();
 
     this.ux.startSpinner('Updating Record');
 
-    const sobject = new SObject({
-      connection: await this.getConnection(),
-      sObjectType: this.flags.sobjecttype,
-      useToolingApi: this.flags.usetoolingapi,
-    });
-
     let status = 'Success';
-    const sObjectId = this.flags.sobjectid || (await sobject.query(this.flags.where)).Id;
+    const sobject = this.getConnection().sobject(this.flags.sobjecttype);
+    const sObjectId = this.flags.sobjectid || (await this.query(sobject, this.flags.where)).Id;
     try {
-      const result = await sobject.update(sObjectId, this.flags.values);
+      const updateObject = this.stringToDictionary(this.flags.values);
+      updateObject.Id = sObjectId;
+      const result = await sobject.update(updateObject);
       if (result.success) {
         this.ux.log(messages.getMessage('updateSuccess', [sObjectId]));
       } else {
