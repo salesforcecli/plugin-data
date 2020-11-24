@@ -495,17 +495,6 @@
     mkdirp "1.0.4"
     sfdx-faye "^1.0.9"
 
-"@salesforce/data@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.npmjs.org/@salesforce/data/-/data-0.0.6.tgz#22df45f54a4331af20c72d72b649210bd8872802"
-  integrity sha512-x3aJeOrWln7Iq2xTguJWyoO4kwv/JRNd98qhY42jO55nR7un8deEeVSj4ed63lPuzGMTm/iqhcrNBqX57WMelw==
-  dependencies:
-    "@salesforce/core" "^2.13.0"
-    "@salesforce/kit" "^1.3.3"
-    "@salesforce/ts-types" "^1.4.3"
-    template-lib "^1.1.2"
-    tslib "^1"
-
 "@salesforce/dev-config@^2.0.0":
   version "2.0.0"
   resolved "https://registry.npmjs.org/@salesforce/dev-config/-/dev-config-2.0.0.tgz#388d71830e63078a835a844b51d2661c73ac851e"
@@ -551,7 +540,7 @@
     typescript "^3.9.3"
     xunit-file "^1.0.0"
 
-"@salesforce/kit@^1.2.2", "@salesforce/kit@^1.3.2", "@salesforce/kit@^1.3.3":
+"@salesforce/kit@^1.2.2", "@salesforce/kit@^1.3.2":
   version "1.3.3"
   resolved "https://registry.npmjs.org/@salesforce/kit/-/kit-1.3.3.tgz#eaea23b1be7aebb81f9f091c8f77c2733a8ae710"
   integrity sha512-Ed5lh8xyCwaXeB1Sovr9xbQZ1tpQg5vSeNvKROlJQRk4Gj3IBm73pKPPuNn+AeXN51lWr9my0ftLREtyig3FoA==
@@ -1080,11 +1069,6 @@ camelcase@^2.0.0:
   version "2.1.1"
   resolved "https://registry.npmjs.org/camelcase/-/camelcase-2.1.1.tgz#7c1d16d679a1bbe59ca02cacecfb011e201f5a1f"
   integrity sha1-fB0W1nmhu+WcoCys7PsBHiAfWh8=
-
-camelcase@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.npmjs.org/camelcase/-/camelcase-4.1.0.tgz#d545635be1e33c542649c69173e5de6acfae34dd"
-  integrity sha1-1UVjW+HjPFQmScaRc+Xeas+uNN0=
 
 camelcase@^5.0.0, camelcase@^5.3.1:
   version "5.3.1"
@@ -4533,13 +4517,6 @@ table@^5.2.3:
     lodash "^4.17.14"
     slice-ansi "^2.1.0"
     string-width "^3.0.0"
-
-template-lib@^1.1.2:
-  version "1.1.2"
-  resolved "https://registry.npmjs.org/template-lib/-/template-lib-1.1.2.tgz#63ee63f03fb8569622fbbd774b13e0f8e38143dd"
-  integrity sha512-1ozSm4KVK/++V3JRDkWJwG9TqQoytttQFNLiqjWDYqe/7sz67y2puT3M8Dk/iUjdA+aN4AGLdETK9p7ein/QLQ==
-  dependencies:
-    camelcase "^4.1.0"
 
 test-exclude@^6.0.0:
   version "6.0.0"

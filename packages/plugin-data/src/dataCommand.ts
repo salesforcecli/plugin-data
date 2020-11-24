@@ -6,20 +6,62 @@
  */
 
 import { SfdxCommand } from '@salesforce/command';
-import { Connection, Messages, SfdxError, Org } from '@salesforce/core';
+import { Messages, SfdxError, Org } from '@salesforce/core';
 import { SObjectErrorResult } from '@salesforce/data';
-import { AnyJson, ensure } from '@salesforce/ts-types';
+import { AnyJson, Dictionary } from '@salesforce/ts-types';
+import { BaseConnection } from 'jsforce';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
+export interface Metric {
+  requestPath: string;
+  perfMetrics: AnyJson;
+}
 interface Result {
   status: number;
   result: AnyJson;
-  perfMetrics?: Connection.Metric[];
+  perfMetrics?: Metric[];
 }
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+// @ts-ignore because jsforce doesn't export http-api
+import * as HttpApi from 'jsforce/lib/http-api';
+
+interface Response {
+  headers: AnyJson & { perfmetrics?: string };
+  req: { path: string };
+}
+
+type ConnectionInternals = { callOptions?: { perfOption?: string } };
+
+const originalRequestMethod = HttpApi.prototype.request;
+HttpApi.prototype.request = function (req: unknown, ...args: unknown[]) {
+  this.once('response', (response: Response) => {
+    const metrics = response.headers.perfmetrics;
+    if (metrics) {
+      DataCommand.addMetric({
+        requestPath: response.req.path,
+        perfMetrics: JSON.parse(metrics),
+      });
+    }
+  });
+  return originalRequestMethod.call(this, req, ...args);
+};
+
 export abstract class DataCommand extends SfdxCommand {
+  // Ensured by requiresUsername
+  public org!: Org;
+
+  private static metrics: Metric[] = [];
+  public static addMetric(metric: Metric): void {
+    DataCommand.metrics.push(metric);
+  }
+
+  public static getMetrics(): Metric[] {
+    return DataCommand.metrics;
+  }
+
   public validateIdXorWhereFlags(): void {
     if (!this.flags.where && !this.flags.sobjectid) {
       throw new SfdxError(messages.getMessage('NeitherSobjectidNorWhereError'), 'NeitherSobjectidNorWhereError', [
@@ -47,19 +89,105 @@ export abstract class DataCommand extends SfdxCommand {
 
   public getJsonResultObject(result = this.result.data, status = process.exitCode || 0): Result {
     const final: Result = { status, result };
-    const perfMetrics = Connection.getMetrics();
+    const perfMetrics = DataCommand.getMetrics();
     if (perfMetrics.length) final.perfMetrics = perfMetrics;
     return final;
   }
 
-  public async getConnection(): Promise<Connection> {
-    const org = ensure<Org>(this.org);
+  public getConnection(): BaseConnection {
+    let connection: BaseConnection & ConnectionInternals = this.flags.useToolingApi
+      ? this.org.getConnection().tooling
+      : this.org.getConnection();
+
     if (this.flags.perflog) {
-      const authInfo = org.getConnection().getAuthInfo();
-      const connection = await Connection.create({ authInfo, perfOption: 'MINIMUM' });
-      return connection;
-    } else {
-      return org.getConnection();
+      if (!connection.callOptions) {
+        connection.callOptions = {};
+      }
+      connection.callOptions.perfOption = 'MINIMUM';
     }
+    return connection;
+  }
+
+  protected stringToDictionary(str: string): Dictionary<string> {
+    const keyValuePairs = this.parseKeyValueSequence(str);
+    return this.transformKeyValueSequence(keyValuePairs);
+  }
+
+  protected normalize<T>(results: T | T[]): T {
+    // jsforce returns RecordResult | RecordResult[]
+    // but we're only ever dealing with a single sobject we are guaranteed to
+    // get back a single RecordResult. Nevertheless, we ensure that it's a
+    // single RecordResult to make Typescript happy
+    return Array.isArray(results) ? results[0] : results;
+  }
+
+  /**
+   * Takes a sequence of key=value string pairs and produces an object out of them.
+   * If you repeat the key, it replaces the value with the subsequent value.
+   *
+   * @param [keyValuePairs] - The list of key=value pair strings.
+   */
+  private transformKeyValueSequence(keyValuePairs: string[]): Dictionary<string> {
+    const constructedObject: Dictionary<string> = {};
+
+    keyValuePairs.forEach((pair) => {
+      // Look for the *first* '=' and splits there, ignores any subsequent '=' for this pair
+      const eqPosition = pair.indexOf('=');
+      if (eqPosition === -1) {
+        throw new Error(messages.getMessage('TextUtilMalformedKeyValuePair', [pair]));
+      } else {
+        const key = pair.substr(0, eqPosition);
+        const value = pair.substr(eqPosition + 1);
+        constructedObject[key] = value;
+      }
+    });
+
+    return constructedObject;
+  }
+
+  /**
+   * Splits a sequence of 'key=value key="leftValue rightValue"   key=value'
+   * into a list of key=value pairs, paying attention to quoted whitespace.
+   *
+   * This is NOT a full push down-automaton so do NOT expect full error handling/recovery.
+   *
+   * @param {string} text - The sequence to split
+   */
+  private parseKeyValueSequence(text: string): string[] {
+    const separator = /\s/;
+
+    let inSingleQuote = false;
+    let inDoubleQuote = false;
+    let currentToken: string[] = [];
+    const keyValuePairs: string[] = [];
+
+    const trimmedText = text.trim();
+    for (const currentChar of trimmedText) {
+      const isSeparator = separator.exec(currentChar);
+
+      if (currentChar === "'" && !inDoubleQuote) {
+        inSingleQuote = !inSingleQuote;
+        continue;
+      } else if (currentChar === '"' && !inSingleQuote) {
+        inDoubleQuote = !inDoubleQuote;
+        continue;
+      }
+
+      if (!inSingleQuote && !inDoubleQuote && isSeparator) {
+        if (currentToken.length > 0) {
+          keyValuePairs.push(currentToken.join(''));
+          currentToken = [];
+        }
+      } else {
+        currentToken.push(currentChar);
+      }
+    }
+
+    // For the case of only one key=value pair with no separator
+    if (currentToken.length > 0) {
+      keyValuePairs.push(currentToken.join(''));
+    }
+
+    return keyValuePairs;
   }
 }

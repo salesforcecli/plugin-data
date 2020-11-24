@@ -79,7 +79,8 @@
       "pre-push": "sf-husky-pre-push"
     }
   },
-  "publishConfig": {
-    "access": "public"
-  }
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
 }
