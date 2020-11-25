@@ -7,5 +7,6 @@
   "BothSobjectidAndWhereErrorActions": "Provide values for either --where or --sobjectid flags but not both",
   "DataRecordGetNoRecord": "No matching record found",
   "DataRecordGetMultipleRecords": "%s is not a unique qualifier for %s; %s records were retrieved.\nRetrieve only one record.",
-  "TextUtilMalformedKeyValuePair": "Malformed key=value pair for value: %s"
+  "TextUtilMalformedKeyValuePair": "Malformed key=value pair for value: %s",
+  "PathDoesNotExist": "The specified path [%s] does not exist"
 }
