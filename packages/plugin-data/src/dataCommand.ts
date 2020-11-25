@@ -26,6 +26,7 @@ interface Result {
 // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore because jsforce doesn't export http-api
 import * as HttpApi from 'jsforce/lib/http-api';
+import { fs as fscore } from '@salesforce/core';
 
 interface Response {
   headers: AnyJson & { perfmetrics?: string };
@@ -85,6 +86,12 @@ export abstract class DataCommand extends SfdxCommand {
       });
     }
     return errors;
+  }
+
+  public async throwIfFileDoesntExist(path: string): Promise<void> {
+    if (!(await fscore.fileExists(path))) {
+      throw new SfdxError(messages.getMessage('PathDoesNotExist', [path]), 'PathDoesNotExist');
+    }
   }
 
   public getJsonResultObject(result = this.result.data, status = process.exitCode || 0): Result {
