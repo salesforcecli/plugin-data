@@ -1,0 +1,7 @@
+{
+  "BulkBatch": "Batch #%s",
+  "NoBatchFound": "Unable to find batch %s for job %s.",
+  "BulkError": "Upsert errors",
+  "BulkJobStatus": "Job Status",
+  "BatchStatus": "Batch Status"
+}
