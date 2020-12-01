@@ -7,10 +7,12 @@
 
 import * as os from 'os';
 import { ReadStream } from 'fs';
-import { Connection, Messages, SfdxError, fs as fscore, Org } from '@salesforce/core';
+import { Connection, Messages, SfdxError, fs, Org } from '@salesforce/core';
 import { flags, FlagsConfig } from '@salesforce/command';
+// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+// @ts-ignore
+import { Batcher, BulkResult, Job } from '@salesforce/data';
 import { DataCommand } from '../../../../dataCommand';
-import Upsert, { Job } from './upsert';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.delete');
@@ -33,25 +35,38 @@ export default class Delete extends DataCommand {
     wait: flags.number({
       char: 'w',
       description: messages.getMessage('flags.wait'),
+      min: 0,
     }),
   };
   public org!: Org;
 
-  public async run(): Promise<void> {
+  public async run(): Promise<BulkResult[]> {
     const conn: Connection = this.org.getConnection();
     this.ux.startSpinner('Bulk Delete');
 
     await this.throwIfFileDoesntExist(this.flags.csvfile);
 
-    const csvRecords: ReadStream = fscore.createReadStream(this.flags.csvfile);
+    const csvRecords: ReadStream = fs.createReadStream(this.flags.csvfile);
+    let result: BulkResult[];
+
     try {
       const job: Job = conn.bulk.createJob(this.flags.sobjecttype, 'delete') as Job;
 
-      await Upsert.createAndExecuteBatches(job, csvRecords, this.flags.sobjecttype, this.ux, this.flags.wait);
+      result = await Batcher.createAndExecuteBatches(
+        job,
+        csvRecords,
+        this.flags.sobjecttype,
+        this.ux,
+        this.org.getConnection(),
+        this.flags.wait
+      );
+
       this.ux.stopSpinner();
     } catch (e) {
-      this.ux.stopSpinner();
+      this.ux.stopSpinner('error');
       throw SfdxError.wrap(e);
     }
+
+    return result;
   }
 }

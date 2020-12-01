@@ -8,9 +8,5 @@
     "jobid": "the ID of the job you want to view or of the job whose batch you want to view",
     "batchid": "the ID of the batch whose status you want to view"
   },
-  "NoBatchFound": "Unable to find batch %s for job %s.",
-  "BulkBatch": "Batch #%s",
-  "BulkError": "Upsert errors",
-  "BulkJobStatus": "Job Status",
-  "BatchStatus": "Batch Status"
+  "NoBatchFound": "Unable to find batch %s for job %s."
 }

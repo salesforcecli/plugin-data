@@ -6,7 +6,7 @@
  */
 
 import { SfdxCommand } from '@salesforce/command';
-import { Messages, SfdxError, Org } from '@salesforce/core';
+import { Messages, SfdxError, Org, fs } from '@salesforce/core';
 import { AnyJson, Dictionary } from '@salesforce/ts-types';
 import { BaseConnection, ErrorResult, Record, SObject } from 'jsforce';
 
@@ -26,7 +26,6 @@ interface Result {
 // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore because jsforce doesn't export http-api
 import * as HttpApi from 'jsforce/lib/http-api';
-import { fs as fscore } from '@salesforce/core';
 
 interface Response {
   headers: AnyJson & { perfmetrics?: string };
@@ -34,6 +33,22 @@ interface Response {
 }
 
 type ConnectionInternals = { callOptions?: { perfOption?: string } };
+
+// export type BulkResult = {
+//   $: {
+//     xmlns: string;
+//   };
+//   id: string;
+//   jobId: string;
+//   state: string;
+//   createdDate: string;
+//   systemModStamp: string;
+//   numberRecordsProcessed: string;
+//   numberRecordsFailed: string;
+//   totalProcessingTime: string;
+//   apiActiveProcessingTime: string;
+//   apexProcessingTime: string;
+// };
 
 const originalRequestMethod = HttpApi.prototype.request;
 HttpApi.prototype.request = function (req: unknown, ...args: unknown[]): unknown {
@@ -89,7 +104,7 @@ export abstract class DataCommand extends SfdxCommand {
   }
 
   public async throwIfFileDoesntExist(path: string): Promise<void> {
-    if (!(await fscore.fileExists(path))) {
+    if (!(await fs.fileExists(path))) {
       throw new SfdxError(messages.getMessage('PathDoesNotExist', [path]), 'PathDoesNotExist');
     }
   }
