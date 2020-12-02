@@ -20,7 +20,6 @@ describe('force:data:bulk:status', () => {
               state: 'Open',
               options: {},
               type: null,
-              willie: true,
               operation: null,
               list: () => {
                 return [
@@ -72,7 +71,6 @@ describe('force:data:bulk:status', () => {
               state: 'Open',
               options: {},
               type: null,
-              willie: true,
               operation: null,
               list: () => {
                 return [

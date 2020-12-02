@@ -34,22 +34,6 @@ interface Response {
 
 type ConnectionInternals = { callOptions?: { perfOption?: string } };
 
-// export type BulkResult = {
-//   $: {
-//     xmlns: string;
-//   };
-//   id: string;
-//   jobId: string;
-//   state: string;
-//   createdDate: string;
-//   systemModStamp: string;
-//   numberRecordsProcessed: string;
-//   numberRecordsFailed: string;
-//   totalProcessingTime: string;
-//   apiActiveProcessingTime: string;
-//   apexProcessingTime: string;
-// };
-
 const originalRequestMethod = HttpApi.prototype.request;
 HttpApi.prototype.request = function (req: unknown, ...args: unknown[]): unknown {
   this.once('response', (response: Response) => {

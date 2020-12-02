@@ -8,8 +8,6 @@ import * as os from 'os';
 import { ReadStream } from 'fs';
 import { flags, FlagsConfig } from '@salesforce/command';
 import { Connection, fs, Messages, SfdxError } from '@salesforce/core';
-// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-// @ts-ignore
 import { Batcher, BulkResult, Job } from '@salesforce/data';
 import { DataCommand } from '../../../../dataCommand';
 

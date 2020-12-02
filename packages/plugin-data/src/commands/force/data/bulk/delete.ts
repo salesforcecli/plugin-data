@@ -4,13 +4,10 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-
 import * as os from 'os';
 import { ReadStream } from 'fs';
 import { Connection, Messages, SfdxError, fs, Org } from '@salesforce/core';
 import { flags, FlagsConfig } from '@salesforce/command';
-// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-// @ts-ignore
 import { Batcher, BulkResult, Job } from '@salesforce/data';
 import { DataCommand } from '../../../../dataCommand';
 

@@ -17,7 +17,7 @@ const POLL_FREQUENCY_MS = 5000;
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/data', 'batcher');
 
-export type Batches = Array<Array<Record<string, unknown>>>;
+export type Batches = Array<Array<Record<string, string>>>;
 export type Job = jsforceJob & { id: string };
 
 export type BulkResult = {
@@ -70,7 +70,7 @@ export class Batcher {
     batchNum?: number,
     isJob?: boolean
   ): void {
-    ux.log(''); // newline
+    ux.log('');
     if (batchNum) {
       ux.styledHeader(messages.getMessage('BulkBatch', [batchNum]));
     }
@@ -113,8 +113,6 @@ export class Batcher {
 
   /**
    * create and execute batches based on the record arrays; wait for completion response if -w flag is set with > 0 minutes
-   * exposed for unit testing
-   *
    * to get proper logging/printing to console pass the instance of UX that called this method
    *
    * @param job {Job}
@@ -143,7 +141,7 @@ export class Batcher {
     // But, we might want to actually continue to the next batch.
     return (await Promise.all(
       batches.map(
-        async (batch: Array<Record<string, unknown>>, i: number): Promise<BulkResult | BatchInfo | void> => {
+        async (batch: Array<Record<string, string>>, i: number): Promise<BulkResult | BatchInfo | void> => {
           const newBatch = job.createBatch();
           return new Promise((resolve, reject) => {
             newBatch.on('error', (err: Error) => {
@@ -280,7 +278,7 @@ export class Batcher {
    * registers the listener in charge of distributing all csv records into batches
    *
    * @param readStream - the read stream
-   * @returns {Object[][]}
+   * @returns {Promise<Batches>}
    */
   private static async splitIntoBatches(readStream: ReadStream): Promise<Batches> {
     // split all records into batches

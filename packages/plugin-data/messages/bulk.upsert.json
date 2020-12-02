@@ -9,10 +9,5 @@
     "csvfile": "the path to the CSV file that defines the records to upsert",
     "externalid": "the column name of the external ID",
     "wait": "the number of minutes to wait for the command to complete before displaying the results"
-  },
-  "ExternalIdRequired": "An External ID is required on %s to perform an upsert.",
-  "TimeOut": "The operation timed out. Check the status with command: \nsfdx force:data:bulk:status -i %s -b %s",
-  "CheckStatusCommand": "Check batch #%s’s status with the command: \nsfdx force:data:bulk:status -i %s -b %s",
-  "PollingInfo": "Will poll the batch statuses every %s seconds \nTo fetch the status on your own, press CTRL+C and use the command: \nsfdx force:data:bulk:status -i %s -b [<batchId>]",
-  "BatchQueued": "Batch #%s queued (Batch ID: %s)."
+  }
 }

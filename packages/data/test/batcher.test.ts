@@ -160,13 +160,13 @@ describe('batcher', () => {
 
     let createdBatches: Batch[];
     const job = {
-      async close(callback?: Function): Promise<JobInfo> {
+      async close(): Promise<JobInfo> {
         return {} as JobInfo;
       },
-      async list(callback?: (err: Error, info: BatchInfo[]) => any): Promise<BatchInfo[]> {
+      async list(): Promise<BatchInfo[]> {
         return [];
       },
-      async check(callback?: (err: Error, info: JobInfo) => any): Promise<JobInfo> {
+      async check(): Promise<JobInfo> {
         return {} as JobInfo;
       },
       createBatch(): Batch {
@@ -176,14 +176,15 @@ describe('batcher', () => {
     } as any;
     beforeEach(() => {
       createdBatches = [];
-      const batch: Batch = {
-        on(event: string, callback?: (result: Record<string, any>) => any): void {},
-        check(callback?: (err: Error, info: BatchInfo) => any): BatchInfo {
+      // only stub the methods we need, cast to unknown then to Batch
+      const batch: Batch = ({
+        on(): void {},
+        check(): BatchInfo {
           return {} as BatchInfo;
         },
-        poll(interval: number, timeout: number): void {},
-        execute(records?: Array<Record<string, any>>, callback?: Function): void {},
-      } as any;
+        poll(): void {},
+        execute(): void {},
+      } as unknown) as Batch;
 
       const batchListeners: any = {};
       creationSpy = stubMethod($$.SANDBOX, job, 'createBatch').callsFake(
