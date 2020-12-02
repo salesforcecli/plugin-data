@@ -18,7 +18,6 @@ workflows:
           name: node-12
       - release-management/release-lerna-packages:
           sign: packages/plugin-data
-          tag: test
           requires:
             - node-latest
           filters:
