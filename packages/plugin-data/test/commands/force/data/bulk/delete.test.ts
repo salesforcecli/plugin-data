@@ -8,7 +8,7 @@ import { ReadStream } from 'fs';
 import { $$, expect, test } from '@salesforce/command/lib/test';
 import { stubMethod } from '@salesforce/ts-sinon';
 import { fs } from '@salesforce/core';
-import { Batcher } from '@salesforce/data';
+import { Batcher } from '../../../../../src/batcher';
 
 describe('force:data:bulk:delete', () => {
   test
@@ -51,7 +51,7 @@ describe('force:data:bulk:delete', () => {
     .do(() => {
       stubMethod($$.SANDBOX, fs, 'fileExists').resolves(true);
       stubMethod($$.SANDBOX, fs, 'createReadStream').returns(ReadStream.prototype);
-      stubMethod($$.SANDBOX, Batcher, 'createAndExecuteBatches').resolves(expected);
+      stubMethod($$.SANDBOX, Batcher.prototype, 'createAndExecuteBatches').resolves(expected);
     })
     .withOrg({ username: 'test@org.com' }, true)
     .stdout()

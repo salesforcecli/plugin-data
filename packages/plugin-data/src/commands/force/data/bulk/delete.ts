@@ -6,9 +6,9 @@
  */
 import * as os from 'os';
 import { ReadStream } from 'fs';
-import { Connection, Messages, SfdxError, fs, Org } from '@salesforce/core';
+import { Connection, Messages, SfdxError, fs } from '@salesforce/core';
 import { flags, FlagsConfig } from '@salesforce/command';
-import { Batcher, BulkResult, Job } from '@salesforce/data';
+import { Batcher, BulkResult, Job } from '../../../../batcher';
 import { DataCommand } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -35,7 +35,6 @@ export default class Delete extends DataCommand {
       min: 0,
     }),
   };
-  public org!: Org;
 
   public async run(): Promise<BulkResult[]> {
     const conn: Connection = this.org.getConnection();
@@ -49,14 +48,9 @@ export default class Delete extends DataCommand {
     try {
       const job: Job = conn.bulk.createJob(this.flags.sobjecttype, 'delete') as Job;
 
-      result = await Batcher.createAndExecuteBatches(
-        job,
-        csvRecords,
-        this.flags.sobjecttype,
-        this.ux,
-        this.org.getConnection(),
-        this.flags.wait
-      );
+      const batcher: Batcher = new Batcher(conn, this.ux);
+
+      result = await batcher.createAndExecuteBatches(job, csvRecords, this.flags.sobjecttype, this.flags.wait);
 
       this.ux.stopSpinner();
     } catch (e) {

@@ -15,7 +15,7 @@ const BATCH_RECORDS_LIMIT = 10000;
 const POLL_FREQUENCY_MS = 5000;
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/data', 'batcher');
+const messages = Messages.loadMessages('@salesforce/plugin-data', 'batcher');
 
 export type Batches = Array<Array<Record<string, string>>>;
 export type Job = jsforceJob & { id: string };
@@ -37,24 +37,28 @@ export type BulkResult = {
 };
 
 export class Batcher {
+  private conn: Connection;
+  private ux: UX;
+
+  public constructor(conn: Connection, ux: UX) {
+    this.conn = conn;
+    this.ux = ux;
+  }
+
   /**
    * get and display the job status; close the job if completed
    *
-   * @param conn {Connection}
    * @param jobId {string}
-   * @param ux
    * @param doneCallback
    */
-  public static async fetchAndDisplayJobStatus(
-    conn: Connection,
+  public async fetchAndDisplayJobStatus(
     jobId: string,
-    ux: UX,
     doneCallback?: (...args: [{ job: JobInfo }]) => void
   ): Promise<JobInfo> {
-    const job: jsforceJob = conn.bulk.job(jobId);
+    const job: jsforceJob = this.conn.bulk.job(jobId);
     const jobInfo: JobInfo = await job.check();
 
-    Batcher.bulkBatchStatus(jobInfo, ux);
+    this.bulkBatchStatus(jobInfo);
 
     if (doneCallback) {
       doneCallback({ job: jobInfo });
@@ -63,16 +67,15 @@ export class Batcher {
     return jobInfo;
   }
 
-  public static bulkBatchStatus(
+  public bulkBatchStatus(
     summary: JobInfo | BatchInfo,
-    ux: UX,
     results?: BatchResultInfo[],
     batchNum?: number,
     isJob?: boolean
   ): void {
-    ux.log('');
+    this.ux.log('');
     if (batchNum) {
-      ux.styledHeader(messages.getMessage('BulkBatch', [batchNum]));
+      this.ux.styledHeader(messages.getMessage('BulkBatch', [batchNum]));
     }
     if (results) {
       const errorMessages: string[] = [];
@@ -84,9 +87,9 @@ export class Batcher {
         }
       });
       if (errorMessages.length > 0) {
-        ux.styledHeader(messages.getMessage('BulkError'));
+        this.ux.styledHeader(messages.getMessage('BulkError'));
         errorMessages.forEach((errorMessage) => {
-          ux.log(errorMessage);
+          this.ux.log(errorMessage);
         });
       }
     }
@@ -104,11 +107,11 @@ export class Batcher {
     formatOutput.splice(0, 1);
 
     if (isJob) {
-      ux.styledHeader(messages.getMessage('BulkJobStatus'));
+      this.ux.styledHeader(messages.getMessage('BulkJobStatus'));
     } else {
-      ux.styledHeader(messages.getMessage('BatchStatus'));
+      this.ux.styledHeader(messages.getMessage('BatchStatus'));
     }
-    ux.styledObject(summary, formatOutput);
+    this.ux.styledObject(summary, formatOutput);
   }
 
   /**
@@ -118,23 +121,19 @@ export class Batcher {
    * @param job {Job}
    * @param records
    * @param sobjectType {string}
-   * @param ux
-   * @param conn
    * @param wait {number}
    */
-  public static async createAndExecuteBatches(
+  public async createAndExecuteBatches(
     job: Job,
     records: ReadStream,
     sobjectType: string,
-    ux: UX,
-    conn: Connection,
     wait?: number
   ): Promise<BulkResult[]> {
     const batchesCompleted = 0;
     let batchesQueued = 0;
     const overallInfo = false;
 
-    const batches = await Batcher.splitIntoBatches(records);
+    const batches = await this.splitIntoBatches(records);
 
     // The error handling for this gets quite tricky when there are multiple batches
     // Currently, we bail out early by calling an Error.exit
@@ -152,7 +151,7 @@ export class Batcher {
               if (err.message.startsWith('Polling time out')) {
                 const jobIdIndex = err.message.indexOf('750');
                 const batchIdIndex = err.message.indexOf('751');
-                ux.log(
+                this.ux.log(
                   messages.getMessage('TimeOut', [
                     err.message.substr(jobIdIndex, 18),
                     err.message.substr(batchIdIndex, 18),
@@ -179,7 +178,7 @@ export class Batcher {
                 // we're using an async method on an event listener which doesn't fit the .on method parameter types
                 // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 async (batchInfo: BatchInfo): Promise<void> => {
-                  ux.log(messages.getMessage('CheckStatusCommand', [i + 1, batchInfo.jobId, batchInfo.id]));
+                  this.ux.log(messages.getMessage('CheckStatusCommand', [i + 1, batchInfo.jobId, batchInfo.id]));
                   const result: BatchInfo = await newBatch.check();
                   if (result.state === 'Failed') {
                     reject(result.stateMessage);
@@ -189,18 +188,7 @@ export class Batcher {
                 }
               );
             } else {
-              resolve(
-                Batcher.waitForCompletion(
-                  newBatch,
-                  batchesCompleted,
-                  overallInfo,
-                  i + 1,
-                  batches.length,
-                  wait,
-                  ux,
-                  conn
-                )
-              );
+              resolve(this.waitForCompletion(newBatch, batchesCompleted, overallInfo, i + 1, batches.length, wait));
             }
 
             newBatch.execute(batch, (err) => {
@@ -224,18 +212,14 @@ export class Batcher {
    * @param batchNum
    * @param totalNumBatches
    * @param waitMins
-   * @param ux
-   * @param conn
    */
-  private static async waitForCompletion(
+  private async waitForCompletion(
     newBatch: Batch,
     batchesCompleted: number,
     overallInfo: boolean,
     batchNum: number,
     totalNumBatches: number,
-    waitMins: number,
-    ux: UX,
-    conn: Connection
+    waitMins: number
   ): Promise<void> {
     const logger: Logger = await Logger.child(this.constructor.name);
     newBatch.on(
@@ -263,10 +247,10 @@ export class Batcher {
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       async (results: BatchResultInfo[]): Promise<JobInfo> => {
         const summary: BatchInfo = await newBatch.check();
-        Batcher.bulkBatchStatus(summary, ux, results, batchNum);
+        this.bulkBatchStatus(summary, results, batchNum);
         batchesCompleted++;
         if (batchesCompleted === totalNumBatches) {
-          return await Batcher.fetchAndDisplayJobStatus(conn, summary.jobId, ux);
+          return await this.fetchAndDisplayJobStatus(summary.jobId);
         } else {
           return {} as JobInfo;
         }
@@ -280,7 +264,7 @@ export class Batcher {
    * @param readStream - the read stream
    * @returns {Promise<Batches>}
    */
-  private static async splitIntoBatches(readStream: ReadStream): Promise<Batches> {
+  private async splitIntoBatches(readStream: ReadStream): Promise<Batches> {
     // split all records into batches
     const batches: Batches = [];
     let batchIndex = 0;

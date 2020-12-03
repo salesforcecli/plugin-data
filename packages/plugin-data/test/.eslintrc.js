@@ -14,6 +14,7 @@ module.exports = {
     'no-unused-expressions': 'off',
 
     // It is common for tests to stub out method.
+    '@typescript-eslint/ban-ts-ignore': 'off',
 
     // Return types are defined by the source code. Allows for quick overwrites.
     '@typescript-eslint/explicit-function-return-type': 'off',

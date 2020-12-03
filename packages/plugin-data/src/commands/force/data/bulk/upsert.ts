@@ -8,7 +8,7 @@ import * as os from 'os';
 import { ReadStream } from 'fs';
 import { flags, FlagsConfig } from '@salesforce/command';
 import { Connection, fs, Messages, SfdxError } from '@salesforce/core';
-import { Batcher, BulkResult, Job } from '@salesforce/data';
+import { Batcher, BulkResult, Job } from '../../../../batcher';
 import { DataCommand } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -55,14 +55,9 @@ export default class Upsert extends DataCommand {
         extIdField: this.flags.externalid,
         concurrencyMode: 'Parallel',
       }) as Job;
-      result = await Batcher.createAndExecuteBatches(
-        job,
-        csvStream,
-        this.flags.sobjecttype,
-        this.ux,
-        this.org.getConnection(),
-        this.flags.wait
-      );
+
+      const batcher: Batcher = new Batcher(this.org.getConnection(), this.ux);
+      result = await batcher.createAndExecuteBatches(job, csvStream, this.flags.sobjecttype, this.flags.wait);
 
       this.ux.stopSpinner();
     } catch (e) {
