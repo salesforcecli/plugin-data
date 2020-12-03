@@ -54,11 +54,12 @@ export default class Create extends DataCommand {
     const result = this.normalize<RecordResult>(await sobject.insert(values));
     if (result.success) {
       this.ux.log(messages.getMessage('createSuccess', [result.id || 'unknown id']));
+      this.ux.stopSpinner();
     } else {
       const errors = this.collectErrorMessages(result);
       this.ux.error(messages.getMessage('createFailure', [errors]));
+      this.ux.stopSpinner('failed');
     }
-    this.ux.stopSpinner();
     return result;
   }
 }

@@ -8,7 +8,7 @@
 import * as os from 'os';
 
 import { flags, FlagsConfig } from '@salesforce/command';
-import { Messages } from '@salesforce/core';
+import { Messages, SfdxError } from '@salesforce/core';
 import { Record } from 'jsforce';
 import { AnyJson } from '@salesforce/ts-types';
 import { DataCommand } from '../../../../dataCommand';
@@ -58,10 +58,15 @@ export default class Get extends DataCommand {
 
     this.ux.startSpinner('Getting Record');
     const sobject = this.getConnection().sobject(this.flags.sobjecttype);
-    const sObjectId = this.flags.sobjectid || (await this.query(sobject, this.flags.where)).Id;
-    const result = await sobject.retrieve(sObjectId);
-    if (!this.flags.json) this.ux.logJson(result);
-    this.ux.stopSpinner();
-    return result;
+    try {
+      const sObjectId = this.flags.sobjectid || (await this.query(sobject, this.flags.where)).Id;
+      const result = await sobject.retrieve(sObjectId);
+      if (!this.flags.json) this.logNestedObject(result);
+      this.ux.stopSpinner();
+      return result;
+    } catch (err) {
+      this.ux.stopSpinner('failed');
+      throw new SfdxError(err.name, err.message);
+    }
   }
 }
