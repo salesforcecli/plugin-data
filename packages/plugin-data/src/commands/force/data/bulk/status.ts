@@ -8,7 +8,7 @@ import * as os from 'os';
 import { Job, JobInfo, BatchInfo } from 'jsforce';
 import { flags, FlagsConfig } from '@salesforce/command';
 import { Connection, Messages, SfdxError } from '@salesforce/core';
-import { Batcher } from '@salesforce/data';
+import { Batcher } from '../../../../batcher';
 import { DataCommand } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -29,20 +29,20 @@ export default class Status extends DataCommand {
       required: true,
     }),
   };
-  private conn!: Connection;
 
   public async run(): Promise<BatchInfo[] | JobInfo> {
     this.ux.startSpinner('Getting Status');
-    this.conn = this.org.getConnection();
+    const conn: Connection = this.org.getConnection();
+    const batcher = new Batcher(conn, this.ux);
     if (this.flags.jobid && this.flags.batchid) {
       // view batch status
-      const job: Job = this.conn.bulk.job(this.flags.jobid);
+      const job: Job = conn.bulk.job(this.flags.jobid);
       let found = false;
 
       const batches: BatchInfo[] = await job.list();
       batches.forEach((batch: BatchInfo) => {
         if (batch.id === this.flags.batchid) {
-          Batcher.bulkBatchStatus(batch, this.ux);
+          batcher.bulkBatchStatus(batch);
           found = true;
         }
       });
@@ -57,7 +57,7 @@ export default class Status extends DataCommand {
       return batches;
     } else {
       // view job status
-      const jobStatus = await Batcher.fetchAndDisplayJobStatus(this.conn, this.flags.jobid, this.ux);
+      const jobStatus = await batcher.fetchAndDisplayJobStatus(this.flags.jobid);
       this.ux.stopSpinner();
       return jobStatus;
     }

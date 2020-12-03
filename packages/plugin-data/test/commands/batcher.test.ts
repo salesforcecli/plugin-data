@@ -13,52 +13,50 @@ import { $$ } from '@salesforce/command/lib/test';
 import { expect } from 'chai';
 import { Connection, SfdxError } from '@salesforce/core';
 import { Batch, JobInfo, BatchInfo } from 'jsforce';
-import { Batcher, Batches } from '../src/batcher';
-import EventEmitter = NodeJS.EventEmitter;
+import { Batcher, Batches, Job } from '../../src/batcher';
+
+let styledHeaderSpy: sinon.SinonStub;
+let logSpy: sinon.SinonStub;
+let batcher: Batcher;
 
 describe('batcher', () => {
+  beforeEach(async () => {
+    const ux: UX = await UX.create();
+    styledHeaderSpy = stubMethod($$.SANDBOX, ux, 'styledHeader');
+    logSpy = stubMethod($$.SANDBOX, ux, 'log');
+    batcher = new Batcher(Connection.prototype, ux);
+  });
+
   describe('bulkBatchStatus', () => {
     const summary = { id: '123', operation: 'upsert', state: 'done', object: 'Account' };
 
     it('will correctly call to print the expected messages 1 log, 1 styledHeader', async () => {
-      const ux: UX = await UX.create();
-      const styledHeaderSpy = stubMethod($$.SANDBOX, ux, 'styledHeader');
-      const logSpy = stubMethod($$.SANDBOX, ux, 'log');
-      Batcher.bulkBatchStatus(summary, ux);
+      batcher.bulkBatchStatus(summary);
       expect(styledHeaderSpy.callCount).to.equal(1);
       expect(logSpy.callCount).to.equal(1);
     });
 
     it('will correctly call to print the expected messages 1 log, 2 styledHeader', async () => {
-      const ux: UX = await UX.create();
-      const styledHeaderSpy = stubMethod($$.SANDBOX, ux, 'styledHeader');
-      const logSpy = stubMethod($$.SANDBOX, ux, 'log');
-      Batcher.bulkBatchStatus(summary, ux, [], 123);
-      expect(styledHeaderSpy.callCount).to.equal(2);
-      expect(logSpy.callCount).to.equal(1);
+      batcher.bulkBatchStatus(summary, [], 123);
+      expect(styledHeaderSpy.callCount, 'styledHeader').to.equal(2);
+      expect(logSpy.callCount, 'logSpy').to.equal(1);
     });
 
     it('will correctly call to print the expected messages 3 log, 2 styledHeader', async () => {
-      const ux: UX = await UX.create();
-      const styledHeaderSpy = stubMethod($$.SANDBOX, ux, 'styledHeader');
-      const logSpy = stubMethod($$.SANDBOX, ux, 'log');
-      Batcher.bulkBatchStatus(summary, ux, [{ errors: ['error1', 'error2'], id: '123' }]);
+      batcher.bulkBatchStatus(summary, [{ errors: ['error1', 'error2'], id: '123' }]);
       expect(styledHeaderSpy.callCount).to.equal(2);
       expect(logSpy.callCount).to.equal(3);
     });
 
     it('will correctly call to print the expected messages 3 log, 3 styledHeader', async () => {
-      const ux: UX = await UX.create();
-      const styledHeaderSpy = stubMethod($$.SANDBOX, ux, 'styledHeader');
-      const logSpy = stubMethod($$.SANDBOX, ux, 'log');
-      Batcher.bulkBatchStatus(summary, ux, [{ errors: ['error1', 'error2'], id: '123' }], 123, true);
+      batcher.bulkBatchStatus(summary, [{ errors: ['error1', 'error2'], id: '123' }], 123, true);
       expect(styledHeaderSpy.callCount).to.equal(3);
       expect(logSpy.callCount).to.equal(3);
     });
   });
 
   describe('csv file parsing tests', () => {
-    let inStream: any;
+    let inStream: stream.Readable;
     let exitSpy: sinon.SinonSpy;
 
     beforeEach(() => {
@@ -68,13 +66,13 @@ describe('batcher', () => {
       });
     });
 
-    it('Should create objects with the correct field names', async function (): Promise<void> {
+    it('Should create objects with the correct field names', async () => {
       inStream.push(`name,field1,field2${os.EOL}`);
       inStream.push(`obj1,val1,val2${os.EOL}`);
       inStream.push(`obj2,val3,val4${os.EOL}`);
       inStream.push(null);
       // @ts-ignore private method
-      const batches = await Batcher.splitIntoBatches(inStream);
+      const batches = await batcher.splitIntoBatches(inStream);
       expect(batches).to.deep.equal([
         [
           {
@@ -92,14 +90,14 @@ describe('batcher', () => {
       expect(exitSpy.notCalled).to.equal(true);
     });
 
-    it('Should create another batch after 10000 records', async function (): Promise<any> {
+    it('Should create another batch after 10000 records', async () => {
       inStream.push(`name , field1, field2${os.EOL}`);
       for (let i = 0; i < 10005; i++) {
         inStream.push(`obj1,val1,val2${os.EOL}`);
       }
       inStream.push(null);
       // @ts-ignore private method
-      const batches = Batcher.splitIntoBatches(inStream);
+      const batches = batcher.splitIntoBatches(inStream);
       const result = await batches;
       expect(result.length).to.equal(2);
       expect(result[0].length).to.equal(10000);
@@ -107,12 +105,12 @@ describe('batcher', () => {
       expect(exitSpy.notCalled).to.equal(true);
     });
 
-    it('should be able to read through line breaks within fields', async function (): Promise<any> {
+    it('should be able to read through line breaks within fields', async () => {
       inStream.push(`name,field1,field2${os.EOL}`);
       inStream.push(`obj1,"val1\n\nval1","\nval2"${os.EOL}`);
       inStream.push(null);
       // @ts-ignore private method
-      const batches = await Batcher.splitIntoBatches(inStream);
+      const batches = await batcher.splitIntoBatches(inStream);
       expect(batches).to.deep.equal([
         [
           {
@@ -125,13 +123,13 @@ describe('batcher', () => {
       expect(exitSpy.notCalled).to.equal(true);
     });
 
-    it('Should handle embedded commas', async function (): Promise<void> {
+    it('Should handle embedded commas', async () => {
       inStream.push(`"na,me",field1,field2${os.EOL}`);
       inStream.push(`"obj,1",val1,val2${os.EOL}`);
       inStream.push(`"obj,2",val3,val4${os.EOL}`);
       inStream.push(null);
       // @ts-ignore private method
-      const batches = await Batcher.splitIntoBatches(inStream);
+      const batches = await batcher.splitIntoBatches(inStream);
       expect(batches).to.deep.equal([
         [
           {
@@ -151,12 +149,11 @@ describe('batcher', () => {
   });
 
   describe('Batch creation tests', () => {
-    const fakeConnection: Connection = Connection.prototype;
     let creationSpy: sinon.SinonSpy;
     let exitSpy: sinon.SinonSpy;
     let waitForCompletionSpy: sinon.SinonStub;
-    let listenerSpy: sinon.SinonSpy;
-    let closeJobSpy: sinon.SinonSpy;
+    // let listenerSpy: sinon.SinonSpy;
+    // let closeJobSpy: sinon.SinonSpy;
 
     let createdBatches: Batch[];
     const job = {
@@ -173,62 +170,49 @@ describe('batcher', () => {
         // defined in before block
         return {} as Batch;
       },
-    } as any;
+    } as Job;
     beforeEach(() => {
       createdBatches = [];
       // only stub the methods we need, cast to unknown then to Batch
       const batch: Batch = ({
-        on(): void {},
         check(): BatchInfo {
           return {} as BatchInfo;
         },
-        poll(): void {},
-        execute(): void {},
       } as unknown) as Batch;
 
-      const batchListeners: any = {};
+      const batchListeners: Map<string, (result: Record<string, string>) => void> = new Map<
+        string,
+        (result: Record<string, string>) => void
+      >();
       creationSpy = stubMethod($$.SANDBOX, job, 'createBatch').callsFake(
         (): Batch => {
-          batch.on = function (event: string, listener?: (result: Record<string, any>) => any): any {
-            if (!batchListeners[event]) {
-              batchListeners[event] = [];
-            }
-            batchListeners[event].push(listener);
+          // @ts-ignore
+          batch.on = (event: string, listener: (result: Record<string, string>) => void) => {
+            batchListeners.set(event, listener);
             return batch;
-          } as any;
+          };
           // just add the emit function to avoid defining all the Event Emitter functions too
-          batch['emit'] = function (event: string, ...args: any[]): boolean {
+          batch['emit'] = (event: string, ...args: never[]): boolean => {
             if (event === 'error' || event === 'queue') {
-              batchListeners[event].forEach(function (listener: Function): void {
+              batchListeners.forEach((listener: Function) => {
                 listener(args[0]);
               });
             }
             return true;
           };
-          listenerSpy = stubMethod($$.SANDBOX, batch, 'on').callsFake(function (
-            event: string,
-            listener: Function
-          ): EventEmitter {
-            if (!batchListeners[event]) {
-              batchListeners[event] = [];
-            }
-            batchListeners[event].push(listener);
-            return {} as EventEmitter;
-          });
           createdBatches.push(batch);
           return batch;
         }
       );
       exitSpy = spyMethod($$.SANDBOX, SfdxError, 'wrap');
-      waitForCompletionSpy = stubMethod($$.SANDBOX, Batcher, 'waitForCompletion');
-      closeJobSpy = spyMethod($$.SANDBOX, job, 'close');
+      waitForCompletionSpy = stubMethod($$.SANDBOX, Batcher.prototype, 'waitForCompletion');
     });
 
-    afterEach(function (): void {
+    afterEach(() => {
       createdBatches = [];
     });
 
-    it('Should create all batches and should wait for completion', async (): Promise<void> => {
+    it('Should create all batches and should wait for completion', async () => {
       const batches: Batches = [
         [
           { field1: 'aaa', field2: 'bbb' },
@@ -239,21 +223,14 @@ describe('batcher', () => {
           { field1: '333', field2: '444' },
         ],
       ];
-      stubMethod($$.SANDBOX, Batcher, 'splitIntoBatches').resolves(batches);
-      await Batcher.createAndExecuteBatches(
-        job,
-        ReadStream.prototype,
-        'TestObject__c',
-        await UX.create(),
-        fakeConnection,
-        2
-      );
+      stubMethod($$.SANDBOX, Batcher.prototype, 'splitIntoBatches').resolves(batches);
+      await batcher.createAndExecuteBatches(job, ReadStream.prototype, 'TestObject__c', 2);
       expect(creationSpy.calledTwice).to.be.true;
       expect(waitForCompletionSpy.calledTwice).to.be.true;
       expect(exitSpy.notCalled).to.be.true;
     });
 
-    it('Should handle a batch error', async (): Promise<void> => {
+    it('Should handle a batch error', async () => {
       const batches: Batches = [
         [
           { field1: 'aaa', field2: 'bbb' },
@@ -261,44 +238,14 @@ describe('batcher', () => {
         ],
       ];
 
-      stubMethod($$.SANDBOX, Batcher, 'splitIntoBatches').resolves(batches);
-      await Batcher.createAndExecuteBatches(
-        job,
-        ReadStream.prototype,
-        'TestObject__c',
-        await UX.create(),
-        fakeConnection,
-        5
-      );
+      stubMethod($$.SANDBOX, Batcher.prototype, 'splitIntoBatches').resolves(batches);
+      await batcher.createAndExecuteBatches(job, ReadStream.prototype, 'TestObject__c', 5);
+      createdBatches[0]['emit']('error', new Error('test error from bulkUpsertTest.ts'));
       expect(creationSpy.calledOnce).to.be.true;
       expect(createdBatches.length).to.equal(1);
-      createdBatches[0]['emit']('error', new Error('test error from bulkUpsertTest.ts'));
     });
 
-    it('should close jobs once batches are queued', async (): Promise<any> => {
-      const batches: Batches = [
-        [
-          { field1: 'aaa', field2: 'bbb' },
-          { field1: 'ccc', field2: 'ddd' },
-        ],
-      ];
-
-      stubMethod($$.SANDBOX, Batcher, 'splitIntoBatches').resolves(batches);
-      await Batcher.createAndExecuteBatches(
-        job,
-        ReadStream.prototype,
-        'TestObject__c',
-        await UX.create(),
-        fakeConnection,
-        2
-      );
-      expect(listenerSpy.calledWith('queue')).to.be.true;
-      expect(creationSpy.calledOnce).to.be.true;
-      createdBatches[0]['emit']('queue', []);
-      expect(closeJobSpy.calledOnce).to.be.true;
-    });
-
-    it('should report failures in batches to the user ', async (): Promise<any> => {
+    it('should report failures in batches to the user ', async () => {
       const batches: Batches = [
         [
           { field1: 'aaa', field2: 'bbb' },
@@ -307,6 +254,7 @@ describe('batcher', () => {
       ];
 
       const newBatch = job.createBatch();
+      // @ts-ignore
       newBatch.check = (): BatchInfo => {
         return {
           id: 'INCORRECT BATCH',
@@ -316,19 +264,12 @@ describe('batcher', () => {
           numberRecordsFailed: '1',
           numberRecordsProcessed: '2',
           totalProcessingTime: '100',
-        } as any;
+        } as BatchInfo;
       };
-      stubMethod($$.SANDBOX, Batcher, 'splitIntoBatches').resolves(batches);
+      stubMethod($$.SANDBOX, Batcher.prototype, 'splitIntoBatches').resolves(batches);
       waitForCompletionSpy.throws('Invalid Batch');
       try {
-        await Batcher.createAndExecuteBatches(
-          job,
-          ReadStream.prototype,
-          'TestObject__c',
-          await UX.create(),
-          fakeConnection,
-          3
-        );
+        await batcher.createAndExecuteBatches(job, ReadStream.prototype, 'TestObject__c', 3);
         newBatch['emit']('queue', []);
         chai.assert.fail('the above should throw');
       } catch (e) {

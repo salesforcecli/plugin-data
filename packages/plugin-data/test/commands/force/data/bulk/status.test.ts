@@ -7,7 +7,7 @@
 import { $$, expect, test } from '@salesforce/command/lib/test';
 import { stubMethod } from '@salesforce/ts-sinon';
 import { Org } from '@salesforce/core';
-import { Batcher } from '@salesforce/data';
+import { Batcher } from '../../../../../src/batcher';
 
 describe('force:data:bulk:status', () => {
   test
@@ -153,7 +153,7 @@ describe('force:data:bulk:status', () => {
 
   test
     .do(() => {
-      stubMethod($$.SANDBOX, Batcher, 'fetchAndDisplayJobStatus').returns(expected);
+      stubMethod($$.SANDBOX, Batcher.prototype, 'fetchAndDisplayJobStatus').returns(expected);
     })
     .withOrg({ username: 'test@org.com' }, true)
     .stdout()
