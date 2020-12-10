@@ -9,7 +9,7 @@ import { BaseConnection, QueryResult } from 'jsforce';
 import { Logger, Messages, SfdxError } from '@salesforce/core';
 import { UX } from '@salesforce/command';
 import { ensureJsonArray, ensureJsonMap, ensureString, isJsonArray, toJsonMap } from '@salesforce/ts-types';
-import { Field, FunctionField, SubqueryField } from './reporters';
+import { Field, FunctionField, SubqueryField } from './reportersNext';
 import { QueryOptions, SoqlQueryResult } from './commands/force/data/soql/query';
 
 Messages.importMessagesDirectory(__dirname);
