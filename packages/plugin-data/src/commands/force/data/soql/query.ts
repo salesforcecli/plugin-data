@@ -16,8 +16,8 @@ import { BaseConnection, QueryResult } from 'jsforce';
 import { asPlainObject, toJsonMap } from '@salesforce/ts-types';
 import { DataCommand } from '../../../../dataCommand';
 import { DataSoqlQueryExecutor } from '../../../../dataSoqlQueryExecutor';
-import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../../../reportersNext';
-import { Field } from '../../../../reportersNext';
+import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../../../reporters';
+import { Field } from '../../../../reporters';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
