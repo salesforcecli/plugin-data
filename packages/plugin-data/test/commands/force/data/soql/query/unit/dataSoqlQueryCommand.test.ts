@@ -7,6 +7,7 @@
 
 /* eslint-disable no-shadow-restricted-names */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import * as chai from 'chai';
 import { expect } from 'chai';
@@ -65,58 +66,26 @@ describe('Execute a SOQL statement', function (): void {
 
       it('Should throw error on no flags', async function (): Promise<void> {
         const dataSoqlQueryExecutor = new DataSoqlQueryExecutor();
-        expect(
-          dataSoqlQueryExecutor.execute({
-            flags: {},
-            ux: {
-              startSpinner: () => {},
-              stopSpinner: () => {},
-              table: () => {},
-            },
-          })
-        ).to.be.rejectedWith(Error);
+        expect(dataSoqlQueryExecutor.execute(this.getConnection(), this.flags.query)).to.be.rejectedWith(Error);
       });
 
       it('Should query with the query api', async function (): Promise<void> {
         const dataSoqlQueryExecutor = new DataSoqlQueryExecutor();
-        await dataSoqlQueryExecutor.execute({
-          flags: { query: 'select something', username: 'someuser@test.org' },
-          ux: {
-            startSpinner: () => {},
-            stopSpinner: () => {},
-            table: () => {},
-          },
-        });
+        await dataSoqlQueryExecutor.execute(this.getConnection(), this.flags.query);
         sinon.assert.notCalled(toolingSpy);
         sinon.assert.calledOnce(querySpy);
       });
 
       it('Should query with the tooling api', async function (): Promise<void> {
         const dataSoqlQueryExecutor = new DataSoqlQueryExecutor();
-        await dataSoqlQueryExecutor.execute({
-          flags: { query: 'select something', usetoolingapi: true },
-          ux: {
-            startSpinner: () => {},
-            stopSpinner: () => {},
-            table: () => {},
-          },
-        });
+        await dataSoqlQueryExecutor.execute(this.getConnection(), this.flags.query);
         sinon.assert.calledOnce(toolingSpy);
         sinon.assert.notCalled(querySpy);
       });
 
       it('Should throw error with only the username flag', async function (): Promise<void> {
         const dataSoqlQueryExecutor = new DataSoqlQueryExecutor();
-        expect(
-          dataSoqlQueryExecutor.execute({
-            flags: { username: 'user@email.com' },
-            ux: {
-              startSpinner: () => {},
-              stopSpinner: () => {},
-              table: () => {},
-            },
-          })
-        ).to.be.rejectedWith(Error);
+        expect(dataSoqlQueryExecutor.execute(this.getConnection(), this.flags.query)).to.be.rejectedWith(Error);
       });
     });
     describe('Handle no records tests', function (): void {
@@ -155,14 +124,7 @@ describe('Execute a SOQL statement', function (): void {
 
       it('Should fetch no results and return no results message', async function (): Promise<void> {
         const dataSoqlQueryExecutor = new DataSoqlQueryExecutor();
-        await dataSoqlQueryExecutor.execute({
-          flags: { query: 'TEST QUERY' },
-          ux: {
-            startSpinner: () => {},
-            stopSpinner: () => {},
-            table: () => {},
-          },
-        });
+        await dataSoqlQueryExecutor.execute(this.getConnection(), this.flags.query);
         sinon.assert.calledOnce(querySpy);
         sinon.assert.notCalled(moreSpy);
         sinon.assert.notCalled(displayTableSpy);
@@ -170,14 +132,10 @@ describe('Execute a SOQL statement', function (): void {
 
       it('Should fetch no results with json flag and return no results message', async function (): Promise<void> {
         const dataSoqlQueryExecutor = new DataSoqlQueryExecutor();
-        const result: QueryResult<unknown> = await dataSoqlQueryExecutor.execute({
-          flags: { query: 'TEST QUERY', json: true },
-          ux: {
-            startSpinner: () => {},
-            stopSpinner: () => {},
-            table: () => {},
-          },
-        });
+        const result: QueryResult<unknown> = await dataSoqlQueryExecutor.execute(
+          this.getConnection(),
+          this.flags.query
+        );
         sinon.assert.calledOnce(querySpy);
         sinon.assert.notCalled(moreSpy);
         chai.expect(result.done).is.equal(true);
@@ -223,14 +181,7 @@ describe('Execute a SOQL statement', function (): void {
 
       it('Should fetch batched results', async function (): Promise<void> {
         const dataSoqlQueryExecutor = new DataSoqlQueryExecutor();
-        await dataSoqlQueryExecutor.execute({
-          flags: { query: 'TEST QUERY' },
-          ux: {
-            startSpinner: () => {},
-            stopSpinner: () => {},
-            table: () => {},
-          },
-        });
+        await dataSoqlQueryExecutor.execute(this.getConnection(), this.flags.query);
         sinon.assert.calledOnce(querySpy);
         sinon.assert.notCalled(moreSpy);
         sinon.assert.calledOnce(displaySpy);
@@ -247,7 +198,10 @@ describe('Execute a SOQL statement', function (): void {
           },
         };
         dataSoqlQueryExecutor.validate(context);
-        const result: QueryResult<unknown> = await dataSoqlQueryExecutor.execute(context);
+        const result: QueryResult<unknown> = await dataSoqlQueryExecutor.execute(
+          this.getConnection(),
+          this.flags.query
+        );
         sinon.assert.calledOnce(querySpy);
         sinon.assert.notCalled(moreSpy);
         chai.expect(result.done).is.equal(true);
@@ -257,14 +211,7 @@ describe('Execute a SOQL statement', function (): void {
       it('Should fetch with BigObjects invalid totalSize', async function (): Promise<void> {
         fakeResult = { done: true, totalSize: -1, records: [{}] };
         const dataSoqlQueryExecutor = new DataSoqlQueryExecutor();
-        await dataSoqlQueryExecutor.execute({
-          flags: { query: 'TEST QUERY' },
-          ux: {
-            startSpinner: () => {},
-            stopSpinner: () => {},
-            table: () => {},
-          },
-        });
+        await dataSoqlQueryExecutor.execute(this.getConnection(), this.flags.query);
         sinon.assert.calledOnce(querySpy);
         sinon.assert.notCalled(moreSpy);
         sinon.assert.calledOnce(displaySpy);
@@ -325,14 +272,7 @@ describe('Execute a SOQL statement', function (): void {
 
       it('Should fetched batched results twice', async function (): Promise<void> {
         const dataSoqlQueryExecutor = new DataSoqlQueryExecutor();
-        await dataSoqlQueryExecutor.execute({
-          flags: { query: 'TEST QUERY' },
-          ux: {
-            startSpinner: () => {},
-            stopSpinner: () => {},
-            table: () => {},
-          },
-        });
+        await dataSoqlQueryExecutor.execute(this.getConnection(), this.flags.query);
         sinon.assert.calledOnce(querySpy);
         sinon.assert.calledTwice(moreStub);
         sinon.assert.calledOnce(displaySpy);
@@ -349,7 +289,10 @@ describe('Execute a SOQL statement', function (): void {
           },
         };
         dataSoqlQueryExecutor.validate(context);
-        const result: QueryResult<unknown> = await dataSoqlQueryExecutor.execute(context);
+        const result: QueryResult<unknown> = await dataSoqlQueryExecutor.execute(
+          this.getConnection(),
+          this.flags.query
+        );
         sinon.assert.calledOnce(querySpy);
         sinon.assert.calledTwice(moreStub);
         sinon.assert.notCalled(displaySpy);
@@ -372,7 +315,10 @@ describe('Execute a SOQL statement', function (): void {
           },
         };
         dataSoqlQueryExecutor.validate(context);
-        const result: QueryResult<unknown> = await dataSoqlQueryExecutor.execute(context);
+        const result: QueryResult<unknown> = await dataSoqlQueryExecutor.execute(
+          this.getConnection(),
+          this.flags.query
+        );
         sinon.assert.calledOnce(querySpy);
         sinon.assert.calledTwice(moreStub);
         sinon.assert.calledOnce(displaySpy);

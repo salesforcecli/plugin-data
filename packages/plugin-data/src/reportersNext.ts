@@ -9,11 +9,11 @@ import { EOL } from 'os';
 import { Dictionary } from '@salesforce/ts-types';
 import { Logger, Messages } from '@salesforce/core';
 import * as lodash from 'lodash';
-import { BaseConnection } from 'jsforce';
 import * as _ from 'lodash';
 import { UX } from '@salesforce/command';
 import * as chalk from 'chalk';
 import { salesforceBlue } from './dataCommand';
+import { SoqlQueryResult } from './commands/force/data/soql/query';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
@@ -79,41 +79,6 @@ export class Reporter {
   }
 
   /**
-   * Does this Reporter need progress information.
-   */
-  public get progressRequired(): boolean {
-    return typeof this.onProgress === 'function';
-  }
-
-  /**
-   * Determine if this is a specific Reporter type instance.
-   *
-   * @param {class} type The type of Reporter to check if this is an instanceof.
-   */
-  public isType(type: any): boolean {
-    return this instanceof type;
-  }
-
-  /**
-   * The function to call when the command has finished.
-   *
-   * @param {Object} results The completed results
-   */
-  // Adding data here so prevent typescript errors when including data
-  // in onFinished.
-  public onFinished(data?: any): Promise<void> {
-    // eslint-disable-line no-unused-vars
-    this.streams.forEach((stream: any) => stream.close());
-
-    let promise = Promise.resolve();
-
-    this.operations.forEach((op: any) => {
-      promise = promise.then(() => op);
-    });
-    return promise;
-  }
-
-  /**
    * The type of output this reporter produces, like the file format which
    * makes this useful for file extensions.
    * i.e. xml, json, txt, etc.
@@ -125,37 +90,35 @@ export class Reporter {
   public getFormat(): any {
     throw new Error('NOT IMPLEMENTED');
   }
-
-  public emit(event: any, data: any): Promise<void> {
-    const funcName = `on${lodash.capitalize(event)}`;
-    if (lodash.isFunction(this[funcName])) {
-      return this[funcName](data);
-    }
-    return Promise.resolve();
-  }
 }
 
 export class QueryReporter extends Reporter {
-  public columns: Field[] = [];
+  protected columns: Field[] = [];
+  protected data: SoqlQueryResult;
 
-  public constructor(protected conn: BaseConnection, protected query: string, ux: UX, logger: Logger) {
+  public constructor(data: SoqlQueryResult, columns: Field[], ux: UX, logger: Logger) {
     super(ux, logger);
-    this.conn = conn;
-    this.query = query;
-  }
-
-  public getBaseUrl(): string {
-    // eslint-disable-next-line no-underscore-dangle
-    return this.conn._baseUrl();
+    this.columns = columns;
+    this.data = data;
   }
 }
 
 export class HumanReporter extends QueryReporter {
-  public constructor(protected conn: BaseConnection, protected query: string, ux: UX, logger: Logger) {
-    super(conn, query, ux, logger);
+  public constructor(data: SoqlQueryResult, columns: Field[], ux: UX, logger: Logger) {
+    super(data, columns, ux, logger);
   }
 
-  public parseFields(): any {
+  public display(): void {
+    const { attributeNames, children, aggregates } = this.parseFields();
+    const totalCount = this.data.result.records.length;
+    this.soqlQuery(attributeNames, this.massageRows(this.data.result.records, children, aggregates), totalCount);
+  }
+
+  public getFormat(): string {
+    return 'txt';
+  }
+
+  private parseFields(): any {
     const fields = this.columns;
     // Field names
     const attributeNames: string[] = [];
@@ -191,32 +154,15 @@ export class HumanReporter extends QueryReporter {
     return { attributeNames, children, aggregates };
   }
 
-  public onFinished(queryResults: any): Promise<void> {
-    const { attributeNames, children, aggregates } = this.parseFields();
-    const totalCount = queryResults.length;
-
-    this.display(attributeNames, this.massageRows(queryResults, children, aggregates), totalCount);
-
-    return super.onFinished(queryResults);
-  }
-
-  public display(attributeNames: string[], queryResults: any, totalCount: number): void {
-    this.soqlQuery(attributeNames, queryResults, totalCount);
-  }
-
-  public getFormat(): string {
-    return 'txt';
-  }
-
-  private soqlQuery(columns: string[], records: Array<Record<string, any>>, totalCount: number): void {
+  private soqlQuery(columns: string[], records: any[], totalCount: number): void {
     this.prepNullValues(records);
-    this.log(chalk.bold(this.query));
+    this.log(chalk.bold(this.data.query));
     this.ux.table(records, { columns: this.prepColumns(columns) });
     this.log(chalk.bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
   }
 
-  private prepNullValues(records: Array<Record<string, any>>): void {
-    records.forEach((record: Record<string, any>): void => {
+  private prepNullValues(records: any[]): void {
+    records.forEach((record): void => {
       for (const propertyKey in record) {
         if (Reflect.has(record, propertyKey)) {
           if (record[propertyKey] === null) {
@@ -295,8 +241,8 @@ const DOUBLE_QUOTE = '"';
 const SHOULD_QUOTE_REGEXP = new RegExp(`[${SEPARATOR}${DOUBLE_QUOTE}${EOL}]`);
 
 export class CsvReporter extends QueryReporter {
-  public constructor(protected conn: BaseConnection, protected query: string, ux: UX, logger: Logger) {
-    super(conn, query, ux, logger);
+  public constructor(data: any, columns: Field[], ux: UX, logger: Logger) {
+    super(data, columns, ux, logger);
   }
 
   /**
@@ -313,7 +259,7 @@ export class CsvReporter extends QueryReporter {
     return value;
   }
 
-  public onFinished(queryResults: any): Promise<void> {
+  public display(): void {
     const fields = this.columns;
     const hasSubqueries = _.some(fields, (field) => field instanceof SubqueryField);
     const hasFunctions = _.some(fields, (field) => field instanceof FunctionField);
@@ -342,7 +288,7 @@ export class CsvReporter extends QueryReporter {
       });
 
       // Get max lengths by iterating over the records once
-      queryResults.forEach((result: any) => {
+      this.data.result.records.forEach((result: any) => {
         Reflect.ownKeys(typeLengths).forEach((key) => {
           if (result[key] && result[key].totalSize > typeLengths[key]) {
             typeLengths[key] = result[key].totalSize;
@@ -392,14 +338,12 @@ export class CsvReporter extends QueryReporter {
         .join(SEPARATOR)
     );
 
-    queryResults.forEach((row: any) => {
+    this.data.result.records.forEach((row: any) => {
       const values = attributeNames.map((name) => {
         return this.escape(_.get(row, name));
       });
       this.log(values.join(SEPARATOR));
     });
-
-    return super.onFinished(queryResults);
   }
 
   public getFormat(): string {
@@ -408,12 +352,8 @@ export class CsvReporter extends QueryReporter {
 }
 
 export class JsonReporter extends QueryReporter {
-  public constructor(protected conn: BaseConnection, protected query: string, ux: UX, logger: Logger) {
-    super(conn, query, ux, logger);
-  }
-
-  public onFinished(queryResults: unknown): any {
-    return queryResults;
+  public constructor(data: any, columns: Field[], ux: UX, logger: Logger) {
+    super(data, columns, ux, logger);
   }
 
   public log(msg: string): void {
@@ -426,6 +366,10 @@ export class JsonReporter extends QueryReporter {
 
   public getFormat(): string {
     return 'json';
+  }
+
+  public display(): void {
+    this.ux.styledJSON({ status: 0, result: { data: { ...this.data.result } } });
   }
 }
 

@@ -5,6 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import {
   Batch,
@@ -16,7 +17,7 @@ import {
   SaveResult,
   SObject,
   UpsertResult,
-  UserInfo
+  UserInfo,
 } from 'jsforce';
 import Parser = require('fast-xml-parser');
 

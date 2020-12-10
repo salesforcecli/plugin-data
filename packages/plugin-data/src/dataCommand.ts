@@ -26,6 +26,9 @@ interface Result {
 // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore because jsforce doesn't export http-api
 import * as HttpApi from 'jsforce/lib/http-api';
+import * as chalk from 'chalk';
+
+export const salesforceBlue = chalk.rgb(0, 161, 224);
 
 interface Response {
   headers: AnyJson & { perfmetrics?: string };

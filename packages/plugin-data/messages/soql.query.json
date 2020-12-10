@@ -1,7 +1,6 @@
 {
   "description": "execute a SOQL query",
   "longDescription": "Executes a SOQL query.",
-  "queryHelp": "When you execute this command in a project,  it executes the query against the data in your default scratch org. PERFLOGLEVEL_JSON_HELP",
   "noResults": "Your query returned no results.",
   "queryToExecute": "SOQL query to execute",
   "queryLongDescription": "SOQL query to execute.",
