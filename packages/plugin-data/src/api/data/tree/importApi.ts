@@ -85,10 +85,6 @@ export class ImportApi {
   /**
    * Inserts given SObject Tree content into given target Org.
    *
-   * Validation and options fix-up done in execute() instead
-   * of validate() to ensure that all execution paths are
-   * properly validated.
-   *
    * @param config
    */
   public async import(config: ImportConfig): Promise<ImportResults> {
@@ -176,7 +172,7 @@ export class ImportApi {
         }
       }
 
-      throw err;
+      throw SfdxError.wrap(err);
     }
 
     return importResults;
@@ -232,7 +228,7 @@ export class ImportApi {
           e.name = INVALID_DATA_IMPORT_ERR_NAME;
           throw e;
         }
-        throw err;
+        throw SfdxError.wrap(err);
       }
     }
     return config;

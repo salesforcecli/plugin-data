@@ -18,7 +18,6 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.export')
 export default class Export extends SfdxCommand {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessage('examples').split(os.EOL);
-  public static readonly requiresProject = false;
   public static readonly requiresUsername = true;
   public static readonly flagsConfig: FlagsConfig = {
     query: flags.string({

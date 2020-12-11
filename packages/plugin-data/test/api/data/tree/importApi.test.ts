@@ -13,12 +13,11 @@ import * as path from 'path';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { fs as fsCore, Messages, SfdxError } from '@salesforce/core';
+import { fs as fsCore, Messages, Org, SfdxError } from '@salesforce/core';
 import { ImportApi, ImportConfig } from '../../../../src/api/data/tree/importApi';
 
 // Json files
-// const DataImportConfigHelpCommand = require('../../../lib/data/dataImportConfigHelpCommand');
-// const dataImportPlanSchema = require('../../../../schemas/dataImportPlanSchema.json');
+const dataImportPlanSchema = require('../../../../schema/dataImportPlanSchema.json');
 const accountsContactsTreeJSON = require('./test-files/accounts-contacts-tree.json');
 const accountsContactsPlanJSON = require('./test-files/accounts-contacts-plan.json');
 
@@ -616,6 +615,14 @@ describe('ImportApi', () => {
       expect(
         context.parseSObjectTreeResponse.calledWith(testResponse, filepath, testMeta.isJson, saveRefs, refMap)
       ).to.equal(true);
+    });
+  });
+
+  describe('getSchema', () => {
+    it('should return the schema', () => {
+      const org = new Org({ aliasOrUsername: 'import@test.org' });
+      const importApi = new ImportApi(org);
+      expect(importApi.getSchema()).to.deep.equal(dataImportPlanSchema);
     });
   });
 });

@@ -368,8 +368,7 @@ export class ExportApi {
     });
 
     if (!result) {
-      const metadataName: string = metadata.name;
-      throw new SfdxError(`Unable to find relationship field name for ${metadataName}`);
+      throw new SfdxError(`Unable to find relationship field name for ${metadata.name as string}`);
     }
 
     return result;
@@ -411,8 +410,7 @@ export class ExportApi {
     });
 
     if (!result) {
-      const metadataName: string = metadata.name;
-      throw new SfdxError(`Unable to find relation for ${metadataName}`);
+      throw new SfdxError(`Unable to find relation for ${metadata.name as string}`);
     }
 
     return result;
