@@ -12,30 +12,15 @@ import * as lodash from 'lodash';
 import * as _ from 'lodash';
 import { UX } from '@salesforce/command';
 import * as chalk from 'chalk';
+import { Field, FunctionField, SubqueryField } from './soqlQuery';
 import { salesforceBlue } from './dataCommand';
-import { SoqlQueryResult } from './commands/force/data/soql/query';
+import { DataSoqlQueryResult } from './dataSoqlQueryTypes';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
-
-export class Field {
-  public name: string;
-
-  public constructor(name: string) {
-    this.name = name;
-  }
-}
-
-export class SubqueryField extends Field {
-  public fields: Field[] = [];
-}
-
-export class FunctionField extends Field {
-  public alias: string | undefined;
-}
 
 export class Reporter {
   // TODO: proper property typing
@@ -52,7 +37,6 @@ export class Reporter {
 
   public logTable(header: any, data: any, columns: any): void {
     let rows = data;
-
     // Tables require arrays, so convert objects to arrays
     if (util.isObject(data) && !util.isArray(data)) {
       rows = [];
@@ -94,9 +78,9 @@ export class Reporter {
 
 export class QueryReporter extends Reporter {
   protected columns: Field[] = [];
-  protected data: SoqlQueryResult;
+  protected data: DataSoqlQueryResult;
 
-  public constructor(data: SoqlQueryResult, columns: Field[], ux: UX, logger: Logger) {
+  public constructor(data: DataSoqlQueryResult, columns: Field[], ux: UX, logger: Logger) {
     super(ux, logger);
     this.columns = columns;
     this.data = data;
@@ -104,7 +88,7 @@ export class QueryReporter extends Reporter {
 }
 
 export class HumanReporter extends QueryReporter {
-  public constructor(data: SoqlQueryResult, columns: Field[], ux: UX, logger: Logger) {
+  public constructor(data: DataSoqlQueryResult, columns: Field[], ux: UX, logger: Logger) {
     super(data, columns, ux, logger);
   }
 

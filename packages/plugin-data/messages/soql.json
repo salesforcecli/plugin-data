@@ -1,0 +1,4 @@
+{
+  "queryMoreMissingUrl": "Server response is missing the next URL; cannot query the rest of the results.",
+  "queryMoreMissingRecords": "Server response is missing the next records; cannot display the rest of the results."
+}

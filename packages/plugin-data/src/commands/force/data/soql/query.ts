@@ -10,35 +10,16 @@
 /* istanbul ignore file */
 
 import * as os from 'os';
-import { flags, FlagsConfig, SfdxResult, UX } from '@salesforce/command';
-import { Logger, Messages } from '@salesforce/core';
-import { BaseConnection, QueryResult } from 'jsforce';
+import { flags, FlagsConfig, SfdxResult } from '@salesforce/command';
+import { Messages } from '@salesforce/core';
 import { asPlainObject, toJsonMap } from '@salesforce/ts-types';
 import { DataCommand } from '../../../../dataCommand';
-import { DataSoqlQueryExecutor } from '../../../../dataSoqlQueryExecutor';
 import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../../../reporters';
-import { Field } from '../../../../reporters';
+import { DataSoqlQueryResult } from '../../../../dataSoqlQueryTypes';
+import { SoqlQuery, SoqlQueryResult } from '../../../../soqlQuery';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
-
-export type QueryOptions = {
-  connection: BaseConnection;
-  query: string;
-  ux: UX;
-  logger: Logger;
-  resultFormat: string;
-  json: boolean;
-};
-
-export type SoqlQueryResult = {
-  query: string;
-  result: QueryResult<unknown>;
-  columns: Field[];
-  resultFormat: string;
-  json: boolean;
-  logger: Logger;
-};
 
 export class DataSoqlQueryCommand extends DataCommand {
   public static readonly description = messages.getMessage('description');
@@ -73,7 +54,7 @@ export class DataSoqlQueryCommand extends DataCommand {
 
   protected static readonly result: SfdxResult = {
     display(): void {
-      const results = asPlainObject(this.data) as SoqlQueryResult;
+      const results = asPlainObject(this.data) as DataSoqlQueryResult;
       let reporter;
       switch (results.resultFormat as keyof typeof FormatTypes) {
         case 'human':
@@ -90,36 +71,42 @@ export class DataSoqlQueryCommand extends DataCommand {
     },
   };
 
-  public async run(): Promise<SoqlQueryResult | SfdxResult> {
+  public async run(): Promise<DataSoqlQueryResult | SfdxResult> {
     try {
-      const options: QueryOptions = {
-        connection: this.getConnection(),
-        logger: this.logger,
-        query: this.flags.query,
-        // force result format to 'json' if --json true
-        resultFormat: this.flags.json ? 'json' : this.flags.resultformat,
-        ux: this.ux,
-        json: this.flags.json,
-      };
       /* hand no results
        *  else if (!(reporter instanceof JsonReporter)) {
       this.childLogger.info(messages.getMessage('queryNoResults'));
     }
        */
-      const dataSoqlQueryExecutor = new DataSoqlQueryExecutor(options);
-      const results = await dataSoqlQueryExecutor.execute();
+      this.runIf(this.flags.resultformat !== 'json', () =>
+        this.ux.startSpinner(messages.getMessage('queryRunningMessage'))
+      );
+      const query = new SoqlQuery({ connection: this.getConnection(), query: this.flags.query, logger: this.logger });
+      const queryResult: SoqlQueryResult = await query.runSoqlQuery();
+      const results = {
+        ...queryResult,
+        resultFormat: this.flags.resultforma,
+        json: this.flags.json,
+        logger: this.logger,
+      };
       return this.normilizeIfJson(results);
     } finally {
-      this.ux.stopSpinner();
+      this.runIf(this.flags.resultformat !== 'json', () => this.ux.stopSpinner());
     }
   }
 
-  private normilizeIfJson(results: SoqlQueryResult): SoqlQueryResult | SfdxResult {
+  private normilizeIfJson(results: DataSoqlQueryResult): DataSoqlQueryResult | SfdxResult {
     if (this.flags.json) {
       return {
         data: toJsonMap(results.result),
       };
     }
     return results;
+  }
+
+  private runIf(condition: boolean, callback: Function): void {
+    if (condition) {
+      callback();
+    }
   }
 }
