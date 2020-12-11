@@ -10,7 +10,7 @@ import * as os from 'os';
 import { flags, FlagsConfig, SfdxCommand, SfdxResult } from '@salesforce/command';
 import { Messages, Org, SchemaPrinter } from '@salesforce/core';
 import { getString, JsonMap } from '@salesforce/ts-types';
-import { ImportApi, ImportConfig } from '../../../../lib/data/tree/importApi';
+import { ImportApi, ImportConfig } from '../../../../api/data/tree/importApi';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.import');

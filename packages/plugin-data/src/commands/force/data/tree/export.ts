@@ -10,7 +10,7 @@ import * as os from 'os';
 import { SfdxCommand } from '@salesforce/command';
 import { flags, FlagsConfig } from '@salesforce/command';
 import { Messages, Org } from '@salesforce/core';
-import { ExportApi } from '../../../../lib/data/tree/exportApi';
+import { ExportApi } from '../../../../api/data/tree/exportApi';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.export');
