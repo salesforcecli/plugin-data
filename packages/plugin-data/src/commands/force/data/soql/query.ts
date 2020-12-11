@@ -13,10 +13,10 @@ import * as os from 'os';
 import { flags, FlagsConfig, SfdxResult } from '@salesforce/command';
 import { Messages } from '@salesforce/core';
 import { asPlainObject, toJsonMap } from '@salesforce/ts-types';
+import { SoqlQuery, SoqlQueryResult } from '@salesforce/data';
 import { DataCommand } from '../../../../dataCommand';
 import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../../../reporters';
 import { DataSoqlQueryResult } from '../../../../dataSoqlQueryTypes';
-import { SoqlQuery, SoqlQueryResult } from '../../../../soqlQuery';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
@@ -85,7 +85,7 @@ export class DataSoqlQueryCommand extends DataCommand {
       const queryResult: SoqlQueryResult = await query.runSoqlQuery();
       const results = {
         ...queryResult,
-        resultFormat: this.flags.resultforma,
+        resultFormat: this.flags.resultformat,
         json: this.flags.json,
         logger: this.logger,
       };

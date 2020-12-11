@@ -12,7 +12,7 @@ import * as lodash from 'lodash';
 import * as _ from 'lodash';
 import { UX } from '@salesforce/command';
 import * as chalk from 'chalk';
-import { Field, FunctionField, SubqueryField } from './soqlQuery';
+import { Field, FunctionField, SubqueryField } from '@salesforce/data';
 import { salesforceBlue } from './dataCommand';
 import { DataSoqlQueryResult } from './dataSoqlQueryTypes';
 
@@ -150,7 +150,7 @@ export class HumanReporter extends QueryReporter {
       for (const propertyKey in record) {
         if (Reflect.has(record, propertyKey)) {
           if (record[propertyKey] === null) {
-            record[propertyKey] = this.context.color.bold('null');
+            record[propertyKey] = chalk.bold('null');
           } else if (typeof record[propertyKey] === 'object') {
             this.prepNullValues([record[propertyKey]]);
           }
