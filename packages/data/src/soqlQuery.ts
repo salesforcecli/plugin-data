@@ -60,7 +60,6 @@ export class SoqlQuery {
       let moreResults: QueryResult<unknown> = result;
       this.logger.debug(`Result has queryMore ${!moreResults.done}`);
       while (!moreResults.done) {
-        // TODO: emit message for query more
         if (moreResults.nextRecordsUrl) {
           moreResults = await this.connection.queryMore(moreResults.nextRecordsUrl);
           if (moreResults.records) {
@@ -77,6 +76,9 @@ export class SoqlQuery {
         throw new SfdxError('query more is missing records');
       }
     }
+
+    delete result.nextRecordsUrl;
+    result.done = true;
     return {
       query: this.query,
       columns,

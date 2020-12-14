@@ -73,11 +73,6 @@ export class DataSoqlQueryCommand extends DataCommand {
 
   public async run(): Promise<DataSoqlQueryResult | SfdxResult> {
     try {
-      /* hand no results
-       *  else if (!(reporter instanceof JsonReporter)) {
-      this.childLogger.info(messages.getMessage('queryNoResults'));
-    }
-       */
       this.runIf(this.flags.resultformat !== 'json', () =>
         this.ux.startSpinner(messages.getMessage('queryRunningMessage'))
       );

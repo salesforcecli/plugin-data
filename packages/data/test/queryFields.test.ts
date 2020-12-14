@@ -14,152 +14,11 @@ import { expect } from 'chai';
 import sinon = require('sinon');
 import { retrieveColumns } from '../lib/queryFields';
 import * as TestUtil from './testUtil';
+import { queryFieldsExemplars } from './queryFields.exemplars';
+
 chai.use(chaiAsPromised);
 
-// SELECT id, name FROM Contact
-const simpleQueryCMD = [
-  {
-    aggregate: false,
-    apexType: 'Id',
-    booleanType: false,
-    columnName: 'Id',
-    custom: false,
-    displayName: 'Id',
-    foreignKeyName: null,
-    insertable: false,
-    joinColumns: [],
-    numberType: false,
-    textType: false,
-    updatable: false,
-  },
-  {
-    aggregate: false,
-    apexType: 'String',
-    booleanType: false,
-    columnName: 'Name',
-    custom: false,
-    displayName: 'Name',
-    foreignKeyName: null,
-    insertable: false,
-    joinColumns: [],
-    numberType: false,
-    textType: true,
-    updatable: false,
-  },
-];
-
-const simpleQueryFields = [
-  {
-    name: 'Id',
-  },
-  {
-    name: 'Name',
-  },
-];
-
-// SELECT Name, ( SELECT LastName FROM Contacts ) FROM Account
-const subqueryQueryCMD = [
-  {
-    aggregate: false,
-    apexType: 'String',
-    booleanType: false,
-    columnName: 'Name',
-    custom: false,
-    displayName: 'Name',
-    foreignKeyName: null,
-    insertable: false,
-    joinColumns: [],
-    numberType: false,
-    textType: true,
-    updatable: false,
-  },
-  {
-    aggregate: true,
-    apexType: null,
-    booleanType: false,
-    columnName: 'Contacts',
-    custom: false,
-    displayName: 'Contacts',
-    foreignKeyName: null,
-    insertable: false,
-    joinColumns: [
-      {
-        aggregate: false,
-        apexType: 'String',
-        booleanType: false,
-        columnName: 'LastName',
-        custom: false,
-        displayName: 'LastName',
-        foreignKeyName: null,
-        insertable: true,
-        joinColumns: [],
-        numberType: false,
-        textType: true,
-        updatable: true,
-      },
-    ],
-    numberType: false,
-    textType: false,
-    updatable: false,
-  },
-];
-
-const subqueryQueryFields = [
-  {
-    name: 'Name',
-  },
-  {
-    name: 'Contacts',
-    fields: [
-      {
-        name: 'LastName',
-      },
-    ],
-  },
-];
-
-// SELECT CampaignId, AVG(Amount) FROM Opportunity GROUP BY CampaignId
-const simpleQueryWithAggregateCMD = [
-  {
-    aggregate: false,
-    apexType: 'Id',
-    booleanType: false,
-    columnName: 'CampaignId',
-    custom: false,
-    displayName: 'CampaignId',
-    foreignKeyName: null,
-    insertable: true,
-    joinColumns: [],
-    numberType: false,
-    textType: false,
-    updatable: true,
-  },
-  {
-    aggregate: true,
-    apexType: null,
-    booleanType: false,
-    columnName: 'expr0',
-    custom: false,
-    displayName: 'avg(Amount)',
-    foreignKeyName: null,
-    insertable: false,
-    joinColumns: [],
-    numberType: true,
-    textType: false,
-    updatable: false,
-  },
-];
-
-const simpleQueryWithAggregateFields = [
-  {
-    name: 'CampaignId',
-  },
-  {
-    name: 'avg(Amount)',
-  },
-];
-
-describe('queryFields test', () => {
+describe('queryFields tests', () => {
   // let toolingSpy: sinon.SinonSpy;
   // let querySpy: sinon.SinonSpy;
   const fakeConnection = TestUtil.createBaseFakeConnection();
@@ -172,20 +31,37 @@ describe('queryFields test', () => {
   });
 
   it('should handle a query with just fields', async () => {
-    sandbox.stub(fakeConnection, 'request').callsFake(() => Promise.resolve({ columnMetadata: simpleQueryCMD }));
-    const results = await retrieveColumns(fakeConnection, 'select foo from baz');
-    expect(results).to.be.deep.equal(simpleQueryFields);
+    sandbox
+      .stub(fakeConnection, 'request')
+      .callsFake(() => Promise.resolve({ columnMetadata: queryFieldsExemplars.simpleQuery.columnMetadata }));
+    const results = await retrieveColumns(fakeConnection, 'SELECT id, name FROM Contact');
+    expect(results).to.be.deep.equal(queryFieldsExemplars.simpleQuery.columns);
   });
   it('should handle a query with a subquery with both having just fields', async () => {
-    sandbox.stub(fakeConnection, 'request').callsFake(() => Promise.resolve({ columnMetadata: subqueryQueryCMD }));
-    const results = await retrieveColumns(fakeConnection, 'select foo from baz');
-    expect(results).to.be.deep.equal(subqueryQueryFields);
+    sandbox
+      .stub(fakeConnection, 'request')
+      .callsFake(() => Promise.resolve({ columnMetadata: queryFieldsExemplars.subquery.columnMetadata }));
+    const results = await retrieveColumns(
+      fakeConnection,
+      'SELECT Name, ( SELECT LastName FROM Contacts ) FROM Account'
+    );
+    expect(results).to.be.deep.equal(queryFieldsExemplars.subquery.columns);
   });
   it('should handle a query with aggregate fields', async () => {
     sandbox
       .stub(fakeConnection, 'request')
-      .callsFake(() => Promise.resolve({ columnMetadata: simpleQueryWithAggregateCMD }));
-    const results = await retrieveColumns(fakeConnection, 'select foo from baz');
-    expect(results).to.be.deep.equal(simpleQueryWithAggregateFields);
+      .callsFake(() => Promise.resolve({ columnMetadata: queryFieldsExemplars.aggregateQuery.columnMetadata }));
+    const results = await retrieveColumns(
+      fakeConnection,
+      'SELECT CampaignId, AVG(Amount) FROM Opportunity GROUP BY CampaignId'
+    );
+    expect(results).to.be.deep.equal(queryFieldsExemplars.aggregateQuery.columns);
+  });
+  it('should handle a query with column join', async () => {
+    sandbox
+      .stub(fakeConnection, 'request')
+      .callsFake(() => Promise.resolve({ columnMetadata: queryFieldsExemplars.queryWithJoin.columnMetadata }));
+    const results = await retrieveColumns(fakeConnection, 'SELECT Name, Owner.Name FROM Account');
+    expect(results).to.be.deep.equal(queryFieldsExemplars.queryWithJoin.columns);
   });
 });
