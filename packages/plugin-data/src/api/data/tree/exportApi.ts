@@ -11,6 +11,7 @@ import * as path from 'path';
 import { fs, Logger, Messages, Org, SfdxError } from '@salesforce/core';
 import { AnyArray, AnyJson, get, getNumber, getString, has, isArray } from '@salesforce/ts-types';
 import { UX } from '@salesforce/command';
+import { QueryResult } from 'jsforce';
 import { sequentialExecute } from './executors';
 
 Messages.importMessagesDirectory(__dirname);
@@ -65,7 +66,7 @@ export class ExportApi {
       this.setupOutputDirectory(outputDir);
     }
 
-    let queryResults: any;
+    let queryResults: QueryResult<unknown>;
     try {
       queryResults = await this.org.getConnection().query(query);
     } catch (err) {

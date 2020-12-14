@@ -365,13 +365,9 @@ export class ImportApi {
     // replace with reference found in previously saved records
     if (resolveRefs && refMap) {
       // find and stash all '@' references
-
-      // Could optionally use String.match(regex) to avoid turning off the rule
-      /* eslint-disable no-cond-assign */
       while ((match = refRegex.exec(contentStr))) {
         foundRefs.add(match[1]);
       }
-      /* eslint-enable no-cond-assign */
 
       if (foundRefs.size > 0 && refMap.size === 0) {
         throw SfdxError.create('@salesforce/plugin-data', 'importApi', 'dataFileNoRefId', [filepath]);
