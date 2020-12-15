@@ -1,6 +1,6 @@
 {
   "name": "@salesforce/plugin-data",
-  "version": "0.2.1",
+  "version": "0.2.3",
   "description": "Plugin for salesforce data commands",
   "author": "Salesforce",
   "homepage": "https://github.com/salesforcecli/data/tree/master/packages/plugin-data#readme",
@@ -28,7 +28,7 @@
                 "description": "fetch records using SOQL"
               },
               "tree": {
-                "description": "manipulate records using the tree API"
+                "description": "import/export records using the tree API"
               }
             }
           }

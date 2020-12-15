@@ -1,0 +1,11 @@
+{
+  "records" : [{
+     "attributes" : {"type" : "Contact", "referenceId" : "JanitorRef"},
+     "lastname" : "Williams",
+     "title" : "President"
+     },{         
+     "attributes" : {"type" : "Contact", "referenceId" : "DeveloperRef"},
+     "lastname" : "Davenport",
+     "title" : "Vice President"
+     }]
+}
