@@ -28,7 +28,7 @@
                 "description": "fetch records using SOQL"
               },
               "tree": {
-                "description": "manipulate records using the tree API"
+                "description": "import/export records using the tree API"
               }
             }
           }
