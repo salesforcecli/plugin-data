@@ -9,18 +9,29 @@ import { BaseConnection, QueryResult } from 'jsforce';
 import { Logger, SfdxError } from '@salesforce/core';
 import { Field, retrieveColumns } from './queryFields';
 
+/**
+ * Type to define expected parameters to SoqlQuery constructor
+ */
 export type QueryOptions = {
   connection: BaseConnection;
   query: string;
   logger?: Logger;
 };
 
+/**
+ * Type to define SoqlQuert results
+ */
 export type SoqlQueryResult = {
   query: string;
   result: QueryResult<unknown>;
   columns: Field[];
 };
 
+/**
+ * Class to handle a soql query
+ *
+ * Will collect all records and the column metadata of the query
+ */
 export class SoqlQuery {
   private readonly query: string;
   private readonly connection: BaseConnection;
@@ -30,6 +41,7 @@ export class SoqlQuery {
     this.connection = options.connection;
     this.logger = options.logger ? options.logger.child('soqlQuery') : Logger.childFromRoot('soqlQuery');
   }
+
   public async runSoqlQuery(): Promise<SoqlQueryResult> {
     let columns: Field[] = [];
     this.logger.debug('running query');
@@ -77,6 +89,7 @@ export class SoqlQuery {
       }
     }
 
+    // remove nextRecordsUrl and force done to true
     delete result.nextRecordsUrl;
     result.done = true;
     return {

@@ -52,6 +52,11 @@ export class DataSoqlQueryCommand extends DataCommand {
     }),
   };
 
+  /**
+   * Define display function that will produce the desired output based on flag resultformat selection
+   *
+   * @protected
+   */
   protected static readonly result: SfdxResult = {
     display(): void {
       const results = asPlainObject(this.data) as DataSoqlQueryResult;
@@ -67,10 +72,25 @@ export class DataSoqlQueryCommand extends DataCommand {
           reporter = new CsvReporter(results, results.columns, this.ux, results.logger);
           break;
       }
+      // delegate to selected reporter
       reporter.display();
     },
   };
 
+  /**
+   * Command run implementation
+   *
+   * Returns either a DataSoqlQueryResult or a SfdxResult.
+   * When the user is using global '--json' flag an instance of SfdxResult si returned.
+   * This is necessary since '--json' flag reports results in the form of SfdxResult
+   * and bypasses the definition of start result. The goal is to have the output
+   * from '--json' and '--resulformat json' the same.
+   *
+   * The DataSoqlQueryResult is necessary to communicate user selections to the reporters.
+   * The 'this' object available during display() function does not include user input to
+   * the command, which are necessary for reporter selection.
+   *
+   */
   public async run(): Promise<DataSoqlQueryResult | SfdxResult> {
     try {
       this.runIf(this.flags.resultformat !== 'json', () =>
@@ -90,6 +110,13 @@ export class DataSoqlQueryCommand extends DataCommand {
     }
   }
 
+  /**
+   * This function maps the DataSoqlQueryResult instance to the the well known 'data' property in
+   * SfdxResult class when the user has selected '--json' flag.
+   *
+   * @param results
+   * @private
+   */
   private normilizeIfJson(results: DataSoqlQueryResult): DataSoqlQueryResult | SfdxResult {
     if (this.flags.json) {
       return {
@@ -99,6 +126,13 @@ export class DataSoqlQueryCommand extends DataCommand {
     return results;
   }
 
+  /**
+   * Call Function when condition is true.
+   *
+   * @param condition
+   * @param callback
+   * @private
+   */
   private runIf(condition: boolean, callback: Function): void {
     if (condition) {
       callback();

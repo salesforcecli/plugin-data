@@ -63,11 +63,11 @@ describe('Execute a SOQL statement', function (): void {
           expect(jsonResults.result.data.records.length).to.be.equal(jsonResults.result.data.totalSize);
         });
     });
-    describe('reporters produce the correct results', () => {
+    describe('reporters produce the correct results for subquery', () => {
       beforeEach(() => {
         soqlQuerySpy = sandbox
           .stub(SoqlQuery.prototype, 'runSoqlQuery')
-          .callsFake(() => Promise.resolve(soqlQueryExemplars.simpleQuery.soqlQueryResult));
+          .callsFake(() => Promise.resolve(soqlQueryExemplars.subqueryAccountsAndContacts.soqlQueryResult));
       });
       afterEach(() => {
         sandbox.restore();
@@ -79,7 +79,7 @@ describe('Execute a SOQL statement', function (): void {
         .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'csv'])
         .it('should have csv results', (ctx) => {
           sinon.assert.calledOnce(soqlQuerySpy);
-          expect(ctx.stdout).to.include('Id,Name\n003B000000DkDswIAF,Matteo Crippa\n');
+          expect(ctx.stdout).to.include('Name,Contacts\n"Cisco Systems, Inc.",\nASSMANN Electronic GmbH,');
         });
       test
         .withOrg({ username: 'test@org.com' }, true)
@@ -90,8 +90,59 @@ describe('Execute a SOQL statement', function (): void {
           sinon.assert.calledOnce(soqlQuerySpy);
           const jsonResults = JSON.parse(ctx.stdout);
           expect(jsonResults).to.have.property('status', 0);
-          expect(jsonResults.result.data).to.have.property('totalSize', 1);
+          expect(jsonResults.result.data).to.have.property('totalSize', 50);
           expect(jsonResults.result.data.records.length).to.be.equal(jsonResults.result.data.totalSize);
+        });
+      test
+        .withOrg({ username: 'test@org.com' }, true)
+        .stdout()
+        .stderr()
+        .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'human'])
+        .it('should have json results', (ctx) => {
+          sinon.assert.calledOnce(soqlQuerySpy);
+          expect(ctx.stdout).to.include('records retrieved: 50');
+        });
+    });
+    describe('reporters produce the correct results for subquery with aggregates', () => {
+      beforeEach(() => {
+        soqlQuerySpy = sandbox
+          .stub(SoqlQuery.prototype, 'runSoqlQuery')
+          .callsFake(() => Promise.resolve(soqlQueryExemplars.subqueryWithAgregates.soqlQueryResult));
+      });
+      afterEach(() => {
+        sandbox.restore();
+      });
+      test
+        .withOrg({ username: 'test@org.com' }, true)
+        .stdout()
+        .stderr()
+        .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'csv'])
+        .it('should have csv results', (ctx) => {
+          sinon.assert.calledOnce(soqlQuerySpy);
+          expect(ctx.stdout).to.include(
+            'Name,avg(AnnualRevenue)\nSample Account for Entitlements,\nsForce,\n"United Oil & Gas, Singapore"'
+          );
+        });
+      test
+        .withOrg({ username: 'test@org.com' }, true)
+        .stdout()
+        .stderr()
+        .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'json'])
+        .it('should have json results', (ctx) => {
+          sinon.assert.calledOnce(soqlQuerySpy);
+          const jsonResults = JSON.parse(ctx.stdout);
+          expect(jsonResults).to.have.property('status', 0);
+          expect(jsonResults.result.data).to.have.property('totalSize', 16);
+          expect(jsonResults.result.data.records.length).to.be.equal(jsonResults.result.data.totalSize);
+        });
+      test
+        .withOrg({ username: 'test@org.com' }, true)
+        .stdout()
+        .stderr()
+        .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'human'])
+        .it('should have human results', (ctx) => {
+          sinon.assert.calledOnce(soqlQuerySpy);
+          expect(ctx.stdout).to.include('records retrieved: 16');
         });
     });
   });

@@ -7,6 +7,9 @@
 import { ensureJsonArray, ensureJsonMap, ensureString, isJsonArray, toJsonMap } from '@salesforce/ts-types';
 import { BaseConnection } from 'jsforce';
 
+/**
+ * Class to represent a field when describing the fields that make up a query result
+ */
 export class Field {
   public name: string;
 
@@ -14,15 +17,29 @@ export class Field {
     this.name = name;
   }
 }
-
+/**
+ * Class to represent a subquery field when describing the fields that make up a query result
+ */
 export class SubqueryField extends Field {
   public fields: Field[] = [];
 }
 
+/**
+ * Class to represent function fields, i.e. result of using aggregation function, like avg.
+ */
 export class FunctionField extends Field {
   public alias: string | undefined;
 }
 
+/**
+ * Utility to fetch the columns involved in a soql query.
+ *
+ * Columns are then transformed into one of three types, Field, SubqueryField and FunctionField. List of
+ * fields is returned as the product.
+ *
+ * @param connection
+ * @param query
+ */
 export const retrieveColumns = async (connection: BaseConnection, query: string): Promise<Field[]> => {
   // eslint-disable-next-line no-underscore-dangle,@typescript-eslint/unbound-method,@typescript-eslint/restrict-template-expressions
   const columnUrl = `${connection._baseUrl()}/query?q=${encodeURIComponent(query)}&columns=true`;
