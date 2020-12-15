@@ -6,6 +6,7 @@
  */
 import { expect, test } from '@salesforce/command/lib/test';
 import { ensureJsonMap, ensureString, isString } from '@salesforce/ts-types';
+import { fs as fsCore } from '@salesforce/core';
 
 const query = 'SELECT Id, Name from Account';
 
@@ -45,6 +46,7 @@ const ACCOUNT_META = {
 
 describe('force:data:tree:export', () => {
   test
+    .stub(fsCore, 'writeFileSync', () => null)
     .withOrg({ username: 'test@org.com' }, true)
     .withConnectionRequest((request) => {
       if (isString(request) && request.includes('sobjects/Account/describe')) {
