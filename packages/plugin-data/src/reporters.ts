@@ -62,7 +62,7 @@ export class HumanReporter extends QueryReporter {
     this.soqlQuery(attributeNames, this.massageRows(this.data.result.records, children, aggregates), totalCount);
   }
 
-  private parseFields(): ParsedFields {
+  public parseFields(): ParsedFields {
     const fields = this.columns;
     // Field names
     const attributeNames: string[] = [];
@@ -98,14 +98,14 @@ export class HumanReporter extends QueryReporter {
     return { attributeNames, children, aggregates };
   }
 
-  private soqlQuery(columns: string[], records: object[], totalCount: number): void {
+  public soqlQuery(columns: string[], records: object[], totalCount: number): void {
     this.prepNullValues(records);
     this.log(chalk.bold(this.data.query));
     this.ux.table(records, { columns: this.prepColumns(columns) });
     this.log(chalk.bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
   }
 
-  private prepNullValues(records: object[]): void {
+  public prepNullValues(records: object[]): void {
     records.forEach((record): void => {
       Reflect.ownKeys(record).forEach((propertyKey) => {
         const value = Reflect.get(record, propertyKey);
@@ -118,7 +118,7 @@ export class HumanReporter extends QueryReporter {
     });
   }
 
-  private prepColumns(columns: string[]): ColumnAttributes[] {
+  public prepColumns(columns: string[]): ColumnAttributes[] {
     return columns.map(
       (field: string): ColumnAttributes => ({
         key: field,
@@ -126,14 +126,14 @@ export class HumanReporter extends QueryReporter {
           .replace(/([A-Z])/g, ' $1')
           .split(/\s+/)
           .filter((s) => s && s.length > 0)
-          .map((s) => upperFirst())
+          .map((s) => upperFirst(s))
           .join(' '),
       })
     );
   }
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  private massageRows(queryResults: any[], children: any[], aggregates: FunctionField[]): any {
+  public massageRows(queryResults: any[], children: any[], aggregates: FunctionField[]): any {
     // There are subqueries or aggregates. Massage the data.
     if (children.length > 0 || aggregates.length > 0) {
       queryResults = queryResults.reduce((newResults, result) => {
@@ -202,11 +202,33 @@ export class CsvReporter extends QueryReporter {
   }
 
   public display(): void {
+    const attributeNames: string[] = this.massageRows();
+
+    // begin output
+    this.log(
+      attributeNames
+        .map((name) => {
+          return this.escape(name);
+        })
+        .join(SEPARATOR)
+    );
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.data.result.records.forEach((row: any) => {
+      const values = attributeNames.map((name) => {
+        return this.escape(Reflect.get(row, name));
+      });
+      this.log(values.join(SEPARATOR));
+    });
+  }
+
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  public massageRows(): string[] {
     const fields = this.columns;
     const hasSubqueries = fields.some((field) => field instanceof SubqueryField);
     const hasFunctions = fields.some((field) => field instanceof FunctionField);
 
-    let attributeNames: string[] = [];
+    const attributeNames: string[] = [];
 
     if (fields) {
       this.logger.info(`Found fields ${JSON.stringify(fields.map((field) => `${typeof field}.${field.name}`))}`);
@@ -271,24 +293,9 @@ export class CsvReporter extends QueryReporter {
         }
       });
     } else {
-      attributeNames = fields.map((field) => field.name);
+      attributeNames.push(...fields.map((field) => field.name));
     }
-
-    this.log(
-      attributeNames
-        .map((name) => {
-          return this.escape(name);
-        })
-        .join(SEPARATOR)
-    );
-
-    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    this.data.result.records.forEach((row: any) => {
-      const values = attributeNames.map((name) => {
-        return this.escape(Reflect.get(row, name));
-      });
-      this.log(values.join(SEPARATOR));
-    });
+    return attributeNames;
   }
 }
 

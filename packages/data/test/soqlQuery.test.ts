@@ -32,7 +32,7 @@ describe('soqlQuery tests', () => {
     sandbox.restore();
   });
 
-  it('should hand a simple query with all records returned in single call', async () => {
+  it('should handle a simple query with all records returned in single call', async () => {
     sandbox
       .stub(fakeConnection, 'request')
       .callsFake(() => Promise.resolve({ columnMetadata: queryFieldsExemplars.simpleQuery.columnMetadata }));

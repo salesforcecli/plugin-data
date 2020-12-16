@@ -5,33 +5,25 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-/* eslint-disable no-shadow-restricted-names */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { expect, test } from '@salesforce/command/lib/test';
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import { SoqlQuery } from '@salesforce/data';
+import { SoqlQuery, SoqlQueryResult } from '@salesforce/data';
 import { soqlQueryExemplars } from '@salesforce/data/test/soqlQuery.exemplars';
-// import { Connection, QueryResult } from 'jsforce';
-//
-// import { AuthInfo, AuthInfoConfig, Logger, Org } from '@salesforce/core';
 import sinon = require('sinon');
-// import * as TestUtil from '@salesforce/data';
-// import { CsvReporter, HumanReporter } from '../../../../../../../lib/reporters';
+import { SinonSandbox, SinonStub } from 'sinon';
 
 chai.use(chaiAsPromised);
 
 const QUERY_COMMAND = 'force:data:soql:query';
 
 describe('Execute a SOQL statement', function (): void {
-  let sandbox: any;
+  let sandbox: SinonSandbox;
   beforeEach(() => {
     sandbox = sinon.createSandbox();
   });
   describe('handle query results', () => {
-    let soqlQuerySpy: any;
+    let soqlQuerySpy: SinonStub<[], Promise<SoqlQueryResult>>;
     describe('handle empty results', () => {
       beforeEach(() => {
         soqlQuerySpy = sandbox
@@ -79,7 +71,10 @@ describe('Execute a SOQL statement', function (): void {
         .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'csv'])
         .it('should have csv results', (ctx) => {
           sinon.assert.calledOnce(soqlQuerySpy);
-          expect(ctx.stdout).to.include('Name,Contacts\n"Cisco Systems, Inc.",\nASSMANN Electronic GmbH,');
+          // test for expected snippet in output
+          expect(ctx.stdout).to.include(
+            'Contacts.totalSize,Contacts.records.3.LastName\n"Cisco Systems, Inc.",,,,,,,,\nASSMANN Electronic GmbH,,,,,,,,\n'
+          );
         });
       test
         .withOrg({ username: 'test@org.com' }, true)
@@ -100,6 +95,7 @@ describe('Execute a SOQL statement', function (): void {
         .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'human'])
         .it('should have json results', (ctx) => {
           sinon.assert.calledOnce(soqlQuerySpy);
+          // test for expected snippet in output
           expect(ctx.stdout).to.include('records retrieved: 50');
         });
     });
@@ -107,7 +103,7 @@ describe('Execute a SOQL statement', function (): void {
       beforeEach(() => {
         soqlQuerySpy = sandbox
           .stub(SoqlQuery.prototype, 'runSoqlQuery')
-          .callsFake(() => Promise.resolve(soqlQueryExemplars.subqueryWithAgregates.soqlQueryResult));
+          .callsFake(() => Promise.resolve(soqlQueryExemplars.queryWithAgregates.soqlQueryResult));
       });
       afterEach(() => {
         sandbox.restore();
@@ -119,6 +115,7 @@ describe('Execute a SOQL statement', function (): void {
         .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'csv'])
         .it('should have csv results', (ctx) => {
           sinon.assert.calledOnce(soqlQuerySpy);
+          // test for expected snippet in output
           expect(ctx.stdout).to.include(
             'Name,avg(AnnualRevenue)\nSample Account for Entitlements,\nsForce,\n"United Oil & Gas, Singapore"'
           );

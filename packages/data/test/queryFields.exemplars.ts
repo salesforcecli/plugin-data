@@ -4,6 +4,14 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+import { Field, FunctionField, SubqueryField } from '../lib/queryFields';
+
+export const makeSubfield = (name: string, fields: Field[]): SubqueryField => {
+  const subfield = new SubqueryField(name);
+  subfield.fields = fields;
+  return subfield;
+};
+
 export const queryFieldsExemplars = {
   simpleQuery: {
     columnMetadata: [
@@ -36,14 +44,7 @@ export const queryFieldsExemplars = {
         updatable: false,
       },
     ],
-    columns: [
-      {
-        name: 'Id',
-      },
-      {
-        name: 'Name',
-      },
-    ],
+    columns: [new Field('Id'), new Field('Name')],
   },
   subquery: {
     columnMetadata: [
@@ -91,19 +92,7 @@ export const queryFieldsExemplars = {
         updatable: false,
       },
     ],
-    columns: [
-      {
-        name: 'Name',
-      },
-      {
-        name: 'Contacts',
-        fields: [
-          {
-            name: 'LastName',
-          },
-        ],
-      },
-    ],
+    columns: [new Field('Name'), makeSubfield('Contacts', [new Field('LastName')])],
   },
   aggregateQuery: {
     columnMetadata: [
@@ -136,14 +125,7 @@ export const queryFieldsExemplars = {
         updatable: false,
       },
     ],
-    columns: [
-      {
-        name: 'CampaignId',
-      },
-      {
-        name: 'avg(Amount)',
-      },
-    ],
+    columns: [new Field('CampaignId'), new FunctionField('avg(Amount)')],
   },
   queryWithJoin: {
     columnMetadata: [
@@ -191,13 +173,6 @@ export const queryFieldsExemplars = {
         updatable: false,
       },
     ],
-    columns: [
-      {
-        name: 'Name',
-      },
-      {
-        name: 'Owner.Name',
-      },
-    ],
+    columns: [new Field('Name'), new FunctionField('Owner.Name')],
   },
 };

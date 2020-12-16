@@ -84,7 +84,7 @@ export class DataSoqlQueryCommand extends DataCommand {
    * When the user is using global '--json' flag an instance of SfdxResult si returned.
    * This is necessary since '--json' flag reports results in the form of SfdxResult
    * and bypasses the definition of start result. The goal is to have the output
-   * from '--json' and '--resulformat json' the same.
+   * from '--json' and '--resulformat json' be the same.
    *
    * The DataSoqlQueryResult is necessary to communicate user selections to the reporters.
    * The 'this' object available during display() function does not include user input to
@@ -93,9 +93,7 @@ export class DataSoqlQueryCommand extends DataCommand {
    */
   public async run(): Promise<DataSoqlQueryResult | SfdxResult> {
     try {
-      this.runIf(this.flags.resultformat !== 'json', () =>
-        this.ux.startSpinner(messages.getMessage('queryRunningMessage'))
-      );
+      if (this.flags.resultformat !== 'json') this.ux.startSpinner(messages.getMessage('queryRunningMessage'));
       const query = new SoqlQuery({ connection: this.getConnection(), query: this.flags.query, logger: this.logger });
       const queryResult: SoqlQueryResult = await query.runSoqlQuery();
       const results = {
@@ -104,9 +102,9 @@ export class DataSoqlQueryCommand extends DataCommand {
         json: this.flags.json,
         logger: this.logger,
       };
-      return this.normilizeIfJson(results);
+      return this.normalizeIfJson(results);
     } finally {
-      this.runIf(this.flags.resultformat !== 'json', () => this.ux.stopSpinner());
+      if (this.flags.resultformat !== 'json') this.ux.stopSpinner();
     }
   }
 
@@ -117,25 +115,12 @@ export class DataSoqlQueryCommand extends DataCommand {
    * @param results
    * @private
    */
-  private normilizeIfJson(results: DataSoqlQueryResult): DataSoqlQueryResult | SfdxResult {
+  private normalizeIfJson(results: DataSoqlQueryResult): DataSoqlQueryResult | SfdxResult {
     if (this.flags.json) {
       return {
         data: toJsonMap(results.result),
       };
     }
     return results;
-  }
-
-  /**
-   * Call Function when condition is true.
-   *
-   * @param condition
-   * @param callback
-   * @private
-   */
-  private runIf(condition: boolean, callback: Function): void {
-    if (condition) {
-      callback();
-    }
   }
 }
