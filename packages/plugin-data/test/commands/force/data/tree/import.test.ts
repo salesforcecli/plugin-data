@@ -63,7 +63,7 @@ describe('force:data:tree:import', () => {
       pathJoin(__dirname, '..', '..', '..', '..', 'api', 'data', 'tree', 'test-files', 'accounts-contacts-tree.json'),
       '--json',
     ])
-    .it('returns 4 reference entries', (ctx) => {
+    .it('returns 4 reference entries for an import file', (ctx) => {
       const result = JSON.parse(ctx.stdout);
       expect(result.status).to.equal(0);
       expect(result.result).to.deep.equal(expectedImportResult);
@@ -95,7 +95,7 @@ describe('force:data:tree:import', () => {
       pathJoin(__dirname, '..', '..', '..', '..', 'api', 'data', 'tree', 'test-files', 'accounts-contacts-plan.json'),
       '--json',
     ])
-    .it('returns 4 reference entries', (ctx) => {
+    .it('returns 4 reference entries for an import plan', (ctx) => {
       const result = JSON.parse(ctx.stdout);
       expect(result.status).to.equal(0);
       expect(result.result).to.deep.equal(expectedImportResult);
@@ -115,7 +115,7 @@ describe('force:data:tree:import', () => {
     .withOrg({ username: 'test@org.com' }, true)
     .stdout()
     .command(['force:data:tree:import', '--targetusername', 'test@org.com', '--json'])
-    .it('should throw an error if --query is not provided', (ctx) => {
+    .it('should throw an error if data plan or file is not provided', (ctx) => {
       const result = JSON.parse(ctx.stdout);
       expect(result.status).to.equal(1);
       expect(result.message).to.include('Provide a data plan or file(s).');
