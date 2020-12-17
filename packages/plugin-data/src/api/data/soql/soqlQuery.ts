@@ -11,7 +11,7 @@ import { Tooling } from '@salesforce/core/lib/connection';
 import { Field, retrieveColumns } from './queryFields';
 
 /**
- * Type to define SoqlQuert results
+ * Type to define SoqlQuery results
  */
 export type SoqlQueryResult = {
   query: string;
