@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "description": "A library for importing and exporting salesforce data",
   "author": "Salesforce",
-  "homepage": "https://github.com/salesforcecli/data/tree/master/packages/data#readme",
+  "homepage": "https://github.com/salesforcecli/data/tree/main/packages/data#readme",
   "license": "BSD-3-Clause",
   "files": [
     "/lib",
