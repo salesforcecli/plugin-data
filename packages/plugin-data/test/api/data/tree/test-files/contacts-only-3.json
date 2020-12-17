@@ -1,0 +1,14 @@
+{
+  "records": [
+    {
+      "attributes": { "type": "Contact", "referenceId": "HetzelRef" },
+      "lastname": "Hetzel",
+      "title": "Developer"
+    },
+    {
+      "attributes": { "type": "Contact", "referenceId": "AlpertRef" },
+      "lastname": "Alpert",
+      "title": "SVP"
+    }
+  ]
+}
