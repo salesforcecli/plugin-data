@@ -36,39 +36,13 @@ export class SoqlQuery {
   public async runSoqlQuery(): Promise<SoqlQueryResult> {
     let columns: Field[] = [];
     this.logger.debug('running query');
-    // the new way - autofetch, but not working right now for some reason
+
     const result = await this.connection.autoFetchQuery(this.query, { autoFetch: true, maxFetch: 50000 });
     this.logger.debug(`Query complete with ${result.totalSize} records returned`);
     if (result.totalSize) {
       this.logger.debug('fetching columns for query');
       columns = await retrieveColumns(this.connection, this.query);
     }
-    // old way
-    // const result = await this.connection.query(this.query);
-    // if (result.totalSize) {
-    //   this.logger.debug('fetching columns for query');
-    //   columns = await retrieveColumns(this.connection, this.query);
-    //
-    //   // get all result batches
-    //   let moreResults: QueryResult<unknown> = result;
-    //   this.logger.debug(`Result has queryMore ${!moreResults.done}`);
-    //   while (!moreResults.done) {
-    //     if (moreResults.nextRecordsUrl) {
-    //       moreResults = await this.connection.queryMore(moreResults.nextRecordsUrl);
-    //       if (moreResults.records) {
-    //         result.records = result.records.concat(moreResults.records);
-    //       } else {
-    //         throw new SfdxError('query more is missing records');
-    //       }
-    //     } else {
-    //       throw new SfdxError('query more URL is missing');
-    //     }
-    //     this.logger.debug(`Result has queryMore ${!moreResults.done}`);
-    //   }
-    //   if (!result.records) {
-    //     throw new SfdxError('query more is missing records');
-    //   }
-    // }
 
     // remove nextRecordsUrl and force done to true
     delete result.nextRecordsUrl;
