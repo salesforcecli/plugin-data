@@ -3,7 +3,7 @@
   "version": "0.2.5",
   "description": "Plugin for salesforce data commands",
   "author": "Salesforce",
-  "homepage": "https://github.com/salesforcecli/data/tree/master/packages/plugin-data#readme",
+  "homepage": "https://github.com/salesforcecli/data/tree/main/packages/plugin-data#readme",
   "license": "BSD-3-Clause",
   "oclif": {
     "commands": "./lib/commands",
