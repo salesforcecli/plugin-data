@@ -10,18 +10,18 @@
 /* istanbul ignore file */
 
 import * as os from 'os';
-import { flags, FlagsConfig, SfdxResult } from '@salesforce/command';
-import { Messages } from '@salesforce/core';
+import { flags, FlagsConfig, SfdxCommand, SfdxResult } from '@salesforce/command';
+import { Connection, Messages, Org } from '@salesforce/core';
 import { asPlainObject, toJsonMap } from '@salesforce/ts-types';
-import { SoqlQuery, SoqlQueryResult } from '@salesforce/data';
-import { DataCommand } from '../../../../dataCommand';
-import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../../../reporters';
-import { DataSoqlQueryResult } from '../../../../dataSoqlQueryTypes';
+import { Tooling } from '@salesforce/core/lib/connection';
+import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../../../api/data/soql/reporters';
+import { DataSoqlQueryResult } from '../../../../api/data/soql/dataSoqlQueryTypes';
+import { SoqlQuery, SoqlQueryResult } from '../../../../api/data/soql/soqlQuery';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
 
-export class DataSoqlQueryCommand extends DataCommand {
+export class DataSoqlQueryCommand extends SfdxCommand {
   public static readonly description = messages.getMessage('description');
   public static readonly longDescription = messages.getMessage('longDescription');
   public static readonly requiresProject = false;
@@ -40,6 +40,7 @@ export class DataSoqlQueryCommand extends DataCommand {
       char: 't',
       required: false,
       hidden: false,
+      default: false,
       description: messages.getMessage('queryToolingDescription'),
       longDescription: messages.getMessage('queryToolingLongDescription'),
     }),
@@ -71,11 +72,16 @@ export class DataSoqlQueryCommand extends DataCommand {
         case 'csv':
           reporter = new CsvReporter(results, results.columns, this.ux, results.logger);
           break;
+        default:
+          throw new Error(`result format is invalid: ${results.resultFormat}`);
       }
       // delegate to selected reporter
       reporter.display();
     },
   };
+
+  // Overrides SfdxCommand.  This is ensured since requiresUsername == true
+  protected org!: Org;
 
   /**
    * Command run implementation
@@ -94,7 +100,11 @@ export class DataSoqlQueryCommand extends DataCommand {
   public async run(): Promise<DataSoqlQueryResult | SfdxResult> {
     try {
       if (this.flags.resultformat !== 'json') this.ux.startSpinner(messages.getMessage('queryRunningMessage'));
-      const query = new SoqlQuery({ connection: this.getConnection(), query: this.flags.query, logger: this.logger });
+      const query = new SoqlQuery(
+        this.getConnection(this.org, this.flags.usetoolingapi),
+        this.flags.query,
+        this.logger
+      );
       const queryResult: SoqlQueryResult = await query.runSoqlQuery();
       const results = {
         ...queryResult,
@@ -122,5 +132,9 @@ export class DataSoqlQueryCommand extends DataCommand {
       };
     }
     return results;
+  }
+
+  private getConnection(org: Org, useToolingApi: boolean): Connection | Tooling {
+    return useToolingApi ? org.getConnection().tooling : org.getConnection();
   }
 }

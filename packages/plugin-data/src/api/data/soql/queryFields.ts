@@ -5,7 +5,8 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { ensureJsonArray, ensureJsonMap, ensureString, isJsonArray, toJsonMap } from '@salesforce/ts-types';
-import { BaseConnection } from 'jsforce';
+import { Connection } from '@salesforce/core';
+import { Tooling } from '@salesforce/core/lib/connection';
 
 /**
  * Class to represent a field when describing the fields that make up a query result
@@ -40,7 +41,7 @@ export class FunctionField extends Field {
  * @param connection
  * @param query
  */
-export const retrieveColumns = async (connection: BaseConnection, query: string): Promise<Field[]> => {
+export const retrieveColumns = async (connection: Connection | Tooling, query: string): Promise<Field[]> => {
   // eslint-disable-next-line no-underscore-dangle,@typescript-eslint/unbound-method,@typescript-eslint/restrict-template-expressions
   const columnUrl = `${connection._baseUrl()}/query?q=${encodeURIComponent(query)}&columns=true`;
   const results = toJsonMap(await connection.request(columnUrl));

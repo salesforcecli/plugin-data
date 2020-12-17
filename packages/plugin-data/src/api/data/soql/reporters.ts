@@ -8,8 +8,8 @@ import { EOL } from 'os';
 import { Logger, Messages } from '@salesforce/core';
 import { UX } from '@salesforce/command';
 import * as chalk from 'chalk';
-import { Field, FunctionField, SubqueryField } from '@salesforce/data';
-import { upperFirst } from '@salesforce/kit';
+import { get, isString } from '@salesforce/ts-types';
+import { Field, FunctionField, SubqueryField } from './queryFields';
 import { DataSoqlQueryResult } from './dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
@@ -79,7 +79,9 @@ export class HumanReporter extends QueryReporter {
       fields.forEach((field) => {
         if (field instanceof SubqueryField) {
           children.push(field.name);
-          field.fields.forEach((subfield) => attributeNames.push(`${field.name}.${subfield.name}`));
+          field.fields
+            .map((subfield: Field) => subfield as SubqueryField)
+            .forEach((subfield: SubqueryField) => attributeNames.push(`${field.name}.${subfield.name}`));
         } else if (field instanceof FunctionField) {
           if (field.alias) {
             attributeNames.push(field.alias);
@@ -98,14 +100,15 @@ export class HumanReporter extends QueryReporter {
     return { attributeNames, children, aggregates };
   }
 
-  public soqlQuery(columns: string[], records: object[], totalCount: number): void {
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  public soqlQuery(columns: string[], records: any[], totalCount: number): void {
     this.prepNullValues(records);
-    this.log(chalk.bold(this.data.query));
     this.ux.table(records, { columns: this.prepColumns(columns) });
     this.log(chalk.bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
   }
 
-  public prepNullValues(records: object[]): void {
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  public prepNullValues(records: any[]): void {
     records.forEach((record): void => {
       Reflect.ownKeys(record).forEach((propertyKey) => {
         const value = Reflect.get(record, propertyKey);
@@ -122,12 +125,7 @@ export class HumanReporter extends QueryReporter {
     return columns.map(
       (field: string): ColumnAttributes => ({
         key: field,
-        label: field
-          .replace(/([A-Z])/g, ' $1')
-          .split(/\s+/)
-          .filter((s) => s && s.length > 0)
-          .map((s) => upperFirst(s))
-          .join(' '),
+        label: field.toUpperCase(),
       })
     );
   }
@@ -176,7 +174,7 @@ export class HumanReporter extends QueryReporter {
     return queryResults;
   }
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
+// /* eslint-enable @typescript-eslint/no-explicit-any */
 
 const SEPARATOR = ',';
 const DOUBLE_QUOTE = '"';
@@ -216,13 +214,16 @@ export class CsvReporter extends QueryReporter {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.data.result.records.forEach((row: any) => {
       const values = attributeNames.map((name) => {
-        return this.escape(Reflect.get(row, name));
+        const value = get(row, name);
+        if (isString(value)) {
+          return this.escape(value);
+        }
+        return value;
       });
       this.log(values.join(SEPARATOR));
     });
   }
 
-  /* eslint-disable @typescript-eslint/no-explicit-any */
   public massageRows(): string[] {
     const fields = this.columns;
     const hasSubqueries = fields.some((field) => field instanceof SubqueryField);
@@ -278,9 +279,11 @@ export class CsvReporter extends QueryReporter {
         if (typeLengths.get(field.name)) {
           for (let i = 0; i < (typeLengths.get(field.name) ?? 0); i++) {
             attributeNames.push(`${field.name}.totalSize`);
-            (field as SubqueryField).fields.forEach((subfield) => {
-              attributeNames.push(`${field.name}.records.${i}.${subfield.name}`);
-            });
+            (field as SubqueryField).fields
+              .map((subfield: Field) => subfield as SubqueryField)
+              .forEach((subfield: SubqueryField) => {
+                attributeNames.push(`${field.name}.records.${i}.${subfield.name}`);
+              });
           }
         } else if (field instanceof FunctionField) {
           if (field.alias) {

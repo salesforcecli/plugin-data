@@ -8,10 +8,12 @@
 import { expect, test } from '@salesforce/command/lib/test';
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import { SoqlQuery, SoqlQueryResult } from '@salesforce/data';
-import { soqlQueryExemplars } from '@salesforce/data/test/soqlQuery.exemplars';
 import sinon = require('sinon');
-import { SinonSandbox, SinonStub } from 'sinon';
+import { SinonSandbox } from 'sinon';
+import { SoqlQuery } from '../../../../../../src/api/data/soql/soqlQuery';
+import { soqlQueryExemplars } from '../../../../../api/data/soql/test-files/soqlQuery.exemplars';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 chai.use(chaiAsPromised);
 
@@ -23,7 +25,7 @@ describe('Execute a SOQL statement', function (): void {
     sandbox = sinon.createSandbox();
   });
   describe('handle query results', () => {
-    let soqlQuerySpy: SinonStub<[], Promise<SoqlQueryResult>>;
+    let soqlQuerySpy: any;
     describe('handle empty results', () => {
       beforeEach(() => {
         soqlQuerySpy = sandbox
@@ -67,7 +69,6 @@ describe('Execute a SOQL statement', function (): void {
       test
         .withOrg({ username: 'test@org.com' }, true)
         .stdout()
-        .stderr()
         .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'csv'])
         .it('should have csv results', (ctx) => {
           sinon.assert.calledOnce(soqlQuerySpy);
@@ -99,7 +100,7 @@ describe('Execute a SOQL statement', function (): void {
           expect(ctx.stdout).to.include('records retrieved: 50');
         });
     });
-    describe('reporters produce the correct results for subquery with aggregates', () => {
+    describe('reporters produce the correct aggregate query', () => {
       beforeEach(() => {
         soqlQuerySpy = sandbox
           .stub(SoqlQuery.prototype, 'runSoqlQuery')
@@ -108,18 +109,6 @@ describe('Execute a SOQL statement', function (): void {
       afterEach(() => {
         sandbox.restore();
       });
-      test
-        .withOrg({ username: 'test@org.com' }, true)
-        .stdout()
-        .stderr()
-        .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'csv'])
-        .it('should have csv results', (ctx) => {
-          sinon.assert.calledOnce(soqlQuerySpy);
-          // test for expected snippet in output
-          expect(ctx.stdout).to.include(
-            'Name,avg(AnnualRevenue)\nSample Account for Entitlements,\nsForce,\n"United Oil & Gas, Singapore"'
-          );
-        });
       test
         .withOrg({ username: 'test@org.com' }, true)
         .stdout()

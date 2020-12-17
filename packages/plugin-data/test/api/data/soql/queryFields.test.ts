@@ -10,18 +10,17 @@ import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import { expect } from 'chai';
 
-// import { AuthInfo, AuthInfoConfig, Logger, Org } from '@salesforce/core';
 import sinon = require('sinon');
-import { retrieveColumns } from '../lib/queryFields';
-import * as TestUtil from './testUtil';
-import { queryFieldsExemplars } from './queryFields.exemplars';
+import { retrieveColumns } from '../../../../src/api/data/soql/queryFields';
+import * as TestUtil from '../../../testUtil';
+import { queryFieldsExemplars } from './test-files/queryFields.exemplars';
 
 chai.use(chaiAsPromised);
 
 describe('queryFields tests', () => {
   // let toolingSpy: sinon.SinonSpy;
   // let querySpy: sinon.SinonSpy;
-  const fakeConnection = TestUtil.createBaseFakeConnection();
+  const fakeConnection = TestUtil.createFakeConnection();
   let sandbox: any;
   beforeEach(() => {
     sandbox = sinon.createSandbox();

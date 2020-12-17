@@ -20,6 +20,7 @@ import {
   UserInfo,
 } from 'jsforce';
 import Parser = require('fast-xml-parser');
+import { Connection } from '@salesforce/core';
 
 import EventEmitter = NodeJS.EventEmitter;
 
@@ -154,6 +155,130 @@ export const createBaseFakeConnection = function (): BaseConnection {
     tooling: {
       query: () => {
         return {} as QueryResult<object>;
+      },
+      retrieve: () => {
+        return new Promise<Record<string, any>>(function (resolve, reject) {
+          resolve({} as Record<string, any>);
+        });
+      },
+      create: () => {
+        return new Promise<RecordResult>(function (resolve, reject) {
+          resolve({} as RecordResult);
+        });
+      },
+      update: () => {
+        return new Promise<RecordResult>(function (resolve, reject) {
+          resolve({} as RecordResult);
+        });
+      },
+      destroy: () => {
+        return new Promise<RecordResult>(function (resolve, reject) {
+          resolve({} as RecordResult);
+        });
+      },
+      sobject: () => {
+        return {} as SObject<object>;
+      },
+    },
+  } as any;
+};
+
+export const createFakeConnection = function (): Connection {
+  return {
+    instanceUrl: '',
+    version: '',
+    accessToken: '',
+    loginBySoap: () => {
+      return new Promise<UserInfo>(function (resolve, reject) {
+        resolve({} as UserInfo);
+      });
+    },
+    async request() {
+      return new Promise<Record<string, any>>(function (resolve, reject) {
+        resolve({});
+      });
+    },
+    describe: () => {
+      return new Promise<Record<string, any>>(function (resolve, reject) {
+        resolve({});
+      });
+    },
+    describeGlobal: () => {
+      return new Promise<Record<string, any>>(function (resolve, reject) {
+        resolve({});
+      });
+    },
+    autoFetchQuery: () => {
+      return new Promise<QueryResult<object>>(function (resolve, reject) {
+        resolve({} as QueryResult<object>);
+      });
+    },
+    query: () => {
+      return new Promise<QueryResult<object>>(function (resolve, reject) {
+        resolve({} as QueryResult<object>);
+      });
+    },
+    queryMore: () => {
+      return new Promise<QueryResult<object>>(function (resolve, reject) {
+        resolve({} as QueryResult<object>);
+      });
+    },
+    sobject: () => {
+      return {} as SObject<object>;
+    },
+    _baseUrl: () => {
+      return 'https://some.sfdc.site.com';
+    },
+    metadata: {
+      read: () => {
+        return new Promise<any>(function (resolve, reject) {
+          resolve({});
+        });
+      },
+      upsert: () => {
+        return new Promise<UpsertResult>(function (resolve, reject) {
+          resolve({} as UpsertResult);
+        });
+      },
+      delete: () => {
+        return new Promise<SaveResult>(function (resolve, reject) {
+          resolve({} as SaveResult);
+        });
+      },
+    },
+    bulk: {
+      load: () => {
+        return {
+          on: () => {},
+          check: () => {
+            return {} as BatchInfo;
+          },
+          poll: () => {},
+          execute: () => {},
+        };
+      },
+      createJob: () => {
+        const job = createBaseFakeEmitter();
+        return Object.assign(job, {
+          createBatch(): any {
+            return createBaseFakeEmitter();
+          },
+        });
+      },
+      job: () => {
+        return {} as Job;
+      },
+    },
+    tooling: {
+      query: () => {
+        return new Promise<QueryResult<object>>(function (resolve, reject) {
+          resolve({} as QueryResult<object>);
+        });
+      },
+      autoFetchQuery: () => {
+        return new Promise<QueryResult<object>>(function (resolve, reject) {
+          resolve({} as QueryResult<object>);
+        });
       },
       retrieve: () => {
         return new Promise<Record<string, any>>(function (resolve, reject) {

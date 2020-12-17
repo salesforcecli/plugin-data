@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { Logger } from '@salesforce/core';
-import { SoqlQueryResult } from '@salesforce/data';
+import { SoqlQueryResult } from './soqlQuery';
 
 export type DataSoqlQueryResult = SoqlQueryResult & {
   resultFormat: string;
