@@ -45,6 +45,7 @@
     "codecov": "codecov --disable=gcov"
   },
   "devDependencies": {
+    "@oclif/dev-cli": "^1",
     "@salesforce/dev-config": "^2.0.0",
     "@salesforce/dev-scripts": "^0.6.2",
     "@salesforce/prettier-config": "^0.0.1",

@@ -7,7 +7,7 @@
 
 import { SfdxCommand } from '@salesforce/command';
 import { Messages, SfdxError, Org, fs } from '@salesforce/core';
-import { AnyJson, Dictionary } from '@salesforce/ts-types';
+import { AnyJson, Dictionary, get, Nullable } from '@salesforce/ts-types';
 import { BaseConnection, ErrorResult, Record, SObject } from 'jsforce';
 
 Messages.importMessagesDirectory(__dirname);
@@ -142,6 +142,19 @@ export abstract class DataCommand extends SfdxCommand {
     // get back a single RecordResult. Nevertheless, we ensure that it's a
     // single RecordResult to make Typescript happy
     return Array.isArray(results) ? results[0] : results;
+  }
+
+  protected logNestedObject(obj: object, indentation = 0): void {
+    const space = ' '.repeat(indentation);
+    Object.keys(obj).forEach((key) => {
+      const value = get(obj, key, null) as Nullable<string | object>;
+      if (!!value && typeof value === 'object') {
+        this.ux.log(`${space}${key}:`);
+        this.logNestedObject(value, indentation + 2);
+      } else {
+        this.ux.log(`${space}${key}: ${value as string}`);
+      }
+    });
   }
 
   /**

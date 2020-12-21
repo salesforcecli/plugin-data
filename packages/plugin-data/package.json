@@ -1,9 +1,9 @@
 {
   "name": "@salesforce/plugin-data",
-  "version": "0.2.0",
+  "version": "0.2.5",
   "description": "Plugin for salesforce data commands",
   "author": "Salesforce",
-  "homepage": "https://github.com/salesforcecli/data/tree/master/packages/plugin-data#readme",
+  "homepage": "https://github.com/salesforcecli/data/tree/main/packages/plugin-data#readme",
   "license": "BSD-3-Clause",
   "oclif": {
     "commands": "./lib/commands",
@@ -28,7 +28,7 @@
                 "description": "fetch records using SOQL"
               },
               "tree": {
-                "description": "manipulate records using the tree API"
+                "description": "import/export records using the tree API"
               }
             }
           }
@@ -68,7 +68,7 @@
     "@oclif/config": "^1",
     "@salesforce/command": "^3.0.5",
     "@salesforce/core": "^2.15.2",
-    "@salesforce/data": "^0.1.0",
+    "@salesforce/data": "^0.1.1",
     "@salesforce/ts-types": "^1.4.3",
     "csv-parse": "^4.14.1",
     "tslib": "^1"
