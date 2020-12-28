@@ -4,11 +4,10 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { Field, FunctionField, SubqueryField } from '../../../../../src/api/data/soql/queryFields';
+import { Field, FieldType, SubqueryField } from '../../../../../src/api/data/soql/queryFields';
 
 export const makeSubfield = (name: string, fields: Field[]): SubqueryField => {
-  const subfield = new SubqueryField(name);
-  subfield.fields = fields;
+  const subfield: SubqueryField = { fields, name, fieldType: FieldType.subqueryField };
   return subfield;
 };
 
@@ -44,7 +43,10 @@ export const queryFieldsExemplars = {
         updatable: false,
       },
     ],
-    columns: [new Field('Id'), new Field('Name')],
+    columns: [
+      { fieldType: FieldType.field, name: 'Id' },
+      { fieldType: FieldType.field, name: 'Name' },
+    ],
   },
   subquery: {
     columnMetadata: [
@@ -92,7 +94,10 @@ export const queryFieldsExemplars = {
         updatable: false,
       },
     ],
-    columns: [new Field('Name'), makeSubfield('Contacts', [new Field('LastName')])],
+    columns: [
+      { fieldType: FieldType.field, name: 'Name' },
+      makeSubfield('Contacts', [{ fieldType: FieldType.field, name: 'LastName' }]),
+    ],
   },
   aggregateQuery: {
     columnMetadata: [
@@ -125,7 +130,10 @@ export const queryFieldsExemplars = {
         updatable: false,
       },
     ],
-    columns: [new Field('CampaignId'), new FunctionField('avg(Amount)')],
+    columns: [
+      { fieldType: FieldType.field, name: 'CampaignId' },
+      { fieldType: FieldType.functionField, name: 'avg(Amount)' },
+    ],
   },
   queryWithJoin: {
     columnMetadata: [
@@ -173,6 +181,9 @@ export const queryFieldsExemplars = {
         updatable: false,
       },
     ],
-    columns: [new Field('Name'), new FunctionField('Owner.Name')],
+    columns: [
+      { fieldType: FieldType.field, name: 'Name' },
+      { fieldType: FieldType.functionField, name: 'Owner.Name' },
+    ],
   },
 };

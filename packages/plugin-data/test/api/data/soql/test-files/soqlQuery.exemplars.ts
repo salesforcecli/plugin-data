@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { Field, FunctionField } from '../../../../../src/api/data/soql/queryFields';
+import { FieldType } from '../../../../../src/api/data/soql/queryFields';
 import { makeSubfield, queryFieldsExemplars } from './queryFields.exemplars';
 
 export const soqlQueryExemplars = {
@@ -1364,7 +1364,10 @@ export const soqlQueryExemplars = {
   queryWithNullFields: {
     soqlQueryResult: {
       query: 'SELECT Name, Avg(AnnualRevenue) FROM Account GROUP BY Name',
-      columns: [new Field('Name'), new FunctionField('avg(AnnualRevenue)')],
+      columns: [
+        { fieldType: FieldType.field, name: 'Name' },
+        { fieldType: FieldType.functionField, name: 'avg(AnnualRevenue)' },
+      ],
       result: {
         totalSize: 16,
         done: true,
@@ -1488,7 +1491,10 @@ export const soqlQueryExemplars = {
   subqueryAccountsAndContacts: {
     soqlQueryResult: {
       query: 'SELECT Name, ( SELECT LastName FROM Contacts ) FROM Account limit 50',
-      columns: [new Field('Name'), makeSubfield('Contacts', [new Field('LastName')])],
+      columns: [
+        { fieldType: FieldType.field, name: 'Name' },
+        makeSubfield('Contacts', [{ fieldType: FieldType.field, name: 'LastName' }]),
+      ],
       result: {
         totalSize: 50,
         done: true,
@@ -2112,7 +2118,10 @@ export const soqlQueryExemplars = {
   queryWithAgregates: {
     soqlQueryResult: {
       query: 'SELECT Name, Avg(AnnualRevenue) FROM Account GROUP BY Name',
-      columns: [new Field('Name'), new FunctionField('avg(AnnualRevenue)')],
+      columns: [
+        { fieldType: FieldType.field, name: 'Name' },
+        { fieldType: FieldType.functionField, name: 'avg(AnnualRevenue)' },
+      ],
       result: {
         totalSize: 16,
         done: true,

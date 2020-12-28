@@ -5,15 +5,10 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-// This is the legacy converted command file. Ignoring code-coverage since this is generated.
-// THIS SHOULD BE REMOVED WHEN CONVERTED TO EXTEND SfdxCommand
-/* istanbul ignore file */
-
 import * as os from 'os';
 import { flags, FlagsConfig, SfdxCommand, SfdxResult } from '@salesforce/command';
-import { Connection, Messages, Org } from '@salesforce/core';
+import { Messages, Org } from '@salesforce/core';
 import { asPlainObject, toJsonMap } from '@salesforce/ts-types';
-import { Tooling } from '@salesforce/core/lib/connection';
 import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../../../api/data/soql/reporters';
 import { DataSoqlQueryResult } from '../../../../api/data/soql/dataSoqlQueryTypes';
 import { SoqlQuery, SoqlQueryResult } from '../../../../api/data/soql/soqlQuery';
@@ -23,7 +18,6 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
 
 export class DataSoqlQueryCommand extends SfdxCommand {
   public static readonly description = messages.getMessage('description');
-  public static readonly longDescription = messages.getMessage('longDescription');
   public static readonly requiresProject = false;
   public static readonly requiresUsername = true;
   public static readonly examples = messages.getMessage('examples').split(os.EOL);
@@ -101,7 +95,7 @@ export class DataSoqlQueryCommand extends SfdxCommand {
     try {
       if (this.flags.resultformat !== 'json') this.ux.startSpinner(messages.getMessage('queryRunningMessage'));
       const query = new SoqlQuery(
-        this.getConnection(this.org, this.flags.usetoolingapi),
+        this.flags.usetoolingapi ? this.org.getConnection().tooling : this.org.getConnection(),
         this.flags.query,
         this.logger
       );
@@ -132,9 +126,5 @@ export class DataSoqlQueryCommand extends SfdxCommand {
       };
     }
     return results;
-  }
-
-  private getConnection(org: Org, useToolingApi: boolean): Connection | Tooling {
-    return useToolingApi ? org.getConnection().tooling : org.getConnection();
   }
 }

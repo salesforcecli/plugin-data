@@ -8,8 +8,8 @@ import { EOL } from 'os';
 import { Logger, Messages } from '@salesforce/core';
 import { UX } from '@salesforce/command';
 import * as chalk from 'chalk';
-import { get, isString } from '@salesforce/ts-types';
-import { Field, FunctionField, SubqueryField } from './queryFields';
+import { get, isString, Optional } from '@salesforce/ts-types';
+import { Field, FieldType, FunctionField, SubqueryField } from './queryFields';
 import { DataSoqlQueryResult } from './dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
@@ -41,7 +41,7 @@ export class QueryReporter extends Reporter {
 }
 
 type ParsedFields = {
-  attributeNames: string[];
+  attributeNames: Array<Optional<string>>;
   children: string[];
   aggregates: FunctionField[];
 };
@@ -77,18 +77,18 @@ export class HumanReporter extends QueryReporter {
       this.logger.info(`Found fields ${JSON.stringify(fields.map((field) => `${typeof field}.${field.name}`))}`);
 
       fields.forEach((field) => {
-        if (field instanceof SubqueryField) {
+        if (field.fieldType === FieldType.subqueryField) {
           children.push(field.name);
-          field.fields
+          (field as SubqueryField).fields
             .map((subfield: Field) => subfield as SubqueryField)
             .forEach((subfield: SubqueryField) => attributeNames.push(`${field.name}.${subfield.name}`));
-        } else if (field instanceof FunctionField) {
-          if (field.alias) {
-            attributeNames.push(field.alias);
+        } else if (field.fieldType === FieldType.functionField) {
+          if ((field as FunctionField).alias) {
+            attributeNames.push((field as FunctionField).alias as string);
           } else {
             attributeNames.push(field.name);
           }
-          aggregates.push(field);
+          aggregates.push(field as FunctionField);
         } else {
           attributeNames.push(field.name);
         }
@@ -101,7 +101,7 @@ export class HumanReporter extends QueryReporter {
   }
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  public soqlQuery(columns: string[], records: any[], totalCount: number): void {
+  public soqlQuery(columns: Array<Optional<string>>, records: any[], totalCount: number): void {
     this.prepNullValues(records);
     this.ux.table(records, { columns: this.prepColumns(columns) });
     this.log(chalk.bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
@@ -121,13 +121,16 @@ export class HumanReporter extends QueryReporter {
     });
   }
 
-  public prepColumns(columns: string[]): ColumnAttributes[] {
-    return columns.map(
-      (field: string): ColumnAttributes => ({
-        key: field,
-        label: field.toUpperCase(),
-      })
-    );
+  public prepColumns(columns: Array<Optional<string>>): ColumnAttributes[] {
+    return columns
+      .map((field: Optional<string>) => field as string)
+      .filter((field): string => field)
+      .map(
+        (field: string): ColumnAttributes => ({
+          key: field,
+          label: field.toUpperCase(),
+        })
+      );
   }
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -174,7 +177,6 @@ export class HumanReporter extends QueryReporter {
     return queryResults;
   }
 }
-// /* eslint-enable @typescript-eslint/no-explicit-any */
 
 const SEPARATOR = ',';
 const DOUBLE_QUOTE = '"';
@@ -226,8 +228,8 @@ export class CsvReporter extends QueryReporter {
 
   public massageRows(): string[] {
     const fields = this.columns;
-    const hasSubqueries = fields.some((field) => field instanceof SubqueryField);
-    const hasFunctions = fields.some((field) => field instanceof FunctionField);
+    const hasSubqueries = fields.some((field) => field.fieldType === FieldType.subqueryField);
+    const hasFunctions = fields.some((field) => field.fieldType === FieldType.functionField);
 
     const attributeNames: string[] = [];
 
@@ -244,11 +246,11 @@ export class CsvReporter extends QueryReporter {
       const aggregates: FunctionField[] = [];
 
       fields.forEach((field) => {
-        if (field instanceof SubqueryField) {
+        if (field.fieldType === FieldType.subqueryField) {
           typeLengths.set(field.name, 0);
         }
-        if (field instanceof FunctionField) {
-          aggregates.push(field);
+        if (field.fieldType === FieldType.functionField) {
+          aggregates.push(field as FunctionField);
         }
       });
 
@@ -285,9 +287,9 @@ export class CsvReporter extends QueryReporter {
                 attributeNames.push(`${field.name}.records.${i}.${subfield.name}`);
               });
           }
-        } else if (field instanceof FunctionField) {
-          if (field.alias) {
-            attributeNames.push(field.alias);
+        } else if (field.fieldType === FieldType.functionField) {
+          if ((field as FunctionField).alias) {
+            attributeNames.push((field as FunctionField).alias as string);
           } else {
             attributeNames.push(field.name);
           }

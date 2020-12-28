@@ -8,10 +8,8 @@
 import { expect } from '@salesforce/command/lib/test';
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import sinon = require('sinon');
 import { UX } from '@salesforce/command';
 import { Logger } from '@salesforce/core';
-import { SinonSandbox } from 'sinon';
 import { soqlQueryExemplars } from '../../../api/data/soql/test-files/soqlQuery.exemplars';
 import { DataSoqlQueryResult } from '../../../../src/api/data/soql/dataSoqlQueryTypes';
 import { HumanReporter } from '../../../../src/api/data/soql/reporters';
@@ -23,12 +21,10 @@ chai.use(chaiAsPromised);
 
 describe('reporter tests', () => {
   const logger = Logger.childFromRoot('reporterTest');
-  let sandbox: SinonSandbox;
   describe('human reporter tests', () => {
     let reporter: HumanReporter;
     let queryData: SoqlQueryResult;
     beforeEach(async () => {
-      sandbox = sinon.createSandbox();
       queryData = soqlQueryExemplars.queryWithAgregates.soqlQueryResult;
       const dataSoqlQueryResult: DataSoqlQueryResult = {
         columns: queryData.columns,
@@ -44,9 +40,6 @@ describe('reporter tests', () => {
         await UX.create(),
         dataSoqlQueryResult.logger
       );
-    });
-    afterEach(() => {
-      sandbox.restore();
     });
     it('parses result fields', () => {
       const { attributeNames, children, aggregates } = reporter.parseFields();
@@ -68,7 +61,6 @@ describe('reporter tests', () => {
     let reporter: CsvReporter;
     let queryData: SoqlQueryResult;
     beforeEach(async () => {
-      sandbox = sinon.createSandbox();
       queryData = soqlQueryExemplars.queryWithAgregates.soqlQueryResult;
       const dataSoqlQueryResult: DataSoqlQueryResult = {
         columns: queryData.columns,
@@ -79,9 +71,6 @@ describe('reporter tests', () => {
         resultFormat: 'csv',
       };
       reporter = new CsvReporter(dataSoqlQueryResult, queryData.columns, await UX.create(), dataSoqlQueryResult.logger);
-    });
-    afterEach(() => {
-      sandbox.restore();
     });
     it('massages report results', () => {
       const massagedRows = reporter.massageRows();
@@ -106,7 +95,6 @@ describe('reporter tests', () => {
     let reporter: HumanReporter;
     let queryData: SoqlQueryResult;
     beforeEach(async () => {
-      sandbox = sinon.createSandbox();
       queryData = soqlQueryExemplars.subQuery.soqlQueryResult;
       const dataSoqlQueryResult: DataSoqlQueryResult = {
         columns: queryData.columns,
@@ -123,9 +111,6 @@ describe('reporter tests', () => {
         dataSoqlQueryResult.logger
       );
     });
-    afterEach(() => {
-      sandbox.restore();
-    });
     it('parses result fields', () => {
       const { attributeNames, children, aggregates } = reporter.parseFields();
       expect(attributeNames).to.be.ok;
@@ -137,7 +122,6 @@ describe('reporter tests', () => {
     let reporter: CsvReporter;
     let queryData: SoqlQueryResult;
     beforeEach(async () => {
-      sandbox = sinon.createSandbox();
       queryData = soqlQueryExemplars.subQuery.soqlQueryResult;
       const dataSoqlQueryResult: DataSoqlQueryResult = {
         columns: queryData.columns,
@@ -148,9 +132,6 @@ describe('reporter tests', () => {
         resultFormat: 'csv',
       };
       reporter = new CsvReporter(dataSoqlQueryResult, queryData.columns, await UX.create(), dataSoqlQueryResult.logger);
-    });
-    afterEach(() => {
-      sandbox.restore();
     });
     it('massages report results', () => {
       const massagedRows = reporter.massageRows();

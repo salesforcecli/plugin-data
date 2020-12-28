@@ -1,6 +1,5 @@
 {
   "description": "execute a SOQL query",
-  "longDescription": "Executes a SOQL query.",
   "noResults": "Your query returned no results.",
   "queryToExecute": "SOQL query to execute",
   "queryLongDescription": "SOQL query to execute.",

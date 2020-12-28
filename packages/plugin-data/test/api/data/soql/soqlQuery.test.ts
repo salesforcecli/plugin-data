@@ -19,16 +19,11 @@ import { queryFieldsExemplars } from './test-files/queryFields.exemplars';
 chai.use(chaiAsPromised);
 
 describe('soqlQuery tests', () => {
-  // let toolingSpy: sinon.SinonSpy;
-  // let querySpy: sinon.SinonSpy;
   const fakeConnection = TestUtil.createFakeConnection();
   const logger = Logger.childFromRoot('soqlQuery.test');
-  let sandbox: any;
+  const sandbox = sinon.createSandbox();
   let querySpy: any;
   let requestSpy: any;
-  beforeEach(() => {
-    sandbox = sinon.createSandbox();
-  });
   afterEach(() => {
     sandbox.restore();
   });
@@ -36,10 +31,8 @@ describe('soqlQuery tests', () => {
   it('should handle a simple query with all records returned in single call', async () => {
     sandbox
       .stub(fakeConnection, 'request')
-      .callsFake(() => Promise.resolve({ columnMetadata: queryFieldsExemplars.simpleQuery.columnMetadata }));
-    querySpy = sandbox
-      .stub(fakeConnection, 'autoFetchQuery')
-      .callsFake(() => Promise.resolve(soqlQueryExemplars.simpleQuery.queryResult));
+      .resolves({ columnMetadata: queryFieldsExemplars.simpleQuery.columnMetadata });
+    querySpy = sandbox.stub(fakeConnection, 'autoFetchQuery').resolves(soqlQueryExemplars.simpleQuery.queryResult);
     // queryMoreSpy = sandbox.stub(fakeConnection, 'queryMore');
     const soqlQuery = new SoqlQuery(fakeConnection, 'SELECT id, name FROM Contact', logger);
     const results = await soqlQuery.runSoqlQuery();
@@ -47,12 +40,8 @@ describe('soqlQuery tests', () => {
     expect(results).to.be.deep.equal(soqlQueryExemplars.simpleQuery.soqlQueryResult);
   });
   it('should handle a query with a subquery', async () => {
-    sandbox
-      .stub(fakeConnection, 'request')
-      .callsFake(() => Promise.resolve({ columnMetadata: queryFieldsExemplars.subquery.columnMetadata }));
-    querySpy = sandbox
-      .stub(fakeConnection, 'autoFetchQuery')
-      .callsFake(() => Promise.resolve(soqlQueryExemplars.subQuery.queryResult));
+    sandbox.stub(fakeConnection, 'request').resolves({ columnMetadata: queryFieldsExemplars.subquery.columnMetadata });
+    querySpy = sandbox.stub(fakeConnection, 'autoFetchQuery').resolves(soqlQueryExemplars.subQuery.queryResult);
     const soqlQuery = new SoqlQuery(
       fakeConnection,
       'SELECT Name, ( SELECT LastName FROM Contacts ) FROM Account',

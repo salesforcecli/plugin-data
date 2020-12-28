@@ -21,10 +21,7 @@ describe('queryFields tests', () => {
   // let toolingSpy: sinon.SinonSpy;
   // let querySpy: sinon.SinonSpy;
   const fakeConnection = TestUtil.createFakeConnection();
-  let sandbox: any;
-  beforeEach(() => {
-    sandbox = sinon.createSandbox();
-  });
+  const sandbox = sinon.createSandbox();
   afterEach(() => {
     sandbox.restore();
   });
@@ -32,14 +29,12 @@ describe('queryFields tests', () => {
   it('should handle a query with just fields', async () => {
     sandbox
       .stub(fakeConnection, 'request')
-      .callsFake(() => Promise.resolve({ columnMetadata: queryFieldsExemplars.simpleQuery.columnMetadata }));
+      .resolves({ columnMetadata: queryFieldsExemplars.simpleQuery.columnMetadata });
     const results = await retrieveColumns(fakeConnection, 'SELECT id, name FROM Contact');
     expect(results).to.be.deep.equal(queryFieldsExemplars.simpleQuery.columns);
   });
   it('should handle a query with a subquery with both having just fields', async () => {
-    sandbox
-      .stub(fakeConnection, 'request')
-      .callsFake(() => Promise.resolve({ columnMetadata: queryFieldsExemplars.subquery.columnMetadata }));
+    sandbox.stub(fakeConnection, 'request').resolves({ columnMetadata: queryFieldsExemplars.subquery.columnMetadata });
     const results = await retrieveColumns(
       fakeConnection,
       'SELECT Name, ( SELECT LastName FROM Contacts ) FROM Account'
@@ -49,7 +44,7 @@ describe('queryFields tests', () => {
   it('should handle a query with aggregate fields', async () => {
     sandbox
       .stub(fakeConnection, 'request')
-      .callsFake(() => Promise.resolve({ columnMetadata: queryFieldsExemplars.aggregateQuery.columnMetadata }));
+      .resolves({ columnMetadata: queryFieldsExemplars.aggregateQuery.columnMetadata });
     const results = await retrieveColumns(
       fakeConnection,
       'SELECT CampaignId, AVG(Amount) FROM Opportunity GROUP BY CampaignId'
@@ -59,7 +54,7 @@ describe('queryFields tests', () => {
   it('should handle a query with column join', async () => {
     sandbox
       .stub(fakeConnection, 'request')
-      .callsFake(() => Promise.resolve({ columnMetadata: queryFieldsExemplars.queryWithJoin.columnMetadata }));
+      .resolves({ columnMetadata: queryFieldsExemplars.queryWithJoin.columnMetadata });
     const results = await retrieveColumns(fakeConnection, 'SELECT Name, Owner.Name FROM Account');
     expect(results).to.be.deep.equal(queryFieldsExemplars.queryWithJoin.columns);
   });
