@@ -7,14 +7,108 @@
 
 import * as os from 'os';
 import { flags, FlagsConfig, SfdxCommand, SfdxResult } from '@salesforce/command';
-import { Messages, Org } from '@salesforce/core';
-import { asPlainObject, toJsonMap } from '@salesforce/ts-types';
-import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../../../api/data/soql/reporters';
-import { DataSoqlQueryResult } from '../../../../api/data/soql/dataSoqlQueryTypes';
-import { SoqlQuery, SoqlQueryResult } from '../../../../api/data/soql/soqlQuery';
+import { Connection, Logger, Messages, Org } from '@salesforce/core';
+import {
+  asPlainObject,
+  ensureJsonArray,
+  ensureJsonMap,
+  ensureString,
+  isJsonArray,
+  toJsonMap,
+} from '@salesforce/ts-types';
+import { Tooling } from '@salesforce/core/lib/connection';
+import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../../../reporters';
+import { DataSoqlQueryResult, Field, FieldType, SoqlQueryResult } from '../../../../dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
+
+/**
+ * Class to handle a soql query
+ *
+ * Will collect all records and the column metadata of the query
+ */
+export class SoqlQuery {
+  public async runSoqlQuery(connection: Connection | Tooling, query: string, logger: Logger): Promise<SoqlQueryResult> {
+    let columns: Field[] = [];
+    logger.debug('running query');
+
+    const result = await connection.autoFetchQuery(query, { autoFetch: true, maxFetch: 50000 });
+    logger.debug(`Query complete with ${result.totalSize} records returned`);
+    if (result.totalSize) {
+      logger.debug('fetching columns for query');
+      columns = await this.retrieveColumns(connection, query);
+    }
+
+    // remove nextRecordsUrl and force done to true
+    delete result.nextRecordsUrl;
+    result.done = true;
+    return {
+      query,
+      columns,
+      result,
+    };
+  }
+  /**
+   * Utility to fetch the columns involved in a soql query.
+   *
+   * Columns are then transformed into one of three types, Field, SubqueryField and FunctionField. List of
+   * fields is returned as the product.
+   *
+   * @param connection
+   * @param query
+   */
+
+  public async retrieveColumns(connection: Connection | Tooling, query: string): Promise<Field[]> {
+    // eslint-disable-next-line no-underscore-dangle,@typescript-eslint/unbound-method,@typescript-eslint/restrict-template-expressions
+    const columnUrl = `${connection._baseUrl()}/query?q=${encodeURIComponent(query)}&columns=true`;
+    const results = toJsonMap(await connection.request(columnUrl));
+    const columns: Field[] = [];
+    for (let column of ensureJsonArray(results.columnMetadata)) {
+      column = ensureJsonMap(column);
+      const name = ensureString(column.columnName);
+
+      if (isJsonArray(column.joinColumns) && column.joinColumns.length > 0) {
+        if (column.aggregate) {
+          const field: Field = {
+            fieldType: FieldType.subqueryField,
+            name,
+            fields: [],
+          };
+          for (const subcolumn of column.joinColumns) {
+            const f: Field = {
+              fieldType: FieldType.field,
+              name: ensureString(ensureJsonMap(subcolumn).columnName),
+            };
+            if (field.fields) field.fields.push(f);
+          }
+          columns.push(field);
+        } else {
+          for (const subcolumn of column.joinColumns) {
+            const f: Field = {
+              fieldType: FieldType.functionField,
+              name: `${name}.${ensureString(ensureJsonMap(subcolumn).columnName)}`,
+            };
+            columns.push(f);
+          }
+        }
+      } else if (column.aggregate) {
+        const field: Field = {
+          fieldType: FieldType.functionField,
+          name: ensureString(column.displayName),
+        };
+        // If it isn't an alias, skip so the display name is used when messaging rows
+        if (!/expr[0-9]+/.test(name)) {
+          field.alias = name;
+        }
+        columns.push(field);
+      } else {
+        columns.push({ fieldType: FieldType.field, name } as Field);
+      }
+    }
+    return columns;
+  }
+}
 
 export class DataSoqlQueryCommand extends SfdxCommand {
   public static readonly description = messages.getMessage('description');
@@ -94,12 +188,12 @@ export class DataSoqlQueryCommand extends SfdxCommand {
   public async run(): Promise<DataSoqlQueryResult | SfdxResult> {
     try {
       if (this.flags.resultformat !== 'json') this.ux.startSpinner(messages.getMessage('queryRunningMessage'));
-      const query = new SoqlQuery(
+      const query = new SoqlQuery();
+      const queryResult: SoqlQueryResult = await query.runSoqlQuery(
         this.flags.usetoolingapi ? this.org.getConnection().tooling : this.org.getConnection(),
         this.flags.query,
         this.logger
       );
-      const queryResult: SoqlQueryResult = await query.runSoqlQuery();
       const results = {
         ...queryResult,
         resultFormat: this.flags.resultformat,

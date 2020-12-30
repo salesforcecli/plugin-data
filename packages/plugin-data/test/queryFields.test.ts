@@ -11,8 +11,8 @@ import * as chaiAsPromised from 'chai-as-promised';
 import { expect } from 'chai';
 
 import sinon = require('sinon');
-import { retrieveColumns } from '../../../../src/api/data/soql/queryFields';
-import * as TestUtil from '../../../testUtil';
+import { SoqlQuery } from '../lib/commands/force/data/soql/query';
+import * as TestUtil from './testUtil';
 import { queryFieldsExemplars } from './test-files/queryFields.exemplars';
 
 chai.use(chaiAsPromised);
@@ -30,12 +30,14 @@ describe('queryFields tests', () => {
     sandbox
       .stub(fakeConnection, 'request')
       .resolves({ columnMetadata: queryFieldsExemplars.simpleQuery.columnMetadata });
-    const results = await retrieveColumns(fakeConnection, 'SELECT id, name FROM Contact');
+    const soqlQuery = new SoqlQuery();
+    const results = await soqlQuery.retrieveColumns(fakeConnection, 'SELECT id, name FROM Contact');
     expect(results).to.be.deep.equal(queryFieldsExemplars.simpleQuery.columns);
   });
   it('should handle a query with a subquery with both having just fields', async () => {
     sandbox.stub(fakeConnection, 'request').resolves({ columnMetadata: queryFieldsExemplars.subquery.columnMetadata });
-    const results = await retrieveColumns(
+    const soqlQuery = new SoqlQuery();
+    const results = await soqlQuery.retrieveColumns(
       fakeConnection,
       'SELECT Name, ( SELECT LastName FROM Contacts ) FROM Account'
     );
@@ -45,7 +47,8 @@ describe('queryFields tests', () => {
     sandbox
       .stub(fakeConnection, 'request')
       .resolves({ columnMetadata: queryFieldsExemplars.aggregateQuery.columnMetadata });
-    const results = await retrieveColumns(
+    const soqlQuery = new SoqlQuery();
+    const results = await soqlQuery.retrieveColumns(
       fakeConnection,
       'SELECT CampaignId, AVG(Amount) FROM Opportunity GROUP BY CampaignId'
     );
@@ -55,7 +58,8 @@ describe('queryFields tests', () => {
     sandbox
       .stub(fakeConnection, 'request')
       .resolves({ columnMetadata: queryFieldsExemplars.queryWithJoin.columnMetadata });
-    const results = await retrieveColumns(fakeConnection, 'SELECT Name, Owner.Name FROM Account');
+    const soqlQuery = new SoqlQuery();
+    const results = await soqlQuery.retrieveColumns(fakeConnection, 'SELECT Name, Owner.Name FROM Account');
     expect(results).to.be.deep.equal(queryFieldsExemplars.queryWithJoin.columns);
   });
 });

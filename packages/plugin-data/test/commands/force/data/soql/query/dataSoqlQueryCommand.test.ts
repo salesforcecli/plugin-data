@@ -10,8 +10,8 @@ import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import sinon = require('sinon');
 import { SinonSandbox } from 'sinon';
-import { SoqlQuery } from '../../../../../../src/api/data/soql/soqlQuery';
-import { soqlQueryExemplars } from '../../../../../api/data/soql/test-files/soqlQuery.exemplars';
+import { SoqlQuery } from '../../../../../../src/commands/force/data/soql/query';
+import { soqlQueryExemplars } from '../../../../../test-files/soqlQuery.exemplars';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 

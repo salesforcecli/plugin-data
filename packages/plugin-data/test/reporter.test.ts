@@ -10,12 +10,10 @@ import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import { UX } from '@salesforce/command';
 import { Logger } from '@salesforce/core';
-import { soqlQueryExemplars } from '../../../api/data/soql/test-files/soqlQuery.exemplars';
-import { DataSoqlQueryResult } from '../../../../src/api/data/soql/dataSoqlQueryTypes';
-import { HumanReporter } from '../../../../src/api/data/soql/reporters';
-import { CsvReporter } from '../../../../src/api/data/soql/reporters';
-import { SoqlQueryResult } from '../../../../src/api/data/soql/soqlQuery';
-import { Field } from '../../../../src/api/data/soql/queryFields';
+import { DataSoqlQueryResult, Field, SoqlQueryResult } from '../src/dataSoqlQueryTypes';
+import { HumanReporter } from '../src/reporters';
+import { CsvReporter } from '../src/reporters';
+import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars';
 
 chai.use(chaiAsPromised);
 

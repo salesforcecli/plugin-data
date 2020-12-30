@@ -11,8 +11,8 @@ import { expect } from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import sinon = require('sinon');
 import { Logger } from '@salesforce/core';
-import * as TestUtil from '../../../testUtil';
-import { SoqlQuery } from '../../../../src/api/data/soql/soqlQuery';
+import { SoqlQuery } from '../src/commands/force/data/soql/query';
+import * as TestUtil from './testUtil';
 import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars';
 import { queryFieldsExemplars } from './test-files/queryFields.exemplars';
 
@@ -34,20 +34,20 @@ describe('soqlQuery tests', () => {
       .resolves({ columnMetadata: queryFieldsExemplars.simpleQuery.columnMetadata });
     querySpy = sandbox.stub(fakeConnection, 'autoFetchQuery').resolves(soqlQueryExemplars.simpleQuery.queryResult);
     // queryMoreSpy = sandbox.stub(fakeConnection, 'queryMore');
-    const soqlQuery = new SoqlQuery(fakeConnection, 'SELECT id, name FROM Contact', logger);
-    const results = await soqlQuery.runSoqlQuery();
+    const soqlQuery = new SoqlQuery();
+    const results = await soqlQuery.runSoqlQuery(fakeConnection, 'SELECT id, name FROM Contact', logger);
     sinon.assert.calledOnce(querySpy);
     expect(results).to.be.deep.equal(soqlQueryExemplars.simpleQuery.soqlQueryResult);
   });
   it('should handle a query with a subquery', async () => {
     sandbox.stub(fakeConnection, 'request').resolves({ columnMetadata: queryFieldsExemplars.subquery.columnMetadata });
     querySpy = sandbox.stub(fakeConnection, 'autoFetchQuery').resolves(soqlQueryExemplars.subQuery.queryResult);
-    const soqlQuery = new SoqlQuery(
+    const soqlQuery = new SoqlQuery();
+    const results = await soqlQuery.runSoqlQuery(
       fakeConnection,
       'SELECT Name, ( SELECT LastName FROM Contacts ) FROM Account',
       logger
     );
-    const results = await soqlQuery.runSoqlQuery();
     sinon.assert.calledOnce(querySpy);
     // sinon.assert.notCalled(queryMoreSpy);
     expect(results).to.be.deep.equal(soqlQueryExemplars.subQuery.soqlQueryResult);
@@ -58,12 +58,12 @@ describe('soqlQuery tests', () => {
       .stub(fakeConnection, 'autoFetchQuery')
       .callsFake(() => Promise.resolve(soqlQueryExemplars.emptyQuery.queryResult));
     // queryMoreSpy = sandbox.stub(fakeConnection, 'queryMore');
-    const soqlQuery = new SoqlQuery(
+    const soqlQuery = new SoqlQuery();
+    const results = await soqlQuery.runSoqlQuery(
       fakeConnection,
       "SELECT Name FROM Contact where name = 'some nonexistent name'",
       logger
     );
-    const results = await soqlQuery.runSoqlQuery();
     sinon.assert.calledOnce(querySpy);
     sinon.assert.notCalled(requestSpy);
     expect(results).to.be.deep.equal(soqlQueryExemplars.emptyQuery.soqlQueryResult);

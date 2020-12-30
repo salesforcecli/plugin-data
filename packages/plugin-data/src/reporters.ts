@@ -9,8 +9,7 @@ import { Logger, Messages } from '@salesforce/core';
 import { UX } from '@salesforce/command';
 import * as chalk from 'chalk';
 import { get, isString, Optional } from '@salesforce/ts-types';
-import { Field, FieldType, FunctionField, SubqueryField } from './queryFields';
-import { DataSoqlQueryResult } from './dataSoqlQueryTypes';
+import { DataSoqlQueryResult, Field, FieldType } from './dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
@@ -43,7 +42,7 @@ export class QueryReporter extends Reporter {
 type ParsedFields = {
   attributeNames: Array<Optional<string>>;
   children: string[];
-  aggregates: FunctionField[];
+  aggregates: Field[];
 };
 
 type ColumnAttributes = {
@@ -71,7 +70,7 @@ export class HumanReporter extends QueryReporter {
     const children: string[] = [];
 
     // For function fields, like avg(total).
-    const aggregates: FunctionField[] = [];
+    const aggregates: Field[] = [];
 
     if (fields) {
       this.logger.info(`Found fields ${JSON.stringify(fields.map((field) => `${typeof field}.${field.name}`))}`);
@@ -79,16 +78,14 @@ export class HumanReporter extends QueryReporter {
       fields.forEach((field) => {
         if (field.fieldType === FieldType.subqueryField) {
           children.push(field.name);
-          (field as SubqueryField).fields
-            .map((subfield: Field) => subfield as SubqueryField)
-            .forEach((subfield: SubqueryField) => attributeNames.push(`${field.name}.${subfield.name}`));
+          (field.fields ?? []).forEach((subfield) => attributeNames.push(`${field.name}.${subfield.name}`));
         } else if (field.fieldType === FieldType.functionField) {
-          if ((field as FunctionField).alias) {
-            attributeNames.push((field as FunctionField).alias as string);
+          if (field.alias) {
+            attributeNames.push(field.alias);
           } else {
             attributeNames.push(field.name);
           }
-          aggregates.push(field as FunctionField);
+          aggregates.push(field);
         } else {
           attributeNames.push(field.name);
         }
@@ -134,7 +131,7 @@ export class HumanReporter extends QueryReporter {
   }
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  public massageRows(queryResults: any[], children: any[], aggregates: FunctionField[]): any {
+  public massageRows(queryResults: any[], children: any[], aggregates: Field[]): any {
     // There are subqueries or aggregates. Massage the data.
     if (children.length > 0 || aggregates.length > 0) {
       queryResults = queryResults.reduce((newResults, result) => {
@@ -243,14 +240,14 @@ export class CsvReporter extends QueryReporter {
       // If there are subqueries, we need to get the max child length for each subquery.
       const typeLengths = new Map<string, number>();
       // For function fields, like avg(total).
-      const aggregates: FunctionField[] = [];
+      const aggregates: Field[] = [];
 
       fields.forEach((field) => {
         if (field.fieldType === FieldType.subqueryField) {
           typeLengths.set(field.name, 0);
         }
         if (field.fieldType === FieldType.functionField) {
-          aggregates.push(field as FunctionField);
+          aggregates.push(field);
         }
       });
 
@@ -281,15 +278,13 @@ export class CsvReporter extends QueryReporter {
         if (typeLengths.get(field.name)) {
           for (let i = 0; i < (typeLengths.get(field.name) ?? 0); i++) {
             attributeNames.push(`${field.name}.totalSize`);
-            (field as SubqueryField).fields
-              .map((subfield: Field) => subfield as SubqueryField)
-              .forEach((subfield: SubqueryField) => {
-                attributeNames.push(`${field.name}.records.${i}.${subfield.name}`);
-              });
+            (field.fields ?? []).forEach((subfield) => {
+              attributeNames.push(`${field.name}.records.${i}.${subfield.name}`);
+            });
           }
         } else if (field.fieldType === FieldType.functionField) {
-          if ((field as FunctionField).alias) {
-            attributeNames.push((field as FunctionField).alias as string);
+          if (field.alias) {
+            attributeNames.push(field.alias);
           } else {
             attributeNames.push(field.name);
           }
