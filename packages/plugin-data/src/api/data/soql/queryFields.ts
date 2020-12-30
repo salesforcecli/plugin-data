@@ -23,7 +23,7 @@ export interface Field {
   name: string;
 }
 /**
- * itnerface to represent a subquery field when describing the fields that make up a query result
+ * interface to represent a subquery field when describing the fields that make up a query result
  */
 export interface SubqueryField extends Field {
   fields: Field[];
