@@ -97,20 +97,19 @@ export class HumanReporter extends QueryReporter {
     return { attributeNames, children, aggregates };
   }
 
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  public soqlQuery(columns: Array<Optional<string>>, records: any[], totalCount: number): void {
+  public soqlQuery(columns: Array<Optional<string>>, records: unknown[], totalCount: number): void {
     this.prepNullValues(records);
     this.ux.table(records, { columns: this.prepColumns(columns) });
     this.log(chalk.bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
   }
 
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  public prepNullValues(records: any[]): void {
+  public prepNullValues(records: unknown[]): void {
     records.forEach((record): void => {
-      Reflect.ownKeys(record).forEach((propertyKey) => {
-        const value = Reflect.get(record, propertyKey);
+      const recordAsObject = record as object;
+      Reflect.ownKeys(recordAsObject).forEach((propertyKey) => {
+        const value = Reflect.get(recordAsObject, propertyKey);
         if (value === null) {
-          Reflect.set(record, propertyKey, chalk.bold('null'));
+          Reflect.set(recordAsObject, propertyKey, chalk.bold('null'));
         } else if (typeof value === 'object') {
           this.prepNullValues([value]);
         }
@@ -130,11 +129,12 @@ export class HumanReporter extends QueryReporter {
       );
   }
 
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  public massageRows(queryResults: any[], children: any[], aggregates: Field[]): any {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public massageRows(queryResults: unknown[], children: string[], aggregates: Field[]): any {
     // There are subqueries or aggregates. Massage the data.
+    let qr;
     if (children.length > 0 || aggregates.length > 0) {
-      queryResults = queryResults.reduce((newResults, result) => {
+      qr = queryResults.reduce((newResults: unknown[], result) => {
         newResults.push(result);
 
         // Aggregates are soql functions that aggregate data, like "SELECT avg(total)" and
@@ -144,7 +144,7 @@ export class HumanReporter extends QueryReporter {
           for (let i = 0; i < aggregates.length; i++) {
             const aggregate = aggregates[i];
             if (!aggregate.alias) {
-              Reflect.set(result, aggregate.name, Reflect.get(result, `expr${i}`));
+              Reflect.set(result as object, aggregate.name, Reflect.get(result as object, `expr${i}`));
             }
           }
         }
@@ -152,12 +152,13 @@ export class HumanReporter extends QueryReporter {
         if (children.length > 0) {
           const childrenRows = Object.assign({});
           children.forEach((child) => {
-            Reflect.set(childrenRows, child, Reflect.get(result, child));
-            Reflect.deleteProperty(result, child);
+            Reflect.set(childrenRows, child, Reflect.get(result as object, child));
+            Reflect.deleteProperty(result as object, child);
           });
 
           Reflect.ownKeys(childrenRows).forEach((child) => {
             if (childrenRows[child]) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               childrenRows[child].records.forEach((record: any) => {
                 const newRecord = Object.assign({});
                 Object.entries(record).forEach(([key, value]) => {
@@ -169,9 +170,9 @@ export class HumanReporter extends QueryReporter {
           });
         }
         return newResults;
-      }, []);
+      }, [] as unknown[]);
     }
-    return queryResults;
+    return qr ?? queryResults;
   }
 }
 
@@ -210,8 +211,7 @@ export class CsvReporter extends QueryReporter {
         .join(SEPARATOR)
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.data.result.records.forEach((row: any) => {
+    this.data.result.records.forEach((row) => {
       const values = attributeNames.map((name) => {
         const value = get(row, name);
         if (isString(value)) {
@@ -252,10 +252,9 @@ export class CsvReporter extends QueryReporter {
       });
 
       // Get max lengths by iterating over the records once
-      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-      this.data.result.records.forEach((result: any) => {
+      this.data.result.records.forEach((result) => {
         [...typeLengths.keys()].forEach((key) => {
-          const record = Reflect.get(result, key);
+          const record = Reflect.get(result as object, key);
           if (record?.totalSize > (typeLengths.get(key) ?? 0)) {
             typeLengths.set(key, record.totalSize);
           }
@@ -268,7 +267,7 @@ export class CsvReporter extends QueryReporter {
           for (let i = 0; i < aggregates.length; i++) {
             const aggregate = aggregates[i];
             if (!aggregate.alias) {
-              Reflect.set(result, aggregate.name, Reflect.get(result, `expr${i}`));
+              Reflect.set(result as object, aggregate.name, Reflect.get(result as object, `expr${i}`));
             }
           }
         }

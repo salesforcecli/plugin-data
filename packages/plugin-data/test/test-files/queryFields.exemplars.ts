@@ -183,7 +183,7 @@ export const queryFieldsExemplars = {
     ],
     columns: [
       { fieldType: FieldType.field, name: 'Name' },
-      { fieldType: FieldType.functionField, name: 'Owner.Name' },
+      { fieldType: FieldType.field, name: 'Owner.Name' },
     ],
   },
 };

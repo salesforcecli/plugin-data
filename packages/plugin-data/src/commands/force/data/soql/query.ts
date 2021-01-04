@@ -86,7 +86,7 @@ export class SoqlQuery {
         } else {
           for (const subcolumn of column.joinColumns) {
             const f: Field = {
-              fieldType: FieldType.functionField,
+              fieldType: FieldType.field,
               name: `${name}.${ensureString(ensureJsonMap(subcolumn).columnName)}`,
             };
             columns.push(f);

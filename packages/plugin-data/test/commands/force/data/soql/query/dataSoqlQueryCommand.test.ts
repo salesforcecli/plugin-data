@@ -94,9 +94,10 @@ describe('Execute a SOQL statement', function (): void {
         .stdout()
         .stderr()
         .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'human'])
-        .it('should have json results', (ctx) => {
+        .it('should have human results', (ctx) => {
           sinon.assert.calledOnce(soqlQuerySpy);
           // test for expected snippet in output
+          expect(/.*?United Oil & Gas, UK.*?\n.*?James.*?/.test(ctx.stdout)).to.be.true;
           expect(ctx.stdout).to.include('records retrieved: 50');
         });
     });
@@ -128,6 +129,7 @@ describe('Execute a SOQL statement', function (): void {
         .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'human'])
         .it('should have human results', (ctx) => {
           sinon.assert.calledOnce(soqlQuerySpy);
+          expect(/.*?United Oil & Gas Corp..*?5600000000.*/.test(ctx.stdout)).to.be.true;
           expect(ctx.stdout).to.include('records retrieved: 16');
         });
     });
