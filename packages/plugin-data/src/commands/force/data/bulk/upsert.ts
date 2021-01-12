@@ -8,7 +8,8 @@ import * as os from 'os';
 import { ReadStream } from 'fs';
 import { flags, FlagsConfig } from '@salesforce/command';
 import { Connection, fs, Messages, SfdxError } from '@salesforce/core';
-import { Batcher, BulkResult, Job } from '../../../../batcher';
+import { Job } from 'jsforce';
+import { Batcher, BulkResult } from '../../../../batcher';
 import { DataCommand } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -42,21 +43,20 @@ export default class Upsert extends DataCommand {
   };
 
   public async run(): Promise<BulkResult[]> {
-    const conn: Connection = this.org.getConnection();
-    this.ux.startSpinner('Bulk Upsert');
-
     await this.throwIfFileDoesntExist(this.flags.csvfile);
-
-    const csvStream: ReadStream = fs.createReadStream(this.flags.csvfile);
     let result: BulkResult[];
 
     try {
+      const conn: Connection = this.org.getConnection();
+      this.ux.startSpinner('Bulk Upsert');
+      const csvStream: ReadStream = fs.createReadStream(this.flags.csvfile);
+
       const job: Job = conn.bulk.createJob(this.flags.sobjecttype, 'upsert', {
         extIdField: this.flags.externalid,
         concurrencyMode: 'Parallel',
-      }) as Job;
+      });
 
-      const batcher: Batcher = new Batcher(this.org.getConnection(), this.ux);
+      const batcher: Batcher = new Batcher(conn, this.ux);
       result = await batcher.createAndExecuteBatches(job, csvStream, this.flags.sobjecttype, this.flags.wait);
 
       this.ux.stopSpinner();
