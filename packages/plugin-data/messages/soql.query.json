@@ -4,7 +4,6 @@
   "queryToExecute": "SOQL query to execute",
   "queryLongDescription": "SOQL query to execute.",
   "queryToolingDescription": "execute query with Tooling API",
-  "queryToolingLongDescription": "Execute the query using Tooling API.",
   "queryInvalidReporter": "Unknown result format type. Must be one of the following values: %s",
   "resultFormatDescription": "result format emitted to stdout; --json flag overrides this parameter",
   "resultFormatLongDescription": "Format to use when displaying results. If you also specify the --json flag, --json overrides this parameter.",

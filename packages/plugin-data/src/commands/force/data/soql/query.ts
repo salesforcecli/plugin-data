@@ -130,7 +130,6 @@ export class DataSoqlQueryCommand extends SfdxCommand {
       hidden: false,
       default: false,
       description: messages.getMessage('queryToolingDescription'),
-      longDescription: messages.getMessage('queryToolingLongDescription'),
     }),
     resultformat: flags.enum({
       char: 'r',
