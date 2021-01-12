@@ -43,10 +43,10 @@ export default class Upsert extends DataCommand {
   };
 
   public async run(): Promise<BulkResult[]> {
-    await this.throwIfFileDoesntExist(this.flags.csvfile);
     let result: BulkResult[];
 
     try {
+      await this.throwIfFileDoesntExist(this.flags.csvfile);
       const conn: Connection = this.org.getConnection();
       this.ux.startSpinner('Bulk Upsert');
       const csvStream: ReadStream = fs.createReadStream(this.flags.csvfile);

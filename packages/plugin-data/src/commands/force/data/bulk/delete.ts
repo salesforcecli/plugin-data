@@ -38,15 +38,15 @@ export default class Delete extends DataCommand {
   };
 
   public async run(): Promise<BulkResult[]> {
-    const conn: Connection = this.org.getConnection();
-    this.ux.startSpinner('Bulk Delete');
-
-    await this.throwIfFileDoesntExist(this.flags.csvfile);
-
-    const csvRecords: ReadStream = fs.createReadStream(this.flags.csvfile);
     let result: BulkResult[];
 
     try {
+      await this.throwIfFileDoesntExist(this.flags.csvfile);
+
+      const conn: Connection = this.org.getConnection();
+      this.ux.startSpinner('Bulk Delete');
+
+      const csvRecords: ReadStream = fs.createReadStream(this.flags.csvfile);
       const job: Job = conn.bulk.createJob(this.flags.sobjecttype, 'delete');
 
       const batcher: Batcher = new Batcher(conn, this.ux);

@@ -17,7 +17,8 @@ const POLL_FREQUENCY_MS = 5000;
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'batcher');
 
-export type Batches = Array<Array<Record<string, string>>>;
+type Entry = Record<string, string>;
+export type Batches = Entry[][];
 
 export type BulkResult = {
   $: {
@@ -57,7 +58,7 @@ export class Batcher {
     const job: Job = this.conn.bulk.job(jobId);
     const jobInfo: JobInfo = await job.check();
 
-    this.bulkBatchStatus(jobInfo);
+    this.bulkStatus(jobInfo);
 
     if (doneCallback) {
       doneCallback({ job: jobInfo });
@@ -66,7 +67,7 @@ export class Batcher {
     return jobInfo;
   }
 
-  public bulkBatchStatus(
+  public bulkStatus(
     summary: JobInfo | BatchInfo,
     results?: BatchResultInfo[],
     batchNum?: number,
@@ -252,7 +253,7 @@ export class Batcher {
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       newBatch.on('response', async (results: BatchResultInfo[]) => {
         const summary: BatchInfo = await newBatch.check();
-        this.bulkBatchStatus(summary, results, batchNum);
+        this.bulkStatus(summary, results, batchNum);
         batchesCompleted++;
         if (batchesCompleted === totalNumBatches) {
           await this.fetchAndDisplayJobStatus(summary.jobId);
