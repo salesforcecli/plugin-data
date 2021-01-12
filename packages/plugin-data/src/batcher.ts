@@ -5,11 +5,11 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { ReadStream } from 'fs';
-import { Connection, Logger, Messages, SfdxError } from '@salesforce/core';
+import { Connection, Messages, SfdxError } from '@salesforce/core';
 import parse = require('csv-parse');
 import { Batch, BatchInfo, BatchResultInfo, JobInfo } from 'jsforce';
 import { UX } from '@salesforce/command';
-import { Job as jsforceJob } from 'jsforce/job';
+import { Job } from 'jsforce/job';
 
 const BATCH_RECORDS_LIMIT = 10000;
 const POLL_FREQUENCY_MS = 5000;
@@ -18,7 +18,6 @@ Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'batcher');
 
 export type Batches = Array<Array<Record<string, string>>>;
-export type Job = jsforceJob & { id: string };
 
 export type BulkResult = {
   $: {
@@ -55,7 +54,7 @@ export class Batcher {
     jobId: string,
     doneCallback?: (...args: [{ job: JobInfo }]) => void
   ): Promise<JobInfo> {
-    const job: jsforceJob = this.conn.bulk.job(jobId);
+    const job: Job = this.conn.bulk.job(jobId);
     const jobInfo: JobInfo = await job.check();
 
     this.bulkBatchStatus(jobInfo);
@@ -161,16 +160,25 @@ export class Batcher {
               reject(err.message);
             });
 
-            newBatch.on('queue', (): void => {
-              batchesQueued++;
-              if (batchesQueued === batches.length) {
-                const id = job.id;
-                job.close();
-                // jsforce clears out the id after close, but you should be able to close a job
-                // after the queue, so add it back so future batch.check don't fail.*/
-                job.id = id;
+            newBatch.on(
+              'queue',
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
+              async (): Promise<void> => {
+                batchesQueued++;
+                if (batchesQueued === batches.length) {
+                  /* jsforce clears out the id after close, but you should be able to close a job
+              after the queue, so add it back so future batch.check don't fail.*/
+
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                  // @ts-ignore
+                  const id = job.id;
+                  await job.close();
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                  // @ts-ignore
+                  job.id = id;
+                }
               }
-            });
+            );
 
             if (!wait) {
               newBatch.on(
@@ -220,42 +228,38 @@ export class Batcher {
     batchNum: number,
     totalNumBatches: number,
     waitMins: number
-  ): Promise<void> {
-    const logger: Logger = await Logger.child(this.constructor.name);
-    newBatch.on(
-      'queue',
-      // we're using an async method on an event listener which doesn't fit the .on method parameter types
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      async (batchInfo: BatchInfo): Promise<void> => {
-        const result: BatchInfo = await newBatch.check();
-        if (result.state === 'Failed') {
-          throw SfdxError.wrap(result.stateMessage);
-        } else {
-          if (!overallInfo) {
-            logger.info(messages.getMessage('PollingInfo', [POLL_FREQUENCY_MS / 1000, batchInfo.jobId]));
-            overallInfo = true;
+  ): Promise<BatchInfo> {
+    return new Promise((resolve, reject) => {
+      newBatch.on(
+        'queue',
+        // we're using an async method on an event listener which doesn't fit the .on method parameter types
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        async (batchInfo: BatchInfo): Promise<void> => {
+          const result: BatchInfo = await newBatch.check();
+          if (result.state === 'Failed') {
+            reject(result.stateMessage);
+          } else {
+            if (!overallInfo) {
+              this.ux.log(messages.getMessage('PollingInfo', [POLL_FREQUENCY_MS / 1000, batchInfo.jobId]));
+              overallInfo = true;
+            }
           }
+          this.ux.log(messages.getMessage('BatchQueued', [batchNum, batchInfo.id]));
+          newBatch.poll(POLL_FREQUENCY_MS, waitMins * 60000);
         }
-        logger.info(messages.getMessage('BatchQueued', [batchNum, batchInfo.id]));
-        newBatch.poll(POLL_FREQUENCY_MS, waitMins * 60000);
-      }
-    );
-
-    newBatch.on(
-      'response',
+      );
       // we're using an async method on an event listener which doesn't fit the .on method parameter types
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      async (results: BatchResultInfo[]): Promise<JobInfo> => {
+      newBatch.on('response', async (results: BatchResultInfo[]) => {
         const summary: BatchInfo = await newBatch.check();
         this.bulkBatchStatus(summary, results, batchNum);
         batchesCompleted++;
         if (batchesCompleted === totalNumBatches) {
-          return await this.fetchAndDisplayJobStatus(summary.jobId);
-        } else {
-          return {} as JobInfo;
+          await this.fetchAndDisplayJobStatus(summary.jobId);
+          resolve(summary);
         }
-      }
-    );
+      });
+    });
   }
 
   /**

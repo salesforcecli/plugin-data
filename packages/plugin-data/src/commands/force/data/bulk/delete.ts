@@ -8,7 +8,8 @@ import * as os from 'os';
 import { ReadStream } from 'fs';
 import { Connection, Messages, SfdxError, fs } from '@salesforce/core';
 import { flags, FlagsConfig } from '@salesforce/command';
-import { Batcher, BulkResult, Job } from '../../../../batcher';
+import { Job } from 'jsforce';
+import { Batcher, BulkResult } from '../../../../batcher';
 import { DataCommand } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -46,7 +47,7 @@ export default class Delete extends DataCommand {
     let result: BulkResult[];
 
     try {
-      const job: Job = conn.bulk.createJob(this.flags.sobjecttype, 'delete') as Job;
+      const job: Job = conn.bulk.createJob(this.flags.sobjecttype, 'delete');
 
       const batcher: Batcher = new Batcher(conn, this.ux);
 
