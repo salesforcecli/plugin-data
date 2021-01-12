@@ -12,8 +12,8 @@ import { spyMethod, stubMethod } from '@salesforce/ts-sinon';
 import { $$ } from '@salesforce/command/lib/test';
 import { expect } from 'chai';
 import { Connection, SfdxError } from '@salesforce/core';
-import { Batch, JobInfo, BatchInfo } from 'jsforce';
-import { Batcher, Batches, Job } from '../../src/batcher';
+import { Batch, JobInfo, BatchInfo, Job } from 'jsforce';
+import { Batcher, Batches } from '../../src/batcher';
 
 let styledHeaderSpy: sinon.SinonStub;
 let logSpy: sinon.SinonStub;
@@ -31,25 +31,25 @@ describe('batcher', () => {
     const summary = { id: '123', operation: 'upsert', state: 'done', object: 'Account' };
 
     it('will correctly call to print the expected messages 1 log, 1 styledHeader', async () => {
-      batcher.bulkBatchStatus(summary);
+      batcher.bulkStatus(summary);
       expect(styledHeaderSpy.callCount).to.equal(1);
       expect(logSpy.callCount).to.equal(1);
     });
 
     it('will correctly call to print the expected messages 1 log, 2 styledHeader', async () => {
-      batcher.bulkBatchStatus(summary, [], 123);
+      batcher.bulkStatus(summary, [], 123);
       expect(styledHeaderSpy.callCount, 'styledHeader').to.equal(2);
       expect(logSpy.callCount, 'logSpy').to.equal(1);
     });
 
     it('will correctly call to print the expected messages 3 log, 2 styledHeader', async () => {
-      batcher.bulkBatchStatus(summary, [{ errors: ['error1', 'error2'], id: '123' }]);
+      batcher.bulkStatus(summary, [{ errors: ['error1', 'error2'], id: '123' }]);
       expect(styledHeaderSpy.callCount).to.equal(2);
       expect(logSpy.callCount).to.equal(3);
     });
 
     it('will correctly call to print the expected messages 3 log, 3 styledHeader', async () => {
-      batcher.bulkBatchStatus(summary, [{ errors: ['error1', 'error2'], id: '123' }], 123, true);
+      batcher.bulkStatus(summary, [{ errors: ['error1', 'error2'], id: '123' }], 123, true);
       expect(styledHeaderSpy.callCount).to.equal(3);
       expect(logSpy.callCount).to.equal(3);
     });

@@ -42,7 +42,7 @@ export default class Status extends DataCommand {
       const batches: BatchInfo[] = await job.list();
       batches.forEach((batch: BatchInfo) => {
         if (batch.id === this.flags.batchid) {
-          batcher.bulkBatchStatus(batch);
+          batcher.bulkStatus(batch);
           found = true;
         }
       });
