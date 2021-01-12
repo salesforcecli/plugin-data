@@ -33,7 +33,6 @@ describe('soqlQuery tests', () => {
       .stub(fakeConnection, 'request')
       .resolves({ columnMetadata: queryFieldsExemplars.simpleQuery.columnMetadata });
     querySpy = sandbox.stub(fakeConnection, 'autoFetchQuery').resolves(soqlQueryExemplars.simpleQuery.queryResult);
-    // queryMoreSpy = sandbox.stub(fakeConnection, 'queryMore');
     const soqlQuery = new SoqlQuery();
     const results = await soqlQuery.runSoqlQuery(fakeConnection, 'SELECT id, name FROM Contact', logger);
     sinon.assert.calledOnce(querySpy);
@@ -49,7 +48,6 @@ describe('soqlQuery tests', () => {
       logger
     );
     sinon.assert.calledOnce(querySpy);
-    // sinon.assert.notCalled(queryMoreSpy);
     expect(results).to.be.deep.equal(soqlQueryExemplars.subQuery.soqlQueryResult);
   });
   it('should handle empty query', async () => {
@@ -57,7 +55,6 @@ describe('soqlQuery tests', () => {
     querySpy = sandbox
       .stub(fakeConnection, 'autoFetchQuery')
       .callsFake(() => Promise.resolve(soqlQueryExemplars.emptyQuery.queryResult));
-    // queryMoreSpy = sandbox.stub(fakeConnection, 'queryMore');
     const soqlQuery = new SoqlQuery();
     const results = await soqlQuery.runSoqlQuery(
       fakeConnection,

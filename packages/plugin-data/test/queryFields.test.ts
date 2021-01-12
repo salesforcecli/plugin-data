@@ -18,8 +18,6 @@ import { queryFieldsExemplars } from './test-files/queryFields.exemplars';
 chai.use(chaiAsPromised);
 
 describe('queryFields tests', () => {
-  // let toolingSpy: sinon.SinonSpy;
-  // let querySpy: sinon.SinonSpy;
   const fakeConnection = TestUtil.createFakeConnection();
   const sandbox = sinon.createSandbox();
   afterEach(() => {

@@ -175,7 +175,7 @@ export class DataSoqlQueryCommand extends SfdxCommand {
    * Command run implementation
    *
    * Returns either a DataSoqlQueryResult or a SfdxResult.
-   * When the user is using global '--json' flag an instance of SfdxResult si returned.
+   * When the user is using global '--json' flag an instance of SfdxResult is returned.
    * This is necessary since '--json' flag reports results in the form of SfdxResult
    * and bypasses the definition of start result. The goal is to have the output
    * from '--json' and '--resulformat json' be the same.
