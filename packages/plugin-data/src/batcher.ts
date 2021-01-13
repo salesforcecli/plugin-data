@@ -17,8 +17,8 @@ const POLL_FREQUENCY_MS = 5000;
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'batcher');
 
-type Entry = Record<string, string>;
-export type Batches = Entry[][];
+type BatchEntry = Record<string, string>;
+export type Batches = BatchEntry[][];
 
 export type BulkResult = {
   $: {
@@ -58,7 +58,7 @@ export class Batcher {
     const job: Job = this.conn.bulk.job(jobId);
     const jobInfo: JobInfo = await job.check();
 
-    this.bulkStatus(jobInfo);
+    this.bulkStatus(jobInfo, undefined, undefined, true);
 
     if (doneCallback) {
       doneCallback({ job: jobInfo });
@@ -288,6 +288,8 @@ export class Batcher {
       parser.on('data', (element) => {
         batches[batchIndex].push(element);
         if (batches[batchIndex].length === BATCH_RECORDS_LIMIT) {
+          // TODO: we can start processing this batch here
+          // we need event listeners to remove all of the `await new Promise`
           // next batch
           batchIndex++;
           batches[batchIndex] = [];

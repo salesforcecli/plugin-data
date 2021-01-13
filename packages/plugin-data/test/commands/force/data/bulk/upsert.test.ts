@@ -59,6 +59,33 @@ describe('force:data:bulk:upsert', () => {
     .do(() => {
       stubMethod($$.SANDBOX, fs, 'fileExists').resolves(true);
       stubMethod($$.SANDBOX, fs, 'createReadStream').resolves(ReadStream.prototype);
+      stubMethod($$.SANDBOX, Batcher.prototype, 'createAndExecuteBatches').resolves(expected);
+    })
+    .stdout()
+    .command([
+      'force:data:bulk:upsert',
+      '--targetusername',
+      'test@org.com',
+      '--sobjecttype',
+      'custom__c',
+      '--csvfile',
+      'fileToUpsert.csv',
+      '--externalid',
+      'field__c',
+      '--wait',
+      '5',
+      '--json',
+    ])
+    .it('should upsert the data correctly', (ctx) => {
+      const result = JSON.parse(ctx.stdout);
+      expect(result).to.deep.equal({ status: 0, result: expected });
+    });
+
+  test
+    .withOrg({ username: 'test@org.com' }, true)
+    .do(() => {
+      stubMethod($$.SANDBOX, fs, 'fileExists').resolves(true);
+      stubMethod($$.SANDBOX, fs, 'createReadStream').resolves(ReadStream.prototype);
       stubMethod($$.SANDBOX, Batcher.prototype, 'createAndExecuteBatches').throws('Error');
     })
     .stdout()
