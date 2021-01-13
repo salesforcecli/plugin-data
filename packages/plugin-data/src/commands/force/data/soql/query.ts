@@ -9,7 +9,7 @@ import * as os from 'os';
 import { flags, FlagsConfig, SfdxCommand, SfdxResult } from '@salesforce/command';
 import { Connection, Logger, Messages, Org } from '@salesforce/core';
 import {
-  asPlainObject,
+  ensureAnyJson,
   ensureJsonArray,
   ensureJsonMap,
   ensureString,
@@ -18,7 +18,7 @@ import {
 } from '@salesforce/ts-types';
 import { Tooling } from '@salesforce/core/lib/connection';
 import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../../../reporters';
-import { DataSoqlQueryResult, Field, FieldType, SoqlQueryResult } from '../../../../dataSoqlQueryTypes';
+import { Field, FieldType, SoqlQueryResult } from '../../../../dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
@@ -140,33 +140,6 @@ export class DataSoqlQueryCommand extends SfdxCommand {
     }),
   };
 
-  /**
-   * Define display function that will produce the desired output based on flag resultformat selection
-   *
-   * @protected
-   */
-  protected static readonly result: SfdxResult = {
-    display(): void {
-      const results = asPlainObject(this.data) as DataSoqlQueryResult;
-      let reporter;
-      switch (results.resultFormat as keyof typeof FormatTypes) {
-        case 'human':
-          reporter = new HumanReporter(results, results.columns, this.ux, results.logger);
-          break;
-        case 'json':
-          reporter = new JsonReporter(results, results.columns, this.ux, results.logger);
-          break;
-        case 'csv':
-          reporter = new CsvReporter(results, results.columns, this.ux, results.logger);
-          break;
-        default:
-          throw new Error(`result format is invalid: ${results.resultFormat}`);
-      }
-      // delegate to selected reporter
-      reporter.display();
-    },
-  };
-
   // Overrides SfdxCommand.  This is ensured since requiresUsername == true
   protected org!: Org;
 
@@ -184,7 +157,7 @@ export class DataSoqlQueryCommand extends SfdxCommand {
    * the command, which are necessary for reporter selection.
    *
    */
-  public async run(): Promise<DataSoqlQueryResult | SfdxResult> {
+  public async run(): Promise<SfdxResult> {
     try {
       if (this.flags.resultformat !== 'json') this.ux.startSpinner(messages.getMessage('queryRunningMessage'));
       const query = new SoqlQuery();
@@ -195,29 +168,31 @@ export class DataSoqlQueryCommand extends SfdxCommand {
       );
       const results = {
         ...queryResult,
-        resultFormat: this.flags.resultformat,
-        json: this.flags.json,
-        logger: this.logger,
       };
-      return this.normalizeIfJson(results);
+      this.displayResults(results);
+      return { data: ensureAnyJson(queryResult) };
     } finally {
       if (this.flags.resultformat !== 'json') this.ux.stopSpinner();
     }
   }
 
-  /**
-   * This function maps the DataSoqlQueryResult instance to the the well known 'data' property in
-   * SfdxResult class when the user has selected '--json' flag.
-   *
-   * @param results
-   * @private
-   */
-  private normalizeIfJson(results: DataSoqlQueryResult): DataSoqlQueryResult | SfdxResult {
-    if (this.flags.json) {
-      return {
-        data: toJsonMap(results.result),
-      };
+  private displayResults(queryResult: SoqlQueryResult): void {
+    let reporter;
+    switch (this.flags.resultformat as keyof typeof FormatTypes) {
+      case 'human':
+        reporter = new HumanReporter(queryResult, queryResult.columns, this.ux, this.logger);
+        break;
+      case 'json':
+        reporter = new JsonReporter(queryResult, queryResult.columns, this.ux, this.logger);
+        break;
+      case 'csv':
+        reporter = new CsvReporter(queryResult, queryResult.columns, this.ux, this.logger);
+        break;
+      default:
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        throw new Error(`result format is invalid: ${this.flags.resultformat}`);
     }
-    return results;
+    // delegate to selected reporter
+    reporter.display();
   }
 }

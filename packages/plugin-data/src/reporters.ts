@@ -9,7 +9,7 @@ import { Logger, Messages } from '@salesforce/core';
 import { UX } from '@salesforce/command';
 import * as chalk from 'chalk';
 import { get, isString, Optional } from '@salesforce/ts-types';
-import { DataSoqlQueryResult, Field, FieldType } from './dataSoqlQueryTypes';
+import { SoqlQueryResult, Field, FieldType } from './dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
@@ -30,9 +30,9 @@ export class Reporter {
 
 export class QueryReporter extends Reporter {
   protected columns: Field[] = [];
-  protected data: DataSoqlQueryResult;
+  protected data: SoqlQueryResult;
 
-  public constructor(data: DataSoqlQueryResult, columns: Field[], ux: UX, logger: Logger) {
+  public constructor(data: SoqlQueryResult, columns: Field[], ux: UX, logger: Logger) {
     super(ux, logger);
     this.columns = columns;
     this.data = data;
@@ -51,7 +51,7 @@ type ColumnAttributes = {
 };
 
 export class HumanReporter extends QueryReporter {
-  public constructor(data: DataSoqlQueryResult, columns: Field[], ux: UX, logger: Logger) {
+  public constructor(data: SoqlQueryResult, columns: Field[], ux: UX, logger: Logger) {
     super(data, columns, ux, logger);
   }
 
@@ -181,7 +181,7 @@ const DOUBLE_QUOTE = '"';
 const SHOULD_QUOTE_REGEXP = new RegExp(`[${SEPARATOR}${DOUBLE_QUOTE}${EOL}]`);
 
 export class CsvReporter extends QueryReporter {
-  public constructor(data: DataSoqlQueryResult, columns: Field[], ux: UX, logger: Logger) {
+  public constructor(data: SoqlQueryResult, columns: Field[], ux: UX, logger: Logger) {
     super(data, columns, ux, logger);
   }
 
@@ -299,7 +299,7 @@ export class CsvReporter extends QueryReporter {
 }
 
 export class JsonReporter extends QueryReporter {
-  public constructor(data: DataSoqlQueryResult, columns: Field[], ux: UX, logger: Logger) {
+  public constructor(data: SoqlQueryResult, columns: Field[], ux: UX, logger: Logger) {
     super(data, columns, ux, logger);
   }
 

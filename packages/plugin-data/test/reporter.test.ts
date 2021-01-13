@@ -10,7 +10,7 @@ import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import { UX } from '@salesforce/command';
 import { Logger } from '@salesforce/core';
-import { DataSoqlQueryResult, Field, SoqlQueryResult } from '../src/dataSoqlQueryTypes';
+import { Field, SoqlQueryResult } from '../src/dataSoqlQueryTypes';
 import { HumanReporter } from '../src/reporters';
 import { CsvReporter } from '../src/reporters';
 import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars';
@@ -24,20 +24,12 @@ describe('reporter tests', () => {
     let queryData: SoqlQueryResult;
     beforeEach(async () => {
       queryData = soqlQueryExemplars.queryWithAgregates.soqlQueryResult;
-      const dataSoqlQueryResult: DataSoqlQueryResult = {
+      const dataSoqlQueryResult: SoqlQueryResult = {
         columns: queryData.columns,
-        json: false,
-        logger,
         query: queryData.query,
         result: queryData.result,
-        resultFormat: 'human',
       };
-      reporter = new HumanReporter(
-        dataSoqlQueryResult,
-        queryData.columns,
-        await UX.create(),
-        dataSoqlQueryResult.logger
-      );
+      reporter = new HumanReporter(dataSoqlQueryResult, queryData.columns, await UX.create(), logger);
     });
     it('parses result fields', () => {
       const { attributeNames, children, aggregates } = reporter.parseFields();
@@ -60,15 +52,12 @@ describe('reporter tests', () => {
     let queryData: SoqlQueryResult;
     beforeEach(async () => {
       queryData = soqlQueryExemplars.queryWithAgregates.soqlQueryResult;
-      const dataSoqlQueryResult: DataSoqlQueryResult = {
+      const dataSoqlQueryResult: SoqlQueryResult = {
         columns: queryData.columns,
-        json: false,
-        logger,
         query: queryData.query,
         result: queryData.result,
-        resultFormat: 'csv',
       };
-      reporter = new CsvReporter(dataSoqlQueryResult, queryData.columns, await UX.create(), dataSoqlQueryResult.logger);
+      reporter = new CsvReporter(dataSoqlQueryResult, queryData.columns, await UX.create(), logger);
     });
     it('massages report results', () => {
       const massagedRows = reporter.massageRows();
@@ -94,20 +83,12 @@ describe('reporter tests', () => {
     let queryData: SoqlQueryResult;
     beforeEach(async () => {
       queryData = soqlQueryExemplars.subQuery.soqlQueryResult;
-      const dataSoqlQueryResult: DataSoqlQueryResult = {
+      const dataSoqlQueryResult: SoqlQueryResult = {
         columns: queryData.columns,
-        json: false,
-        logger,
         query: queryData.query,
         result: queryData.result,
-        resultFormat: 'human',
       };
-      reporter = new HumanReporter(
-        dataSoqlQueryResult,
-        queryData.columns,
-        await UX.create(),
-        dataSoqlQueryResult.logger
-      );
+      reporter = new HumanReporter(dataSoqlQueryResult, queryData.columns, await UX.create(), logger);
     });
     it('parses result fields', () => {
       const { attributeNames, children, aggregates } = reporter.parseFields();
@@ -121,15 +102,12 @@ describe('reporter tests', () => {
     let queryData: SoqlQueryResult;
     beforeEach(async () => {
       queryData = soqlQueryExemplars.subQuery.soqlQueryResult;
-      const dataSoqlQueryResult: DataSoqlQueryResult = {
+      const dataSoqlQueryResult: SoqlQueryResult = {
         columns: queryData.columns,
-        json: false,
-        logger,
         query: queryData.query,
         result: queryData.result,
-        resultFormat: 'csv',
       };
-      reporter = new CsvReporter(dataSoqlQueryResult, queryData.columns, await UX.create(), dataSoqlQueryResult.logger);
+      reporter = new CsvReporter(dataSoqlQueryResult, queryData.columns, await UX.create(), logger);
     });
     it('massages report results', () => {
       const massagedRows = reporter.massageRows();
