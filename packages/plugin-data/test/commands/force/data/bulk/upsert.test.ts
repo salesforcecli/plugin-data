@@ -11,30 +11,38 @@ import { fs } from '@salesforce/core';
 import { Batcher } from '../../../../../src/batcher';
 
 describe('force:data:bulk:upsert', () => {
-  const expected = [
-    {
-      $: {
-        xmlns: 'http://www.force.com/2009/06/asyncapi/dataload',
-      },
-      id: '751540000070aNTAAY',
-      jobId: '75054000006yvAYAAY',
-      state: 'Queued',
-      createdDate: '2020-11-30T16:13:15.000Z',
-      systemModstamp: '2020-11-30T16:13:15.000Z',
-      numberRecordsProcessed: '0',
-      numberRecordsFailed: '0',
-      totalProcessingTime: '0',
-      apiActiveProcessingTime: '0',
-      apexProcessingTime: '0',
-    },
-  ];
+  const expected = {
+    id: '7503F000004rVEMQA2',
+    operation: 'upsert',
+    object: 'custom__c',
+    createdById: '0053F000007vESSQA2',
+    createdDate: '2021-01-19T23:05:32.000Z',
+    systemModstamp: '2021-01-19T23:05:33.000Z',
+    state: 'Closed',
+    externalIdFieldName: 'field__c',
+    concurrencyMode: 'Parallel',
+    contentType: 'CSV',
+    numberBatchesQueued: '0',
+    numberBatchesInProgress: '0',
+    numberBatchesCompleted: '1',
+    numberBatchesFailed: '0',
+    numberBatchesTotal: '1',
+    numberRecordsProcessed: '18',
+    numberRetries: '0',
+    apiVersion: '50.0',
+    numberRecordsFailed: '0',
+    totalProcessingTime: '80',
+    apiActiveProcessingTime: '46',
+    apexProcessingTime: '0',
+  };
 
   test
     .withOrg({ username: 'test@org.com' }, true)
     .do(() => {
       stubMethod($$.SANDBOX, fs, 'fileExists').resolves(true);
-      stubMethod($$.SANDBOX, fs, 'createReadStream').resolves(ReadStream.prototype);
-      stubMethod($$.SANDBOX, Batcher.prototype, 'createAndExecuteBatches').resolves(expected);
+      stubMethod($$.SANDBOX, fs, 'createReadStream').returns(ReadStream.prototype);
+      stubMethod($$.SANDBOX, Batcher.prototype, 'createAndExecuteBatches').resolves();
+      stubMethod($$.SANDBOX, Batcher.prototype, 'jobStatus').resolves(expected);
     })
     .stdout()
     .command([
@@ -51,15 +59,16 @@ describe('force:data:bulk:upsert', () => {
     ])
     .it('should upsert the data correctly', (ctx) => {
       const result = JSON.parse(ctx.stdout);
-      expect(result).to.deep.equal({ status: 0, result: expected });
+      expect(result).to.deep.equal({ status: 0, result: [expected] });
     });
 
   test
     .withOrg({ username: 'test@org.com' }, true)
     .do(() => {
       stubMethod($$.SANDBOX, fs, 'fileExists').resolves(true);
-      stubMethod($$.SANDBOX, fs, 'createReadStream').resolves(ReadStream.prototype);
-      stubMethod($$.SANDBOX, Batcher.prototype, 'createAndExecuteBatches').resolves(expected);
+      stubMethod($$.SANDBOX, fs, 'createReadStream').returns(ReadStream.prototype);
+      stubMethod($$.SANDBOX, Batcher.prototype, 'createAndExecuteBatches').resolves();
+      stubMethod($$.SANDBOX, Batcher.prototype, 'jobStatus').resolves(expected);
     })
     .stdout()
     .command([
@@ -76,16 +85,16 @@ describe('force:data:bulk:upsert', () => {
       '5',
       '--json',
     ])
-    .it('should upsert the data correctly', (ctx) => {
+    .it('should upsert the data correctly while waiting', (ctx) => {
       const result = JSON.parse(ctx.stdout);
-      expect(result).to.deep.equal({ status: 0, result: expected });
+      expect(result).to.deep.equal({ status: 0, result: [expected] });
     });
 
   test
     .withOrg({ username: 'test@org.com' }, true)
     .do(() => {
       stubMethod($$.SANDBOX, fs, 'fileExists').resolves(true);
-      stubMethod($$.SANDBOX, fs, 'createReadStream').resolves(ReadStream.prototype);
+      stubMethod($$.SANDBOX, fs, 'createReadStream').returns(ReadStream.prototype);
       stubMethod($$.SANDBOX, Batcher.prototype, 'createAndExecuteBatches').throws('Error');
     })
     .stdout()
