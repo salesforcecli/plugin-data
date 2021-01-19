@@ -67,6 +67,14 @@ export class Batcher {
     return jobInfo;
   }
 
+  public async jobStatus(job: Job): Promise<JobInfo> {
+    const summary = await job.check();
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    delete summary['$'];
+    return summary;
+  }
+
   public bulkStatus(
     summary: JobInfo | BatchInfo,
     results?: BatchResultInfo[],
