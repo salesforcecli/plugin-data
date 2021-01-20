@@ -8,7 +8,7 @@ import * as os from 'os';
 import { ReadStream } from 'fs';
 import { Connection, Messages, SfdxError, fs } from '@salesforce/core';
 import { flags, FlagsConfig } from '@salesforce/command';
-import { Job } from 'jsforce';
+import { Job, JobInfo } from 'jsforce';
 import { Batcher, BulkResult } from '../../../../batcher';
 import { DataCommand } from '../../../../dataCommand';
 
@@ -37,8 +37,8 @@ export default class Delete extends DataCommand {
     }),
   };
 
-  public async run(): Promise<BulkResult[]> {
-    let result: BulkResult[];
+  public async run(): Promise<BulkResult[] | JobInfo[]> {
+    let result: BulkResult[] | JobInfo[];
 
     try {
       await this.throwIfFileDoesntExist(this.flags.csvfile);

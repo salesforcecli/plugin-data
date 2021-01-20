@@ -67,20 +67,12 @@ export class Batcher {
     return jobInfo;
   }
 
-  public async jobStatus(job: Job): Promise<JobInfo> {
-    const summary = await job.check();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-    // @ts-ignore
-    delete summary['$'];
-    return summary;
-  }
-
   public bulkStatus(
     summary: JobInfo | BatchInfo,
     results?: BatchResultInfo[],
     batchNum?: number,
     isJob?: boolean
-  ): void {
+  ): JobInfo | BatchInfo {
     this.ux.log('');
     if (batchNum) {
       this.ux.styledHeader(messages.getMessage('BulkBatch', [batchNum]));
@@ -108,18 +100,20 @@ export class Batcher {
         formatOutput.push(field);
       }
     }
-    // remove url field
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-    // @ts-ignore
-    delete summary['$'];
     formatOutput.splice(0, 1);
 
     if (isJob) {
+      // remove url field
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore
+      delete summary['$'];
       this.ux.styledHeader(messages.getMessage('BulkJobStatus'));
     } else {
       this.ux.styledHeader(messages.getMessage('BatchStatus'));
     }
     this.ux.styledObject(summary, formatOutput);
+
+    return summary;
   }
 
   /**
@@ -136,7 +130,7 @@ export class Batcher {
     records: ReadStream,
     sobjectType: string,
     wait?: number
-  ): Promise<BulkResult[]> {
+  ): Promise<BulkResult[] | JobInfo[]> {
     const batchesCompleted = 0;
     let batchesQueued = 0;
     const overallInfo = false;
@@ -148,8 +142,9 @@ export class Batcher {
     // But, we might want to actually continue to the next batch.
     return (await Promise.all(
       batches.map(
-        async (batch: Array<Record<string, string>>, i: number): Promise<BulkResult | BatchInfo | void> => {
+        async (batch: Array<Record<string, string>>, i: number): Promise<BulkResult | BatchInfo | void | JobInfo> => {
           const newBatch = job.createBatch();
+
           return new Promise((resolve, reject) => {
             newBatch.on('error', (err: Error) => {
               // reword no external id error message to direct it to org user rather than api user
@@ -237,7 +232,7 @@ export class Batcher {
     batchNum: number,
     totalNumBatches: number,
     waitMins: number
-  ): Promise<BatchInfo> {
+  ): Promise<JobInfo> {
     return new Promise((resolve, reject) => {
       newBatch.on(
         'queue',
@@ -264,8 +259,7 @@ export class Batcher {
         this.bulkStatus(summary, results, batchNum);
         batchesCompleted++;
         if (batchesCompleted === totalNumBatches) {
-          await this.fetchAndDisplayJobStatus(summary.jobId);
-          resolve(summary);
+          resolve(await this.fetchAndDisplayJobStatus(summary.jobId));
         }
       });
     });
