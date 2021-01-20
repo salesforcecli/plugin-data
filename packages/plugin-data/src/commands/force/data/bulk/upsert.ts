@@ -7,9 +7,9 @@
 import * as os from 'os';
 import { ReadStream } from 'fs';
 import { flags, FlagsConfig } from '@salesforce/command';
-import { Connection, fs, Messages, SfdxError } from '@salesforce/core';
-import { Job, JobInfo } from 'jsforce';
-import { Batcher } from '../../../../batcher';
+import { Connection, fs, Messages } from '@salesforce/core';
+import { JobInfo } from 'jsforce';
+import { Batcher, BulkResult } from '../../../../batcher';
 import { DataCommand } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -42,32 +42,33 @@ export default class Upsert extends DataCommand {
     }),
   };
 
-  public async run(): Promise<JobInfo[]> {
-    const result: JobInfo[] = [];
+  public async run(): Promise<JobInfo[] | BulkResult[]> {
+    const conn: Connection = this.org.getConnection();
+    this.ux.startSpinner('Bulk Upsert');
 
-    try {
-      await this.throwIfFileDoesntExist(this.flags.csvfile);
+    await this.throwIfFileDoesntExist(this.flags.csvfile);
 
-      const conn: Connection = this.org.getConnection();
-      this.ux.startSpinner('Bulk Upsert');
+    const batcher: Batcher = new Batcher(conn, this.ux);
+    const csvStream: ReadStream = fs.createReadStream(this.flags.csvfile);
 
-      const csvStream: ReadStream = fs.createReadStream(this.flags.csvfile);
-      const job: Job = conn.bulk.createJob(this.flags.sobjecttype, 'upsert', {
-        extIdField: this.flags.externalid,
-        concurrencyMode: 'Parallel',
+    const job = conn.bulk.createJob(this.flags.sobjecttype, 'upsert', {
+      extIdField: this.flags.externalid,
+      concurrencyMode: 'Parallel',
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
+    return new Promise(async (resolve, reject) => {
+      job.on('error', (err): void => {
+        reject(err);
       });
 
-      const batcher: Batcher = new Batcher(conn, this.ux);
-      await batcher.createAndExecuteBatches(job, csvStream, this.flags.sobjecttype, this.flags.wait);
-
-      result.push(await batcher.jobStatus(job));
-
-      this.ux.stopSpinner();
-    } catch (e) {
-      this.ux.stopSpinner('error');
-      throw SfdxError.wrap(e);
-    }
-
-    return result;
+      try {
+        resolve(await batcher.createAndExecuteBatches(job, csvStream, this.flags.sobjecttype, this.flags.wait));
+        this.ux.stopSpinner();
+      } catch (e) {
+        this.ux.stopSpinner('error');
+        reject(e);
+      }
+    });
   }
 }

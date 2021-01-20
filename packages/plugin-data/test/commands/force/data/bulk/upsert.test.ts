@@ -11,7 +11,48 @@ import { fs } from '@salesforce/core';
 import { Batcher } from '../../../../../src/batcher';
 
 describe('force:data:bulk:upsert', () => {
-  const expected = {
+  const expectedBatch = {
+    $: {
+      xmlns: 'http://www.force.com/2009/06/asyncapi/dataload',
+    },
+    id: '7513F000003y0iZQAQ',
+    jobId: '7503F000004rVluQAE',
+    state: 'Queued',
+    createdDate: '2021-01-20T02:30:06.000Z',
+    systemModstamp: '2021-01-20T02:30:06.000Z',
+    numberRecordsProcessed: '0',
+    numberRecordsFailed: '0',
+    totalProcessingTime: '0',
+    apiActiveProcessingTime: '0',
+    apexProcessingTime: '0',
+  };
+
+  test
+    .withOrg({ username: 'test@org.com' }, true)
+    .do(() => {
+      stubMethod($$.SANDBOX, fs, 'fileExists').resolves(true);
+      stubMethod($$.SANDBOX, fs, 'createReadStream').returns(ReadStream.prototype);
+      stubMethod($$.SANDBOX, Batcher.prototype, 'createAndExecuteBatches').resolves(expectedBatch);
+    })
+    .stdout()
+    .command([
+      'force:data:bulk:upsert',
+      '--targetusername',
+      'test@org.com',
+      '--sobjecttype',
+      'custom__c',
+      '--csvfile',
+      'fileToUpsert.csv',
+      '--externalid',
+      'field__c',
+      '--json',
+    ])
+    .it('should upsert the data correctly', (ctx) => {
+      const result = JSON.parse(ctx.stdout);
+      expect(result).to.deep.equal({ status: 0, result: expectedBatch });
+    });
+
+  const expectedJob = {
     id: '7503F000004rVEMQA2',
     operation: 'upsert',
     object: 'custom__c',
@@ -41,34 +82,7 @@ describe('force:data:bulk:upsert', () => {
     .do(() => {
       stubMethod($$.SANDBOX, fs, 'fileExists').resolves(true);
       stubMethod($$.SANDBOX, fs, 'createReadStream').returns(ReadStream.prototype);
-      stubMethod($$.SANDBOX, Batcher.prototype, 'createAndExecuteBatches').resolves();
-      stubMethod($$.SANDBOX, Batcher.prototype, 'jobStatus').resolves(expected);
-    })
-    .stdout()
-    .command([
-      'force:data:bulk:upsert',
-      '--targetusername',
-      'test@org.com',
-      '--sobjecttype',
-      'custom__c',
-      '--csvfile',
-      'fileToUpsert.csv',
-      '--externalid',
-      'field__c',
-      '--json',
-    ])
-    .it('should upsert the data correctly', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
-      expect(result).to.deep.equal({ status: 0, result: [expected] });
-    });
-
-  test
-    .withOrg({ username: 'test@org.com' }, true)
-    .do(() => {
-      stubMethod($$.SANDBOX, fs, 'fileExists').resolves(true);
-      stubMethod($$.SANDBOX, fs, 'createReadStream').returns(ReadStream.prototype);
-      stubMethod($$.SANDBOX, Batcher.prototype, 'createAndExecuteBatches').resolves();
-      stubMethod($$.SANDBOX, Batcher.prototype, 'jobStatus').resolves(expected);
+      stubMethod($$.SANDBOX, Batcher.prototype, 'createAndExecuteBatches').resolves(expectedJob);
     })
     .stdout()
     .command([
@@ -87,7 +101,7 @@ describe('force:data:bulk:upsert', () => {
     ])
     .it('should upsert the data correctly while waiting', (ctx) => {
       const result = JSON.parse(ctx.stdout);
-      expect(result).to.deep.equal({ status: 0, result: [expected] });
+      expect(result).to.deep.equal({ status: 0, result: expectedJob });
     });
 
   test
