@@ -170,29 +170,32 @@ export class DataSoqlQueryCommand extends SfdxCommand {
         ...queryResult,
       };
       this.displayResults(results);
-      return { data: ensureAnyJson(queryResult) };
+      return { data: ensureAnyJson(queryResult.result) };
     } finally {
       if (this.flags.resultformat !== 'json') this.ux.stopSpinner();
     }
   }
 
   private displayResults(queryResult: SoqlQueryResult): void {
-    let reporter;
-    switch (this.flags.resultformat as keyof typeof FormatTypes) {
-      case 'human':
-        reporter = new HumanReporter(queryResult, queryResult.columns, this.ux, this.logger);
-        break;
-      case 'json':
-        reporter = new JsonReporter(queryResult, queryResult.columns, this.ux, this.logger);
-        break;
-      case 'csv':
-        reporter = new CsvReporter(queryResult, queryResult.columns, this.ux, this.logger);
-        break;
-      default:
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        throw new Error(`result format is invalid: ${this.flags.resultformat}`);
+    // bypass if --json flag present
+    if (!this.flags.json) {
+      let reporter;
+      switch (this.flags.resultformat as keyof typeof FormatTypes) {
+        case 'human':
+          reporter = new HumanReporter(queryResult, queryResult.columns, this.ux, this.logger);
+          break;
+        case 'json':
+          reporter = new JsonReporter(queryResult, queryResult.columns, this.ux, this.logger);
+          break;
+        case 'csv':
+          reporter = new CsvReporter(queryResult, queryResult.columns, this.ux, this.logger);
+          break;
+        default:
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          throw new Error(`result format is invalid: ${this.flags.resultformat}`);
+      }
+      // delegate to selected reporter
+      reporter.display();
     }
-    // delegate to selected reporter
-    reporter.display();
   }
 }
