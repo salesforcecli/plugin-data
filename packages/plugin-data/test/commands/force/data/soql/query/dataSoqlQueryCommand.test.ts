@@ -53,8 +53,8 @@ describe('Execute a SOQL statement', function (): void {
           sinon.assert.calledOnce(soqlQuerySpy);
           const jsonResults = JSON.parse(ctx.stdout);
           expect(jsonResults).to.have.property('status', 0);
-          expect(jsonResults.result.data).to.have.property('totalSize', 0);
-          expect(jsonResults.result.data.records.length).to.be.equal(jsonResults.result.data.totalSize);
+          expect(jsonResults.result).to.have.property('totalSize', 0);
+          expect(jsonResults.result.records.length).to.be.equal(jsonResults.result.totalSize);
         });
     });
     describe('reporters produce the correct results for subquery', () => {
@@ -86,8 +86,8 @@ describe('Execute a SOQL statement', function (): void {
           sinon.assert.calledOnce(soqlQuerySpy);
           const jsonResults = JSON.parse(ctx.stdout);
           expect(jsonResults).to.have.property('status', 0);
-          expect(jsonResults.result.data).to.have.property('totalSize', 50);
-          expect(jsonResults.result.data.records.length).to.be.equal(jsonResults.result.data.totalSize);
+          expect(jsonResults.result).to.have.property('totalSize', 50);
+          expect(jsonResults.result.records.length).to.be.equal(jsonResults.result.totalSize);
         });
       test
         .withOrg({ username: 'test@org.com' }, true)
@@ -119,8 +119,8 @@ describe('Execute a SOQL statement', function (): void {
           sinon.assert.calledOnce(soqlQuerySpy);
           const jsonResults = JSON.parse(ctx.stdout);
           expect(jsonResults).to.have.property('status', 0);
-          expect(jsonResults.result.data).to.have.property('totalSize', 16);
-          expect(jsonResults.result.data.records.length).to.be.equal(jsonResults.result.data.totalSize);
+          expect(jsonResults.result).to.have.property('totalSize', 16);
+          expect(jsonResults.result.records.length).to.be.equal(jsonResults.result.totalSize);
         });
       test
         .withOrg({ username: 'test@org.com' }, true)

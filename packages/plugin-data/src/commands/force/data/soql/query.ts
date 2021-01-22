@@ -6,16 +6,9 @@
  */
 
 import * as os from 'os';
-import { flags, FlagsConfig, SfdxCommand, SfdxResult } from '@salesforce/command';
+import { flags, FlagsConfig, SfdxCommand } from '@salesforce/command';
 import { Connection, Logger, Messages, Org } from '@salesforce/core';
-import {
-  ensureAnyJson,
-  ensureJsonArray,
-  ensureJsonMap,
-  ensureString,
-  isJsonArray,
-  toJsonMap,
-} from '@salesforce/ts-types';
+import { ensureJsonArray, ensureJsonMap, ensureString, isJsonArray, toJsonMap } from '@salesforce/ts-types';
 import { Tooling } from '@salesforce/core/lib/connection';
 import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../../../reporters';
 import { Field, FieldType, SoqlQueryResult } from '../../../../dataSoqlQueryTypes';
@@ -152,7 +145,7 @@ export class DataSoqlQueryCommand extends SfdxCommand {
    * the command, which are necessary for reporter selection.
    *
    */
-  public async run(): Promise<SfdxResult> {
+  public async run(): Promise<unknown> {
     try {
       if (this.flags.resultformat !== 'json') this.ux.startSpinner(messages.getMessage('queryRunningMessage'));
       const query = new SoqlQuery();
@@ -165,7 +158,7 @@ export class DataSoqlQueryCommand extends SfdxCommand {
         ...queryResult,
       };
       this.displayResults(results);
-      return { data: ensureAnyJson(queryResult.result) };
+      return queryResult.result;
     } finally {
       if (this.flags.resultformat !== 'json') this.ux.stopSpinner();
     }

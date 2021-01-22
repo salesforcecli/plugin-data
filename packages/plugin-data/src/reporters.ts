@@ -308,7 +308,7 @@ export class JsonReporter extends QueryReporter {
   }
 
   public display(): void {
-    this.ux.styledJSON({ status: 0, result: { data: { ...this.data.result } } });
+    this.ux.styledJSON({ status: 0, result: this.data.result });
   }
 }
 
