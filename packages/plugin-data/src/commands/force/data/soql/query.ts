@@ -53,7 +53,7 @@ export class SoqlQuery {
    */
 
   public async retrieveColumns(connection: Connection | Tooling, query: string): Promise<Field[]> {
-    // eslint-disable-next-line no-underscore-dangle,@typescript-eslint/unbound-method,@typescript-eslint/restrict-template-expressions
+    // eslint-disable-next-line no-underscore-dangle
     const columnUrl = `${connection._baseUrl()}/query?q=${encodeURIComponent(query)}&columns=true`;
     const results = toJsonMap(await connection.request(columnUrl));
     const columns: Field[] = [];
@@ -145,22 +145,18 @@ export class DataSoqlQueryCommand extends SfdxCommand {
    *
    */
   public async run(): Promise<unknown> {
-    try {
-      if (this.flags.resultformat !== 'json') this.ux.startSpinner(messages.getMessage('queryRunningMessage'));
-      const query = new SoqlQuery();
-      const queryResult: SoqlQueryResult = await query.runSoqlQuery(
-        this.flags.usetoolingapi ? this.org.getConnection().tooling : this.org.getConnection(),
-        this.flags.query,
-        this.logger
-      );
-      const results = {
-        ...queryResult,
-      };
-      this.displayResults(results);
-      return queryResult.result;
-    } finally {
-      if (this.flags.resultformat !== 'json') this.ux.stopSpinner();
-    }
+    if (this.flags.resultformat !== 'json') this.ux.startSpinner(messages.getMessage('queryRunningMessage'));
+    const query = new SoqlQuery();
+    const queryResult: SoqlQueryResult = await query.runSoqlQuery(
+      this.flags.usetoolingapi ? this.org.getConnection().tooling : this.org.getConnection(),
+      this.flags.query,
+      this.logger
+    );
+    const results = {
+      ...queryResult,
+    };
+    this.displayResults(results);
+    return queryResult.result;
   }
 
   private displayResults(queryResult: SoqlQueryResult): void {
@@ -178,8 +174,7 @@ export class DataSoqlQueryCommand extends SfdxCommand {
           reporter = new CsvReporter(queryResult, queryResult.columns, this.ux, this.logger);
           break;
         default:
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          throw new Error(`result format is invalid: ${this.flags.resultformat}`);
+          throw new Error(`result format is invalid: ${this.flags.resultformat as string}`);
       }
       // delegate to selected reporter
       reporter.display();
