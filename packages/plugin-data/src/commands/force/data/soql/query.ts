@@ -120,21 +120,16 @@ export class DataSoqlQueryCommand extends SfdxCommand {
     query: flags.string({
       char: 'q',
       required: true,
-      hidden: false,
       description: messages.getMessage('queryToExecute'),
-      longDescription: messages.getMessage('queryLongDescription'),
     }),
     usetoolingapi: flags.boolean({
       char: 't',
-      required: false,
-      hidden: false,
       default: false,
       description: messages.getMessage('queryToolingDescription'),
     }),
     resultformat: flags.enum({
       char: 'r',
       description: messages.getMessage('resultFormatDescription'),
-      longDescription: messages.getMessage('resultFormatLongDescription'),
       options: ['human', 'csv', 'json'],
       default: 'human',
     }),
