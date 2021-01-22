@@ -117,7 +117,6 @@ export class DataSoqlQueryCommand extends SfdxCommand {
     }),
     usetoolingapi: flags.boolean({
       char: 't',
-      default: false,
       description: messages.getMessage('queryToolingDescription'),
     }),
     resultformat: flags.enum({
