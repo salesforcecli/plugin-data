@@ -145,18 +145,22 @@ export class DataSoqlQueryCommand extends SfdxCommand {
    *
    */
   public async run(): Promise<unknown> {
-    if (this.flags.resultformat !== 'json') this.ux.startSpinner(messages.getMessage('queryRunningMessage'));
-    const query = new SoqlQuery();
-    const queryResult: SoqlQueryResult = await query.runSoqlQuery(
-      this.flags.usetoolingapi ? this.org.getConnection().tooling : this.org.getConnection(),
-      this.flags.query,
-      this.logger
-    );
-    const results = {
-      ...queryResult,
-    };
-    this.displayResults(results);
-    return queryResult.result;
+    try {
+      if (this.flags.resultformat !== 'json') this.ux.startSpinner(messages.getMessage('queryRunningMessage'));
+      const query = new SoqlQuery();
+      const queryResult: SoqlQueryResult = await query.runSoqlQuery(
+        this.flags.usetoolingapi ? this.org.getConnection().tooling : this.org.getConnection(),
+        this.flags.query,
+        this.logger
+      );
+      const results = {
+        ...queryResult,
+      };
+      this.displayResults(results);
+      return queryResult.result;
+    } finally {
+      if (this.flags.resultformat !== 'json') this.ux.stopSpinner();
+    }
   }
 
   private displayResults(queryResult: SoqlQueryResult): void {
