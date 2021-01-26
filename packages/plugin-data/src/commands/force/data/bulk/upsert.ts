@@ -35,7 +35,7 @@ export default class Upsert extends DataCommand {
       description: messages.getMessage('flags.sobjecttype'),
       required: true,
     }),
-    wait: flags.number({
+    wait: flags.minutes({
       char: 'w',
       description: messages.getMessage('flags.wait'),
       min: 0,
