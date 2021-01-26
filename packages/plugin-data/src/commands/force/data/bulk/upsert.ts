@@ -35,7 +35,7 @@ export default class Upsert extends DataCommand {
       description: messages.getMessage('flags.sobjecttype'),
       required: true,
     }),
-    wait: flags.minutes({
+    wait: flags.number({
       char: 'w',
       description: messages.getMessage('flags.wait'),
       min: 0,
@@ -63,7 +63,15 @@ export default class Upsert extends DataCommand {
       });
 
       try {
-        resolve(await batcher.createAndExecuteBatches(job, csvStream, this.flags.sobjecttype, this.flags.wait));
+        resolve(
+          await batcher.createAndExecuteBatches(
+            job,
+            csvStream,
+            this.flags.sobjecttype,
+            this.flags.wait,
+            this.flags.json
+          )
+        );
         this.ux.stopSpinner();
       } catch (e) {
         this.ux.stopSpinner('error');

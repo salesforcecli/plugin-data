@@ -124,12 +124,14 @@ export class Batcher {
    * @param records
    * @param sobjectType {string}
    * @param wait {number}
+   * @param jsonFlag
    */
   public async createAndExecuteBatches(
     job: Job,
     records: ReadStream,
     sobjectType: string,
-    wait?: number
+    wait?: number,
+    jsonFlag?: boolean
   ): Promise<BulkResult[] | JobInfo[]> {
     const batchesCompleted = 0;
     let batchesQueued = 0;
@@ -152,16 +154,23 @@ export class Batcher {
                 err.message = messages.getMessage('ExternalIdRequired', [sobjectType]);
               }
               if (err.message.startsWith('Polling time out')) {
-                const jobIdIndex = err.message.indexOf('750');
-                const batchIdIndex = err.message.indexOf('751');
-                this.ux.log(
-                  messages.getMessage('TimeOut', [
-                    err.message.substr(jobIdIndex, 18),
-                    err.message.substr(batchIdIndex, 18),
-                  ])
-                );
+                err.message = this.parseTimeOutError(err);
               }
-              reject(err.message);
+
+              this.ux.stopSpinner('Error');
+
+              // using the reject method for all of the promises wasn't handling errors properly
+              // but throwing inside of a promise has it's own issues
+              // one of them being that it will throw an exception right away
+              // to only show one error message throw it, and then catch the exception and do nothing
+              if (jsonFlag) {
+                throw new SfdxError(err.message, 'Time Out', [], 69).toObject();
+              } else {
+                try {
+                  throw err.message;
+                  // eslint-disable-next-line no-empty
+                } catch (e) {}
+              }
             });
 
             newBatch.on(
@@ -212,6 +221,27 @@ export class Batcher {
         }
       )
     )) as BulkResult[];
+  }
+
+  /**
+   * The timeout error handling is messy so to increase readability
+   * break it out into it's own method
+   *
+   * @param err The timeout Error
+   * @private
+   */
+  private parseTimeOutError(err: Error): string {
+    const jobIdIndex = err.message.indexOf('750');
+    const batchIdIndex = err.message.indexOf('751');
+    const message = messages.getMessage('TimeOut', [
+      err.message.substr(jobIdIndex, 18),
+      err.message.substr(batchIdIndex, 18),
+    ]);
+    this.ux.log('');
+    this.ux.log(message);
+
+    process.exitCode = 69;
+    return message;
   }
 
   /**
