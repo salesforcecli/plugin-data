@@ -270,11 +270,49 @@ describe('batcher', () => {
       waitForCompletionSpy.throws('Invalid Batch');
       try {
         await batcher.createAndExecuteBatches(job, ReadStream.prototype, 'TestObject__c', 3);
-        newBatch['emit']('queue', []);
+        newBatch.emit('queue', []);
         chai.assert.fail('the above should throw');
       } catch (e) {
         expect(e.name).to.equal('Invalid Batch');
       }
+    });
+
+    describe('timeout errors', () => {
+      it('Should properly handle External Id Required errors', async () => {
+        const batches: Batches = [
+          [
+            { field1: 'aaa', field2: 'bbb' },
+            { field1: 'ccc', field2: 'ddd' },
+          ],
+        ];
+
+        stubMethod($$.SANDBOX, Batcher.prototype, 'splitIntoBatches').resolves(batches);
+        const batch = job.createBatch();
+        batch.emit('External ID was blank');
+        try {
+          await batcher.createAndExecuteBatches(job, ReadStream.prototype, 'TestObject__c', 5, false);
+        } catch (e) {
+          expect(e.message).to.equal('An External ID is required on TestObject__c to perform an upsert.');
+        }
+      });
+
+      it('Should properly handle timeout errors', async () => {
+        const batches: Batches = [
+          [
+            { field1: 'aaa', field2: 'bbb' },
+            { field1: 'ccc', field2: 'ddd' },
+          ],
+        ];
+
+        stubMethod($$.SANDBOX, Batcher.prototype, 'splitIntoBatches').resolves(batches);
+        const batch = job.createBatch();
+        batch.emit('Polling time out');
+        try {
+          await batcher.createAndExecuteBatches(job, ReadStream.prototype, 'TestObject__c', 5, false);
+        } catch (e) {
+          expect(e.message).to.contain('The operation timed out. Check the status with command');
+        }
+      });
     });
   });
 });
