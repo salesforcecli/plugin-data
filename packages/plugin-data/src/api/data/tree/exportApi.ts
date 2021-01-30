@@ -115,8 +115,8 @@ export class ExportApi {
       }
     }
 
-    config.query = config.query.toLowerCase().trim();
-    if (!config.query.startsWith('select')) {
+    // get first word of string, if it is 'select' we're good, if it's not, we'll throw an error
+    if (!(config.query.substr(0, config.query.indexOf(' ')).toLowerCase() === 'select')) {
       throw SfdxError.create('@salesforce/plugin-data', 'exportApi', 'soqlInvalid', [config.query]);
     }
 

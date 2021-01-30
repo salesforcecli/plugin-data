@@ -288,7 +288,7 @@ describe('Export API', () => {
   });
 
   it('should export query results to a file', async () => {
-    await exportApi.export({ query: 'select' });
+    await exportApi.export({ query: 'select ' });
     const writeFileArgs = writeStub.args;
     const filenameArg = writeFileArgs[0][0];
     const fileContentsJsonArg = JSON.parse(writeFileArgs[0][1]);
@@ -306,7 +306,7 @@ describe('Export API', () => {
     expectedPlan.Cases.records[0].AccountId = '@AccountRef1';
     expectedPlan.Contacts.records[0].AccountId = '@AccountRef1';
 
-    await exportApi.export({ query: 'select', plan: true });
+    await exportApi.export({ query: 'select ', plan: true });
     expect(writeStub.callCount).to.equal(4);
 
     const fsWriteCall1 = writeStub.args[0];
@@ -343,7 +343,7 @@ describe('Export API', () => {
     expectedPlan.planFile[2].files = [`${PREFIX}-Contacts.json`];
 
     await exportApi.export({
-      query: 'select',
+      query: 'select ',
       plan: true,
       prefix: PREFIX,
     });
@@ -400,7 +400,7 @@ describe('Export API', () => {
       sobject: sobjectStub,
     });
 
-    await exportApi.export({ query: 'select' });
+    await exportApi.export({ query: 'select ' });
     const writeFileArgs = writeStub.args;
     const filenameArg = writeFileArgs[0][0];
     const fileContentsJsonArg = JSON.parse(writeFileArgs[0][1]);
@@ -408,5 +408,38 @@ describe('Export API', () => {
     expect(writeStub.callCount).to.equal(1);
     expect(filenameArg).to.equal('Account-Case-Contact.json');
     expect(fileContentsJsonArg).to.eql(expectedFile);
+  });
+
+  it('should parse query for valid select statement, lower case', async () => {
+    await exportApi.export({ query: 'select ' });
+    expect(writeStub.callCount).to.equal(1);
+  });
+
+  it('should parse query for valid select statement, all caps', async () => {
+    await exportApi.export({ query: 'SELECT ' });
+    expect(writeStub.callCount).to.equal(1);
+  });
+
+  it('should parse query for valid select statement, mixed case', async () => {
+    await exportApi.export({ query: 'sElEcT ' });
+    expect(writeStub.callCount).to.equal(1);
+  });
+
+  it('should parse query for valid select statement, should throw, no space after select, not valid', async () => {
+    try {
+      await exportApi.export({ query: 'SELECT' });
+      assert.fail('the above should throw a message');
+    } catch (e) {
+      expect(e.message).to.equal('Invalid SOQL query: SELECT');
+    }
+  });
+
+  it('should parse query for valid select statement, should throw, query not starting with select, not valid', async () => {
+    try {
+      await exportApi.export({ query: 'choose id from users' });
+      assert.fail('the above should throw a message');
+    } catch (e) {
+      expect(e.message).to.equal('Invalid SOQL query: choose id from users');
+    }
   });
 });
