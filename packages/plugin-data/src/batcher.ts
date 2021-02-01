@@ -124,14 +124,12 @@ export class Batcher {
    * @param records
    * @param sobjectType {string}
    * @param wait {number}
-   * @param jsonFlag
    */
   public async createAndExecuteBatches(
     job: Job,
     records: ReadStream,
     sobjectType: string,
-    wait?: number,
-    jsonFlag?: boolean
+    wait?: number
   ): Promise<BulkResult[] | JobInfo[]> {
     const batchesCompleted = 0;
     let batchesQueued = 0;
@@ -152,25 +150,17 @@ export class Batcher {
               // reword no external id error message to direct it to org user rather than api user
               if (err.message.startsWith('External ID was blank')) {
                 err.message = messages.getMessage('ExternalIdRequired', [sobjectType]);
+                job.emit('error', err);
               }
               if (err.message.startsWith('Polling time out')) {
                 err.message = this.parseTimeOutError(err);
+                // using the reject method for all of the promises wasn't handling errors properly
+                // so emit a 'error' on the job.
+
+                job.emit('error', new SfdxError(err.message, 'Time Out', [], 69));
               }
 
               this.ux.stopSpinner('Error');
-
-              // using the reject method for all of the promises wasn't handling errors properly
-              // but throwing inside of a promise has it's own issues
-              // one of them being that it will throw an exception right away
-              // to only show one error message throw it, and then catch the exception and do nothing
-              if (jsonFlag) {
-                throw new SfdxError(err.message, 'Time Out', [], 69).toObject();
-              } else {
-                try {
-                  throw err.message;
-                  // eslint-disable-next-line no-empty
-                } catch (e) {}
-              }
             });
 
             newBatch.on(

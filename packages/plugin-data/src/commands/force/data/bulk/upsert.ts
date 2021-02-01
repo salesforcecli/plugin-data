@@ -63,15 +63,7 @@ export default class Upsert extends DataCommand {
       });
 
       try {
-        resolve(
-          await batcher.createAndExecuteBatches(
-            job,
-            csvStream,
-            this.flags.sobjecttype,
-            this.flags.wait,
-            this.flags.json
-          )
-        );
+        resolve(await batcher.createAndExecuteBatches(job, csvStream, this.flags.sobjecttype, this.flags.wait));
         this.ux.stopSpinner();
       } catch (e) {
         this.ux.stopSpinner('error');

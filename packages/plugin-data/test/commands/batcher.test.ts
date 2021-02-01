@@ -290,7 +290,7 @@ describe('batcher', () => {
         const batch = job.createBatch();
         batch.emit('External ID was blank');
         try {
-          await batcher.createAndExecuteBatches(job, ReadStream.prototype, 'TestObject__c', 5, false);
+          await batcher.createAndExecuteBatches(job, ReadStream.prototype, 'TestObject__c', 5);
         } catch (e) {
           expect(e.message).to.equal('An External ID is required on TestObject__c to perform an upsert.');
         }
@@ -308,7 +308,7 @@ describe('batcher', () => {
         const batch = job.createBatch();
         batch.emit('Polling time out');
         try {
-          await batcher.createAndExecuteBatches(job, ReadStream.prototype, 'TestObject__c', 5, false);
+          await batcher.createAndExecuteBatches(job, ReadStream.prototype, 'TestObject__c', 5);
         } catch (e) {
           expect(e.message).to.contain('The operation timed out. Check the status with command');
         }
