@@ -2260,7 +2260,7 @@ export const soqlQueryExemplars = {
     },
     soqlQueryResult: {
       columns: queryFieldsExemplars.queryWithIdFilter.columns,
-      query: 'SELECT Id, name FROM Contact where Id = \'003B000000DkDswIAF\'',
+      query: 'SELECT Id, Name FROM Contact where Id = \'003B000000DkDswIAF\'',
       result: {
         totalSize: 1,
         done: true,
