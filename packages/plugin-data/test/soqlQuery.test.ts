@@ -65,4 +65,19 @@ describe('soqlQuery tests', () => {
     sinon.assert.notCalled(requestSpy);
     expect(results).to.be.deep.equal(soqlQueryExemplars.emptyQuery.soqlQueryResult);
   });
+  it('should preserve case sensitivity for query filter Ids', async () => {
+
+      sandbox
+        .stub(fakeConnection, 'request')
+        .resolves({ columnMetadata: queryFieldsExemplars.queryWithIdFilter.columnMetadata });
+
+      querySpy = sandbox.stub(fakeConnection, 'autoFetchQuery')
+        .resolves(soqlQueryExemplars.queryWithIdFilter.queryResult);
+
+      const soqlQuery = new SoqlQuery();
+      const results = await soqlQuery.runSoqlQuery(fakeConnection, 'SELECT id, name FROM Contact where Id = \'003B000000DkDswIAF\'', logger);
+
+      sinon.assert.calledOnce(querySpy);
+      expect(results).to.be.deep.equal(soqlQueryExemplars.queryWithIdFilter.soqlQueryResult);
+    });
 });
