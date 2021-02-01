@@ -6,8 +6,8 @@
  */
 
 import { SfdxCommand } from '@salesforce/command';
-import { Messages, SfdxError, Org } from '@salesforce/core';
 import { AnyJson, Dictionary, get, Nullable } from '@salesforce/ts-types';
+import { Messages, SfdxError, Org, fs } from '@salesforce/core';
 import { BaseConnection, ErrorResult, Record, SObject } from 'jsforce';
 
 Messages.importMessagesDirectory(__dirname);
@@ -85,6 +85,12 @@ export abstract class DataCommand extends SfdxCommand {
       });
     }
     return errors;
+  }
+
+  public async throwIfFileDoesntExist(path: string): Promise<void> {
+    if (!(await fs.fileExists(path))) {
+      throw new SfdxError(messages.getMessage('PathDoesNotExist', [path]), 'PathDoesNotExist');
+    }
   }
 
   public getJsonResultObject(result = this.result.data, status = process.exitCode || 0): Result {
