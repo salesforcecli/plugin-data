@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.com/salesforcecli/data/compare/@salesforce/plugin-data@0.2.5...@salesforce/plugin-data@0.4.0) (2021-02-01)
+
+
+### Features
+
+* @W-8449669@ migrate force:data:soql:query ([#16](https://github.com/salesforcecli/data/issues/16)) ([b6820f8](https://github.com/salesforcecli/data/commit/b6820f8632876419f5f0d5f74f11651adb02d4b9))
+
+
+
+
+
 ## [0.2.5](https://github.com/salesforcecli/data/compare/@salesforce/plugin-data@0.2.4...@salesforce/plugin-data@0.2.5) (2020-12-15)
 
 **Note:** Version bump only for package @salesforce/plugin-data
