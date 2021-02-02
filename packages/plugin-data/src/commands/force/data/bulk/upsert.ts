@@ -49,7 +49,7 @@ export default class Upsert extends DataCommand {
     await this.throwIfFileDoesntExist(this.flags.csvfile);
 
     const batcher: Batcher = new Batcher(conn, this.ux);
-    const csvStream: ReadStream = fs.createReadStream(this.flags.csvfile);
+    const csvStream: ReadStream = fs.createReadStream(this.flags.csvfile, { encoding: 'utf-8' });
 
     const job = conn.bulk.createJob(this.flags.sobjecttype, 'upsert', {
       extIdField: this.flags.externalid,

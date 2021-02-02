@@ -46,7 +46,7 @@ export default class Delete extends DataCommand {
       const conn: Connection = this.org.getConnection();
       this.ux.startSpinner('Bulk Delete');
 
-      const csvRecords: ReadStream = fs.createReadStream(this.flags.csvfile);
+      const csvRecords: ReadStream = fs.createReadStream(this.flags.csvfile, { encoding: 'utf-8' });
       const job: Job = conn.bulk.createJob(this.flags.sobjecttype, 'delete');
 
       const batcher: Batcher = new Batcher(conn, this.ux);
