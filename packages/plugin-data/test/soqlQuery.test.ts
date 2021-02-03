@@ -69,15 +69,15 @@ describe('soqlQuery tests', () => {
 
       sandbox
         .stub(fakeConnection, 'request')
-        .resolves({ columnMetadata: queryFieldsExemplars.queryWithIdFilter.columnMetadata });
+        .resolves({ columnMetadata: queryFieldsExemplars.queryWithIdFilters.columnMetadata });
 
       querySpy = sandbox.stub(fakeConnection, 'autoFetchQuery')
-        .resolves(soqlQueryExemplars.queryWithIdFilter.queryResult);
+        .resolves(soqlQueryExemplars.queryWithIdFilters.queryResult);
 
       const soqlQuery = new SoqlQuery();
       const results = await soqlQuery.runSoqlQuery(fakeConnection, 'SELECT id, name FROM Contact where Id = \'003B000000DkDswIAF\'', logger);
 
       sinon.assert.calledOnce(querySpy);
-      expect(results).to.be.deep.equal(soqlQueryExemplars.queryWithIdFilter.soqlQueryResult);
+      expect(results).to.be.deep.equal(soqlQueryExemplars.queryWithIdFilters.soqlQueryResult);
     });
 });
