@@ -186,7 +186,7 @@ export const queryFieldsExemplars = {
       { fieldType: FieldType.field, name: 'Owner.Name' },
     ],
   },
-  queryWithIdFilter: {
+  queryWithIdFilters: {
     columnMetadata: [
       {
         aggregate: false,
