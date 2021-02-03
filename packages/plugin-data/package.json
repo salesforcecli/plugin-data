@@ -72,11 +72,11 @@
     "@salesforce/ts-types": "^1.4.3",
     "chalk": "^4.1.0",
     "csv-parse": "^4.14.1",
-    "tslib": "^1"
+    "tslib": "^2"
   },
   "devDependencies": {
     "@salesforce/dev-config": "^2.0.0",
-    "@salesforce/dev-scripts": "^0.6.2",
+    "@salesforce/dev-scripts": "0.6.2",
     "@salesforce/prettier-config": "^0.0.1",
     "@salesforce/ts-sinon": "^1.2.3",
     "@types/chai-as-promised": "^7.1.3",
