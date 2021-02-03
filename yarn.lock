@@ -1407,7 +1407,7 @@
   resolved "https://registry.npmjs.org/@salesforce/dev-config/-/dev-config-2.0.0.tgz#388d71830e63078a835a844b51d2661c73ac851e"
   integrity sha512-CwPeiNrH7bULxjr7RmvStR3uPWu3aMl35mQrUNip2pTMvXQ4QmcDowWqx5MSaLj03JIQaoxnt6g8qWlhyOmxUQ==
 
-"@salesforce/dev-scripts@^0.6.2":
+"@salesforce/dev-scripts@0.6.2", "@salesforce/dev-scripts@^0.6.2":
   version "0.6.2"
   resolved "https://registry.npmjs.org/@salesforce/dev-scripts/-/dev-scripts-0.6.2.tgz#fad0c4187626c795360b560ceef0a2171042fd04"
   integrity sha512-uzQW02sbH1NOS088Yz7P8wh4k3APSSJ+t+NZP9Q1k5PawYJFYhzPSoHcYE5TMVMmgoTBZLHNBxCprfxNTNGTIA==
