@@ -303,6 +303,7 @@ export class Batcher {
         // library option is snakecase
         // eslint-disable-next-line @typescript-eslint/camelcase
         skip_empty_lines: true,
+        bom: true,
       });
 
       readStream.pipe(parser);
