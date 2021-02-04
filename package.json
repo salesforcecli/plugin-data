@@ -46,8 +46,10 @@
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1",
+    "@oclif/plugin-command-snapshot": "^2.0.0",
     "@salesforce/dev-config": "^2.0.0",
     "@salesforce/dev-scripts": "^0.6.2",
+    "@salesforce/plugin-command-reference": "^1.3.0",
     "@salesforce/prettier-config": "^0.0.1",
     "@salesforce/ts-sinon": "^1.2.3",
     "@typescript-eslint/eslint-plugin": "^2.30.0",
@@ -68,8 +70,8 @@
     "nyc": "^15.1.0",
     "prettier": "^2.0.5",
     "pretty-quick": "^2.0.1",
-    "sinon": "^9.0.2",
     "shx": "^0.3.3",
+    "sinon": "^9.0.2",
     "ts-node": "^9.1.1",
     "typescript": "^3.9.3"
   },
