@@ -15,6 +15,7 @@
     ],
     "topics": {
       "force": {
+        "description": "tools for the Salesforce developer",
         "subtopics": {
           "data": {
             "description": "manipulate records in your org",
