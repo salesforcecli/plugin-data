@@ -6,15 +6,17 @@
  */
 
 import * as os from 'os';
-import { flags, FlagsConfig, SfdxCommand } from '@salesforce/command';
-import { Connection, Logger, Messages, Org } from '@salesforce/core';
+import { flags, FlagsConfig } from '@salesforce/command';
+import { Connection, Logger, Messages } from '@salesforce/core';
 import { ensureJsonArray, ensureJsonMap, ensureString, isJsonArray, toJsonMap } from '@salesforce/ts-types';
 import { Tooling } from '@salesforce/core/lib/connection';
 import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../../../reporters';
 import { Field, FieldType, SoqlQueryResult } from '../../../../dataSoqlQueryTypes';
+import { DataCommand } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
+const commonMessages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
 /**
  * Class to handle a soql query
@@ -103,9 +105,8 @@ export class SoqlQuery {
   }
 }
 
-export class DataSoqlQueryCommand extends SfdxCommand {
+export class DataSoqlQueryCommand extends DataCommand {
   public static readonly description = messages.getMessage('description');
-  public static readonly requiresProject = false;
   public static readonly requiresUsername = true;
   public static readonly examples = messages.getMessage('examples').split(os.EOL);
 
@@ -125,10 +126,11 @@ export class DataSoqlQueryCommand extends SfdxCommand {
       options: ['human', 'csv', 'json'],
       default: 'human',
     }),
+    perflog: flags.boolean({
+      description: commonMessages.getMessage('perfLogLevelOption'),
+      dependsOn: ['json'],
+    }),
   };
-
-  // Overrides SfdxCommand.  This is ensured since requiresUsername == true
-  protected org!: Org;
 
   /**
    * Command run implementation
@@ -148,11 +150,8 @@ export class DataSoqlQueryCommand extends SfdxCommand {
     try {
       if (this.flags.resultformat !== 'json') this.ux.startSpinner(messages.getMessage('queryRunningMessage'));
       const query = new SoqlQuery();
-      const queryResult: SoqlQueryResult = await query.runSoqlQuery(
-        this.flags.usetoolingapi ? this.org.getConnection().tooling : this.org.getConnection(),
-        this.flags.query,
-        this.logger
-      );
+      const conn = this.getConnection() as Connection | Tooling;
+      const queryResult: SoqlQueryResult = await query.runSoqlQuery(conn, this.flags.query, this.logger);
       const results = {
         ...queryResult,
       };
