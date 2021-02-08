@@ -106,6 +106,7 @@
             "json",
             "loglevel",
             "query",
+            "perflog",
             "resultformat",
             "targetusername",
             "usetoolingapi"
