@@ -25,7 +25,7 @@ export default class Upsert extends DataCommand {
       description: messages.getMessage('flags.externalid'),
       required: true,
     }),
-    csvfile: flags.string({
+    csvfile: flags.filepath({
       char: 'f',
       description: messages.getMessage('flags.csvfile'),
       required: true,

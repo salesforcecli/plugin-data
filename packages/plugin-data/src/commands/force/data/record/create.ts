@@ -25,24 +25,20 @@ export default class Create extends DataCommand {
     sobjecttype: flags.string({
       char: 's',
       required: true,
-      hidden: false,
       description: messages.getMessage('sObjectType'),
     }),
     values: flags.string({
       char: 'v',
       required: true,
-      hidden: false,
       description: messages.getMessage('values'),
     }),
     usetoolingapi: flags.boolean({
       char: 't',
-      required: false,
-      hidden: false,
       description: messages.getMessage('useToolingApi'),
     }),
     perflog: flags.boolean({
       description: commonMessages.getMessage('perfLogLevelOption'),
-      longDescription: commonMessages.getMessage('perfLogLevelOptionLong'),
+      dependsOn: ['json'],
     }),
   };
 

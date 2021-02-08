@@ -7,8 +7,11 @@
 
 import { SfdxCommand } from '@salesforce/command';
 import { AnyJson, Dictionary, get, Nullable } from '@salesforce/ts-types';
-import { Messages, SfdxError, Org, fs } from '@salesforce/core';
+import { fs, Messages, Org, SfdxError } from '@salesforce/core';
 import { BaseConnection, ErrorResult, Record, SObject } from 'jsforce';
+// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+// @ts-ignore because jsforce doesn't export http-api
+import * as HttpApi from 'jsforce/lib/http-api';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
@@ -22,10 +25,6 @@ interface Result {
   result: AnyJson;
   perfMetrics?: Metric[];
 }
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-// @ts-ignore because jsforce doesn't export http-api
-import * as HttpApi from 'jsforce/lib/http-api';
 
 interface Response {
   headers: AnyJson & { perfmetrics?: string };
@@ -66,12 +65,6 @@ export abstract class DataCommand extends SfdxCommand {
     if (!this.flags.where && !this.flags.sobjectid) {
       throw new SfdxError(messages.getMessage('NeitherSobjectidNorWhereError'), 'NeitherSobjectidNorWhereError', [
         messages.getMessage('NeitherSobjectidNorWhereErrorActions'),
-      ]);
-    }
-
-    if (!!this.flags.where && !!this.flags.sobjectid) {
-      throw new SfdxError(messages.getMessage('BothSobjectidAndWhereError'), 'BothSobjectidAndWhereError', [
-        messages.getMessage('BothSobjectidAndWhereErrorActions'),
       ]);
     }
   }
@@ -173,8 +166,7 @@ export abstract class DataCommand extends SfdxCommand {
         throw new Error(messages.getMessage('TextUtilMalformedKeyValuePair', [pair]));
       } else {
         const key = pair.substr(0, eqPosition);
-        const value = pair.substr(eqPosition + 1);
-        constructedObject[key] = value;
+        constructedObject[key] = pair.substr(eqPosition + 1);
       }
     });
 
