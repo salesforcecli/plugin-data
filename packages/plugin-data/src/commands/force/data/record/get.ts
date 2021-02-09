@@ -49,7 +49,7 @@ export default class Get extends DataCommand {
   };
 
   public async run(): Promise<Record<AnyJson>> {
-    //  this.validateIdXorWhereFlags();
+    this.validateIdXorWhereFlags();
 
     this.ux.startSpinner('Getting Record');
     const sobject = this.getConnection().sobject(this.flags.sobjecttype);
