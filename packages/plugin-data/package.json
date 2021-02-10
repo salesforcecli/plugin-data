@@ -42,6 +42,7 @@
   "files": [
     "/lib",
     "/messages",
+    "/schema",
     "/oclif.manifest.json"
   ],
   "repository": {

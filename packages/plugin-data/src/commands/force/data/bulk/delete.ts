@@ -20,7 +20,7 @@ export default class Delete extends DataCommand {
   public static readonly examples = messages.getMessage('examples').split(os.EOL);
   public static readonly requiresUsername = true;
   public static readonly flagsConfig: FlagsConfig = {
-    csvfile: flags.string({
+    csvfile: flags.filepath({
       char: 'f',
       description: messages.getMessage('flags.csvfile'),
       required: true,
