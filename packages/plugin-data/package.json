@@ -68,7 +68,8 @@
     "pretest": "sf-compile-test",
     "test": "sf-test",
     "test:deprecation-policy": "./bin/run snapshot:compare",
-    "test:command-reference": "./bin/run commandreference:generate --erroronwarnings"
+    "test:command-reference": "./bin/run commandreference:generate --erroronwarnings",
+    "test:nuts": "nyc mocha \"**/*.nut.ts\" --slow 4500 --timeout 600000 --parallel"
   },
   "dependencies": {
     "@oclif/config": "^1",
