@@ -94,7 +94,7 @@ export abstract class DataCommand extends SfdxCommand {
   }
 
   public getConnection(): BaseConnection {
-    const connection: BaseConnection & ConnectionInternals = this.flags.useToolingApi
+    const connection: BaseConnection & ConnectionInternals = this.flags.usetoolingapi
       ? this.org.getConnection().tooling
       : this.org.getConnection();
 
