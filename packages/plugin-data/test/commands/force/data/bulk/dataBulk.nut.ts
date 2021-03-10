@@ -8,7 +8,7 @@ import * as path from 'path';
 import fs = require('fs');
 import { assert, expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-import { getNumber, getString } from '@salesforce/ts-types';
+import { getNumber, getString, Optional } from '@salesforce/ts-types';
 import { QueryResult } from '../soql/query/dataSoqlQuery.nut';
 
 let testSession: TestSession;
@@ -43,14 +43,14 @@ interface BulkStatus {
  * The four states of a job are Queued, Completed, InProgress, and Aborted. If Aborted, the test will fail
  * Otherwise run status until job is Completed
  */
-const checkBulkStatusJsonResponse = (jobId: string, batchId: string): void => {
+const checkBulkStatusJsonResponse = (jobId: Optional<string>, batchId: Optional<string>): void => {
   let totalProcessingTime;
   let jobState;
   do {
     const statusResponse = execCmd<BulkStatus[]>(
       `force:data:bulk:status --jobid ${jobId} --batchid ${batchId} --json`,
       { ensureExitCode: 0 }
-    ).jsonOutput.result;
+    ).jsonOutput?.result;
     expect(statusResponse).to.be.an('array').with.lengthOf(1);
     totalProcessingTime = getNumber(statusResponse[0], 'totalProcessingTime') ?? 0;
     jobState = getString(statusResponse[0], 'state', 'InProgress') ?? 'InProgress';
@@ -68,7 +68,7 @@ const checkBulkStatusHumanResponse = (statusCommand: string): void => {
   do {
     const statusResponse = execCmd<BulkStatus[]>(statusCommand.replace(/^sfdx /, ''), {
       ensureExitCode: 0,
-    }).shellOutput.stdout.split('\n');
+    }).shellOutput.stdout.split('\n') as string[];
     jobState = statusResponse.find((line) => line.startsWith('state:')) ?? 'InProgress';
     const totalProcessingTimeLine =
       statusResponse.find((line) => line.startsWith('totalProcessingTimeLine:')) ?? 'totalProcessingTimeLine: 0';
@@ -84,7 +84,7 @@ function queryAccountRecords() {
     {
       ensureExitCode: 0,
     }
-  ).jsonOutput.result;
+  ).jsonOutput?.result;
   expect(queryResponse).to.have.property('records').with.lengthOf(10);
   return queryResponse.records ?? [];
 }
@@ -114,7 +114,7 @@ describe('data:bulk commands', () => {
             'bulkUpsert.csv'
           )} --externalid Id --json`,
           { ensureExitCode: 0 }
-        ).jsonOutput.result;
+        ).jsonOutput?.result;
         expect(response).to.be.an('array').with.lengthOf(1);
         const bulkUpsertResult = response[0];
         expect(bulkUpsertResult).to.have.property('jobId');
@@ -141,7 +141,7 @@ describe('data:bulk commands', () => {
           {
             ensureExitCode: 0,
           }
-        ).jsonOutput.result;
+        ).jsonOutput?.result;
         expect(deleteResponse).to.be.an('array').with.lengthOf(1);
         const bulkDeleteResult = deleteResponse[0];
         expect(bulkDeleteResult).to.have.property('jobId');
@@ -165,7 +165,9 @@ describe('data:bulk commands', () => {
           { ensureExitCode: 0 }
         ).shellOutput.stdout;
         expect(response).to.match(/Check batch.*?status with the command:/g);
-        let statusCheckCommand = response.split('\n').find((line) => line.startsWith('sfdx force:data:bulk:status'));
+        let statusCheckCommand = (response.split('\n') as string[]).find((line) =>
+          line.startsWith('sfdx force:data:bulk:status')
+        );
         expect(statusCheckCommand).to.be.ok;
 
         checkBulkStatusHumanResponse(statusCheckCommand);
@@ -192,7 +194,9 @@ describe('data:bulk commands', () => {
           }
         ).shellOutput.stdout;
         expect(response).to.match(/Check batch.*?status with the command:/g);
-        statusCheckCommand = deleteResponse.split('\n').find((line) => line.startsWith('sfdx force:data:bulk:status'));
+        statusCheckCommand = (deleteResponse.split('\n') as string[]).find((line) =>
+          line.startsWith('sfdx force:data:bulk:status')
+        );
         expect(statusCheckCommand).to.be.ok;
         checkBulkStatusHumanResponse(statusCheckCommand);
       });
