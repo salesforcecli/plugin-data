@@ -9,21 +9,16 @@ import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { SfdxResult } from '@salesforce/command';
 import { Dictionary, get } from '@salesforce/ts-types';
-
-export interface QueryResult {
-  totalSize: number;
-  done: boolean;
-  records: Dictionary[];
-}
+import { QueryResult } from '../soql/query/dataSoqlQuery.nut';
 
 describe('data:tree commands', () => {
   let testSession: TestSession;
 
-  before(async () => {
+  before(() => {
     testSession = TestSession.create({
       setupCommands: [
-        'sfdx force:org:create -f config/project-scratch-def.json --setdefaultusername --wait 10',
-        'sfdx force:org:create -f config/project-scratch-def.json --setalias importOrg --wait 10',
+        'sfdx force:org:create -f config/project-scratch-def.json --setdefaultusername --wait 10 --durationdays 1',
+        'sfdx force:org:create -f config/project-scratch-def.json --setalias importOrg --wait 10 --durationdays 1',
       ],
       project: { sourceDir: path.join('test', 'test-files', 'data-project') },
     });
@@ -33,9 +28,9 @@ describe('data:tree commands', () => {
     await testSession?.clean();
   });
 
-  it('should error with invalid soql', async () => {
+  it('should error with invalid soql', () => {
     const result = execCmd(
-      `force:data:tree:export --query 'SELECT' --prefix INT --outputdir ${path.join('.', 'expoect_data')}`
+      `force:data:tree:export --query 'SELECT' --prefix INT --outputdir ${path.join('.', 'export_data')}`
     );
     const stdError = result.shellOutput.stderr.toLowerCase();
     expect(stdError).to.include('soql');
@@ -44,7 +39,7 @@ describe('data:tree commands', () => {
     expect(stdError).to.include('check the soql');
   });
 
-  it('import -> export -> import round trip should succeed', async () => {
+  it('import -> export -> import round trip should succeed', () => {
     const query =
       "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry, (SELECT Lastname, Title, Email FROM Contacts) FROM Account  WHERE Name LIKE 'SampleAccount%'";
 
