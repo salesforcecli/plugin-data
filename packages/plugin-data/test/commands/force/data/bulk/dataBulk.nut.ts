@@ -6,7 +6,7 @@
  */
 import * as path from 'path';
 import fs = require('fs');
-import { assert, expect } from 'chai';
+import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { getNumber, getString, Optional } from '@salesforce/ts-types';
 import { QueryResult } from '../soql/query/dataSoqlQuery.nut';
@@ -16,27 +16,11 @@ let testSession: TestSession;
 interface BulkUpsertDelete {
   id: string;
   jobId: string;
-  state: string;
-  createdDate: string;
-  systemModstamp: string;
-  numberRecordsProcessed: number;
-  numberRecordsFailed: number;
-  totalProcessingTime: number;
-  apiActiveProcessingTime: number;
-  apexProcessingTime: number;
 }
 
 interface BulkStatus {
-  id: string;
-  jobId: string;
   state: string;
-  createdDate: string;
-  systemModstamp: string;
-  numberRecordsProcessed: number;
-  numberRecordsFailed: number;
   totalProcessingTime: number;
-  apiActiveProcessingTime: number;
-  apexProcessingTime: number;
 }
 
 /* Check the status of the bulk upsert job using json output to determine progress
@@ -50,10 +34,10 @@ const checkBulkStatusJsonResponse = (jobId: Optional<string>, batchId: Optional<
     const statusResponse = execCmd<BulkStatus[]>(
       `force:data:bulk:status --jobid ${jobId} --batchid ${batchId} --json`,
       { ensureExitCode: 0 }
-    ).jsonOutput?.result;
+    ).jsonOutput?.result ?? [{ state: 'InProgress', totalProcessingTime: 0 }];
     expect(statusResponse).to.be.an('array').with.lengthOf(1);
-    totalProcessingTime = getNumber(statusResponse[0], 'totalProcessingTime') ?? 0;
-    jobState = getString(statusResponse[0], 'state', 'InProgress') ?? 'InProgress';
+    totalProcessingTime = getNumber(statusResponse[0], 'totalProcessingTime');
+    jobState = getString(statusResponse[0], 'state', 'InProgress');
   } while (totalProcessingTime < 10000 && (jobState === 'InProgress' || jobState === 'Queued'));
   expect(jobState).to.equal('Completed');
 };
@@ -84,9 +68,9 @@ function queryAccountRecords() {
     {
       ensureExitCode: 0,
     }
-  ).jsonOutput?.result;
+  ).jsonOutput?.result ?? { records: [], done: false, totalSize: 0 };
   expect(queryResponse).to.have.property('records').with.lengthOf(10);
-  return queryResponse.records ?? [];
+  return queryResponse.records;
 }
 
 describe('data:bulk commands', () => {
@@ -114,7 +98,7 @@ describe('data:bulk commands', () => {
             'bulkUpsert.csv'
           )} --externalid Id --json`,
           { ensureExitCode: 0 }
-        ).jsonOutput?.result;
+        ).jsonOutput?.result ?? [{ id: '', jobId: '' }];
         expect(response).to.be.an('array').with.lengthOf(1);
         const bulkUpsertResult = response[0];
         expect(bulkUpsertResult).to.have.property('jobId');
@@ -126,14 +110,7 @@ describe('data:bulk commands', () => {
 
         const accountIds = records.map((account) => account.Id);
         const idsFile = path.join(testSession.project?.dir ?? '.', 'data', 'deleteAccounts.csv');
-        try {
-          if (fs.existsSync(idsFile)) {
-            fs.unlinkSync(idsFile);
-          }
-          fs.writeFileSync(idsFile, `Id\n${accountIds.join('\n')}\n`);
-        } catch (error) {
-          assert.fail('', '', 'Could not create csv file of ids to delete');
-        }
+        fs.writeFileSync(idsFile, `Id\n${accountIds.join('\n')}\n`);
 
         // Run bulk delete
         const deleteResponse = execCmd<BulkUpsertDelete[]>(
@@ -141,7 +118,7 @@ describe('data:bulk commands', () => {
           {
             ensureExitCode: 0,
           }
-        ).jsonOutput?.result;
+        ).jsonOutput?.result ?? [{ id: '', jobId: '' }];
         expect(deleteResponse).to.be.an('array').with.lengthOf(1);
         const bulkDeleteResult = deleteResponse[0];
         expect(bulkDeleteResult).to.have.property('jobId');
@@ -177,14 +154,7 @@ describe('data:bulk commands', () => {
 
         const accountIds = records.map((account) => account.Id);
         const idsFile = path.join(testSession.project?.dir ?? '.', 'data', 'deleteAccounts.csv');
-        try {
-          if (fs.existsSync(idsFile)) {
-            fs.unlinkSync(idsFile);
-          }
-          fs.writeFileSync(idsFile, `Id\n${accountIds.join('\n')}\n`);
-        } catch (error) {
-          assert.fail('', '', 'Could not create csv file of ids to delete');
-        }
+        fs.writeFileSync(idsFile, `Id\n${accountIds.join('\n')}\n`);
 
         // Run bulk delete
         const deleteResponse = execCmd<BulkUpsertDelete[]>(
