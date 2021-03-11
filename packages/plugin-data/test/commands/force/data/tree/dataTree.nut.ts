@@ -35,7 +35,6 @@ describe('data:tree commands', () => {
     const stdError = result.shellOutput.stderr.toLowerCase();
     expect(stdError).to.include('soql');
     expect(stdError).to.include('malformed');
-    expect(stdError).to.include('select');
     expect(stdError).to.include('check the soql');
   });
 

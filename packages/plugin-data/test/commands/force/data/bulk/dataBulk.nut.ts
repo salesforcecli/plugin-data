@@ -55,11 +55,10 @@ const checkBulkStatusHumanResponse = (statusCommand: string): void => {
     }).shellOutput.stdout.split('\n') as string[];
     jobState = statusResponse.find((line) => line.startsWith('state:')) ?? 'InProgress';
     const totalProcessingTimeLine =
-      statusResponse.find((line) => line.startsWith('totalProcessingTimeLine:')) ?? 'totalProcessingTimeLine: 0';
+      statusResponse.find((line) => line.startsWith('totalProcessingTime:')) ?? 'totalProcessingTime: 0';
     totalProcessingTime = parseInt(totalProcessingTimeLine.split(/\s+/)[1], 10);
-    jobState = getString(statusResponse[0], 'state', 'InProgress') ?? 'InProgress';
   } while (totalProcessingTime < 10000 && (jobState.includes('InProgress') || jobState.includes('Queued')));
-  expect(jobState).to.equal('Completed');
+  expect(jobState).to.include('Completed');
 };
 
 function queryAccountRecords() {
