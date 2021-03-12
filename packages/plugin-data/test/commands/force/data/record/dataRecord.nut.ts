@@ -39,7 +39,7 @@ describe('data:record commands', () => {
     testSession = TestSession.create({
       setupCommands: [
         'sfdx force:org:create -f config/project-scratch-def.json --setdefaultusername --wait 10 --durationdays 1',
-        'sfdx force:org:create -f config/project-scratch-def.json --setalias importOrg --wait 10 --durationdays 1',
+        'sfdx force:source:push',
       ],
       project: { sourceDir: path.join('test', 'test-files', 'data-project') },
     });
@@ -50,7 +50,7 @@ describe('data:record commands', () => {
   });
 
   describe('verify json results', () => {
-    it('should create, update, and delete a data record', () => {
+    it('should create, get, update, and delete a data record', () => {
       const uniqueString = genUniqueString();
       const accountNameBefore = `MyIntTest${uniqueString}`;
       const accountNameAfter = `MyIntTestUpdated${uniqueString}`;
@@ -58,7 +58,7 @@ describe('data:record commands', () => {
       const updatedPhoneNumber = '0987654321';
 
       // Create a record
-      const createRecordResponse = execCmd<RecordCrudResult>(
+      let createRecordResponse = execCmd<RecordCrudResult>(
         `force:data:record:create --sobjecttype Account --values "name=${accountNameBefore} phone=${phoneNumber}" --json`,
         { ensureExitCode: 0 }
       ).jsonOutput;
@@ -74,6 +74,15 @@ describe('data:record commands', () => {
       expect(getRecordResponse?.result).to.have.property('Name', accountNameBefore);
       expect(getRecordResponse?.result).to.have.property('Phone', phoneNumber);
 
+      // Get a record using where
+      getRecordResponse = execCmd<AccountRecord>(
+        `force:data:record:get --sobjecttype Account --where "Name='${accountNameBefore}' Phone='${phoneNumber}'" --json`,
+        { ensureExitCode: 0 }
+      ).jsonOutput;
+      expect(getRecordResponse?.result).to.have.property('Id', createRecordResponse?.result.id);
+      expect(getRecordResponse?.result).to.have.property('Name', accountNameBefore);
+      expect(getRecordResponse?.result).to.have.property('Phone', phoneNumber);
+
       // Update a record
       execCmd<RecordCrudResult>(
         `force:data:record:update --sobjectid ${createRecordResponse?.result.id} --sobjecttype Account --values "name=${accountNameAfter} phone=${updatedPhoneNumber}" --json`,
@@ -82,16 +91,47 @@ describe('data:record commands', () => {
 
       // Get a record
       getRecordResponse = execCmd<AccountRecord>(
-        `force:data:record:get --sobjecttype Account --sobjectid ${createRecordResponse?.result.id} --json`,
+        `force:data:record:get --sobjecttype Account --sobjectid ${createRecordResponse?.result.id} --json --perflog`,
         { ensureExitCode: 0 }
       ).jsonOutput;
       expect(getRecordResponse?.result).to.have.property('Id', createRecordResponse?.result.id);
       expect(getRecordResponse?.result).to.have.property('Name', accountNameAfter);
       expect(getRecordResponse?.result).to.have.property('Phone', updatedPhoneNumber);
 
+      // Update a record
+      execCmd<RecordCrudResult>(
+        `force:data:record:update --where "Name='${accountNameAfter}'" --sobjecttype Account --values "name='${accountNameBefore}'" --json`,
+        { ensureExitCode: 0 }
+      );
+
+      // Get a record
+      getRecordResponse = execCmd<AccountRecord>(
+        `force:data:record:get --sobjecttype Account --sobjectid ${createRecordResponse?.result.id} --json `,
+        { ensureExitCode: 0 }
+      ).jsonOutput;
+      expect(getRecordResponse?.result).to.have.property('Id', createRecordResponse?.result.id);
+      expect(getRecordResponse?.result).to.have.property('Name', accountNameBefore);
+      expect(getRecordResponse?.result).to.have.property('Phone', updatedPhoneNumber);
+
       // Delete a record
-      const deleteRecordResponse = execCmd<RecordCrudResult>(
+      let deleteRecordResponse = execCmd<RecordCrudResult>(
         `force:data:record:delete --sobjecttype Account --sobjectid ${createRecordResponse?.result.id} --json`,
+        { ensureExitCode: 0 }
+      ).jsonOutput;
+      expect(deleteRecordResponse?.result).to.have.property('id', createRecordResponse?.result.id);
+      expect(deleteRecordResponse?.result).to.have.property('success', true);
+
+      // Create a record
+      createRecordResponse = execCmd<RecordCrudResult>(
+        `force:data:record:create --sobjecttype Account --values "name=${accountNameBefore} phone=${phoneNumber}" --json`,
+        { ensureExitCode: 0 }
+      ).jsonOutput;
+      expect(createRecordResponse?.result).to.have.property('success', true);
+      expect(createRecordResponse?.result).to.have.property('id');
+
+      // Delete a record
+      deleteRecordResponse = execCmd<RecordCrudResult>(
+        `force:data:record:delete --sobjecttype Account --where "name='${accountNameBefore}' phone='${phoneNumber}'" --json`,
         { ensureExitCode: 0 }
       ).jsonOutput;
       expect(deleteRecordResponse?.result).to.have.property('id', createRecordResponse?.result.id);
