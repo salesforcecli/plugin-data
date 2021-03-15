@@ -85,7 +85,7 @@
   "devDependencies": {
     "@salesforce/dev-config": "^2.0.0",
     "@salesforce/dev-scripts": "0.6.2",
-    "@salesforce/prettier-config": "^0.0.1",
+    "@salesforce/prettier-config": "^0.0.2",
     "@salesforce/cli-plugins-testkit": "^0.0.14",
     "@salesforce/ts-sinon": "^1.2.3",
     "@types/chai-as-promised": "^7.1.3",
