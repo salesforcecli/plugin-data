@@ -7,6 +7,7 @@
 import * as path from 'path';
 import { expect } from 'chai';
 import { execCmd, genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
+import { Dictionary } from '@salesforce/ts-types';
 
 interface RecordCrudResult {
   id: string;
@@ -18,6 +19,13 @@ interface AccountRecord {
   Id: string;
   Name: string;
   Phone: string;
+}
+
+interface ApexClassRecord {
+  Id: string;
+  Name: string;
+  Body: string;
+  SymbolTable: Dictionary;
 }
 
 const validateAccount = (
@@ -182,6 +190,27 @@ describe('data:record commands', () => {
         ensureExitCode: 0,
       }).shellOutput.stdout;
       expect(deleteRecordResponse).to.include('Successfully deleted record: 001');
+    });
+  });
+  describe('verify tooling api record commands', () => {
+    it('should get, update, and delete a data record', () => {
+      // Get ApexClass
+      let getRecordResponse = execCmd<ApexClassRecord>(
+        'force:data:record:get --sobjecttype ApexClass --where Name=MyClass --json',
+        { ensureExitCode: 0 }
+      ).jsonOutput?.result;
+      expect(getRecordResponse).to.have.property('Id');
+      expect(getRecordResponse).to.have.property('Name', 'MyClass');
+      expect(getRecordResponse).to.not.have.property('SymbolTable');
+
+      // Get ApexClass via tooling API
+      getRecordResponse = execCmd<ApexClassRecord>(
+        'force:data:record:get --sobjecttype ApexClass --where Name=MyClass --usetoolingapi --json',
+        { ensureExitCode: 0 }
+      ).jsonOutput?.result;
+      expect(getRecordResponse).to.have.property('Id', getRecordResponse?.Id);
+      expect(getRecordResponse).to.have.property('Name', 'MyClass');
+      expect(getRecordResponse).to.have.property('SymbolTable');
     });
   });
 });
