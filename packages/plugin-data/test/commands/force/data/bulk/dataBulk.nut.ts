@@ -23,6 +23,12 @@ interface BulkStatus {
   totalProcessingTime: number;
 }
 
+interface ShellString {
+  code: number;
+  stdout: string;
+  stderr: string;
+}
+
 /* Check the status of the bulk upsert job using json output to determine progress
  * The four states of a job are Queued, Completed, InProgress, and Aborted. If Aborted, the test will fail
  * Otherwise run status until job is Completed
@@ -48,11 +54,11 @@ const checkBulkStatusJsonResponse = (jobId: string, batchId: string): void => {
  */
 const checkBulkStatusHumanResponse = (statusCommand: string): void => {
   let totalProcessingTime = 0;
-  let jobState;
+  let jobState: string;
   do {
-    const statusResponse = execCmd<BulkStatus[]>(statusCommand.replace(/^sfdx /, ''), {
+    const statusResponse = (execCmd<BulkStatus[]>(statusCommand.replace(/^sfdx /, ''), {
       ensureExitCode: 0,
-    }).shellOutput.stdout.split('\n') as string[];
+    }).shellOutput as ShellString).stdout.split('\n');
     jobState = statusResponse.find((line) => line.startsWith('state:')) ?? 'InProgress';
     const totalProcessingTimeLine =
       statusResponse.find((line) => line.startsWith('totalProcessingTime:')) ?? 'totalProcessingTime: 0';
@@ -132,17 +138,17 @@ describe('data:bulk commands', () => {
     describe('data:bulk:upsert then data:bulk:status then soql:query and data:bulk:delete', () => {
       it('should upsert, query, and delete 10 accounts', () => {
         // Bulk upsert 10 accounts
-        const response = execCmd<BulkUpsertDelete[]>(
+        const response = (execCmd<BulkUpsertDelete[]>(
           `force:data:bulk:upsert --sobjecttype Account --csvfile ${path.join(
             '.',
             'data',
             'bulkUpsert.csv'
           )} --externalid Id`,
           { ensureExitCode: 0 }
-        ).shellOutput.stdout;
+        ).shellOutput as ShellString).stdout;
         expect(response).to.match(/Check batch.*?status with the command:/g);
         let statusCheckCommand =
-          (response.split('\n') as string[]).find((line) => line.startsWith('sfdx force:data:bulk:status')) ?? '';
+          response.split('\n').find((line) => line.startsWith('sfdx force:data:bulk:status')) ?? '';
 
         checkBulkStatusHumanResponse(statusCheckCommand);
 
@@ -154,15 +160,15 @@ describe('data:bulk commands', () => {
         fs.writeFileSync(idsFile, `Id\n${accountIds.join('\n')}\n`);
 
         // Run bulk delete
-        const deleteResponse = execCmd<BulkUpsertDelete[]>(
+        const deleteResponse = (execCmd<BulkUpsertDelete[]>(
           `force:data:bulk:delete --sobjecttype Account --csvfile ${idsFile}`,
           {
             ensureExitCode: 0,
           }
-        ).shellOutput.stdout;
+        ).shellOutput as ShellString).stdout;
         expect(response).to.match(/Check batch.*?status with the command:/g);
         statusCheckCommand =
-          (deleteResponse.split('\n') as string[]).find((line) => line.startsWith('sfdx force:data:bulk:status')) ?? '';
+          deleteResponse.split('\n').find((line) => line.startsWith('sfdx force:data:bulk:status')) ?? '';
 
         checkBulkStatusHumanResponse(statusCheckCommand);
       });

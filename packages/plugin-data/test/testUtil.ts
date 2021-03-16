@@ -22,9 +22,11 @@ import {
 import Parser = require('fast-xml-parser');
 import { Connection } from '@salesforce/core';
 
+import { getArray, getString } from '@salesforce/ts-types';
 import EventEmitter = NodeJS.EventEmitter;
 
 // needs an external _listeners object since its not included in the type definition
+/* eslint-disable @typescript-eslint/no-unsafe-return,@typescript-eslint/ban-types */
 export const createBaseFakeEmitter = function (): EventEmitter {
   return {
     on(event: string, listener: Function): EventEmitter {
@@ -74,8 +76,10 @@ export const createBaseFakeEmitter = function (): EventEmitter {
     },
   };
 };
+/* eslint-enable @typescript-eslint/no-unsafe-return */
 
 export const createBaseFakeConnection = function (): BaseConnection {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return {
     instanceUrl: '',
     version: '',
@@ -184,6 +188,7 @@ export const createBaseFakeConnection = function (): BaseConnection {
 };
 
 export const createFakeConnection = function (): Connection {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return {
     instanceUrl: '',
     version: '',
@@ -308,6 +313,7 @@ export const createFakeConnection = function (): Connection {
 };
 
 export const createBaseFakeBatch = function (): Batch {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return {
     on(event: string, callback?: (result: Record<string, any>) => any): void {},
     check(callback?: (err: Error, info: BatchInfo) => any): BatchInfo {
@@ -319,11 +325,12 @@ export const createBaseFakeBatch = function (): Batch {
 };
 
 export const toXMLObject = function (xmlString: string): Record<string, any> {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return Parser.parse(xmlString, { arrayMode: false });
 };
 
 let currentCommandResponse: Record<string, any> | undefined;
-export const setCurrentResponse = function (response: Record<string, any>) {
+export const setCurrentResponse = function (response: Record<string, any>): void {
   currentCommandResponse = response;
 };
 
@@ -331,12 +338,7 @@ export const getCurrentResponse = function (): Record<string, any> | undefined {
   return currentCommandResponse;
 };
 
-export const getFlag = function (command: any, flagName: string) {
-  const flags = command.flags;
-  if (flags) {
-    const flag = flags.find(function (value: any): boolean {
-      return value.name === flagName;
-    });
-    return flag;
-  }
+export const getFlag = function (command: unknown, flagName: string): any {
+  const flags = getArray(command, 'flags');
+  return flags ? flags.find((value: any) => getString(value, 'name') === flagName) : undefined;
 };

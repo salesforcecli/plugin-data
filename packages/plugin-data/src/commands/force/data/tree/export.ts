@@ -10,7 +10,7 @@ import * as os from 'os';
 import { SfdxCommand } from '@salesforce/command';
 import { flags, FlagsConfig } from '@salesforce/command';
 import { Messages, Org } from '@salesforce/core';
-import { ExportApi } from '../../../../api/data/tree/exportApi';
+import { ExportApi, ExportConfig } from '../../../../api/data/tree/exportApi';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.export');
@@ -45,6 +45,12 @@ export default class Export extends SfdxCommand {
   public async run(): Promise<unknown> {
     const { query, plan, prefix, outputdir: outputDir } = this.flags;
     const exportApi = new ExportApi(this.org, this.ux);
-    return exportApi.export({ query, plan, prefix, outputDir });
+    const exportConfig: ExportConfig = {
+      outputDir: outputDir as string,
+      plan: plan as boolean,
+      prefix: prefix as string,
+      query: query as string,
+    };
+    return exportApi.export(exportConfig);
   }
 }

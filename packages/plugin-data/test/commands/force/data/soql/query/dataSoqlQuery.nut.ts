@@ -39,7 +39,7 @@ function runQuery(query: string, options: QueryOptions = { json: true, ensureExi
     expect(queryResult).to.have.property('records').to.not.have.lengthOf(0);
     return queryResult;
   } else {
-    return options.ensureExitCode === 0 ? results.shellOutput.stdout : results.shellOutput.stderr;
+    return (options.ensureExitCode === 0 ? results?.shellOutput.stdout : results?.shellOutput.stderr) as string;
   }
 }
 
@@ -66,8 +66,8 @@ describe('data:soql:query command', () => {
 
   describe('data:soql:query verify query errors', () => {
     it('should error with invalid soql', () => {
-      const result = runQuery('SELECT', { ensureExitCode: 1, json: false });
-      const stdError = result.toLowerCase();
+      const result = runQuery('SELECT', { ensureExitCode: 1, json: false }) as string;
+      const stdError = result?.toLowerCase();
       expect(stdError).to.include('unexpected token');
     });
 
@@ -76,8 +76,8 @@ describe('data:soql:query command', () => {
       const result = runQuery('SELECT Id, Name, SymbolTable from ApexClass', {
         ensureExitCode: 1,
         json: false,
-      });
-      expect(result.toLowerCase()).to.include("No such column 'SymbolTable' on entity 'ApexClass'".toLowerCase());
+      }) as string;
+      expect(result?.toLowerCase()).to.include("No such column 'SymbolTable' on entity 'ApexClass'".toLowerCase());
     });
   });
   describe('data:soql:query verify json results', () => {
@@ -85,9 +85,9 @@ describe('data:soql:query command', () => {
       const query =
         "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry FROM Account WHERE Name LIKE 'SampleAccount%'";
 
-      const queryResult = runQuery(query, { ensureExitCode: 0, json: true });
+      const queryResult = runQuery(query, { ensureExitCode: 0, json: true }) as QueryResult;
 
-      verifyRecordFields(queryResult.records[0], [
+      verifyRecordFields(queryResult?.records[0], [
         'Id',
         'Name',
         'Phone',
@@ -101,9 +101,9 @@ describe('data:soql:query command', () => {
       const query =
         "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry, (SELECT Lastname, Title, Email FROM Contacts) FROM Account  WHERE Name LIKE 'SampleAccount%'";
 
-      const queryResult = runQuery(query, { ensureExitCode: 0, json: true });
+      const queryResult = runQuery(query, { ensureExitCode: 0, json: true }) as QueryResult;
 
-      verifyRecordFields(queryResult.records[0], [
+      verifyRecordFields(queryResult?.records[0], [
         'Id',
         'Name',
         'Phone',
@@ -114,7 +114,7 @@ describe('data:soql:query command', () => {
         'attributes',
       ]);
 
-      const contacts = (queryResult.records[0].Contacts ?? { done: false, records: [], totalSize: 0 }) as QueryResult;
+      const contacts = (queryResult?.records[0].Contacts ?? { done: false, records: [], totalSize: 0 }) as QueryResult;
       verifyRecordFields(contacts.records[0], ['LastName', 'Title', 'Email', 'attributes']);
     });
   });
@@ -132,7 +132,7 @@ describe('data:soql:query command', () => {
       const query =
         "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry, (SELECT Lastname, Title, Email FROM Contacts) FROM Account  WHERE Name LIKE 'SampleAccount%' limit 1";
 
-      const queryResult = runQuery(query, { ensureExitCode: 0, json: false });
+      const queryResult = runQuery(query, { ensureExitCode: 0, json: false }) as string;
 
       expect(queryResult).to.match(
         /ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY\s+?CONTACTS.LASTNAME\s+?CONTACTS.TITLE\s+?CONTACTS.EMAIL/g

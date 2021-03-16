@@ -52,7 +52,7 @@ export default class Upsert extends DataCommand {
     const csvStream: ReadStream = fs.createReadStream(this.flags.csvfile, { encoding: 'utf-8' });
 
     const job = conn.bulk.createJob(this.flags.sobjecttype, 'upsert', {
-      extIdField: this.flags.externalid,
+      extIdField: this.flags.externalid as string,
       concurrencyMode: 'Parallel',
     });
 

@@ -79,9 +79,9 @@ export default class Import extends SfdxCommand {
     }
 
     const importConfig: ImportConfig = {
-      sobjectTreeFiles: this.flags.sobjecttreefiles,
-      contentType: this.flags.contenttype,
-      plan: this.flags.plan,
+      sobjectTreeFiles: this.flags.sobjecttreefiles as string[],
+      contentType: this.flags.contenttype as string,
+      plan: this.flags.plan as string,
     };
 
     const importResults = await importApi.import(importConfig);

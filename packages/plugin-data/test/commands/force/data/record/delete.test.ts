@@ -9,6 +9,12 @@ import { ensureJsonMap, ensureString } from '@salesforce/ts-types';
 
 const sObjectId = '0011100001zhhyUAAQ';
 
+interface DeleteResult {
+  status: number;
+  name?: string;
+  result?: { Id: string; IsDeleted: boolean };
+}
+
 describe('force:data:record:delete', () => {
   test
     .withOrg({ username: 'test@org.com' }, true)
@@ -38,10 +44,10 @@ describe('force:data:record:delete', () => {
       '--json',
     ])
     .it('should delete the sobject by sobjectid', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as DeleteResult;
       expect(result.status).to.equal(0);
-      expect(result.result.Id).to.equal('0011100001zhhyUAAQ');
-      expect(result.result.IsDeleted).to.equal(true);
+      expect(result.result?.Id).to.equal('0011100001zhhyUAAQ');
+      expect(result.result?.IsDeleted).to.equal(true);
     });
 
   test
@@ -62,7 +68,7 @@ describe('force:data:record:delete', () => {
       '--json',
     ])
     .it('should throw an error if both --where and --sobjectid are provided', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as DeleteResult;
       expect(result.status).to.equal(1);
     });
 
@@ -83,7 +89,7 @@ describe('force:data:record:delete', () => {
       '--json',
     ])
     .it('should throw an error if the where flag returns nothing', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as DeleteResult;
       expect(result.status).to.equal(1);
       expect(result.name).to.equal('DataRecordGetNoRecord');
     });

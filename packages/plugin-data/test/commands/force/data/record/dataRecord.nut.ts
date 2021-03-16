@@ -28,6 +28,12 @@ interface ApexClassRecord {
   SymbolTable: Dictionary;
 }
 
+interface ShellString {
+  code: number;
+  stdout: string;
+  stderr: string;
+}
+
 const validateAccount = (
   accountRecord: string,
   recordId: string,
@@ -155,40 +161,38 @@ describe('data:record commands', () => {
       const updatedPhoneNumber = '0987654321';
 
       // Create a record
-      const createRecordResponse = execCmd(
+      const createRecordResponse = (execCmd(
         `force:data:record:create --sobjecttype Account --values "name=${accountNameBefore} phone=${phoneNumber}"`,
         { ensureExitCode: 0 }
-      ).shellOutput.stdout;
-      const match = createRecordResponse.match('Successfully created record: (001.{15})\\.');
-      expect(match).to.have.lengthOf(
-        2,
-        `could not locate success message in results: "${createRecordResponse as string}`
-      );
-      const recordId = match[1] as string;
+      ).shellOutput as ShellString).stdout;
+      const m = new RegExp('Successfully created record: (001.{15})\\.');
+      const match = m.exec(createRecordResponse);
+      expect(match).to.have.lengthOf(2, `could not locate success message in results: "${createRecordResponse}`);
+      const recordId = match[1];
 
       // Get a record
-      let getRecordResponse = execCmd(`force:data:record:get --sobjecttype Account --sobjectid ${recordId}`, {
+      let getRecordResponse = (execCmd(`force:data:record:get --sobjecttype Account --sobjectid ${recordId}`, {
         ensureExitCode: 0,
-      }).shellOutput.stdout;
+      }).shellOutput as ShellString).stdout;
       expect(validateAccount(getRecordResponse, recordId, accountNameBefore, phoneNumber)).to.be.true;
 
       // Update a record
-      const updateRecordResponse = execCmd(
+      const updateRecordResponse = (execCmd(
         `force:data:record:update --sobjectid ${recordId} --sobjecttype Account --values "name=${accountNameAfter} phone=${updatedPhoneNumber}"`,
         { ensureExitCode: 0 }
-      ).shellOutput.stdout;
+      ).shellOutput as ShellString).stdout;
       expect(updateRecordResponse).to.include('Successfully updated record: 001');
 
       // Get a record
-      getRecordResponse = execCmd(`force:data:record:get --sobjecttype Account --sobjectid ${recordId}`, {
+      getRecordResponse = (execCmd(`force:data:record:get --sobjecttype Account --sobjectid ${recordId}`, {
         ensureExitCode: 0,
-      }).shellOutput.stdout;
+      }).shellOutput as ShellString).stdout;
       expect(validateAccount(getRecordResponse, recordId, accountNameAfter, updatedPhoneNumber)).to.be.true;
 
       // Delete a record
-      const deleteRecordResponse = execCmd(`force:data:record:delete --sobjecttype Account --sobjectid ${recordId}`, {
+      const deleteRecordResponse = (execCmd(`force:data:record:delete --sobjecttype Account --sobjectid ${recordId}`, {
         ensureExitCode: 0,
-      }).shellOutput.stdout;
+      }).shellOutput as ShellString).stdout;
       expect(deleteRecordResponse).to.include('Successfully deleted record: 001');
     });
   });

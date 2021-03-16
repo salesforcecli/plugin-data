@@ -6,6 +6,7 @@
  */
 
 /* eslint-disable  @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import * as path from 'path';
 import * as util from 'util';
@@ -17,9 +18,9 @@ import {
   isArray,
   getNumber,
   getString,
-  AnyJson,
   JsonMap,
   JsonCollection,
+  AnyJson,
 } from '@salesforce/ts-types';
 import { fs, Logger, Org, SfdxError, SchemaValidator } from '@salesforce/core';
 import { sequentialExecute } from './executors';
@@ -56,10 +57,15 @@ interface ResponseRefs {
 
 export interface ImportResults {
   responseRefs?: ResponseRefs[];
-  sobjectTypes?: AnyJson;
+  sobjectTypes?: Dictionary;
   errors?: string[];
 }
 
+interface RequestMeta {
+  refRegex: RegExp;
+  isJson: boolean;
+  headers: Dictionary;
+}
 /**
  * Imports data into an org that was exported to files using the export API.
  */
@@ -68,7 +74,7 @@ export class ImportApi {
   private responseRefs: ResponseRefs[] = [];
   private sobjectUrlMap: Map<string, string>;
   private schemaValidator: SchemaValidator;
-  private sobjectTypes: any = {}; // hash of sobject { referenceId: type }
+  private sobjectTypes: Dictionary = {} as Dictionary;
 
   private config!: ImportConfig;
 
@@ -105,6 +111,7 @@ export class ImportApi {
       sobjectTreeFiles.forEach((file) => {
         const filepath = path.resolve(process.cwd(), file);
         const importConfig: DataImportComponents = { instanceUrl, refMap, filepath, contentType };
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         fileFns.push(() => this.importSObjectTreeFile(importConfig));
       });
     }
@@ -114,10 +121,12 @@ export class ImportApi {
 
       importPlanRootPath = path.dirname(plan);
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       this.importPlanConfig.forEach((sobjectConfig: any) => {
-        const globalSaveRefs = sobjectConfig.saveRefs != null ? sobjectConfig.saveRefs : false;
-        const globalResolveRefs = sobjectConfig.resolveRefs != null ? sobjectConfig.resolveRefs : false;
+        const globalSaveRefs = (sobjectConfig.saveRefs != null ? sobjectConfig.saveRefs : false) as boolean;
+        const globalResolveRefs = (sobjectConfig.resolveRefs != null ? sobjectConfig.resolveRefs : false) as boolean;
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         sobjectConfig.files.forEach((fileDef: any) => {
           let filepath;
           let saveRefs = globalSaveRefs;
@@ -129,13 +138,13 @@ export class ImportApi {
             filepath = fileDef;
           } else if (isObject(fileDef)) {
             const def: any = fileDef;
-            filepath = def.file;
+            filepath = def.file as string;
 
             // override save references, if set
-            saveRefs = def.saveRefs == null ? globalSaveRefs : def.saveRefs;
+            saveRefs = (def.saveRefs == null ? globalSaveRefs : def.saveRefs) as boolean;
 
             // override resolve references, if set
-            resolveRefs = def.resolveRefs == null ? globalResolveRefs : def.resolveRefs;
+            resolveRefs = (def.resolveRefs == null ? globalResolveRefs : def.resolveRefs) as boolean;
           } else {
             throw new SfdxError('file definition format unknown.', 'InvalidDataImportPlan');
           }
@@ -149,6 +158,7 @@ export class ImportApi {
             filepath,
             contentType,
           };
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
           planFns.push(() => this.importSObjectTreeFile(importConfig));
         });
       });
@@ -158,12 +168,13 @@ export class ImportApi {
       await sequentialExecute(fileFns);
       await sequentialExecute(planFns);
       importResults.responseRefs = this.responseRefs;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       importResults.sobjectTypes = this.sobjectTypes;
     } catch (err) {
       if (err.errorCode === 'ERROR_HTTP_400' && err.message != null) {
         let msg;
         try {
-          msg = JSON.parse(err.message);
+          msg = JSON.parse(err.message) as { hasErrors?: boolean; results?: [] };
           if (msg.hasErrors && msg.results && msg.results.length > 0) {
             importResults.errors = msg.results;
           }
@@ -216,7 +227,7 @@ export class ImportApi {
         throw err;
       }
 
-      this.importPlanConfig = JSON.parse(fs.readFileSync(planPath, 'utf8'));
+      this.importPlanConfig = JSON.parse(fs.readFileSync(planPath, 'utf8')) as Dictionary;
       try {
         await this.schemaValidator.validate(this.importPlanConfig);
       } catch (err) {
@@ -250,8 +261,8 @@ export class ImportApi {
           if (isObject(val)) {
             const v: any = val;
             if (key === 'attributes') {
-              const { referenceId, type } = v;
-              this.sobjectTypes[referenceId as string] = type;
+              const { referenceId, type } = v as { referenceId: string; type: string };
+              this.sobjectTypes[referenceId] = type;
             } else {
               if (isArray(v.records)) {
                 getTypes(v.records);
@@ -263,7 +274,7 @@ export class ImportApi {
     };
 
     if (isJson) {
-      contentJson = JSON.parse(content);
+      contentJson = JSON.parse(content) as { records: [] };
       if (isArray(contentJson.records)) {
         getTypes(contentJson.records);
       }
@@ -272,10 +283,11 @@ export class ImportApi {
 
   // Does some basic validation on the filepath and returns some file metadata such as
   // isJson, refRegex, and headers.
-  private getSObjectTreeFileMeta(filepath: string, contentType?: string): Dictionary<any> {
-    const meta: Dictionary<any> = {
+  private getSObjectTreeFileMeta(filepath: string, contentType?: string): RequestMeta {
+    const meta: RequestMeta = {
       isJson: false,
-      headers: {},
+      headers: {} as Dictionary,
+      refRegex: new RegExp(/./),
     };
     let tmpContentType;
 
@@ -330,7 +342,7 @@ export class ImportApi {
     isJson: boolean,
     refRegex: RegExp,
     resolveRefs?: boolean,
-    refMap?: any
+    refMap?: Map<string, string>
   ): Promise<any> {
     let contentStr: string;
     let contentJson;
@@ -349,7 +361,7 @@ export class ImportApi {
     if (isJson) {
       // is valid json?  (save round-trip to server)
       try {
-        contentJson = JSON.parse(contentStr);
+        contentJson = JSON.parse(contentStr) as AnyJson;
 
         // All top level records should be of the same sObject type so just grab the first one
         const type = getString(contentJson, 'records[0].attributes.type');
@@ -377,7 +389,7 @@ export class ImportApi {
 
       // loop thru found references and replace with id value
       foundRefs.forEach((ref) => {
-        const value: string = refMap.get(ref.toLowerCase());
+        const value = refMap.get(ref.toLowerCase());
         if (value == null) {
           // REVIEWME: fail?
           this.logger.warn(`Reference '${ref}' not found in saved record references (${filepath})`);
@@ -399,7 +411,7 @@ export class ImportApi {
     contentStr: string,
     sobject: string,
     instanceUrl: string,
-    headers: any
+    headers: Dictionary
   ): Promise<JsonCollection> {
     const apiVersion = this.org.getConnection().getApiVersion();
     let sobjectTreeApiUrl = this.sobjectUrlMap.get(sobject);
@@ -446,9 +458,10 @@ export class ImportApi {
         // if enabled, save references to map to be used to replace references
         // prior to subsequent saves
         if (saveRefs) {
-          for (let i = 0, len = response.results.length, ref; i < len; i++) {
-            ref = response.results[i];
+          for (let i = 0, len = response.results.length as number, ref; i < len; i++) {
+            ref = response.results[i] as { referenceId: string; id: string };
             if (refMap) {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-call
               refMap.set(ref.referenceId.toLowerCase(), ref.id);
             }
           }
@@ -458,6 +471,7 @@ export class ImportApi {
       throw new SfdxError('SObject Tree API XML response parsing not implemented', 'FailedDataImport');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return response;
   }
 
@@ -473,13 +487,17 @@ export class ImportApi {
         this.sendSObjectTreeRequest(contentStr, sobject, components.instanceUrl, headers)
       )
       .then((response) =>
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         this.parseSObjectTreeResponse(response, components.filepath, isJson, components.saveRefs, components.refMap)
       )
       .catch((error) => {
         // break the error message string into the variables we want
         if (error.errorCode === 'INVALID_FIELD') {
-          const field = error.message.split("'")[1];
-          const object = error.message.substr(error.message.lastIndexOf(' ') + 1, error.message.length);
+          const field = (error as Error).message.split("'")[1];
+          const object = (error as Error).message.substr(
+            (error as Error).message.lastIndexOf(' ') + 1,
+            error.message.length
+          );
           throw SfdxError.create('@salesforce/plugin-data', 'importApi', 'FlsError', [field, object]);
         }
         throw SfdxError.wrap(error);

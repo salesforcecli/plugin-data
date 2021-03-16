@@ -19,6 +19,8 @@ let styledHeaderSpy: sinon.SinonStub;
 let logSpy: sinon.SinonStub;
 let batcher: Batcher;
 
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+
 describe('batcher', () => {
   beforeEach(async () => {
     const ux: UX = await UX.create();
@@ -194,6 +196,7 @@ describe('batcher', () => {
           // just add the emit function to avoid defining all the Event Emitter functions too
           batch['emit'] = (event: string, ...args: never[]): boolean => {
             if (event === 'error' || event === 'queue') {
+              // eslint-disable-next-line @typescript-eslint/ban-types
               batchListeners.forEach((listener: Function) => {
                 listener(args[0]);
               });
@@ -273,7 +276,7 @@ describe('batcher', () => {
         newBatch.emit('queue', []);
         chai.assert.fail('the above should throw');
       } catch (e) {
-        expect(e.name).to.equal('Invalid Batch');
+        expect((e as Error).name).to.equal('Invalid Batch');
       }
     });
 
@@ -292,7 +295,7 @@ describe('batcher', () => {
         try {
           await batcher.createAndExecuteBatches(job, ReadStream.prototype, 'TestObject__c', 5);
         } catch (e) {
-          expect(e.message).to.equal('An External ID is required on TestObject__c to perform an upsert.');
+          expect((e as Error).message).to.equal('An External ID is required on TestObject__c to perform an upsert.');
         }
       });
 
@@ -310,7 +313,7 @@ describe('batcher', () => {
         try {
           await batcher.createAndExecuteBatches(job, ReadStream.prototype, 'TestObject__c', 5);
         } catch (e) {
-          expect(e.message).to.contain('The operation timed out. Check the status with command');
+          expect((e as Error).message).to.contain('The operation timed out. Check the status with command');
         }
       });
     });

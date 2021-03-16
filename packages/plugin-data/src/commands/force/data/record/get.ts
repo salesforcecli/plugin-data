@@ -54,14 +54,14 @@ export default class Get extends DataCommand {
     this.ux.startSpinner('Getting Record');
     const sobject = this.getConnection().sobject(this.flags.sobjecttype);
     try {
-      const sObjectId = this.flags.sobjectid || (await this.query(sobject, this.flags.where)).Id;
+      const sObjectId = (this.flags.sobjectid || (await this.query(sobject, this.flags.where)).Id) as string;
       const result = await sobject.retrieve(sObjectId);
-      if (!this.flags.json) this.logNestedObject(result);
+      if (!this.flags.json) this.logNestedObject(result as never);
       this.ux.stopSpinner();
       return result;
     } catch (err) {
       this.ux.stopSpinner('failed');
-      throw new SfdxError(err.name, err.message);
+      throw new SfdxError((err as Error).name, (err as Error).message);
     }
   }
 }

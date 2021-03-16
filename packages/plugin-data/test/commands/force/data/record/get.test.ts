@@ -9,6 +9,12 @@ import { ensureJsonMap, ensureString } from '@salesforce/ts-types';
 
 const sObjectId = '0011100001zhhyUAAQ';
 
+interface GetResult {
+  status: number;
+  name?: string;
+  result: { Id: string; name: string };
+}
+
 describe('force:data:record:get', () => {
   test
     .withOrg({ username: 'test@org.com' }, true)
@@ -48,7 +54,7 @@ describe('force:data:record:get', () => {
       '--json',
     ])
     .it('returns record for provided sobjectid', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as GetResult;
       expect(result.status).to.equal(0);
       expect(result.result.Id).to.equal('0011100001zhhyUAAQ');
     });
@@ -69,7 +75,7 @@ describe('force:data:record:get', () => {
       '--json',
     ])
     .it('should throw an error if both --where and --sobjectid are provided', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as GetResult;
       expect(result.status).to.equal(1);
     });
 
@@ -87,7 +93,7 @@ describe('force:data:record:get', () => {
       '--json',
     ])
     .it('should throw an error if values provided to where flag are invalid', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as GetResult;
       expect(result.status).to.equal(1);
       expect(result.name).to.equal('Malformed key=value pair for value: Name');
     });

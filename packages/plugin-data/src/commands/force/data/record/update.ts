@@ -59,7 +59,7 @@ export default class Update extends DataCommand {
 
     let status = 'Success';
     const sobject = this.getConnection().sobject(this.flags.sobjecttype);
-    const sObjectId = this.flags.sobjectid || (await this.query(sobject, this.flags.where)).Id;
+    const sObjectId = (this.flags.sobjectid || (await this.query(sobject, this.flags.where)).Id) as string;
     try {
       const updateObject = this.stringToDictionary(this.flags.values);
       updateObject.Id = sObjectId;
@@ -75,8 +75,10 @@ export default class Update extends DataCommand {
     } catch (err) {
       status = 'Failed';
       this.ux.stopSpinner(status);
-      if (err.errorCode && err.fields) {
-        throw new SfdxError(messages.getMessage('updateFailureWithFields', [err.errorCode, err.fields]));
+      if (Reflect.has(err, 'errorCode') && Reflect.has(err, 'fields')) {
+        throw new SfdxError(
+          messages.getMessage('updateFailureWithFields', [Reflect.get(err, 'errorCode'), Reflect.get(err, 'fields')])
+        );
       } else {
         throw err;
       }

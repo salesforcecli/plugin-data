@@ -9,7 +9,7 @@ import { SfdxCommand } from '@salesforce/command';
 import { AnyJson, Dictionary, get, Nullable } from '@salesforce/ts-types';
 import { fs, Messages, Org, SfdxError } from '@salesforce/core';
 import { BaseConnection, ErrorResult, Record, SObject } from 'jsforce';
-// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore because jsforce doesn't export http-api
 import * as HttpApi from 'jsforce/lib/http-api';
 
@@ -33,6 +33,8 @@ interface Response {
 
 type ConnectionInternals = { callOptions?: { perfOption?: string } };
 
+/* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return */
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const originalRequestMethod = HttpApi.prototype.request;
 HttpApi.prototype.request = function (req: unknown, ...args: unknown[]): unknown {
   this.once('response', (response: Response) => {
@@ -41,12 +43,13 @@ HttpApi.prototype.request = function (req: unknown, ...args: unknown[]): unknown
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       DataCommand.addMetric({
         requestPath: response.req.path,
-        perfMetrics: JSON.parse(metrics),
+        perfMetrics: JSON.parse(metrics) as AnyJson,
       });
     }
   });
   return originalRequestMethod.call(this, req, ...args);
 };
+/* eslint-enable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call*/
 
 export abstract class DataCommand extends SfdxCommand {
   private static metrics: Metric[] = [];
@@ -107,7 +110,7 @@ export abstract class DataCommand extends SfdxCommand {
     return connection;
   }
 
-  public async query(sobject: SObject<object>, where: string): Promise<Record<AnyJson>> {
+  public async query(sobject: SObject<unknown>, where: string): Promise<Record<AnyJson>> {
     const queryObject = this.stringToDictionary(where);
     const records = await sobject.find(queryObject, 'id');
     if (!records || records.length === 0) {
@@ -137,10 +140,10 @@ export abstract class DataCommand extends SfdxCommand {
     return Array.isArray(results) ? results[0] : results;
   }
 
-  protected logNestedObject(obj: object, indentation = 0): void {
+  protected logNestedObject(obj: never, indentation = 0): void {
     const space = ' '.repeat(indentation);
     Object.keys(obj).forEach((key) => {
-      const value = get(obj, key, null) as Nullable<string | object>;
+      const value = get(obj, key, null) as Nullable<string | never>;
       if (!!value && typeof value === 'object') {
         this.ux.log(`${space}${key}:`);
         this.logNestedObject(value, indentation + 2);

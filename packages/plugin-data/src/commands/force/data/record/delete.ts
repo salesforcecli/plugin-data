@@ -55,7 +55,7 @@ export default class Delete extends DataCommand {
 
     try {
       const sobject = this.getConnection().sobject(this.flags.sobjecttype);
-      const sObjectId = this.flags.sobjectid || (await this.query(sobject, this.flags.where)).Id;
+      const sObjectId = (this.flags.sobjectid || (await this.query(sobject, this.flags.where)).Id) as string;
       const result = this.normalize<RecordResult>(await sobject.destroy(sObjectId));
 
       if (result.success) {
@@ -70,7 +70,7 @@ export default class Delete extends DataCommand {
     } catch (err) {
       status = 'Failed';
       this.ux.stopSpinner(status);
-      throw new SfdxError(err.name, err.message);
+      throw new SfdxError((err as Error).name, (err as Error).message);
     }
   }
 }

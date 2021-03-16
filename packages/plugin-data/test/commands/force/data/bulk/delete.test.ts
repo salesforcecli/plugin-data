@@ -10,6 +10,11 @@ import { stubMethod } from '@salesforce/ts-sinon';
 import { fs } from '@salesforce/core';
 import { Batcher } from '../../../../../src/batcher';
 
+interface DeleteResult {
+  status: number;
+  name: string;
+  message: string;
+}
 describe('force:data:bulk:delete', () => {
   test
     .withOrg({ username: 'test@org.com' }, true)
@@ -25,7 +30,7 @@ describe('force:data:bulk:delete', () => {
       '--json',
     ])
     .it("should throw an error if the file doesn't exist", (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as DeleteResult;
       expect(result.status).to.equal(1);
       expect(result.name).to.equal('PathDoesNotExist');
       expect(result.message).to.equal('The specified path [nonexistant.csv] does not exist');
@@ -66,7 +71,7 @@ describe('force:data:bulk:delete', () => {
       '--json',
     ])
     .it('should properly print output once a bulk delete operation is done', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as never;
       expect(result).to.deep.equal({ status: 0, result: expected });
     });
 });

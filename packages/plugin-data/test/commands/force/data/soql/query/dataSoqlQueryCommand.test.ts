@@ -19,6 +19,11 @@ chai.use(chaiAsPromised);
 
 const QUERY_COMMAND = 'force:data:soql:query';
 
+interface QueryResult {
+  status: string;
+  result: { totalSize: number; records: [] };
+}
+
 describe('Execute a SOQL statement', function (): void {
   let sandbox: SinonSandbox;
   beforeEach(() => {
@@ -51,7 +56,7 @@ describe('Execute a SOQL statement', function (): void {
         .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'json'])
         .it('should have 0 totalSize and 0 records for empty result with json reporter', (ctx) => {
           sinon.assert.calledOnce(soqlQuerySpy);
-          const jsonResults = JSON.parse(ctx.stdout);
+          const jsonResults = JSON.parse(ctx.stdout) as QueryResult;
           expect(jsonResults).to.have.property('status', 0);
           expect(jsonResults.result).to.have.property('totalSize', 0);
           expect(jsonResults.result.records.length).to.be.equal(jsonResults.result.totalSize);
@@ -84,7 +89,7 @@ describe('Execute a SOQL statement', function (): void {
         .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'json'])
         .it('should have json results', (ctx) => {
           sinon.assert.calledOnce(soqlQuerySpy);
-          const jsonResults = JSON.parse(ctx.stdout);
+          const jsonResults = JSON.parse(ctx.stdout) as QueryResult;
           expect(jsonResults).to.have.property('status', 0);
           expect(jsonResults.result).to.have.property('totalSize', 50);
           expect(jsonResults.result.records.length).to.be.equal(jsonResults.result.totalSize);
@@ -97,7 +102,8 @@ describe('Execute a SOQL statement', function (): void {
         .it('should have human results', (ctx) => {
           sinon.assert.calledOnce(soqlQuerySpy);
           // test for expected snippet in output
-          expect(/.*?United Oil & Gas, UK.*?\n.*?James.*?/.test(ctx.stdout)).to.be.true;
+          const stdout = ctx.stdout;
+          expect(/.*?United Oil & Gas, UK.*?\n.*?James.*?/.test(stdout)).to.be.true;
           expect(ctx.stdout).to.include('records retrieved: 50');
         });
     });
@@ -117,7 +123,7 @@ describe('Execute a SOQL statement', function (): void {
         .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'json'])
         .it('should have json results', (ctx) => {
           sinon.assert.calledOnce(soqlQuerySpy);
-          const jsonResults = JSON.parse(ctx.stdout);
+          const jsonResults = JSON.parse(ctx.stdout) as QueryResult;
           expect(jsonResults).to.have.property('status', 0);
           expect(jsonResults.result).to.have.property('totalSize', 16);
           expect(jsonResults.result.records.length).to.be.equal(jsonResults.result.totalSize);

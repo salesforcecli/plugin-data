@@ -104,7 +104,7 @@ export class Batcher {
 
     if (isJob) {
       // remove url field
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       delete summary['$'];
       this.ux.styledHeader(messages.getMessage('BulkJobStatus'));
@@ -172,11 +172,11 @@ export class Batcher {
                   /* jsforce clears out the id after close, but you should be able to close a job
               after the queue, so add it back so future batch.check don't fail.*/
 
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                   // @ts-ignore
-                  const id = job.id;
+                  const id = job.id as string;
                   await job.close();
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                   // @ts-ignore
                   job.id = id;
                 }
@@ -301,7 +301,7 @@ export class Batcher {
       const parser = parse({
         columns: true,
         // library option is snakecase
-        // eslint-disable-next-line @typescript-eslint/camelcase
+        // eslint-disable-next-line camelcase
         skip_empty_lines: true,
         bom: true,
       });

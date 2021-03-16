@@ -4,8 +4,9 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+
 import { expect, test } from '@salesforce/command/lib/test';
-import { ensureJsonMap, ensureString, isString } from '@salesforce/ts-types';
+import { ensureJsonMap, ensureString, isString, AnyJson } from '@salesforce/ts-types';
 import { fs as fsCore } from '@salesforce/core';
 
 const query = 'SELECT Id, Name from Account';
@@ -44,6 +45,12 @@ const ACCOUNT_META = {
   ],
 };
 
+interface ExportResult {
+  status: string;
+  message?: string;
+  result: AnyJson;
+}
+
 describe('force:data:tree:export', () => {
   test
     .stub(fsCore, 'writeFileSync', () => null)
@@ -62,7 +69,7 @@ describe('force:data:tree:export', () => {
     .stdout()
     .command(['force:data:tree:export', '--targetusername', 'test@org.com', '--query', query, '--json'])
     .it('returns Account record', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as ExportResult;
       expect(result.status).to.equal(0);
       expect(result.result).to.deep.equal({
         records: [
@@ -82,7 +89,7 @@ describe('force:data:tree:export', () => {
     .stdout()
     .command(['force:data:tree:export', '--targetusername', 'test@org.com', '--json'])
     .it('should throw an error if --query is not provided', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as ExportResult;
       expect(result.status).to.equal(1);
       expect(result.message).to.include('Missing required flag');
     });

@@ -8,7 +8,7 @@ import { EOL } from 'os';
 import { Logger, Messages } from '@salesforce/core';
 import { UX } from '@salesforce/command';
 import * as chalk from 'chalk';
-import { get, isString, Optional } from '@salesforce/ts-types';
+import { get, getArray, getNumber, isString, Optional } from '@salesforce/ts-types';
 import { SoqlQueryResult, Field, FieldType } from './dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
@@ -105,8 +105,9 @@ export class HumanReporter extends QueryReporter {
 
   public prepNullValues(records: unknown[]): void {
     records.forEach((record): void => {
-      const recordAsObject = record as object;
+      const recordAsObject = record as never;
       Reflect.ownKeys(recordAsObject).forEach((propertyKey) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const value = Reflect.get(recordAsObject, propertyKey);
         if (value === null) {
           Reflect.set(recordAsObject, propertyKey, chalk.bold('null'));
@@ -144,24 +145,29 @@ export class HumanReporter extends QueryReporter {
           for (let i = 0; i < aggregates.length; i++) {
             const aggregate = aggregates[i];
             if (!aggregate.alias) {
-              Reflect.set(result as object, aggregate.name, Reflect.get(result as object, `expr${i}`));
+              Reflect.set(result as never, aggregate.name, Reflect.get(result as never, `expr${i}`));
             }
           }
         }
 
         if (children.length > 0) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           const childrenRows = Object.assign({});
           children.forEach((child) => {
-            Reflect.set(childrenRows, child, Reflect.get(result as object, child));
-            Reflect.deleteProperty(result as object, child);
+            const aChild = get(result as never, child);
+            Reflect.set(childrenRows, child, aChild);
+            Reflect.deleteProperty(result as never, child);
           });
 
           Reflect.ownKeys(childrenRows).forEach((child) => {
-            if (childrenRows[child]) {
+            const childO = get(childrenRows, child as string);
+            if (childO) {
+              const childRecords = getArray(childO, 'records', []);
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              childrenRows[child].records.forEach((record: any) => {
+              childRecords.forEach((record: unknown) => {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 const newRecord = Object.assign({});
-                Object.entries(record).forEach(([key, value]) => {
+                Object.entries(record as never).forEach(([key, value]) => {
                   Reflect.defineProperty(newRecord, `${child.toString()}.${key}`, { value });
                 });
                 newResults.push(newRecord);
@@ -254,9 +260,10 @@ export class CsvReporter extends QueryReporter {
       // Get max lengths by iterating over the records once
       this.data.result.records.forEach((result) => {
         [...typeLengths.keys()].forEach((key) => {
-          const record = Reflect.get(result as object, key);
-          if (record?.totalSize > (typeLengths.get(key) ?? 0)) {
-            typeLengths.set(key, record.totalSize);
+          const record = get(result as never, key);
+          const totalSize = getNumber(record, 'totalSize');
+          if (!!totalSize && totalSize > (typeLengths.get(key) ?? 0)) {
+            typeLengths.set(key, totalSize);
           }
         });
 
@@ -267,7 +274,7 @@ export class CsvReporter extends QueryReporter {
           for (let i = 0; i < aggregates.length; i++) {
             const aggregate = aggregates[i];
             if (!aggregate.alias) {
-              Reflect.set(result as object, aggregate.name, Reflect.get(result as object, `expr${i}`));
+              Reflect.set(result as never, aggregate.name, Reflect.get(result as never, `expr${i}`));
             }
           }
         }
