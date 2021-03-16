@@ -168,7 +168,7 @@ describe('data:record commands', () => {
       const m = new RegExp('Successfully created record: (001.{15})\\.');
       const match = m.exec(createRecordResponse);
       expect(match).to.have.lengthOf(2, `could not locate success message in results: "${createRecordResponse}`);
-      const recordId = match[1];
+      const recordId = match ? match[1] : 'shouldnoteverybethisvalue';
 
       // Get a record
       let getRecordResponse = (execCmd(`force:data:record:get --sobjecttype Account --sobjectid ${recordId}`, {
