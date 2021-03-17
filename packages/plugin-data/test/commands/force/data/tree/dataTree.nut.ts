@@ -33,9 +33,8 @@ describe('data:tree commands', () => {
       `force:data:tree:export --query 'SELECT' --prefix INT --outputdir ${path.join('.', 'export_data')}`
     );
     const stdError = getString(result, 'shellOutput.stderr', '').toLowerCase();
-    expect(stdError).to.include('soql', stdError);
-    expect(stdError).to.include('malformed', stdError);
-    expect(stdError).to.include('check the soql', stdError);
+    const errorKeywords = ['malformed', 'check the soql', 'invalid soql query'];
+    expect(errorKeywords.some((keyWord) => stdError.includes(keyWord))).to.be.true;
   });
 
   it('import -> export -> import round trip should succeed', () => {
