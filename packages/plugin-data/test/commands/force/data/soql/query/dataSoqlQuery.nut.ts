@@ -7,7 +7,7 @@
 import * as path from 'path';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-import { Dictionary } from '@salesforce/ts-types';
+import { Dictionary, getString } from '@salesforce/ts-types';
 
 export interface QueryResult {
   totalSize: number;
@@ -39,7 +39,9 @@ function runQuery(query: string, options: QueryOptions = { json: true, ensureExi
     expect(queryResult).to.have.property('records').to.not.have.lengthOf(0);
     return queryResult;
   } else {
-    return (options.ensureExitCode === 0 ? results?.shellOutput.stdout : results?.shellOutput.stderr) as string;
+    return options.ensureExitCode === 0
+      ? getString(results, 'shellOutput.stdout')
+      : getString(results, 'shellOutput.stderr');
   }
 }
 

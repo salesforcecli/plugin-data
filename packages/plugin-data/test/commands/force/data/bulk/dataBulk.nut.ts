@@ -89,7 +89,7 @@ describe('data:bulk commands', () => {
   });
 
   after(async () => {
-    testSession?.clean();
+    await testSession?.clean();
   });
 
   describe('data:bulk verify json responses', () => {

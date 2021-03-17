@@ -8,7 +8,7 @@ import * as path from 'path';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { SfdxResult } from '@salesforce/command';
-import { Dictionary, get } from '@salesforce/ts-types';
+import { Dictionary, get, getString } from '@salesforce/ts-types';
 import { QueryResult } from '../soql/query/dataSoqlQuery.nut';
 
 describe('data:tree commands', () => {
@@ -32,7 +32,7 @@ describe('data:tree commands', () => {
     const result = execCmd(
       `force:data:tree:export --query 'SELECT' --prefix INT --outputdir ${path.join('.', 'export_data')}`
     );
-    const stdError = result?.shellOutput.stderr.toLowerCase() as string;
+    const stdError = getString(result, 'shellOutput.stderr').toLowerCase();
     expect(stdError).to.include('soql', stdError);
     expect(stdError).to.include('malformed', stdError);
     expect(stdError).to.include('check the soql', stdError);
