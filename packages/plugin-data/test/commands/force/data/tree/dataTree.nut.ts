@@ -32,7 +32,7 @@ describe('data:tree commands', () => {
     const result = execCmd(
       `force:data:tree:export --query 'SELECT' --prefix INT --outputdir ${path.join('.', 'export_data')}`
     );
-    const stdError = getString(result, 'shellOutput.stderr').toLowerCase();
+    const stdError = getString(result, 'shellOutput.stderr', '').toLowerCase();
     expect(stdError).to.include('soql', stdError);
     expect(stdError).to.include('malformed', stdError);
     expect(stdError).to.include('check the soql', stdError);
