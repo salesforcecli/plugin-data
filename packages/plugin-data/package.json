@@ -62,7 +62,6 @@
     "docs": "sf-docs",
     "format": "sf-format",
     "lint": "sf-lint",
-    "mylint": "eslint --debug \"src/**/*.ts\" \"test/**/*.ts\"",
     "postpack": "shx rm -f oclif.manifest.json",
     "posttest": "yarn lint && yarn test:deprecation-policy && yarn test:command-reference",
     "prepack": "sf-build",
@@ -70,7 +69,7 @@
     "test": "sf-test",
     "test:command-reference": "./bin/run commandreference:generate --erroronwarnings",
     "test:deprecation-policy": "./bin/run snapshot:compare",
-    "test:nuts": "nyc mocha \"**/*.nut.ts\" --slow 4500 --timeout 600000 --parallel",
+    "test:nuts": "nyc mocha \"**/*.nut.ts\" --slow 4500 --timeout 600000",
     "version": "oclif-dev readme"
   },
   "dependencies": {
