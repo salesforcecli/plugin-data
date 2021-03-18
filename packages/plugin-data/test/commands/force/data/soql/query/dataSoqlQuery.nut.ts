@@ -48,8 +48,8 @@ function runQuery(query: string, options: QueryOptions = { json: true, ensureExi
 describe('data:soql:query command', () => {
   let testSession: TestSession;
 
-  before(() => {
-    testSession = TestSession.create({
+  before(async () => {
+    testSession = await TestSession.create({
       setupCommands: [
         'sfdx force:org:create -f config/project-scratch-def.json --setdefaultusername --wait 10 --durationdays 1',
         'sfdx force:source:push',

@@ -79,8 +79,8 @@ function queryAccountRecords() {
 }
 
 describe('data:bulk commands', () => {
-  before(() => {
-    testSession = TestSession.create({
+  before(async () => {
+    testSession = await TestSession.create({
       setupCommands: [
         'sfdx force:org:create -f config/project-scratch-def.json --setdefaultusername --wait 10 --durationdays 1',
       ],

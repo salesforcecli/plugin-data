@@ -14,8 +14,8 @@ import { QueryResult } from '../soql/query/dataSoqlQuery.nut';
 describe('data:tree commands', () => {
   let testSession: TestSession;
 
-  before(() => {
-    testSession = TestSession.create({
+  before(async () => {
+    testSession = await TestSession.create({
       setupCommands: [
         'sfdx force:org:create -f config/project-scratch-def.json --setdefaultusername --wait 10 --durationdays 1',
         'sfdx force:org:create -f config/project-scratch-def.json --setalias importOrg --wait 10 --durationdays 1',
