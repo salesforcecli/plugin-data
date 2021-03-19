@@ -5,9 +5,12 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-/* eslint-disable  @typescript-eslint/no-explicit-any */
-/* eslint-disable  @typescript-eslint/ban-ts-ignore */
-/* eslint-disable  @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import * as path from 'path';
 import { expect } from 'chai';
@@ -340,6 +343,7 @@ describe('ImportApi', () => {
 
     it('should call this.createSObjectTypeMap() with correct args', () =>
       // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       ImportApi.prototype.parseSObjectTreeFile
         .call(context, filepath, isJson, refRegex, resolveRefs, refMap)
         .then(() => {
@@ -350,6 +354,7 @@ describe('ImportApi', () => {
 
     it('should return a Promise resolved with the contentStr and sobject', () =>
       // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       ImportApi.prototype.parseSObjectTreeFile
         .call(context, filepath, isJson, refRegex, resolveRefs, refMap)
         .then((rv) => {
@@ -364,6 +369,7 @@ describe('ImportApi', () => {
 
       expect(() =>
         // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         ImportApi.prototype.parseSObjectTreeFile.call(context, filepath, isJson, refRegex, resolveRefs, refMap)
       ).to.throw(
         "We couldn't process your request because you don't have access to field__c on object__c. To learn more about field-level security, visit Tips and Hints for Page Layouts and Field-Level Security in our Developer Documentation."
@@ -376,6 +382,7 @@ describe('ImportApi', () => {
       refMap.set('sampleaccountref', 'test_account_id1');
       refMap.set('sampleacct2ref', 'test_account_id2');
       // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return ImportApi.prototype.parseSObjectTreeFile
         .call(context, filepath, isJson, refRegex, resolveRefs, refMap)
         .then((rv) => {
@@ -420,6 +427,7 @@ describe('ImportApi', () => {
       refMap.set('customobj__cref2', 'custom_id2');
       refMap.set('customobj__cref20', 'custom_id3');
       // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return ImportApi.prototype.parseSObjectTreeFile
         .call(context, filepath, isJson, refRegex, resolveRefs, refMap)
         .then((rv) => {

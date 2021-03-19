@@ -9,6 +9,11 @@ import { ensureJsonMap, ensureString } from '@salesforce/ts-types';
 
 const sObjectId = '0011100001zhhyUAAQ';
 
+interface UpdateResult {
+  status: number;
+  result: { Id: string; Name: string };
+}
+
 describe('force:data:record:update', () => {
   test
     .withOrg({ username: 'test@org.com' }, true)
@@ -50,7 +55,7 @@ describe('force:data:record:update', () => {
       '--json',
     ])
     .it('should update the sobject with the provided values', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as UpdateResult;
       expect(result.status).to.equal(0);
       expect(result.result.Id).to.equal('0011100001zhhyUAAQ');
       expect(result.result.Name).to.equal('NewName');
@@ -74,7 +79,7 @@ describe('force:data:record:update', () => {
       '--json',
     ])
     .it('should throw an error if both --where and --sobjectid are provided', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as UpdateResult;
       expect(result.status).to.equal(1);
     });
 });

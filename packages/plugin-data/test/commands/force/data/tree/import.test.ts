@@ -9,8 +9,9 @@
 
 import { join as pathJoin } from 'path';
 import { expect, test } from '@salesforce/command/lib/test';
-import { ensureJsonMap, ensureString } from '@salesforce/ts-types';
+import { ensureJsonMap, ensureString, AnyJson } from '@salesforce/ts-types';
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const dataImportPlanSchema = require('../../../../../schema/dataImportPlanSchema.json');
 
 const expectedImportResult = [
@@ -35,6 +36,12 @@ const expectedImportResult = [
     id: '0039A00000Bzy8lQAB',
   },
 ];
+
+interface ImportResult {
+  status: string;
+  message?: string;
+  result: AnyJson;
+}
 
 describe('force:data:tree:import', () => {
   test
@@ -64,7 +71,7 @@ describe('force:data:tree:import', () => {
       '--json',
     ])
     .it('returns 4 reference entries for an import file', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as ImportResult;
       expect(result.status).to.equal(0);
       expect(result.result).to.deep.equal(expectedImportResult);
     });
@@ -96,7 +103,7 @@ describe('force:data:tree:import', () => {
       '--json',
     ])
     .it('returns 4 reference entries for an import plan', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as ImportResult;
       expect(result.status).to.equal(0);
       expect(result.result).to.deep.equal(expectedImportResult);
     });
@@ -106,7 +113,7 @@ describe('force:data:tree:import', () => {
     .stdout()
     .command(['force:data:tree:import', '--targetusername', 'test@org.com', '--confighelp', '--json'])
     .it('should return the schema with --confighelp param', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as ImportResult;
       expect(result.status).to.equal(0);
       expect(result.result).to.deep.equal(dataImportPlanSchema);
     });
@@ -116,7 +123,7 @@ describe('force:data:tree:import', () => {
     .stdout()
     .command(['force:data:tree:import', '--targetusername', 'test@org.com', '--json'])
     .it('should throw an error if data plan or file is not provided', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as ImportResult;
       expect(result.status).to.equal(1);
       expect(result.message).to.include('Provide a data plan or file(s).');
     });

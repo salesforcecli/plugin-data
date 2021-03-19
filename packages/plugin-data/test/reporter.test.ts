@@ -10,6 +10,7 @@ import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import { UX } from '@salesforce/command';
 import { Logger } from '@salesforce/core';
+import { get, getPlainObject } from '@salesforce/ts-types';
 import { Field, SoqlQueryResult } from '../src/dataSoqlQueryTypes';
 import { HumanReporter } from '../src/reporters';
 import { CsvReporter } from '../src/reporters';
@@ -40,6 +41,7 @@ describe('reporter tests', () => {
     it('preps null values in result', () => {
       const { attributeNames, children, aggregates } = reporter.parseFields();
       expect(attributeNames).to.be.ok;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const massagedRows = reporter.massageRows(queryData.result.records, children, aggregates);
       expect(massagedRows).to.be.deep.equal(queryData.result.records);
       reporter.prepNullValues(massagedRows);
@@ -61,11 +63,13 @@ describe('reporter tests', () => {
     });
     it('massages report results', () => {
       const massagedRows = reporter.massageRows();
-      const data = Reflect.get(reporter, 'data');
+      const data = getPlainObject(reporter, 'data');
       expect(massagedRows).to.be.deep.equal(
         soqlQueryExemplars.queryWithAgregates.soqlQueryResult.columns.map((column: Field) => column.name)
       );
-      expect(data.result.records).be.equal(soqlQueryExemplars.queryWithAgregates.soqlQueryResult.result.records);
+      expect(get(data, 'result.records')).be.equal(
+        soqlQueryExemplars.queryWithAgregates.soqlQueryResult.result.records
+      );
     });
     it('escapes embedded separator', () => {
       let escapedString = reporter.escape('"a,b,c"');
@@ -111,7 +115,7 @@ describe('reporter tests', () => {
     });
     it('massages report results', () => {
       const massagedRows = reporter.massageRows();
-      const data = Reflect.get(reporter, 'data');
+      const data = get(reporter, 'data');
       expect(massagedRows).to.be.deep.equal([
         'Name',
         'Contacts.totalSize',
@@ -123,7 +127,7 @@ describe('reporter tests', () => {
         'Contacts.totalSize',
         'Contacts.records.3.LastName',
       ]);
-      expect(data.result.records).be.equal(soqlQueryExemplars.subQuery.soqlQueryResult.result.records);
+      expect(get(data, 'result.records')).be.equal(soqlQueryExemplars.subQuery.soqlQueryResult.result.records);
     });
   });
 });

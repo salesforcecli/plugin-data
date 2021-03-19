@@ -9,6 +9,11 @@ import { stubMethod } from '@salesforce/ts-sinon';
 import { Org } from '@salesforce/core';
 import { Batcher } from '../../../../../src/batcher';
 
+interface StatusResult {
+  status: number;
+  message: string;
+}
+
 describe('force:data:bulk:status', () => {
   test
     .do(() => {
@@ -56,7 +61,7 @@ describe('force:data:bulk:status', () => {
       '--json',
     ])
     .it('will fail with the correct error message', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as StatusResult;
       expect(result.message).to.equal('Unable to find batch 751540000070Q4RAAU for job 75054000006ybyHAAQ.');
       expect(result.status).to.equal(1);
     });
@@ -107,7 +112,7 @@ describe('force:data:bulk:status', () => {
       '--json',
     ])
     .it('will successfully find the batchid and jobid', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as never;
       expect(result).to.deep.equal({
         result: [
           {
@@ -159,7 +164,7 @@ describe('force:data:bulk:status', () => {
     .stdout()
     .command(['force:data:bulk:status', '--targetusername', 'test@org.com', '--jobid', '75054000006ybyHAAQ', '--json'])
     .it('will call Batcher to find jobid', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as never;
       expect(result).to.deep.equal({ status: 0, result: expected });
     });
 });

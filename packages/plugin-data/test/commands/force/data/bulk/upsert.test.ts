@@ -10,6 +10,12 @@ import { stubMethod } from '@salesforce/ts-sinon';
 import { fs } from '@salesforce/core';
 import { Batcher } from '../../../../../src/batcher';
 
+interface UpsertResult {
+  commandName: string;
+  exitCode: number;
+  message: string;
+}
+
 describe('force:data:bulk:upsert', () => {
   const expectedBatch = {
     $: {
@@ -48,7 +54,7 @@ describe('force:data:bulk:upsert', () => {
       '--json',
     ])
     .it('should upsert the data correctly', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as never;
       expect(result).to.deep.equal({ status: 0, result: expectedBatch });
     });
 
@@ -100,7 +106,7 @@ describe('force:data:bulk:upsert', () => {
       '--json',
     ])
     .it('should upsert the data correctly while waiting', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as never;
       expect(result).to.deep.equal({ status: 0, result: expectedJob });
     });
 
@@ -125,7 +131,7 @@ describe('force:data:bulk:upsert', () => {
       '--json',
     ])
     .it('should fail correctly with error message', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as UpsertResult;
       expect(result.commandName).to.equal('Upsert');
       expect(result.exitCode).to.equal(1);
       expect(result.message).to.equal('Error');

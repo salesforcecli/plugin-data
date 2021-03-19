@@ -9,6 +9,11 @@ import { ensureJsonMap, ensureString } from '@salesforce/ts-types';
 
 const sObjectId = '0011100001zhhyUAAQ';
 
+interface CreateResult {
+  status: number;
+  result: { Id: string; Name: string };
+}
+
 describe('force:data:record:create', () => {
   test
     .withOrg({ username: 'test@org.com' }, true)
@@ -48,7 +53,7 @@ describe('force:data:record:create', () => {
       '--json',
     ])
     .it('should create a new sobject', (ctx) => {
-      const result = JSON.parse(ctx.stdout);
+      const result = JSON.parse(ctx.stdout) as CreateResult;
       expect(result.status).to.equal(0);
       expect(result.result.Id).to.equal('0011100001zhhyUAAQ');
       expect(result.result.Name).to.equal('Acme');

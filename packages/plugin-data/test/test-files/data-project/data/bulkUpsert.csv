@@ -1,0 +1,11 @@
+NAME,TYPE,PHONE,WEBSITE,ANNUALREVENUE
+account Upsert #0,Account,415-555-0000,http://www.accountUpsert0.com,0
+account Upsert #1,Account,415-555-0000,http://www.accountUpsert1.com,1000
+account Upsert #2,Account,415-555-0000,http://www.accountUpsert2.com,2000
+account Upsert #3,Account,415-555-0000,http://www.accountUpsert3.com,3000
+account Upsert #4,Account,415-555-0000,http://www.accountUpsert4.com,4000
+account Upsert #5,Account,415-555-0000,http://www.accountUpsert5.com,5000
+account Upsert #6,Account,415-555-0000,http://www.accountUpsert6.com,6000
+account Upsert #7,Account,415-555-0000,http://www.accountUpsert7.com,7000
+account Upsert #8,Account,415-555-0000,http://www.accountUpsert8.com,8000
+account Upsert #9,Account,415-555-0000,http://www.accountUpsert9.com,9000

@@ -5,8 +5,11 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-/* eslint-disable  @typescript-eslint/no-explicit-any */
-/* eslint-disable  @typescript-eslint/ban-ts-ignore */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import * as sinon from 'sinon';
 
@@ -211,6 +214,7 @@ const expectedPlanOutput = {
 };
 
 function deepClone(obj: AnyJson) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return JSON.parse(JSON.stringify(obj));
 }
 

@@ -6,10 +6,11 @@
  */
 
 /* eslint-disable  @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import * as path from 'path';
 import { fs, Logger, Messages, Org, SfdxError } from '@salesforce/core';
-import { AnyArray, AnyJson, get, getNumber, getString, has, isArray } from '@salesforce/ts-types';
+import { AnyArray, AnyJson, Dictionary, get, getNumber, getString, has, isArray } from '@salesforce/ts-types';
 import { UX } from '@salesforce/command';
 import { QueryResult } from 'jsforce';
 import { sequentialExecute } from './executors';
@@ -19,7 +20,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'exportApi');
 
 const DATA_PLAN_FILENAME_PART = '-plan.json';
 
-const describe: any = {}; // holds metadata result for object type describe calls
+const describe: Dictionary<any> = {}; // holds metadata result for object type describe calls
 
 interface DataPlanPart {
   sobject: string;
@@ -70,7 +71,7 @@ export class ExportApi {
     try {
       queryResults = await this.org.getConnection().query(query);
     } catch (err) {
-      if (err.name === 'MALFORMED_QUERY') {
+      if ((err as Error).name === 'MALFORMED_QUERY') {
         const errMsg = messages.getMessage('soqlMalformed');
         const errMsgAction = messages.getMessage('soqlMalformedAction');
         throw new SfdxError(errMsg, 'MalformedQuery', [errMsgAction]);
@@ -79,7 +80,7 @@ export class ExportApi {
       }
     }
 
-    const sobjectTree = await this.processQueryResults(queryResults);
+    const sobjectTree = (await this.processQueryResults(queryResults)) as Dictionary<any>;
 
     if (!sobjectTree.records?.length) {
       return sobjectTree;
@@ -140,38 +141,43 @@ export class ExportApi {
 
     const { plan, query } = this.config;
 
-    const processedRecordList = await this.processRecordList(recordList);
+    const processedRecordList = (await this.processRecordList(recordList)) as Dictionary<any>;
     // log record count; warn if > 200 and !options.plan
     const recordCount = getNumber(processedRecordList, 'records.length', 0);
     this.logger.debug(messages.getMessage('dataExportRecordCount', [recordCount, query]));
     if (recordCount > 200 && !plan) {
       this.ux.warn(messages.getMessage('dataExportRecordCountWarning', [recordCount, query]));
     }
-    return this.finalApplyRefs(processedRecordList.records);
+    return this.finalApplyRefs(processedRecordList.records as any[]);
   }
 
   // Register object types and type hierarchy for plan generation
   private async recordObjectTypes(recordList: any): Promise<any> {
-    const records = recordList.records;
+    const records = recordList.records as any[];
 
     if (!records.length) {
       // TODO: should be on the command
       this.ux.log('Query returned no results');
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return recordList;
     }
 
     // top level object type
-    this.objectTypeRegistry[records[0].attributes.type as string] = {
+    const topLevelType = getString(records[0], 'attributes.type') as string;
+    this.objectTypeRegistry[topLevelType] = {
       order: 0,
-      type: records[0].attributes.type,
+      type: topLevelType,
       saveRefs: true, // post-save, record reference-to-id to be used for child reference resolution
       resolveRefs: false, // pre-save, don't resolve relationship references to parent ids (from previous save)
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     records.forEach((record: any) => {
       Object.keys(record).map((key) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const value = record[key];
         if (value && getNumber(value, 'records.length')) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           const firstRec = value.records[0];
           const type = getString(firstRec, 'attributes.type');
           // found a related object, add to map
@@ -190,6 +196,7 @@ export class ExportApi {
 
     // pre-load object metadata
     const promises = Object.keys(this.objectTypeRegistry).map((key) => this.loadMetadata(key));
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return Promise.all(promises).then(() => recordList);
   }
 
@@ -199,6 +206,7 @@ export class ExportApi {
 
     // visit each record in the list
     const processRecordsFn = (record: any) => (): Promise<any> => this.processRecords(parentRef, record, sobjectTree);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
     const recordFns = recordList.records.map((record: any) => processRecordsFn(record));
 
     // TODO: do we really need sequentialExecute?  Can't we just use Promise.all()?
@@ -214,7 +222,7 @@ export class ExportApi {
     // add the attributes for this record, setting the type and reference
     const treeRecord: any = {
       attributes: {
-        type: record.attributes.type,
+        type: record.attributes.type as string,
         referenceId: objRefId,
       },
     };
@@ -228,12 +236,14 @@ export class ExportApi {
     if (parentRef && this.config.plan) {
       const parentFieldName = getString(parentRef, 'fieldName', '');
       if (!treeRecord[parentFieldName]) {
-        treeRecord[parentFieldName] = parentRef.id;
+        treeRecord[parentFieldName] = parentRef.id as string;
       }
     }
     // add record to tree
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     sobjectTree.records.push(treeRecord);
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return sobjectTree;
   }
 
@@ -249,11 +259,13 @@ export class ExportApi {
   private async processRecordAttributes(record: any, treeRecord: any, objRefId: string): Promise<any> {
     const promises = Object.keys(record).map((key) => this.processRecordAttribute(record, key, treeRecord, objRefId));
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return Promise.all(promises).then(() => treeRecord);
   }
 
   private async processRecordAttribute(record: any, key: string, treeRecord: any, objRefId: string): Promise<any> {
     return Promise.resolve().then(() => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const field = record[key];
 
       // skip attributes and id.  Data import does not accept records with IDs.
@@ -284,10 +296,10 @@ export class ExportApi {
                   // find reference in record result
                   if (this.objectTypeRegistry[relTo]) {
                     // add ref to replace the value
-                    const id: string = record[key];
-                    const relatedObject = this.referenceRegistry[relTo];
+                    const id: string = record[key] as string;
+                    const relatedObject = this.referenceRegistry[relTo] as Dictionary<any>;
                     if (relatedObject) {
-                      const ref: string = relatedObject[id];
+                      const ref: string = relatedObject[id] as string;
                       // If ref is not found, then leave intact because we may not have processed
                       // this parent fully. We'll go back through the sObject tree
                       // later and replace the id with a reference.
@@ -298,12 +310,13 @@ export class ExportApi {
                     }
                   } else {
                     // TODO: what to do if ref not found?
-                    const recordId: string = record['Id'];
+                    const recordId: string = record['Id'] as string;
                     this.logger.error(`Reference ${relTo} not found for ${key}.  Skipping record ${recordId}.`);
                   }
                 }
               } else {
                 // not a relationship field, simple key/value insertion
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return record[key];
               }
             }
@@ -312,6 +325,7 @@ export class ExportApi {
           })
           .then((processedAttribute) => {
             if (processedAttribute !== null) {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               treeRecord[key] = processedAttribute;
             }
 
@@ -333,38 +347,38 @@ export class ExportApi {
       describe[objectName] = await sObject.describe();
     }
 
-    return describe[objectName];
+    return describe[objectName] as Dictionary;
   }
 
   private isQueryResult(metadata: any, fieldName: string): any {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
     return metadata.childRelationships.some((cr: any) => cr.relationshipName === fieldName);
   }
 
   private isSpecificTypeWithMetadata(metadata: any, fieldName: string, fieldType: string): boolean {
     for (let i = 0, fld; i < metadata.fields.length; i++) {
-      fld = metadata.fields[i];
+      fld = metadata.fields[i] as { name: string; type: string };
+      /* eslint-disable @typescript-eslint/no-unsafe-call */
       if (fld.name.toLowerCase() === fieldName.toLowerCase()) {
         if (fld.type.toLowerCase() === fieldType.toLowerCase()) {
           return true;
         }
       }
+      /* eslint-enable @typescript-eslint/no-unsafe-call */
     }
 
     return false;
   }
 
   private getRelationshipFieldName(metadata: any, parentName: string): string {
-    let result = '';
-    metadata.fields.some((field: any) => {
+    const result = (metadata.fields as [{ name: string; type: string; referenceTo: string[] }]).find((field: any) => {
       if (field.type === 'reference') {
         for (const refTo of field.referenceTo) {
           if (refTo === parentName) {
-            result = field.name;
             return true;
           }
         }
       }
-
       return false;
     });
 
@@ -372,11 +386,11 @@ export class ExportApi {
       throw new SfdxError(`Unable to find relationship field name for ${metadata.name as string}`);
     }
 
-    return result;
+    return result.name;
   }
 
   private isRelationship(objectName: string, fieldName: string): boolean {
-    const metadata = describe[objectName];
+    const metadata = describe[objectName] as Dictionary<any>;
     if (!metadata) {
       throw new SfdxError(`Metadata not found for ${objectName}`);
     }
@@ -389,7 +403,7 @@ export class ExportApi {
   }
 
   private getRelatedTo(objectName: string, fieldName: string): string {
-    const metadata = describe[objectName];
+    const metadata = describe[objectName] as Dictionary<any>;
     if (!metadata) {
       throw new SfdxError(`Metadata not found for ${objectName}`);
     }
@@ -398,15 +412,13 @@ export class ExportApi {
   }
 
   private getRelatedToWithMetadata(metadata: any, fieldName: string): string {
-    let result = '';
-    metadata.fields.some((field: any) => {
+    const result = (metadata.fields as [{ name: string; type: string; referenceTo: string[] }]).find((field) => {
       if (field.name === fieldName) {
-        for (const refTo of field.referenceTo) {
-          result = refTo;
+        if (field.referenceTo.length) {
           return true;
         }
+        return false;
       }
-
       return false;
     });
 
@@ -414,7 +426,7 @@ export class ExportApi {
       throw new SfdxError(`Unable to find relation for ${metadata.name as string}`);
     }
 
-    return result;
+    return result.referenceTo[0];
   }
 
   // Register object type's id to reference mapping
@@ -422,13 +434,13 @@ export class ExportApi {
     const id = path.basename(obj.attributes.url);
     const ref = refId;
 
-    const type: string = obj.attributes.type;
+    const type = obj.attributes.type as string;
     if (typeof this.referenceRegistry[type] === 'undefined') {
       this.referenceRegistry[type] = {};
     }
 
     // ensure no existing reference
-    const refEntry: string = this.referenceRegistry[type][id];
+    const refEntry = this.referenceRegistry[type][id] as string;
     if (refEntry && refEntry !== ref) {
       throw new SfdxError(`Overriding ${type} reference for ${id}: existing ${refEntry}, incoming ${ref}`);
     }
@@ -447,8 +459,9 @@ export class ExportApi {
     let topLevelObjectType: string;
 
     // loop thru object tree extracting type-specific records into separate tree structure
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     sobjectTree.records.forEach((record: any) => {
-      topLevelObjectType = record.attributes.type;
+      topLevelObjectType = record.attributes.type as string;
       if (!objects[topLevelObjectType]) {
         objects[topLevelObjectType] = { records: [] };
       }
@@ -458,14 +471,16 @@ export class ExportApi {
         if (childRecords) {
           // found child records, add to type-specific registry
           if (childRecords.length) {
-            const childObjectType: string = childRecords[0].attributes.type;
+            const childObjectType = childRecords[0].attributes.type as string;
             if (!objects[childObjectType]) {
               objects[childObjectType] = { records: [] };
             }
 
+            /* eslint-disable @typescript-eslint/no-unsafe-call */
             childRecords.forEach((child: any) => {
               objects[childObjectType].records.push(child);
             });
+            /* eslint-enable @typescript-eslint/no-unsafe-call */
           }
 
           // remove child from top-level object structure
@@ -475,6 +490,7 @@ export class ExportApi {
         return key;
       });
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       objects[topLevelObjectType].records.push(record);
     });
 
@@ -530,20 +546,21 @@ export class ExportApi {
    * in the initial pass done by processRecordList. It looks for relationship fields that
    * contain an id.
    */
-  private finalApplyRefs(sobjectTree: any): { records: any } {
+  private finalApplyRefs(sobjectTree: any[]): { records: any } {
     sobjectTree.forEach((record: any) => {
       Object.keys(record).map((field) => {
         if (record[field].records) {
           // These are children
-          this.finalApplyRefs(record[field].records);
+          this.finalApplyRefs(record[field].records as any[]);
         } else {
-          const objType: string = record.attributes.type;
+          const objType = record.attributes.type as string;
 
           if (this.isRelationship(objType, field)) {
-            const id: string = record[field].toString();
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+            const id = record[field].toString() as string;
             if (!id.startsWith('@')) {
               const refTo = this.getRelatedTo(objType, field);
-              const ref: string = this.referenceRegistry[refTo][id];
+              const ref = this.referenceRegistry[refTo][id] as string;
 
               if (!ref) {
                 throw new SfdxError(`${objType} reference to ${refTo} (${id}) not found in query results.`);
@@ -553,7 +570,7 @@ export class ExportApi {
 
               // Setup dependency ordering for later output
               if (this.objectTypeRegistry[objType].order <= this.objectTypeRegistry[refTo].order) {
-                this.objectTypeRegistry[objType].order = this.objectTypeRegistry[refTo].order + 1;
+                this.objectTypeRegistry[objType].order = Number(this.objectTypeRegistry[refTo].order) + 1;
                 this.objectTypeRegistry[refTo].saveRefs = true;
                 this.objectTypeRegistry[objType].resolveRefs = true;
               }

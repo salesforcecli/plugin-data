@@ -4,11 +4,11 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+
 import { Field, FieldType } from '../../src/dataSoqlQueryTypes';
 
 export const makeSubfield = (name: string, fields: Field[]): Field => {
-  const subfield: Field = { fields, name, fieldType: FieldType.subqueryField };
-  return subfield;
+  return { fields, name, fieldType: FieldType.subqueryField };
 };
 
 export const queryFieldsExemplars = {
