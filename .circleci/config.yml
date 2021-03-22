@@ -47,7 +47,7 @@ workflows:
       - release-management/test-nut:
           name: just-nuts
           sfdx_version: latest
+          node-version: node-latest
           matrix:
             parameters:
               os: [ linux, windows ]
-              node-version: [ node-latest ]
