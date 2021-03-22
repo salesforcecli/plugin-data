@@ -42,3 +42,12 @@ workflows:
                 - main
     jobs:
       - release-management/test-ts-update
+  just-nuts:
+    jobs:
+      - release-management/test-nut:
+          name: just-nuts
+          sfdx_version: latest
+          matrix:
+            parameters:
+              os: [ linux, windows ]
+              node-version: [ node-latest ]
