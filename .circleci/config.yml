@@ -1,6 +1,9 @@
 version: 2.1
 orbs:
   release-management: salesforce/npm-release-management@4
+jobs:
+  just-nuts:
+
 workflows:
   version: 2
   test-and-release:
@@ -45,7 +48,7 @@ workflows:
   just-nuts:
     jobs:
       - release-management/test-nut:
-          name: just-nuts
+          name: just-nuts-<< matrix.os >>
           sfdx_version: latest
           matrix:
             parameters:
