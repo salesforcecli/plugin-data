@@ -53,13 +53,15 @@ workflows:
     jobs:
       - release-management/test-ts-update
   just-nuts:
+
     when: << pipeline.parameters.run-just-nuts >>
     jobs:
       - release-management/test-nut:
           name: just-nuts-<< matrix.os >>
           sfdx_version: latest-rc
+          environment:
+            TESTKIT_EXECUTABLE_PATH: sfdx
           matrix:
             parameters:
               os: [ linux, windows ]
-          environment:
-            TESTKIT_EXECUTABLE_PATH: sfdx
+
