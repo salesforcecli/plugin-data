@@ -3,18 +3,17 @@ orbs:
   release-management: salesforce/npm-release-management@4
 
 parameters:
-  run-test-and-release:
+  run-auto-workflows:
     default: true
     type: boolean
   run-just-nuts:
     default: false
     type: boolean
 
-
 workflows:
   version: 2
   test-and-release:
-    when: << pipeline.parameters.run-test-and-release >>
+    when: << pipeline.parameters.run-auto-workflows >>
     jobs:
       - release-management/validate-pr:
           filters:
@@ -58,7 +57,9 @@ workflows:
     jobs:
       - release-management/test-nut:
           name: just-nuts-<< matrix.os >>
-          sfdx_version: latest
+          sfdx_version: latest-rc
           matrix:
             parameters:
               os: [ linux, windows ]
+          environment:
+            TESTKIT_EXECUTABLE_PATH: sfdx
