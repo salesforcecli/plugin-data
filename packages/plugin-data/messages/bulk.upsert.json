@@ -1,5 +1,5 @@
 {
-  "description": "bulk upsert records from a CSV file",
+  "description": "bulk upsert records from a CSV file\nInserts or updates records from a CSV file.\n\nOne job can contain many batches, depending on the length of the CSV file.\nReturns a job ID and a batch ID. Use these IDs to check job status with data:bulk:status.\n\nFor information about formatting your CSV file, see \"Prepare CSV Files\" in the Bulk API Developer Guide. \n\n",
   "examples": [
     "sfdx force:data:bulk:upsert -s MyObject__c -f ./path/to/file.csv -i MyField__c",
     "sfdx force:data:bulk:upsert -s MyObject__c -f ./path/to/file.csv -i Id -w 2"
