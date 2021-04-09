@@ -1,5 +1,5 @@
 {
-  "description": "view the status of a bulk data load job or batch",
+  "description": "view the status of a bulk data load job or batch\nRun this command using the job ID or batch ID returned from the force:data:bulk:delete or force:data:bulk:upsert commands.",
   "examples": [
     "sfdx force:data:bulk:status -i 750xx000000005sAAA",
     "sfdx force:data:bulk:status -i 750xx000000005sAAA -b 751xx000000005nAAA"

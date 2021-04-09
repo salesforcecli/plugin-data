@@ -1,5 +1,5 @@
 {
-  "description": "bulk delete records from a csv file",
+  "description": "bulk delete records from a csv file\nThe file must be a CSV file with only one column: \"Id\".\nOne job can contain many batches, depending on the length of the CSV file.\nReturns a job ID and a batch ID. Use these IDs to check job status with data:bulk:status.\n\n",
   "examples": [
     "sfdx force:data:bulk:delete -s Account -f ./path/to/file.csv",
     "sfdx force:data:bulk:delete -s MyObject__c -f ./path/to/file.csv"
