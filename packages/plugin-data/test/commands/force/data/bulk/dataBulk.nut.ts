@@ -74,7 +74,7 @@ function queryAccountRecords() {
       ensureExitCode: 0,
     }
   ).jsonOutput?.result ?? { records: [], done: false, totalSize: 0 };
-  expect(queryResponse).to.have.property('records').with.lengthOf(10);
+  expect(queryResponse).to.have.property('records').with.lengthOf.above(9);
   return queryResponse.records;
 }
 
