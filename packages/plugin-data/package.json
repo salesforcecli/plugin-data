@@ -83,6 +83,7 @@
     "tslib": "^2"
   },
   "devDependencies": {
+    "@oclif/dev-cli": "^1",
     "@salesforce/cli-plugins-testkit": "^0.0.15",
     "@salesforce/dev-config": "^2.1.0",
     "@salesforce/dev-scripts": "0.9.1",
