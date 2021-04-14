@@ -1397,10 +1397,10 @@
     mv "~2"
     safe-json-stringify "~1"
 
-"@salesforce/cli-plugins-testkit@^0.0.14":
-  version "0.0.14"
-  resolved "https://registry.yarnpkg.com/@salesforce/cli-plugins-testkit/-/cli-plugins-testkit-0.0.14.tgz#c0f2003bfb958d0e2c09606878ffa4ae2b68784d"
-  integrity sha512-rBAn1M9kWiO+cH8fVNhRkSRgDgB16VqipVV8ogjkxsf9asheW/eATETrnmYoqKOmxBq3CSdEAQQy7RBEV4IyrQ==
+"@salesforce/cli-plugins-testkit@^0.0.25":
+  version "0.0.25"
+  resolved "https://registry.yarnpkg.com/@salesforce/cli-plugins-testkit/-/cli-plugins-testkit-0.0.25.tgz#b8d295c0f0e35746a594e51b0077b745e32b914f"
+  integrity sha512-a9PJ0ceOmrh36T64M6ceHqui5UxfHwKeptTyCpUYntr9U9VdiQcMvzfDpf7gm+2C9rcCi7QXDjcguSG4nfzYZA==
   dependencies:
     "@salesforce/core" "^2.20.3"
     "@salesforce/kit" "^1.4.5"
@@ -1408,21 +1408,7 @@
     archiver "^5.2.0"
     debug "^4.3.1"
     shelljs "^0.8.4"
-    sinon "^9.0.2"
-    strip-ansi "^6.0.0"
-
-"@salesforce/cli-plugins-testkit@^0.0.15":
-  version "0.0.15"
-  resolved "https://registry.yarnpkg.com/@salesforce/cli-plugins-testkit/-/cli-plugins-testkit-0.0.15.tgz#4114ce84a538410a2e7ee11d801711049dd271c3"
-  integrity sha512-nAjPa8zfUAWMTURkEv9FhSJ+b/xrlrCka4tWX2ssw1ZsVUOsbCoCUuP3iVvHCL1gsj/6gGlLr4Z9TjuAK6X9Ig==
-  dependencies:
-    "@salesforce/core" "^2.20.3"
-    "@salesforce/kit" "^1.4.5"
-    "@salesforce/ts-types" "^1.5.5"
-    archiver "^5.2.0"
-    debug "^4.3.1"
-    shelljs "^0.8.4"
-    sinon "^9.0.2"
+    sinon "^10.0.0"
     strip-ansi "^6.0.0"
 
 "@salesforce/command@^3.0.0", "@salesforce/command@^3.0.5":
@@ -6343,7 +6329,7 @@ nise@^1.3.3:
     lolex "^5.0.1"
     path-to-regexp "^1.7.0"
 
-nise@^4.0.4:
+nise@^4.0.4, nise@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/nise/-/nise-4.1.0.tgz#8fb75a26e90b99202fa1e63f448f58efbcdedaf6"
   integrity sha512-eQMEmGN/8arp0xsvGoQ+B1qvSkR73B1nWSCh7nOt5neMCtwcQVYQGdzQMhcNscktTsWB54xnlSQFzOAPJD8nXA==
@@ -7873,6 +7859,18 @@ sinon@5.1.1:
     nise "^1.3.3"
     supports-color "^5.4.0"
     type-detect "^4.0.8"
+
+sinon@^10.0.0:
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/sinon/-/sinon-10.0.0.tgz#52279f97e35646ff73d23207d0307977c9b81430"
+  integrity sha512-XAn5DxtGVJBlBWYrcYKEhWCz7FLwZGdyvANRyK06419hyEpdT0dMc5A8Vcxg5SCGHc40CsqoKsc1bt1CbJPfNw==
+  dependencies:
+    "@sinonjs/commons" "^1.8.1"
+    "@sinonjs/fake-timers" "^6.0.1"
+    "@sinonjs/samsam" "^5.3.1"
+    diff "^4.0.2"
+    nise "^4.1.0"
+    supports-color "^7.1.0"
 
 sinon@^9.0.0, sinon@^9.0.2:
   version "9.2.4"
