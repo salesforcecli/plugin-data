@@ -1,6 +1,6 @@
 # Description
 
-This repository contains packages for the Salesforce CLI data commands and the data library
+This repository contains packages for the Salesforce CLI data commands and the data library.
 
 # Packages
 
