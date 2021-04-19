@@ -1,6 +1,6 @@
 {
   "name": "@salesforce/plugin-data",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "Plugin for salesforce data commands",
   "author": "Salesforce",
   "homepage": "https://github.com/salesforcecli/data/tree/main/packages/plugin-data#readme",
@@ -83,6 +83,7 @@
     "tslib": "^2"
   },
   "devDependencies": {
+    "@oclif/dev-cli": "^1",
     "@salesforce/cli-plugins-testkit": "^0.0.15",
     "@salesforce/dev-config": "^2.1.0",
     "@salesforce/dev-scripts": "0.9.1",
