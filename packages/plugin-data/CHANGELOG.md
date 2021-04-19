@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.6](https://github.com/salesforcecli/data/compare/@salesforce/plugin-data@0.4.5...@salesforce/plugin-data@0.4.6) (2021-04-14)
+
+
+### Bug Fixes
+
+* add oclif/dev dependency [skip-validate-pr] ([#90](https://github.com/salesforcecli/data/issues/90)) ([ecbd054](https://github.com/salesforcecli/data/commit/ecbd05403cb71988c4110b4e5e0815229c5ed86e))
+
+
+
+
+
+## [0.4.5](https://github.com/salesforcecli/data/compare/@salesforce/plugin-data@0.4.3...@salesforce/plugin-data@0.4.5) (2021-04-09)
+
+
+### Bug Fixes
+
+* correct help for data commands ([#69](https://github.com/salesforcecli/data/issues/69)) ([80b601b](https://github.com/salesforcecli/data/commit/80b601bc0cbd973326afe69ad825530e53d1f5fc))
+
+
+
+
+
 ## [0.4.3](https://github.com/salesforcecli/data/compare/@salesforce/plugin-data@0.4.2...@salesforce/plugin-data@0.4.3) (2021-02-24)
 
 
