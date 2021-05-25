@@ -169,7 +169,7 @@ export abstract class DataCommand extends SfdxCommand {
         throw new Error(messages.getMessage('TextUtilMalformedKeyValuePair', [pair]));
       } else {
         const key = pair.substr(0, eqPosition);
-        constructedObject[key] = this.convertToBooleanIfApplicable(pair.substr(eqPosition + 1));
+        constructedObject[key] = this.convertToBooleanIfApplicable(pair.substr(eqPosition + 1).trim());
       }
     });
 
