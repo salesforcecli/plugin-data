@@ -127,7 +127,7 @@ export abstract class DataCommand extends SfdxCommand {
     return this.normalize<Record<AnyJson>>(records);
   }
 
-  protected stringToDictionary(str: string): Dictionary<string> {
+  protected stringToDictionary(str: string): Dictionary<string | boolean> {
     const keyValuePairs = this.parseKeyValueSequence(str);
     return this.transformKeyValueSequence(keyValuePairs);
   }
@@ -159,8 +159,8 @@ export abstract class DataCommand extends SfdxCommand {
    *
    * @param [keyValuePairs] - The list of key=value pair strings.
    */
-  private transformKeyValueSequence(keyValuePairs: string[]): Dictionary<string> {
-    const constructedObject: Dictionary<string> = {};
+  private transformKeyValueSequence(keyValuePairs: string[]): Dictionary<string | boolean> {
+    const constructedObject: Dictionary<string | boolean> = {};
 
     keyValuePairs.forEach((pair) => {
       // Look for the *first* '=' and splits there, ignores any subsequent '=' for this pair
@@ -169,11 +169,17 @@ export abstract class DataCommand extends SfdxCommand {
         throw new Error(messages.getMessage('TextUtilMalformedKeyValuePair', [pair]));
       } else {
         const key = pair.substr(0, eqPosition);
-        constructedObject[key] = pair.substr(eqPosition + 1);
+        constructedObject[key] = this.convertToBooleanIfApplicable(pair.substr(eqPosition + 1));
       }
     });
 
     return constructedObject;
+  }
+
+  private convertToBooleanIfApplicable(input: string): boolean | string {
+    if (input.toLowerCase() === 'false') return false;
+    if (input.toLowerCase() === 'true') return true;
+    return input;
   }
 
   /**
