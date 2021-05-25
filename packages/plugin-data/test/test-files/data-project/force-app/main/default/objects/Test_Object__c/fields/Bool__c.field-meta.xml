@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField>
+    <label>Bool</label>
+    <type>Checkbox</type>
+    <fullName>Bool__c</fullName>
+    <defaultValue>false</defaultValue>
+</CustomField>

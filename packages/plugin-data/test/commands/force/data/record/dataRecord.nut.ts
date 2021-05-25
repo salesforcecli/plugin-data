@@ -54,6 +54,7 @@ describe('data:record commands', () => {
       setupCommands: [
         'sfdx force:org:create -f config/project-scratch-def.json --setdefaultusername --wait 10 --durationdays 1',
         'sfdx force:source:push',
+        'sfdx force:user:permset:assign -n TestPerm',
       ],
       project: { sourceDir: path.join('test', 'test-files', 'data-project') },
     });
@@ -91,15 +92,6 @@ describe('data:record commands', () => {
       // Get a record using where
       getRecordResponse = execCmd<AccountRecord>(
         `force:data:record:get --sobjecttype Account --where "Name='${accountNameBefore}' Phone='${phoneNumber}'" --json`,
-        { ensureExitCode: 0 }
-      ).jsonOutput;
-      expect(getRecordResponse?.result).to.have.property('Id', createRecordResponse?.result.id);
-      expect(getRecordResponse?.result).to.have.property('Name', accountNameBefore);
-      expect(getRecordResponse?.result).to.have.property('Phone', phoneNumber);
-
-      // Get a record using where that contains a boolean. cf W-6236756
-      getRecordResponse = execCmd<AccountRecord>(
-        `force:data:record:get --sobjecttype Account --where "Name='${accountNameBefore}' Phone='${phoneNumber}' HasOptedOutOfEmail=false" --json`,
         { ensureExitCode: 0 }
       ).jsonOutput;
       expect(getRecordResponse?.result).to.have.property('Id', createRecordResponse?.result.id);
@@ -224,6 +216,25 @@ describe('data:record commands', () => {
       expect(getRecordResponse).to.have.property('Id', getRecordResponse?.Id);
       expect(getRecordResponse).to.have.property('Name', 'MyClass');
       expect(getRecordResponse).to.have.property('SymbolTable');
+    });
+  });
+
+  describe('test get with where clause using boolean', () => {
+    const objectType = 'Test_Object__c';
+    const recordName = 'TestRecord';
+    it('create a record in a custom object that we can query', () => {
+      execCmd(`force:data:record:create --sobjecttype ${objectType} --values "Name=${recordName}"`, {
+        ensureExitCode: 0,
+      });
+    });
+
+    it('get the record using a boolean field', () => {
+      const result = execCmd(
+        `force:data:record:get --sobjecttype ${objectType} --where "Name='${recordName}' Bool__c=false" --json`,
+        { ensureExitCode: 0 }
+      ).jsonOutput?.result;
+      expect(result).to.have.property('Name', recordName);
+      expect(result).to.have.property('Bool__c', false);
     });
   });
 });
