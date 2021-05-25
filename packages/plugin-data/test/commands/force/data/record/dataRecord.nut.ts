@@ -97,6 +97,15 @@ describe('data:record commands', () => {
       expect(getRecordResponse?.result).to.have.property('Name', accountNameBefore);
       expect(getRecordResponse?.result).to.have.property('Phone', phoneNumber);
 
+      // Get a record using where that contains a boolean. cf W-6236756
+      getRecordResponse = execCmd<AccountRecord>(
+        `force:data:record:get --sobjecttype Account --where "Name='${accountNameBefore}' Phone='${phoneNumber}' HasOptedOutOfEmail=false" --json`,
+        { ensureExitCode: 0 }
+      ).jsonOutput;
+      expect(getRecordResponse?.result).to.have.property('Id', createRecordResponse?.result.id);
+      expect(getRecordResponse?.result).to.have.property('Name', accountNameBefore);
+      expect(getRecordResponse?.result).to.have.property('Phone', phoneNumber);
+
       // Update a record
       execCmd<RecordCrudResult>(
         `force:data:record:update --sobjectid ${createRecordResponse?.result.id} --sobjecttype Account --values "name=${accountNameAfter} phone=${updatedPhoneNumber}" --json`,
