@@ -169,7 +169,7 @@ export abstract class DataCommand extends SfdxCommand {
         throw new Error(messages.getMessage('TextUtilMalformedKeyValuePair', [pair]));
       } else {
         const key = pair.substr(0, eqPosition);
-        constructedObject[key] = this.convertToBooleanIfApplicable(pair.substr(eqPosition + 1).trim());
+        constructedObject[key] = this.convertToBooleanIfApplicable(pair.substr(eqPosition + 1));
       }
     });
 
@@ -177,8 +177,8 @@ export abstract class DataCommand extends SfdxCommand {
   }
 
   private convertToBooleanIfApplicable(input: string): boolean | string {
-    if (input.toLowerCase() === 'false') return false;
-    if (input.toLowerCase() === 'true') return true;
+    if (input.trim().toLowerCase() === 'false') return false;
+    if (input.trim().toLowerCase() === 'true') return true;
     return input;
   }
 
