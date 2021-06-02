@@ -1,6 +1,6 @@
 {
   "name": "@salesforce/plugin-data",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "description": "Plugin for salesforce data commands",
   "author": "Salesforce",
   "homepage": "https://github.com/salesforcecli/data/tree/main/packages/plugin-data#readme",
@@ -76,7 +76,7 @@
     "@oclif/config": "^1",
     "@salesforce/command": "^3.0.5",
     "@salesforce/core": "^2.15.2",
-    "@salesforce/data": "^0.1.5",
+    "@salesforce/data": "^0.1.6",
     "@salesforce/ts-types": "^1.5.5",
     "chalk": "^4.1.0",
     "csv-parse": "^4.14.1",
