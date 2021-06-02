@@ -54,6 +54,7 @@ describe('data:record commands', () => {
       setupCommands: [
         'sfdx force:org:create -f config/project-scratch-def.json --setdefaultusername --wait 10 --durationdays 1',
         'sfdx force:source:push',
+        'sfdx force:user:permset:assign -n TestPerm',
       ],
       project: { sourceDir: path.join('test', 'test-files', 'data-project') },
     });
@@ -215,6 +216,25 @@ describe('data:record commands', () => {
       expect(getRecordResponse).to.have.property('Id', getRecordResponse?.Id);
       expect(getRecordResponse).to.have.property('Name', 'MyClass');
       expect(getRecordResponse).to.have.property('SymbolTable');
+    });
+  });
+
+  describe('test get with where clause using boolean', () => {
+    const objectType = 'Test_Object__c';
+    const recordName = 'TestRecord';
+    it('create a record in a custom object that we can query', () => {
+      execCmd(`force:data:record:create --sobjecttype ${objectType} --values "Name=${recordName}"`, {
+        ensureExitCode: 0,
+      });
+    });
+
+    it('get the record using a boolean field', () => {
+      const result = execCmd(
+        `force:data:record:get --sobjecttype ${objectType} --where "Name='${recordName}' Bool__c=false" --json`,
+        { ensureExitCode: 0 }
+      ).jsonOutput?.result;
+      expect(result).to.have.property('Name', recordName);
+      expect(result).to.have.property('Bool__c', false);
     });
   });
 });
