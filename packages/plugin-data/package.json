@@ -74,8 +74,8 @@
   },
   "dependencies": {
     "@oclif/config": "^1",
-    "@salesforce/command": "^3.0.5",
-    "@salesforce/core": "^2.15.2",
+    "@salesforce/command": "3.2.0-beta-2",
+    "@salesforce/core": "2.24.0-beta",
     "@salesforce/data": "^0.1.6",
     "@salesforce/ts-types": "^1.5.5",
     "chalk": "^4.1.0",
