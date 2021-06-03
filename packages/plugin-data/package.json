@@ -84,7 +84,7 @@
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1",
-    "@salesforce/cli-plugins-testkit": "^0.0.15",
+    "@salesforce/cli-plugins-testkit": "^1.0.2",
     "@salesforce/dev-config": "^2.1.2",
     "@salesforce/dev-scripts": "0.9.11",
     "@salesforce/prettier-config": "^0.0.2",
@@ -110,7 +110,7 @@
     "prettier": "^2.0.5",
     "pretty-quick": "^3.1.0",
     "shx": "^0.3.3",
-    "sinon": "10.0.0",
+    "sinon": "^9.0.2",
     "ts-node": "^8.10.2",
     "typescript": "^4.1.3"
   }
