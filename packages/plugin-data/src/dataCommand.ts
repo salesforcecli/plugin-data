@@ -110,7 +110,7 @@ export abstract class DataCommand extends SfdxCommand {
     return connection;
   }
 
-  public async query(sobject: SObject<unknown>, where: string): Promise<Record<AnyJson>> {
+  public async query(sobject: SObject<unknown>, where: string): Promise<Record<unknown>> {
     const queryObject = this.stringToDictionary(where);
     const records = await sobject.find(queryObject, 'id');
     if (!records || records.length === 0) {
@@ -124,7 +124,7 @@ export abstract class DataCommand extends SfdxCommand {
       );
     }
 
-    return this.normalize<Record<AnyJson>>(records);
+    return this.normalize<Record<unknown>>(records);
   }
 
   protected stringToDictionary(str: string): Dictionary<string | boolean> {
