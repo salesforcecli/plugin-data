@@ -176,37 +176,35 @@ describe('batcher', () => {
     beforeEach(() => {
       createdBatches = [];
       // only stub the methods we need, cast to unknown then to Batch
-      const batch: Batch = ({
+      const batch: Batch = {
         check(): BatchInfo {
           return {} as BatchInfo;
         },
-      } as unknown) as Batch;
+      } as unknown as Batch;
 
       const batchListeners: Map<string, (result: Record<string, string>) => void> = new Map<
         string,
         (result: Record<string, string>) => void
       >();
-      creationSpy = stubMethod($$.SANDBOX, job, 'createBatch').callsFake(
-        (): Batch => {
-          // @ts-ignore
-          batch.on = (event: string, listener: (result: Record<string, string>) => void) => {
-            batchListeners.set(event, listener);
-            return batch;
-          };
-          // just add the emit function to avoid defining all the Event Emitter functions too
-          batch['emit'] = (event: string, ...args: never[]): boolean => {
-            if (event === 'error' || event === 'queue') {
-              // eslint-disable-next-line @typescript-eslint/ban-types
-              batchListeners.forEach((listener: Function) => {
-                listener(args[0]);
-              });
-            }
-            return true;
-          };
-          createdBatches.push(batch);
+      creationSpy = stubMethod($$.SANDBOX, job, 'createBatch').callsFake((): Batch => {
+        // @ts-ignore
+        batch.on = (event: string, listener: (result: Record<string, string>) => void) => {
+          batchListeners.set(event, listener);
           return batch;
-        }
-      );
+        };
+        // just add the emit function to avoid defining all the Event Emitter functions too
+        batch['emit'] = (event: string, ...args: never[]): boolean => {
+          if (event === 'error' || event === 'queue') {
+            // eslint-disable-next-line @typescript-eslint/ban-types
+            batchListeners.forEach((listener: Function) => {
+              listener(args[0]);
+            });
+          }
+          return true;
+        };
+        createdBatches.push(batch);
+        return batch;
+      });
       exitSpy = spyMethod($$.SANDBOX, SfdxError, 'wrap');
       waitForCompletionSpy = stubMethod($$.SANDBOX, Batcher.prototype, 'waitForCompletion');
     });

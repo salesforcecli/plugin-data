@@ -141,75 +141,75 @@ export class Batcher {
     // Currently, we bail out early by calling an Error.exit
     // But, we might want to actually continue to the next batch.
     return (await Promise.all(
-      batches.map(
-        async (batch: Array<Record<string, string>>, i: number): Promise<BulkResult | BatchInfo | void | JobInfo> => {
-          const newBatch = job.createBatch();
+      batches.map(async (batch: Array<Record<string, string>>, i: number): Promise<
+        BulkResult | BatchInfo | void | JobInfo
+      > => {
+        const newBatch = job.createBatch();
 
-          return new Promise((resolve, reject) => {
-            newBatch.on('error', (err: Error) => {
-              // reword no external id error message to direct it to org user rather than api user
-              if (err.message.startsWith('External ID was blank')) {
-                err.message = messages.getMessage('ExternalIdRequired', [sobjectType]);
-                job.emit('error', err);
-              }
-              if (err.message.startsWith('Polling time out')) {
-                err.message = this.parseTimeOutError(err);
-                // using the reject method for all of the promises wasn't handling errors properly
-                // so emit a 'error' on the job.
+        return new Promise((resolve, reject) => {
+          newBatch.on('error', (err: Error) => {
+            // reword no external id error message to direct it to org user rather than api user
+            if (err.message.startsWith('External ID was blank')) {
+              err.message = messages.getMessage('ExternalIdRequired', [sobjectType]);
+              job.emit('error', err);
+            }
+            if (err.message.startsWith('Polling time out')) {
+              err.message = this.parseTimeOutError(err);
+              // using the reject method for all of the promises wasn't handling errors properly
+              // so emit a 'error' on the job.
 
-                job.emit('error', new SfdxError(err.message, 'Time Out', [], 69));
-              }
+              job.emit('error', new SfdxError(err.message, 'Time Out', [], 69));
+            }
 
-              this.ux.stopSpinner('Error');
-            });
+            this.ux.stopSpinner('Error');
+          });
 
-            newBatch.on(
-              'queue',
-              // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              async (): Promise<void> => {
-                batchesQueued++;
-                if (batchesQueued === batches.length) {
-                  /* jsforce clears out the id after close, but you should be able to close a job
+          newBatch.on(
+            'queue',
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            async (): Promise<void> => {
+              batchesQueued++;
+              if (batchesQueued === batches.length) {
+                /* jsforce clears out the id after close, but you should be able to close a job
               after the queue, so add it back so future batch.check don't fail.*/
 
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore
-                  const id = job.id as string;
-                  await job.close();
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore
-                  job.id = id;
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                const id = job.id as string;
+                await job.close();
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                job.id = id;
+              }
+            }
+          );
+
+          if (!wait) {
+            newBatch.on(
+              'queue',
+              // we're using an async method on an event listener which doesn't fit the .on method parameter types
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
+              async (batchInfo: BatchInfo): Promise<void> => {
+                this.ux.log(messages.getMessage('CheckStatusCommand', [i + 1, batchInfo.jobId, batchInfo.id]));
+                const result: BatchInfo = await newBatch.check();
+                if (result.state === 'Failed') {
+                  reject(result.stateMessage);
+                } else {
+                  resolve(batchInfo);
                 }
               }
             );
+          } else {
+            resolve(this.waitForCompletion(newBatch, batchesCompleted, overallInfo, i + 1, batches.length, wait));
+          }
 
-            if (!wait) {
-              newBatch.on(
-                'queue',
-                // we're using an async method on an event listener which doesn't fit the .on method parameter types
-                // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                async (batchInfo: BatchInfo): Promise<void> => {
-                  this.ux.log(messages.getMessage('CheckStatusCommand', [i + 1, batchInfo.jobId, batchInfo.id]));
-                  const result: BatchInfo = await newBatch.check();
-                  if (result.state === 'Failed') {
-                    reject(result.stateMessage);
-                  } else {
-                    resolve(batchInfo);
-                  }
-                }
-              );
-            } else {
-              resolve(this.waitForCompletion(newBatch, batchesCompleted, overallInfo, i + 1, batches.length, wait));
+          newBatch.execute(batch, (err) => {
+            if (err) {
+              reject(err);
             }
-
-            newBatch.execute(batch, (err) => {
-              if (err) {
-                reject(err);
-              }
-            });
           });
-        }
-      )
+        });
+      })
     )) as BulkResult[];
   }
 
