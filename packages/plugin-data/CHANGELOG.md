@@ -3,6 +3,33 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.11](https://github.com/salesforcecli/data/compare/@salesforce/plugin-data@0.4.10...@salesforce/plugin-data@0.4.11) (2021-06-04)
+
+**Note:** Version bump only for package @salesforce/plugin-data
+
+
+
+
+
+## [0.4.10](https://github.com/salesforcecli/data/compare/@salesforce/plugin-data@0.4.9...@salesforce/plugin-data@0.4.10) (2021-06-04)
+
+
+### Bug Fixes
+
+* depend on 0.1.5 ([#132](https://github.com/salesforcecli/data/issues/132)) ([97c1199](https://github.com/salesforcecli/data/commit/97c119977b4749e1add714ce2a04ef2940e627f3))
+
+
+
+
+
+## [0.4.9](https://github.com/salesforcecli/data/compare/@salesforce/plugin-data@0.4.8...@salesforce/plugin-data@0.4.9) (2021-06-02)
+
+**Note:** Version bump only for package @salesforce/plugin-data
+
+
+
+
+
 ## [0.4.8](https://github.com/salesforcecli/data/compare/@salesforce/plugin-data@0.4.6...@salesforce/plugin-data@0.4.8) (2021-05-20)
 
 

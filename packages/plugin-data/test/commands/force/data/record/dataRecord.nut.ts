@@ -54,6 +54,7 @@ describe('data:record commands', () => {
       setupCommands: [
         'sfdx force:org:create -f config/project-scratch-def.json --setdefaultusername --wait 10 --durationdays 1',
         'sfdx force:source:push',
+        'sfdx force:user:permset:assign -n TestPerm',
       ],
       project: { sourceDir: path.join('test', 'test-files', 'data-project') },
     });
@@ -161,38 +162,48 @@ describe('data:record commands', () => {
       const updatedPhoneNumber = '0987654321';
 
       // Create a record
-      const createRecordResponse = (execCmd(
-        `force:data:record:create --sobjecttype Account --values "name=${accountNameBefore} phone=${phoneNumber}"`,
-        { ensureExitCode: 0 }
-      ).shellOutput as ShellString).stdout;
+      const createRecordResponse = (
+        execCmd(
+          `force:data:record:create --sobjecttype Account --values "name=${accountNameBefore} phone=${phoneNumber}"`,
+          { ensureExitCode: 0 }
+        ).shellOutput as ShellString
+      ).stdout;
       const m = new RegExp('Successfully created record: (001.{15})\\.');
       const match = m.exec(createRecordResponse);
       expect(match).to.have.lengthOf(2, `could not locate success message in results: "${createRecordResponse}`);
       const recordId = match ? match[1] : 'shouldnoteverybethisvalue';
 
       // Get a record
-      let getRecordResponse = (execCmd(`force:data:record:get --sobjecttype Account --sobjectid ${recordId}`, {
-        ensureExitCode: 0,
-      }).shellOutput as ShellString).stdout;
+      let getRecordResponse = (
+        execCmd(`force:data:record:get --sobjecttype Account --sobjectid ${recordId}`, {
+          ensureExitCode: 0,
+        }).shellOutput as ShellString
+      ).stdout;
       expect(validateAccount(getRecordResponse, recordId, accountNameBefore, phoneNumber)).to.be.true;
 
       // Update a record
-      const updateRecordResponse = (execCmd(
-        `force:data:record:update --sobjectid ${recordId} --sobjecttype Account --values "name=${accountNameAfter} phone=${updatedPhoneNumber}"`,
-        { ensureExitCode: 0 }
-      ).shellOutput as ShellString).stdout;
+      const updateRecordResponse = (
+        execCmd(
+          `force:data:record:update --sobjectid ${recordId} --sobjecttype Account --values "name=${accountNameAfter} phone=${updatedPhoneNumber}"`,
+          { ensureExitCode: 0 }
+        ).shellOutput as ShellString
+      ).stdout;
       expect(updateRecordResponse).to.include('Successfully updated record: 001');
 
       // Get a record
-      getRecordResponse = (execCmd(`force:data:record:get --sobjecttype Account --sobjectid ${recordId}`, {
-        ensureExitCode: 0,
-      }).shellOutput as ShellString).stdout;
+      getRecordResponse = (
+        execCmd(`force:data:record:get --sobjecttype Account --sobjectid ${recordId}`, {
+          ensureExitCode: 0,
+        }).shellOutput as ShellString
+      ).stdout;
       expect(validateAccount(getRecordResponse, recordId, accountNameAfter, updatedPhoneNumber)).to.be.true;
 
       // Delete a record
-      const deleteRecordResponse = (execCmd(`force:data:record:delete --sobjecttype Account --sobjectid ${recordId}`, {
-        ensureExitCode: 0,
-      }).shellOutput as ShellString).stdout;
+      const deleteRecordResponse = (
+        execCmd(`force:data:record:delete --sobjecttype Account --sobjectid ${recordId}`, {
+          ensureExitCode: 0,
+        }).shellOutput as ShellString
+      ).stdout;
       expect(deleteRecordResponse).to.include('Successfully deleted record: 001');
     });
   });
@@ -215,6 +226,25 @@ describe('data:record commands', () => {
       expect(getRecordResponse).to.have.property('Id', getRecordResponse?.Id);
       expect(getRecordResponse).to.have.property('Name', 'MyClass');
       expect(getRecordResponse).to.have.property('SymbolTable');
+    });
+  });
+
+  describe('test get with where clause using boolean', () => {
+    const objectType = 'Test_Object__c';
+    const recordName = 'TestRecord';
+    it('create a record in a custom object that we can query', () => {
+      execCmd(`force:data:record:create --sobjecttype ${objectType} --values "Name=${recordName}"`, {
+        ensureExitCode: 0,
+      });
+    });
+
+    it('get the record using a boolean field', () => {
+      const result = execCmd(
+        `force:data:record:get --sobjecttype ${objectType} --where "Name='${recordName}' Bool__c=false" --json`,
+        { ensureExitCode: 0 }
+      ).jsonOutput?.result;
+      expect(result).to.have.property('Name', recordName);
+      expect(result).to.have.property('Bool__c', false);
     });
   });
 });
