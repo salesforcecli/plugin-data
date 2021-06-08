@@ -1,3 +1,3 @@
 module.exports = {
-  extends: ['../../.eslintrc.js'],
+  extends: ['eslint-config-salesforce-typescript', 'eslint-config-salesforce-license'],
 };
