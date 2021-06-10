@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.8](https://github.com/salesforcecli/data/compare/@salesforce/data@0.1.7...@salesforce/data@0.1.8) (2021-06-10)
+
+
+### Bug Fixes
+
+* dependency pruning ([#141](https://github.com/salesforcecli/data/issues/141)) ([7a8212d](https://github.com/salesforcecli/data/commit/7a8212d7d99e1cddc8a9f2fbaaea7abd2fea181f))
+
+
+
+
+
 ## [0.1.7](https://github.com/salesforcecli/data/compare/@salesforce/data@0.1.6...@salesforce/data@0.1.7) (2021-06-04)
 
 **Note:** Version bump only for package @salesforce/data
