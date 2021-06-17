@@ -7,7 +7,7 @@
 
 import { SfdxCommand } from '@salesforce/command';
 import { AnyJson, Dictionary, get, Nullable } from '@salesforce/ts-types';
-import { fs, Messages, Org, SfdxError } from '@salesforce/core';
+import { fs, Messages, SfdxError } from '@salesforce/core';
 import { BaseConnection, ErrorResult, Record, SObject } from 'jsforce';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore because jsforce doesn't export http-api
@@ -53,8 +53,6 @@ HttpApi.prototype.request = function (req: unknown, ...args: unknown[]): unknown
 
 export abstract class DataCommand extends SfdxCommand {
   private static metrics: Metric[] = [];
-  // Ensured by requiresUsername
-  public org!: Org;
 
   public static addMetric(metric: Metric): void {
     DataCommand.metrics.push(metric);
@@ -97,6 +95,10 @@ export abstract class DataCommand extends SfdxCommand {
   }
 
   public getConnection(): BaseConnection {
+    // typeguard to make sure this.org is of proper type for getConnection
+    if (!this.org) {
+      throw new Error('An org is required for a connection');
+    }
     const connection: BaseConnection & ConnectionInternals = this.flags.usetoolingapi
       ? this.org.getConnection().tooling
       : this.org.getConnection();
