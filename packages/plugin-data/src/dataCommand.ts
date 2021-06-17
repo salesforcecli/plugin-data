@@ -7,7 +7,7 @@
 
 import { SfdxCommand } from '@salesforce/command';
 import { AnyJson, Dictionary, get, Nullable } from '@salesforce/ts-types';
-import { fs, Messages, SfdxError } from '@salesforce/core';
+import { fs, Messages, SfdxError, Org } from '@salesforce/core';
 import { BaseConnection, ErrorResult, Record, SObject } from 'jsforce';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore because jsforce doesn't export http-api
@@ -94,14 +94,17 @@ export abstract class DataCommand extends SfdxCommand {
     return final;
   }
 
-  public getConnection(): BaseConnection {
-    // typeguard to make sure this.org is of proper type for getConnection
+  public ensureOrg(): Org {
     if (!this.org) {
       throw new Error('An org is required for a connection');
     }
+    return this.org;
+  }
+  public getConnection(): BaseConnection {
+    const safeOrg = this.ensureOrg();
     const connection: BaseConnection & ConnectionInternals = this.flags.usetoolingapi
-      ? this.org.getConnection().tooling
-      : this.org.getConnection();
+      ? safeOrg.getConnection().tooling
+      : safeOrg.getConnection();
 
     if (this.flags.perflog) {
       if (!connection.callOptions) {
