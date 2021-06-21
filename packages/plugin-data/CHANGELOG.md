@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.17](https://github.com/salesforcecli/data/compare/@salesforce/plugin-data@0.4.16...@salesforce/plugin-data@0.4.17) (2021-06-21)
+
+
+### Bug Fixes
+
+* going past ellipses ([dc55fea](https://github.com/salesforcecli/data/commit/dc55feabc2964a6be59df4f82e41b7f390032d70))
+
+
+
+
+
 ## [0.4.16](https://github.com/salesforcecli/data/compare/@salesforce/plugin-data@0.4.15...@salesforce/plugin-data@0.4.16) (2021-06-21)
 
 
