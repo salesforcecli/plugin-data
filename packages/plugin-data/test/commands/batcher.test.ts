@@ -20,6 +20,7 @@ let logSpy: sinon.SinonStub;
 let batcher: Batcher;
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+// this comment forces a test
 
 describe('batcher', () => {
   beforeEach(async () => {
