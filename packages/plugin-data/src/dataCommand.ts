@@ -94,12 +94,20 @@ export abstract class DataCommand extends SfdxCommand {
     return final;
   }
 
+  /**
+   * Necessary where plugin commands are extending a base class that extends SfdxCommand
+   *
+   * @returns Org
+   */
   public ensureOrg(): Org {
     if (!this.org) {
-      throw new Error('An org is required for a connection');
+      throw new Error(
+        'This command requires a username. Specify it with the -u parameter or with the "sfdx config:set defaultusername=<username>" command.'
+      );
     }
     return this.org;
   }
+
   public getConnection(): BaseConnection {
     const safeOrg = this.ensureOrg();
     const connection: BaseConnection & ConnectionInternals = this.flags.usetoolingapi
