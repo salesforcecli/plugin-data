@@ -31,7 +31,7 @@ interface Response {
   req: { path: string };
 }
 
-type ConnectionInternals = { callOptions?: { perfOption?: string } };
+type ConnectionInternals = { callOptions?: { perfOption?: string }; client?: string };
 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return */
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -96,17 +96,19 @@ export abstract class DataCommand extends SfdxCommand {
     return final;
   }
 
-  public getConnection(): BaseConnection {
+  public getConnection(options: ConnectionInternals = {}): BaseConnection {
     const connection: BaseConnection & ConnectionInternals = this.flags.usetoolingapi
       ? this.org.getConnection().tooling
       : this.org.getConnection();
-
-    if (this.flags.perflog) {
-      if (!connection.callOptions) {
-        connection.callOptions = {};
-      }
-      connection.callOptions.perfOption = 'MINIMUM';
-    }
+    const effectiveOptions = {
+      ...(process.env.SFDX_SET_CLIENT_IDS ? { client: process.env.SFDX_SET_CLIENT_IDS } : {}),
+      ...options,
+      ...(this.flags.perflog ? { perfOption: 'MINIMUM' } : {}),
+    };
+    // const perfOption = this.flags.perflog ? { perfOption: 'MINIMUM' } : {};
+    connection.callOptions = Object.assign(connection.callOptions ? { ...connection.callOptions } : {}, {
+      ...effectiveOptions,
+    });
     return connection;
   }
 
