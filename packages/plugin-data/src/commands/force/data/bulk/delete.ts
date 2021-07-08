@@ -43,7 +43,7 @@ export default class Delete extends DataCommand {
     try {
       await this.throwIfFileDoesntExist(this.flags.csvfile);
 
-      const conn: Connection = this.org.getConnection();
+      const conn: Connection = this.ensureOrg().getConnection();
       this.ux.startSpinner('Bulk Delete');
 
       const csvRecords: ReadStream = fs.createReadStream(this.flags.csvfile, { encoding: 'utf-8' });

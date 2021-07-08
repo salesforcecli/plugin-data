@@ -59,11 +59,8 @@ export default class Import extends SfdxCommand {
     },
   };
 
-  // Overrides SfdxCommand.  This is ensured since requiresUsername == true
-  protected org!: Org;
-
   public async run(): Promise<ImportResult[] | JsonMap> {
-    const importApi = new ImportApi(this.org);
+    const importApi = new ImportApi(this.org as Org);
 
     if (this.flags.confighelp) {
       // Display config help and return

@@ -32,7 +32,7 @@ export default class Status extends DataCommand {
 
   public async run(): Promise<BatchInfo[] | JobInfo> {
     this.ux.startSpinner('Getting Status');
-    const conn: Connection = this.org.getConnection();
+    const conn: Connection = this.ensureOrg().getConnection();
     const batcher = new Batcher(conn, this.ux);
     if (this.flags.jobid && this.flags.batchid) {
       // view batch status

@@ -39,12 +39,9 @@ export default class Export extends SfdxCommand {
     }),
   };
 
-  // Overrides SfdxCommand.  This is ensured since requiresUsername == true
-  protected org!: Org;
-
   public async run(): Promise<unknown> {
     const { query, plan, prefix, outputdir: outputDir } = this.flags;
-    const exportApi = new ExportApi(this.org, this.ux);
+    const exportApi = new ExportApi(this.org as Org, this.ux);
     const exportConfig: ExportConfig = {
       outputDir: outputDir as string,
       plan: plan as boolean,

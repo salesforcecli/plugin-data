@@ -43,7 +43,7 @@ export default class Upsert extends DataCommand {
   };
 
   public async run(): Promise<JobInfo[] | BulkResult[]> {
-    const conn: Connection = this.org.getConnection();
+    const conn: Connection = this.ensureOrg().getConnection();
     this.ux.startSpinner('Bulk Upsert');
 
     await this.throwIfFileDoesntExist(this.flags.csvfile);
