@@ -72,7 +72,7 @@ workflows:
           requires:
             - release-management/test-package
       - release-management/release-lerna-packages:
-          sign: packages/plugin-data
+          sign: '@salesforces/plugin-data'
           requires:
             - release-management/test-package
           filters:
