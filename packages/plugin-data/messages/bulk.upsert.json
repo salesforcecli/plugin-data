@@ -9,6 +9,6 @@
     "csvfile": "the path to the CSV file that defines the records to upsert",
     "externalid": "the column name of the external ID",
     "wait": "the number of minutes to wait for the command to complete before displaying the results",
-    "serial": "run batches in serial"
+    "serial": "run batches in serial mode"
   }
 }
