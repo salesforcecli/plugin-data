@@ -136,4 +136,57 @@ describe('force:data:bulk:upsert', () => {
       expect(result.exitCode).to.equal(1);
       expect(result.message).to.equal('Error');
     });
+
+  const expectedSerialJob = {
+    id: '7503F000004rVEMQA2',
+    operation: 'upsert',
+    object: 'custom__c',
+    createdById: '0053F000007vESSQA2',
+    createdDate: '2021-01-19T23:05:32.000Z',
+    systemModstamp: '2021-01-19T23:05:33.000Z',
+    state: 'Closed',
+    externalIdFieldName: 'field__c',
+    concurrencyMode: 'Serial',
+    contentType: 'CSV',
+    numberBatchesQueued: '0',
+    numberBatchesInProgress: '0',
+    numberBatchesCompleted: '1',
+    numberBatchesFailed: '0',
+    numberBatchesTotal: '1',
+    numberRecordsProcessed: '18',
+    numberRetries: '0',
+    apiVersion: '50.0',
+    numberRecordsFailed: '0',
+    totalProcessingTime: '80',
+    apiActiveProcessingTime: '46',
+    apexProcessingTime: '0',
+  };
+
+  test
+    .withOrg({ username: 'test@org.com' }, true)
+    .do(() => {
+      stubMethod($$.SANDBOX, fs, 'fileExists').resolves(true);
+      stubMethod($$.SANDBOX, fs, 'createReadStream').returns(ReadStream.prototype);
+      stubMethod($$.SANDBOX, Batcher.prototype, 'createAndExecuteBatches').resolves(expectedSerialJob);
+    })
+    .stdout()
+    .command([
+      'force:data:bulk:upsert',
+      '--targetusername',
+      'test@org.com',
+      '--sobjecttype',
+      'custom__c',
+      '--csvfile',
+      'fileToUpsert.csv',
+      '--externalid',
+      'field__c',
+      '--wait',
+      '5',
+      '--json',
+      '--serial',
+    ])
+    .it('should upsert the data correctly while waiting', (ctx) => {
+      const result = JSON.parse(ctx.stdout) as never;
+      expect(result).to.deep.equal({ status: 0, result: expectedSerialJob });
+    });
 });

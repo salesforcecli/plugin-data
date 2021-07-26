@@ -175,6 +175,44 @@ describe('data:bulk commands', () => {
 
         checkBulkStatusHumanResponse(statusCheckCommand);
       });
+
+      it('should upsert serially, query, and delete 10 accounts', () => {
+        // Bulk upsert 10 accounts
+        const response = (
+          execCmd<BulkUpsertDelete[]>(
+            `force:data:bulk:upsert --sobjecttype Account --csvfile ${path.join(
+              '.',
+              'data',
+              'bulkUpsert.csv'
+            )} --externalid Id --serial`,
+            { ensureExitCode: 0 }
+          ).shellOutput as ShellString
+        ).stdout;
+        expect(response).to.match(/Check batch.*?status with the command:/g);
+        let statusCheckCommand =
+          response.split('\n').find((line) => line.startsWith('sfdx force:data:bulk:status')) ?? '';
+
+        checkBulkStatusHumanResponse(statusCheckCommand);
+
+        // Query for the accounts created and create a file with ids
+        const records = queryAccountRecords();
+
+        const accountIds = records.map((account) => account.Id);
+        const idsFile = path.join(testSession.project?.dir ?? '.', 'data', 'deleteAccounts.csv');
+        fs.writeFileSync(idsFile, `Id\n${accountIds.join('\n')}\n`);
+
+        // Run bulk delete
+        const deleteResponse = (
+          execCmd<BulkUpsertDelete[]>(`force:data:bulk:delete --sobjecttype Account --csvfile ${idsFile}`, {
+            ensureExitCode: 0,
+          }).shellOutput as ShellString
+        ).stdout;
+        expect(response).to.match(/Check batch.*?status with the command:/g);
+        statusCheckCommand =
+          deleteResponse.split('\n').find((line) => line.startsWith('sfdx force:data:bulk:status')) ?? '';
+
+        checkBulkStatusHumanResponse(statusCheckCommand);
+      });
     });
   });
 });

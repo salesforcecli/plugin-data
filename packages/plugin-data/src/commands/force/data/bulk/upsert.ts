@@ -40,6 +40,11 @@ export default class Upsert extends DataCommand {
       description: messages.getMessage('flags.wait'),
       min: 0,
     }),
+    serial: flags.boolean({
+      char: 'r',
+      description: messages.getMessage('flags.serial'),
+      default: false,
+    }),
   };
 
   public async run(): Promise<JobInfo[] | BulkResult[]> {
@@ -51,9 +56,10 @@ export default class Upsert extends DataCommand {
     const batcher: Batcher = new Batcher(conn, this.ux);
     const csvStream: ReadStream = fs.createReadStream(this.flags.csvfile, { encoding: 'utf-8' });
 
+    const concurrencyMode = this.flags.serial ? 'Serial' : 'Parallel';
     const job = conn.bulk.createJob(this.flags.sobjecttype, 'upsert', {
       extIdField: this.flags.externalid as string,
-      concurrencyMode: 'Parallel',
+      concurrencyMode,
     });
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
