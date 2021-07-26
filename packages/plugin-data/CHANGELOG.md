@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://github.com/salesforcecli/data/compare/@salesforce/plugin-data@0.5.2...@salesforce/plugin-data@0.6.0) (2021-07-26)
+
+
+### Features
+
+* added new flag for serial process ([#166](https://github.com/salesforcecli/data/issues/166)) ([9c70cbd](https://github.com/salesforcecli/data/commit/9c70cbd78deecf2d99b63b3328fa6475657c49b2))
+
+
+
+
+
 ## [0.5.2](https://github.com/salesforcecli/data/compare/@salesforce/plugin-data@0.5.1...@salesforce/plugin-data@0.5.2) (2021-07-08)
 
 **Note:** Version bump only for package @salesforce/plugin-data

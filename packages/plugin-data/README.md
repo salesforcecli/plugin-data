@@ -69,7 +69,7 @@ sfdx plugins
 <!-- commands -->
 * [`sfdx force:data:bulk:delete -f <filepath> -s <string> [-w <minutes>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatabulkdelete--f-filepath--s-string--w-minutes--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx force:data:bulk:status -i <string> [-b <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatabulkstatus--i-string--b-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
-* [`sfdx force:data:bulk:upsert -i <string> -f <filepath> -s <string> [-w <minutes>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatabulkupsert--i-string--f-filepath--s-string--w-minutes--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
+* [`sfdx force:data:bulk:upsert -i <string> -f <filepath> -s <string> [-w <minutes>] [-r] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatabulkupsert--i-string--f-filepath--s-string--w-minutes--r--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx force:data:record:create -s <string> -v <string> [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatarecordcreate--s-string--v-string--t---perflog---json--u-string---apiversion-string---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx force:data:record:delete -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatarecorddelete--s-string--i-id---w-string--t---perflog---json--u-string---apiversion-string---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx force:data:record:get -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatarecordget--s-string--i-id---w-string--t---perflog---json--u-string---apiversion-string---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
@@ -120,7 +120,7 @@ EXAMPLES
   sfdx force:data:bulk:delete -s MyObject__c -f ./path/to/file.csv
 ```
 
-_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/data/blob/v0.5.2/src/commands/force/data/bulk/delete.ts)_
+_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/data/blob/v0.6.0/src/commands/force/data/bulk/delete.ts)_
 
 ## `sfdx force:data:bulk:status -i <string> [-b <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -159,15 +159,15 @@ EXAMPLES
   sfdx force:data:bulk:status -i 750xx000000005sAAA -b 751xx000000005nAAA
 ```
 
-_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/data/blob/v0.5.2/src/commands/force/data/bulk/status.ts)_
+_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/data/blob/v0.6.0/src/commands/force/data/bulk/status.ts)_
 
-## `sfdx force:data:bulk:upsert -i <string> -f <filepath> -s <string> [-w <minutes>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
+## `sfdx force:data:bulk:upsert -i <string> -f <filepath> -s <string> [-w <minutes>] [-r] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
 bulk upsert records from a CSV file
 
 ```
 USAGE
-  $ sfdx force:data:bulk:upsert -i <string> -f <filepath> -s <string> [-w <minutes>] [-u <string>] [--apiversion 
+  $ sfdx force:data:bulk:upsert -i <string> -f <filepath> -s <string> [-w <minutes>] [-r] [-u <string>] [--apiversion 
   <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 
 OPTIONS
@@ -176,6 +176,8 @@ OPTIONS
 
   -i, --externalid=externalid                                                       (required) the column name of the
                                                                                     external ID
+
+  -r, --serial                                                                      run batches in serial mode
 
   -s, --sobjecttype=sobjecttype                                                     (required) the sObject type of the
                                                                                     records you want to upsert
@@ -201,14 +203,16 @@ DESCRIPTION
   One job can contain many batches, depending on the length of the CSV file.
   Returns a job ID and a batch ID. Use these IDs to check job status with data:bulk:status.
 
-  For information about formatting your CSV file, see "Prepare CSV Files" in the Bulk API Developer Guide.
+  For information about formatting your CSV file, see "Prepare CSV Files" in the Bulk API Developer Guide. 
+
+  By default, the job runs the batches in parallel. Specify --serial to run them serially.
 
 EXAMPLES
   sfdx force:data:bulk:upsert -s MyObject__c -f ./path/to/file.csv -i MyField__c
   sfdx force:data:bulk:upsert -s MyObject__c -f ./path/to/file.csv -i Id -w 2
 ```
 
-_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/data/blob/v0.5.2/src/commands/force/data/bulk/upsert.ts)_
+_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/data/blob/v0.6.0/src/commands/force/data/bulk/upsert.ts)_
 
 ## `sfdx force:data:record:create -s <string> -v <string> [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -258,7 +262,7 @@ EXAMPLES
   sfdx force:data:record:create -s Account -v "Name=Acme" --perflog --json
 ```
 
-_See code: [src/commands/force/data/record/create.ts](https://github.com/salesforcecli/data/blob/v0.5.2/src/commands/force/data/record/create.ts)_
+_See code: [src/commands/force/data/record/create.ts](https://github.com/salesforcecli/data/blob/v0.6.0/src/commands/force/data/record/create.ts)_
 
 ## `sfdx force:data:record:delete -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -309,7 +313,7 @@ EXAMPLES
   sfdx force:data:record:delete -t -s TraceFlag -i 7tf170000009cU6AAI --perflog --json
 ```
 
-_See code: [src/commands/force/data/record/delete.ts](https://github.com/salesforcecli/data/blob/v0.5.2/src/commands/force/data/record/delete.ts)_
+_See code: [src/commands/force/data/record/delete.ts](https://github.com/salesforcecli/data/blob/v0.6.0/src/commands/force/data/record/delete.ts)_
 
 ## `sfdx force:data:record:get -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -361,7 +365,7 @@ EXAMPLES
   sfdx force:data:record:get -t -s TraceFlag -i 7tf170000009cUBAAY --perflog --json
 ```
 
-_See code: [src/commands/force/data/record/get.ts](https://github.com/salesforcecli/data/blob/v0.5.2/src/commands/force/data/record/get.ts)_
+_See code: [src/commands/force/data/record/get.ts](https://github.com/salesforcecli/data/blob/v0.6.0/src/commands/force/data/record/get.ts)_
 
 ## `sfdx force:data:record:update -s <string> -v <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -414,7 +418,7 @@ EXAMPLES
   sfdx force:data:record:update -s Account -i 001D000000Kv3dl -v "Name=NewAcme" --perflog --json
 ```
 
-_See code: [src/commands/force/data/record/update.ts](https://github.com/salesforcecli/data/blob/v0.5.2/src/commands/force/data/record/update.ts)_
+_See code: [src/commands/force/data/record/update.ts](https://github.com/salesforcecli/data/blob/v0.6.0/src/commands/force/data/record/update.ts)_
 
 ## `sfdx force:data:soql:query -q <string> [-t] [-r human|csv|json] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -459,7 +463,7 @@ EXAMPLES
   sfdx force:data:soql:query -q "SELECT Name FROM ApexTrigger" -t
 ```
 
-_See code: [src/commands/force/data/soql/query.ts](https://github.com/salesforcecli/data/blob/v0.5.2/src/commands/force/data/soql/query.ts)_
+_See code: [src/commands/force/data/soql/query.ts](https://github.com/salesforcecli/data/blob/v0.6.0/src/commands/force/data/soql/query.ts)_
 
 ## `sfdx force:data:tree:export -q <string> [-p] [-x <string>] [-d <directory>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -504,7 +508,7 @@ EXAMPLES
   sfdx force:data:tree:export -q <path to file containing soql query> -x export-demo -d /tmp/sfdx-out -p
 ```
 
-_See code: [src/commands/force/data/tree/export.ts](https://github.com/salesforcecli/data/blob/v0.5.2/src/commands/force/data/tree/export.ts)_
+_See code: [src/commands/force/data/tree/export.ts](https://github.com/salesforcecli/data/blob/v0.6.0/src/commands/force/data/tree/export.ts)_
 
 ## `sfdx force:data:tree:import [-f <array> | -p <filepath>] [--confighelp] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -552,5 +556,5 @@ EXAMPLES
   sfdx force:data:tree:import -p Account-Contact-plan.json -u me@my.org
 ```
 
-_See code: [src/commands/force/data/tree/import.ts](https://github.com/salesforcecli/data/blob/v0.5.2/src/commands/force/data/tree/import.ts)_
+_See code: [src/commands/force/data/tree/import.ts](https://github.com/salesforcecli/data/blob/v0.6.0/src/commands/force/data/tree/import.ts)_
 <!-- commandsstop -->
