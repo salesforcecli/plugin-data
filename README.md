@@ -84,6 +84,13 @@ sfdx plugins
 bulk delete records from a csv file
 
 ```
+bulk delete records from a csv file
+The file must be a CSV file with only one column: "Id".
+One job can contain many batches, depending on the length of the CSV file.
+Returns a job ID and a batch ID. Use these IDs to check job status with data:bulk:status.
+
+
+
 USAGE
   $ sfdx force:data:bulk:delete -f <filepath> -s <string> [-w <minutes>] [-u <string>] [--apiversion <string>] [--json] 
   [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
@@ -121,13 +128,16 @@ EXAMPLES
   sfdx force:data:bulk:delete -s MyObject__c -f ./path/to/file.csv
 ```
 
-_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/data/blob/v0.6.0/src/commands/force/data/bulk/delete.ts)_
+_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.0/src/commands/force/data/bulk/delete.ts)_
 
 ## `sfdx force:data:bulk:status -i <string> [-b <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
 view the status of a bulk data load job or batch
 
 ```
+view the status of a bulk data load job or batch
+Run this command using the job ID or batch ID returned from the force:data:bulk:delete or force:data:bulk:upsert commands.
+
 USAGE
   $ sfdx force:data:bulk:status -i <string> [-b <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel 
   trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
@@ -160,13 +170,23 @@ EXAMPLES
   sfdx force:data:bulk:status -i 750xx000000005sAAA -b 751xx000000005nAAA
 ```
 
-_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/data/blob/v0.6.0/src/commands/force/data/bulk/status.ts)_
+_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.0/src/commands/force/data/bulk/status.ts)_
 
 ## `sfdx force:data:bulk:upsert -i <string> -f <filepath> -s <string> [-w <minutes>] [-r] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
 bulk upsert records from a CSV file
 
 ```
+bulk upsert records from a CSV file
+Inserts or updates records from a CSV file.
+
+One job can contain many batches, depending on the length of the CSV file.
+Returns a job ID and a batch ID. Use these IDs to check job status with data:bulk:status.
+
+For information about formatting your CSV file, see "Prepare CSV Files" in the Bulk API Developer Guide. 
+
+By default, the job runs the batches in parallel. Specify --serial to run them serially.
+
 USAGE
   $ sfdx force:data:bulk:upsert -i <string> -f <filepath> -s <string> [-w <minutes>] [-r] [-u <string>] [--apiversion 
   <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
@@ -213,13 +233,20 @@ EXAMPLES
   sfdx force:data:bulk:upsert -s MyObject__c -f ./path/to/file.csv -i Id -w 2
 ```
 
-_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/data/blob/v0.6.0/src/commands/force/data/bulk/upsert.ts)_
+_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.0/src/commands/force/data/bulk/upsert.ts)_
 
 ## `sfdx force:data:record:create -s <string> -v <string> [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
 creates and inserts a record
 
 ```
+creates and inserts a record
+The format of a field-value pair is <fieldName>=<value>.
+Enclose all field-value pairs in one set of double quotation marks, delimited by spaces.
+Enclose values that contain spaces in single quotes.
+
+To get data on API performance metrics, specify both --perflog and --json.
+
 USAGE
   $ sfdx force:data:record:create -s <string> -v <string> [-t] [--perflog --json] [-u <string>] [--apiversion <string>] 
   [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
@@ -263,13 +290,21 @@ EXAMPLES
   sfdx force:data:record:create -s Account -v "Name=Acme" --perflog --json
 ```
 
-_See code: [src/commands/force/data/record/create.ts](https://github.com/salesforcecli/data/blob/v0.6.0/src/commands/force/data/record/create.ts)_
+_See code: [src/commands/force/data/record/create.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.0/src/commands/force/data/record/create.ts)_
 
 ## `sfdx force:data:record:delete -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
 deletes a single record
 
 ```
+deletes a single record
+Specify an sObject type and either an ID or a list of <fieldName>=<value> pairs.
+The format of a field-value pair is <fieldName>=<value>.
+Enclose all field-value pairs in one set of double quotation marks, delimited by spaces.
+Enclose values that contain spaces in single quotes.
+
+To get data on API performance metrics, specify both --perflog and --json.
+
 USAGE
   $ sfdx force:data:record:delete -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] 
   [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
@@ -314,13 +349,21 @@ EXAMPLES
   sfdx force:data:record:delete -t -s TraceFlag -i 7tf170000009cU6AAI --perflog --json
 ```
 
-_See code: [src/commands/force/data/record/delete.ts](https://github.com/salesforcecli/data/blob/v0.6.0/src/commands/force/data/record/delete.ts)_
+_See code: [src/commands/force/data/record/delete.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.0/src/commands/force/data/record/delete.ts)_
 
 ## `sfdx force:data:record:get -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
 displays a single record
 
 ```
+displays a single record
+Specify an sObject type and either an ID or a list of <fieldName>=<value> pairs.
+The format of a field-value pair is <fieldName>=<value>.
+Enclose all field-value pairs in one set of double quotation marks, delimited by spaces.
+Enclose values that contain spaces in single quotes.
+
+To get data on API performance metrics, specify both --perflog and --json.
+
 USAGE
   $ sfdx force:data:record:get -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion 
   <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
@@ -366,13 +409,20 @@ EXAMPLES
   sfdx force:data:record:get -t -s TraceFlag -i 7tf170000009cUBAAY --perflog --json
 ```
 
-_See code: [src/commands/force/data/record/get.ts](https://github.com/salesforcecli/data/blob/v0.6.0/src/commands/force/data/record/get.ts)_
+_See code: [src/commands/force/data/record/get.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.0/src/commands/force/data/record/get.ts)_
 
 ## `sfdx force:data:record:update -s <string> -v <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
 updates a single record
 
 ```
+updates a single record
+The format of a field-value pair is <fieldName>=<value>.
+Enclose all field-value pairs in one set of double quotation marks, delimited by spaces.
+Enclose values that contain spaces in single quotes.
+
+To get data on API performance metrics, specify both --perflog and --json.
+
 USAGE
   $ sfdx force:data:record:update -s <string> -v <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] 
   [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
@@ -419,13 +469,20 @@ EXAMPLES
   sfdx force:data:record:update -s Account -i 001D000000Kv3dl -v "Name=NewAcme" --perflog --json
 ```
 
-_See code: [src/commands/force/data/record/update.ts](https://github.com/salesforcecli/data/blob/v0.6.0/src/commands/force/data/record/update.ts)_
+_See code: [src/commands/force/data/record/update.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.0/src/commands/force/data/record/update.ts)_
 
 ## `sfdx force:data:soql:query -q <string> [-t] [-r human|csv|json] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
 execute a SOQL query
 
 ```
+execute a SOQL query
+When you execute this command in a project, it executes the query against the data in your default scratch org.
+
+To get data on API performance metrics, specify both --perflog and --json.
+
+
+
 USAGE
   $ sfdx force:data:soql:query -q <string> [-t] [-r human|csv|json] [--perflog --json] [-u <string>] [--apiversion 
   <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
@@ -464,13 +521,17 @@ EXAMPLES
   sfdx force:data:soql:query -q "SELECT Name FROM ApexTrigger" -t
 ```
 
-_See code: [src/commands/force/data/soql/query.ts](https://github.com/salesforcecli/data/blob/v0.6.0/src/commands/force/data/soql/query.ts)_
+_See code: [src/commands/force/data/soql/query.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.0/src/commands/force/data/soql/query.ts)_
 
 ## `sfdx force:data:tree:export -q <string> [-p] [-x <string>] [-d <directory>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
 export data from an org
 
 ```
+export data from an org
+Exports data from an org into sObject tree format for use with the force:data:tree:import command.
+The query for export can return a maximum of 2,000 records. For more information, see the REST API Developer Guide: https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobject_tree.htm
+
 USAGE
   $ sfdx force:data:tree:export -q <string> [-p] [-x <string>] [-d <directory>] [-u <string>] [--apiversion <string>] 
   [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
@@ -509,13 +570,18 @@ EXAMPLES
   sfdx force:data:tree:export -q <path to file containing soql query> -x export-demo -d /tmp/sfdx-out -p
 ```
 
-_See code: [src/commands/force/data/tree/export.ts](https://github.com/salesforcecli/data/blob/v0.6.0/src/commands/force/data/tree/export.ts)_
+_See code: [src/commands/force/data/tree/export.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.0/src/commands/force/data/tree/export.ts)_
 
 ## `sfdx force:data:tree:import [-f <array> | -p <filepath>] [--confighelp] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
 import data into an org
 
 ```
+import data into an org
+Imports data into an org using the SObject Tree Save API.  This data can include master-detail relationships.
+To generate JSON files for use with force:data:tree:import, run "sfdx force:data:tree:export".
+The SObject Tree API supports requests that contain up to 200 records. For more information, see the REST API Developer Guide: https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobject_tree.htm
+
 USAGE
   $ sfdx force:data:tree:import [-f <array> | -p <filepath>] [--confighelp] [-u <string>] [--apiversion <string>] 
   [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
@@ -557,5 +623,5 @@ EXAMPLES
   sfdx force:data:tree:import -p Account-Contact-plan.json -u me@my.org
 ```
 
-_See code: [src/commands/force/data/tree/import.ts](https://github.com/salesforcecli/data/blob/v0.6.0/src/commands/force/data/tree/import.ts)_
+_See code: [src/commands/force/data/tree/import.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.0/src/commands/force/data/tree/import.ts)_
 <!-- commandsstop -->
