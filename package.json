@@ -57,10 +57,7 @@
     "/schema",
     "/oclif.manifest.json"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/salesforcecli/plugin-data.git"
-  },
+  "repository": "salesforcecli/plugin-data",
   "bugs": "https://github.com/forcedotcom/cli/issues",
   "publishConfig": {
     "access": "public"
@@ -87,9 +84,8 @@
   },
   "dependencies": {
     "@oclif/config": "^1",
-    "@salesforce/command": "^3.1.3",
+    "@salesforce/command": "^4.0.4",
     "@salesforce/core": "^2.24.0",
-    "@salesforce/data": "^0.1.8",
     "@salesforce/ts-types": "^1.5.13",
     "@types/graceful-fs": "^4.1.5",
     "@types/mkdirp": "^1.0.1",
@@ -102,20 +98,19 @@
     "@oclif/plugin-command-snapshot": "^2.1.1",
     "@salesforce/cli-plugins-testkit": "^1.1.5",
     "@salesforce/dev-config": "^2.1.2",
-    "@salesforce/plugin-command-reference": "^1.3.0",
     "@salesforce/dev-scripts": "0.9.15",
+    "@salesforce/plugin-command-reference": "^1.3.0",
     "@salesforce/prettier-config": "^0.0.2",
     "@salesforce/ts-sinon": "^1.3.15",
     "@types/chai-as-promised": "^7.1.3",
     "@types/jsforce": "^1.9.29",
-    "@types/sinon": "^10.0.2",
     "@typescript-eslint/eslint-plugin": "^4.26.0",
     "@typescript-eslint/parser": "^4.26.0",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "cz-conventional-changelog": "^3.3.0",
     "eslint": "^7.27.0",
-    "eslint-config-prettier": "^6.11.0",
+    "eslint-config-prettier": "^8.3.0",
     "eslint-config-salesforce": "^0.1.6",
     "eslint-config-salesforce-license": "^0.1.6",
     "eslint-config-salesforce-typescript": "^0.2.7",
@@ -124,7 +119,7 @@
     "eslint-plugin-jsdoc": "^35.1.2",
     "eslint-plugin-prettier": "^3.1.3",
     "fast-xml-parser": "^3.17.5",
-    "husky": "^5.1.3",
+    "husky": "^4.3.8",
     "mocha": "^8.4.0",
     "nyc": "^15.1.0",
     "prettier": "^2.0.5",
@@ -133,5 +128,12 @@
     "sinon": "10.0.0",
     "ts-node": "^10.0.0",
     "typescript": "^4.1.3"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "sf-husky-commit-msg",
+      "pre-commit": "sf-husky-pre-commit",
+      "pre-push": "sf-husky-pre-push"
+    }
   }
 }
