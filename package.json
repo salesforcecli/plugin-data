@@ -1,22 +1,9 @@
 {
-  "name": "root",
-  "description": "Repository for salesforce data plugin and library",
+  "name": "@salesforce/plugin-data",
+  "version": "0.6.0",
+  "description": "Plugin for salesforce data commands",
   "author": "Salesforce",
-  "bugs": "https://github.com/forcedotcom/cli/issues",
-  "config": {
-    "commitizen": {
-      "path": "cz-conventional-changelog"
-    }
-  },
-  "engines": {
-    "node": ">=12.0.0"
-  },
-  "files": [
-    "/lib",
-    "/messages",
-    "/oclif.manifest.json"
-  ],
-  "homepage": "https://github.com/salesforcecli/data",
+  "homepage": "https://github.com/salesforcecli/plugin-data",
   "keywords": [
     "force",
     "salesforce",
@@ -25,54 +12,121 @@
     "sfdx-plugin"
   ],
   "license": "BSD-3-Clause",
-  "repository": "salesforcecli/data",
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "oclif": {
+    "commands": "./lib/commands",
+    "bin": "sfdx",
+    "devPlugins": [
+      "@oclif/plugin-help",
+      "@oclif/plugin-command-snapshot",
+      "@salesforce/plugin-command-reference"
+    ],
+    "topics": {
+      "force": {
+        "description": "tools for the Salesforce developer",
+        "subtopics": {
+          "data": {
+            "description": "manipulate records in your org",
+            "longDescription": "Use the data commands to manipulate records in your org. Commands are available to help you work with various APIs. Import CSV files with the Bulk API. Export and import data that includes master-detail relationships with the SObject Tree Save API. Perform simple CRUD operations on individual records with the REST API.",
+            "subtopics": {
+              "bulk": {
+                "description": "manipulate records using the bulk API"
+              },
+              "record": {
+                "description": "manipulate records using the enterprise API"
+              },
+              "soql": {
+                "description": "fetch records using SOQL"
+              },
+              "tree": {
+                "description": "import/export records using the tree API"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "files": [
+    "/lib",
+    "/messages",
+    "/schema",
+    "/oclif.manifest.json"
+  ],
+  "repository": "salesforcecli/plugin-data",
+  "bugs": "https://github.com/forcedotcom/cli/issues",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "bootstrap": "lerna bootstrap",
-    "build": "lerna run build",
-    "ci-docs": "yarn sf-ci-docs",
-    "clean": "lerna run clean",
-    "clean-all": "lerna run clean-all",
-    "compile": "lerna run compile",
-    "docs": "lerna run docs",
-    "format": "lerna run format",
-    "install": "sf-lerna-install",
-    "lint": "lerna run lint",
-    "lint-fix": "lerna run lint -- --fix",
-    "postclean-all": "yarn sf-clean all",
-    "postinstall": "yarn bootstrap",
-    "prepack": "lerna run prepack",
-    "test": "lerna run test",
-    "test:nuts": "lerna run test:nuts"
+    "build": "sf-build",
+    "clean": "sf-clean",
+    "clean-all": "sf-clean all",
+    "clean:lib": "shx rm -rf lib && shx rm -rf coverage && shx rm -rf .nyc_output && shx rm -f oclif.manifest.json",
+    "compile": "sf-compile",
+    "docs": "sf-docs",
+    "format": "sf-format",
+    "lint": "sf-lint",
+    "postpack": "shx rm -f oclif.manifest.json",
+    "posttest": "yarn lint && yarn test:deprecation-policy && yarn test:command-reference",
+    "prepack": "sf-prepack",
+    "prepare": "sf-install",
+    "pretest": "sf-compile-test",
+    "test": "sf-test",
+    "test:command-reference": "./bin/run commandreference:generate --erroronwarnings",
+    "test:deprecation-policy": "./bin/run snapshot:compare",
+    "test:nuts": "nyc mocha \"**/*.nut.ts\" --slow 4500 --timeout 600000 --parallel",
+    "version": "oclif-dev readme"
+  },
+  "dependencies": {
+    "@oclif/config": "^1",
+    "@salesforce/command": "^4.0.4",
+    "@salesforce/core": "^2.24.0",
+    "@salesforce/ts-types": "^1.5.13",
+    "@types/graceful-fs": "^4.1.5",
+    "@types/mkdirp": "^1.0.1",
+    "chalk": "^4.1.0",
+    "csv-parse": "^4.14.1",
+    "tslib": "^2"
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1",
+    "@oclif/plugin-command-snapshot": "^2.1.1",
     "@salesforce/cli-plugins-testkit": "^1.1.5",
     "@salesforce/dev-config": "^2.1.2",
-    "@salesforce/dev-scripts": "0.9.15",
+    "@salesforce/dev-scripts": "0.9.18",
     "@salesforce/plugin-command-reference": "^1.3.0",
     "@salesforce/prettier-config": "^0.0.2",
-    "@salesforce/ts-sinon": "^1.3.12",
-    "@typescript-eslint/eslint-plugin": "4.26.0",
-    "@typescript-eslint/parser": "4.26.0",
+    "@salesforce/ts-sinon": "^1.3.15",
+    "@types/chai-as-promised": "^7.1.3",
+    "@types/jsforce": "^1.9.29",
+    "@typescript-eslint/eslint-plugin": "^4.26.0",
+    "@typescript-eslint/parser": "^4.26.0",
     "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "cz-conventional-changelog": "^3.3.0",
     "eslint": "^7.27.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-salesforce": "^0.1.6",
     "eslint-config-salesforce-license": "^0.1.6",
     "eslint-config-salesforce-typescript": "^0.2.7",
-    "eslint-plugin-header": "^3.0.0",
-    "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-jsdoc": "^35.0.0",
+    "eslint-plugin-header": "^3.1.1",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-jsdoc": "^35.1.2",
     "eslint-plugin-prettier": "^3.1.3",
+    "fast-xml-parser": "^3.17.5",
     "husky": "^4.3.8",
-    "lerna": "^4.0.0",
-    "mocha": "^8.3.0",
+    "mocha": "^8.4.0",
     "nyc": "^15.1.0",
     "prettier": "^2.0.5",
     "pretty-quick": "^3.1.0",
     "shx": "^0.3.3",
-    "sinon": "^9.0.0",
-    "ts-node": "^9.1.1",
+    "sinon": "10.0.0",
+    "ts-node": "^10.0.0",
     "typescript": "^4.1.3"
   },
   "husky": {
@@ -81,9 +135,5 @@
       "pre-commit": "sf-husky-pre-commit",
       "pre-push": "sf-husky-pre-push"
     }
-  },
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ]
+  }
 }
