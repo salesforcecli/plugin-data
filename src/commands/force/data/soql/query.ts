@@ -8,7 +8,15 @@
 import * as os from 'os';
 import { flags, FlagsConfig } from '@salesforce/command';
 import { Connection, Logger, Messages } from '@salesforce/core';
-import { ensureJsonArray, ensureJsonMap, ensureString, isJsonArray, toJsonMap } from '@salesforce/ts-types';
+import {
+  AnyJson,
+  ensureJsonArray,
+  ensureJsonMap,
+  ensureString,
+  getArray,
+  isJsonArray,
+  toJsonMap,
+} from '@salesforce/ts-types';
 import { Tooling } from '@salesforce/core/lib/connection';
 import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../../../reporters';
 import { Field, FieldType, SoqlQueryResult } from '../../../../dataSoqlQueryTypes';
@@ -80,9 +88,10 @@ export class SoqlQuery {
           columns.push(field);
         } else {
           for (const subcolumn of column.joinColumns) {
+            const allSubFieldNames = this.searchSubColumns(subcolumn);
             const f: Field = {
               fieldType: FieldType.field,
-              name: `${name}.${ensureString(ensureJsonMap(subcolumn).columnName)}`,
+              name: `${name}.${allSubFieldNames}`,
             };
             columns.push(f);
           }
@@ -102,6 +111,19 @@ export class SoqlQuery {
       }
     }
     return columns;
+  }
+
+  private searchSubColumns(parent: AnyJson): string {
+    const column = ensureJsonMap(parent);
+    const name = ensureString(column.columnName);
+
+    const names = [name];
+    const child = getArray(parent, 'joinColumns') as AnyJson[];
+    if (child.length) {
+      // recursively search for related column names
+      child.map((c) => names.push(this.searchSubColumns(c)));
+    }
+    return names.join('.');
   }
 }
 
