@@ -120,6 +120,19 @@ describe('data:soql:query command', () => {
       verifyRecordFields(contacts.records[0], ['LastName', 'Title', 'Email', 'attributes']);
     });
   });
+
+  describe('data:soql:query returns grandparents fields correctly', () => {
+    it('should return Lead.owner.name', () => {
+      execCmd('force:data:record:create -s Lead -v "Company=Salesforce LastName=Astro"', { ensureExitCode: 0 });
+      const query = 'SELECT owner.Profile.Name FROM lead LIMIT 1';
+
+      const queryResult = runQuery(query, { ensureExitCode: 0 });
+
+      expect(queryResult).to.not.include('[object Object]');
+      expect(queryResult).to.include('UUser');
+    });
+  });
+
   describe('data:soql:query verify human results', () => {
     it('should return account records', () => {
       const query =
