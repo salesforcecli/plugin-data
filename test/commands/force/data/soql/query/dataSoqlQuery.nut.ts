@@ -120,7 +120,21 @@ describe('data:soql:query command', () => {
       verifyRecordFields(contacts.records[0], ['LastName', 'Title', 'Email', 'attributes']);
     });
   });
+
   describe('data:soql:query verify human results', () => {
+    it('should return Lead.owner.name (multi-level relationships)', () => {
+      execCmd('force:data:record:create -s Lead -v "Company=Salesforce LastName=Astro"', { ensureExitCode: 0 });
+      const query = 'SELECT owner.Profile.Name FROM lead LIMIT 1';
+
+      const queryResult = runQuery(query, { ensureExitCode: 0 });
+      expect(queryResult).to.not.include('[object Object]');
+      expect(queryResult).to.include('System Administrator');
+
+      const queryResultCSV = runQuery(query + '" --resultformat "csv', { ensureExitCode: 0 });
+      expect(queryResultCSV).to.not.include('[object Object]');
+      expect(queryResultCSV).to.include('System Administrator');
+    });
+
     it('should return account records', () => {
       const query =
         "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry FROM Account WHERE Name LIKE 'SampleAccount%' limit 1";
