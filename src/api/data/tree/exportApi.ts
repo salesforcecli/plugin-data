@@ -129,7 +129,8 @@ export class ExportApi {
       fs.mkdirpSync(outputDir);
     } catch (err) {
       // It is ok if the directory already exist
-      if (err.name !== 'EEXIST') {
+      const error = err as Error;
+      if (error.name !== 'EEXIST') {
         throw err;
       }
     }
