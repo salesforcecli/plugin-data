@@ -79,8 +79,9 @@ describe('ImportApi', () => {
         // this should never execute but if it does it will cause the test to fail
         expect(rv).to.throw('InvalidDataImport');
       } catch (err) {
-        expect(err.name).to.equal('InvalidDataImport');
-        expect(err.message).to.equal(messages.getMessage('dataFileNotProvided'));
+        const error = err as Error;
+        expect(error.name).to.equal('InvalidDataImport');
+        expect(error.message).to.equal(messages.getMessage('dataFileNotProvided'));
       }
     });
 
@@ -96,8 +97,9 @@ describe('ImportApi', () => {
         // this should never execute but if it does it will cause the test to fail
         expect(rv).to.throw('InvalidDataImport');
       } catch (err) {
-        expect(err.name).to.equal('InvalidDataImport');
-        expect(err.message).to.equal(messages.getMessage('tooManyFiles'));
+        const error = err as Error;
+        expect(error.name).to.equal('InvalidDataImport');
+        expect(error.message).to.equal(messages.getMessage('tooManyFiles'));
       }
     });
 
@@ -123,8 +125,9 @@ describe('ImportApi', () => {
         // this should never execute but if it does it will cause the test to fail
         expect(rv).to.throw('InvalidDataImport');
       } catch (err) {
-        expect(err.name).to.equal('InvalidDataImport');
-        expect(err.message).to.equal(messages.getMessage('dataFileNotFound', [expectedFilePath]));
+        const error = err as Error;
+        expect(error.name).to.equal('InvalidDataImport');
+        expect(error.message).to.equal(messages.getMessage('dataFileNotFound', [expectedFilePath]));
       }
     });
 
@@ -287,8 +290,9 @@ describe('ImportApi', () => {
         // this should never execute but if it does it will cause the test to fail
         expect(rv).to.throw('InvalidDataImport');
       } catch (err) {
-        expect(err.name).to.equal('InvalidDataImport');
-        expect(err.message).to.equal(`Cannot find data file. Indicate a valid path: ${filepath}.`);
+        const error = err as Error;
+        expect(error.name).to.equal('InvalidDataImport');
+        expect(error.message).to.equal(`Cannot find data file. Indicate a valid path: ${filepath}.`);
       }
     });
 
@@ -300,8 +304,9 @@ describe('ImportApi', () => {
         // this should never execute but if it does it will cause the test to fail
         expect(rv).to.throw('InvalidDataImport');
       } catch (err) {
-        expect(err.name).to.equal('InvalidDataImport');
-        expect(err.message).to.equal(`Unable to determine content type for file: ${filepath}.`);
+        const error = err as Error;
+        expect(error.name).to.equal('InvalidDataImport');
+        expect(error.message).to.equal(`Unable to determine content type for file: ${filepath}.`);
       }
     });
 
@@ -313,8 +318,9 @@ describe('ImportApi', () => {
         // this should never execute but if it does it will cause the test to fail
         expect(rv).to.throw('InvalidDataImport');
       } catch (err) {
-        expect(err.name).to.equal('InvalidDataImport');
-        expect(err.message).to.equal('Content type: txt not supported.');
+        const error = err as Error;
+        expect(error.name).to.equal('InvalidDataImport');
+        expect(error.message).to.equal('Content type: txt not supported.');
       }
     });
   });

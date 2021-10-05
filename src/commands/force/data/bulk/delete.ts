@@ -56,7 +56,7 @@ export default class Delete extends DataCommand {
       this.ux.stopSpinner();
     } catch (e) {
       this.ux.stopSpinner('error');
-      throw SfdxError.wrap(e);
+      throw SfdxError.wrap(e as Error);
     }
 
     return result;

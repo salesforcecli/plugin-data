@@ -272,9 +272,10 @@ describe('Export API', () => {
       await exportApi.export({ query: null });
       assert.fail();
     } catch (err) {
+      const error = err as Error;
       expect(writeStub.called).to.be.false;
-      expect(err.name).to.equal('queryNotProvided');
-      expect(err.message).to.equal(messages.getMessage('queryNotProvided'));
+      expect(error.name).to.equal('queryNotProvided');
+      expect(error.message).to.equal(messages.getMessage('queryNotProvided'));
     }
   });
 
@@ -285,9 +286,10 @@ describe('Export API', () => {
       await exportApi.export({ query });
       assert.fail();
     } catch (err) {
+      const error = err as Error;
       expect(writeStub.called).to.be.false;
-      expect(err.name).to.equal('soqlInvalid');
-      expect(err.message).to.equal(messages.getMessage('soqlInvalid', [query]));
+      expect(error.name).to.equal('soqlInvalid');
+      expect(error.message).to.equal(messages.getMessage('soqlInvalid', [query]));
     }
   });
 
