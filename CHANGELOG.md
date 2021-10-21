@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.6.4](https://github.com/salesforcecli/plugin-data/compare/v0.6.3...v0.6.4) (2021-10-21)
+
+
+### Bug Fixes
+
+* downgrade eslint jsdoc dep ([8775d6c](https://github.com/salesforcecli/plugin-data/commit/8775d6cca6b7240b023958e282cfadbe2e16ec6e))
+
 ### [0.6.3](https://github.com/salesforcecli/plugin-data/compare/v0.6.2...v0.6.3) (2021-10-12)
 
 ### [0.6.2](https://github.com/salesforcecli/plugin-data/compare/v0.6.1...v0.6.2) (2021-10-05)
