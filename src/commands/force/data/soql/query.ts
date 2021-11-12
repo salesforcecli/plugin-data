@@ -173,7 +173,7 @@ export class DataSoqlQueryCommand extends DataCommand {
       if (this.flags.resultformat !== 'json') this.ux.startSpinner(messages.getMessage('queryRunningMessage'));
       const query = new SoqlQuery();
       const conn = this.getConnection() as Connection | Tooling;
-      const queryResult: SoqlQueryResult = await query.runSoqlQuery(conn, this.flags.query, this.logger);
+      const queryResult: SoqlQueryResult = await query.runSoqlQuery(conn, this.flags.query as string, this.logger);
       const results = {
         ...queryResult,
       };

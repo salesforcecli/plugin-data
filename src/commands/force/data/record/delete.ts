@@ -54,8 +54,8 @@ export default class Delete extends DataCommand {
     let status = 'Success';
 
     try {
-      const sobject = this.getConnection().sobject(this.flags.sobjecttype);
-      const sObjectId = (this.flags.sobjectid || (await this.query(sobject, this.flags.where)).Id) as string;
+      const sobject = this.getConnection().sobject(this.flags.sobjecttype as string);
+      const sObjectId = (this.flags.sobjectid || (await this.query(sobject, this.flags.where as string)).Id) as string;
       const result = this.normalize<RecordResult>(await sobject.destroy(sObjectId));
 
       if (result.success) {
