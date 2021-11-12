@@ -60,7 +60,7 @@ describe('ImportApi', () => {
 
   describe('validate', () => {
     let context: any;
-    let config: any;
+    let config: ImportConfig;
 
     beforeEach(() => {
       context = {
@@ -87,7 +87,7 @@ describe('ImportApi', () => {
 
     it('should throw an InvalidDataImport error when both --sobjecttreefiles and --plan ARE set', async () => {
       config = {
-        sobjectTreeFiles: 'test_file.json',
+        sobjectTreeFiles: ['test_file.json'],
         plan: 'test_plan.json',
       };
       try {
@@ -133,7 +133,7 @@ describe('ImportApi', () => {
 
     it('should return a promise resolved with config with data file as input', async () => {
       config = {
-        sobjectTreeFiles: path.join(__dirname, 'test-files', 'accounts-contacts-tree.json'),
+        sobjectTreeFiles: [path.join(__dirname, 'test-files', 'accounts-contacts-tree.json')],
       };
       // @ts-ignore
       const opts = await ImportApi.prototype.validate.call(context, config);
@@ -354,7 +354,7 @@ describe('ImportApi', () => {
         .call(context, filepath, isJson, refRegex, resolveRefs, refMap)
         .then(() => {
           const actualArgs = context.createSObjectTypeMap.args[0];
-          expect(JSON.parse(actualArgs[0])).to.eql(accountsContactsTreeJSON);
+          expect(JSON.parse(actualArgs[0] as string)).to.eql(accountsContactsTreeJSON);
           expect(actualArgs[1]).to.eql(isJson);
         }));
 
@@ -364,7 +364,7 @@ describe('ImportApi', () => {
       ImportApi.prototype.parseSObjectTreeFile
         .call(context, filepath, isJson, refRegex, resolveRefs, refMap)
         .then((rv) => {
-          expect(JSON.parse(rv.contentStr)).to.eql(accountsContactsTreeJSON);
+          expect(JSON.parse(rv.contentStr as string)).to.eql(accountsContactsTreeJSON);
           expect(rv.sobject).to.eql('account');
         }));
 
@@ -392,7 +392,7 @@ describe('ImportApi', () => {
       return ImportApi.prototype.parseSObjectTreeFile
         .call(context, filepath, isJson, refRegex, resolveRefs, refMap)
         .then((rv) => {
-          const contentJson = JSON.parse(rv.contentStr);
+          const contentJson = JSON.parse(rv.contentStr as string);
           expect(contentJson.records[0].AccountId).to.equal(refMap.get('sampleaccountref'));
           expect(contentJson.records[1].AccountId).to.equal(refMap.get('sampleacct2ref'));
         });
@@ -437,7 +437,7 @@ describe('ImportApi', () => {
       return ImportApi.prototype.parseSObjectTreeFile
         .call(context, filepath, isJson, refRegex, resolveRefs, refMap)
         .then((rv) => {
-          const contentJson = JSON.parse(rv.contentStr);
+          const contentJson = JSON.parse(rv.contentStr as string);
           expect(contentJson.records[0].Broker__c).to.equal(refMap.get('customobj__cref1'));
           expect(contentJson.records[1].Broker__c).to.equal(refMap.get('customobj__cref2'));
           expect(contentJson.records[2].Broker__c).to.equal(refMap.get('customobj__cref20'));
@@ -549,7 +549,10 @@ describe('ImportApi', () => {
       ];
       saveRefs = true;
       const expectedRefMap = new Map<string, number>();
-      response.results.reduce((map: Map<string, number>, res: any) => map.set(res.referenceId, res.id), expectedRefMap);
+      response.results.reduce(
+        (map: Map<string, number>, res: any) => map.set(res.referenceId as string, res.id as number),
+        expectedRefMap
+      );
       // @ts-ignore
       ImportApi.prototype.parseSObjectTreeResponse.call(context, response, filepath, isJson, saveRefs, refMap);
       expect(refMap).to.eql(expectedRefMap);

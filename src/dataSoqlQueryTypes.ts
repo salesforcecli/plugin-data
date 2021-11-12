@@ -38,7 +38,7 @@ export type BasicRecord = {
   [index: string]: { records: BasicRecord[] } | unknown;
   attributes: {
     type: string;
-    url: string;
+    url?: string;
   };
 };
 

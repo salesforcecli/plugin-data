@@ -30,7 +30,7 @@ describe('Execute a SOQL statement', function (): void {
     sandbox = sinon.createSandbox();
   });
   describe('handle query results', () => {
-    let soqlQuerySpy: any;
+    let soqlQuerySpy: sinon.SinonSpy;
     describe('handle empty results', () => {
       beforeEach(() => {
         soqlQuerySpy = sandbox

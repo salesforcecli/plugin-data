@@ -430,6 +430,9 @@ export class ExportApi {
 
   // Register object type's id to reference mapping
   private saveRecordRef(obj: BasicRecord, refId: string): void {
+    if (!obj.attributes.url) {
+      return;
+    }
     const id = path.basename(obj.attributes.url);
     const ref = refId;
 
