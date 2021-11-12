@@ -8,8 +8,8 @@ import { EOL } from 'os';
 import { Logger, Messages } from '@salesforce/core';
 import { UX } from '@salesforce/command';
 import * as chalk from 'chalk';
-import { get, getArray, getNumber, isString, Optional } from '@salesforce/ts-types';
-import { SoqlQueryResult, Field, FieldType } from './dataSoqlQueryTypes';
+import { get, getNumber, isString, Optional } from '@salesforce/ts-types';
+import { SoqlQueryResult, Field, FieldType, BasicRecord, hasNestedRecords } from './dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
@@ -130,12 +130,11 @@ export class HumanReporter extends QueryReporter {
       );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public massageRows(queryResults: unknown[], children: string[], aggregates: Field[]): any {
+  public massageRows(queryResults: BasicRecord[], children: string[], aggregates: Field[]): BasicRecord[] {
     // There are subqueries or aggregates. Massage the data.
     let qr;
     if (children.length > 0 || aggregates.length > 0) {
-      qr = queryResults.reduce((newResults: unknown[], result) => {
+      qr = queryResults.reduce((newResults, result) => {
         newResults.push(result);
 
         // Aggregates are soql functions that aggregate data, like "SELECT avg(total)" and
@@ -145,38 +144,35 @@ export class HumanReporter extends QueryReporter {
           for (let i = 0; i < aggregates.length; i++) {
             const aggregate = aggregates[i];
             if (!aggregate.alias) {
-              Reflect.set(result as never, aggregate.name, Reflect.get(result as never, `expr${i}`));
+              Reflect.set(result, aggregate.name, Reflect.get(result, `expr${i}`));
             }
           }
         }
 
         if (children.length > 0) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          const childrenRows = Object.assign({});
+          const childrenRows: Record<string, unknown> = {};
           children.forEach((child) => {
-            const aChild = get(result as never, child);
+            const aChild = result[child];
             Reflect.set(childrenRows, child, aChild);
-            Reflect.deleteProperty(result as never, child);
+            Reflect.deleteProperty(result, child);
           });
 
-          Reflect.ownKeys(childrenRows).forEach((child) => {
-            const childO = get(childrenRows, child as string);
-            if (childO) {
-              const childRecords = getArray(childO, 'records', []);
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              childRecords.forEach((record: unknown) => {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                const newRecord = Object.assign({});
-                Object.entries(record as never).forEach(([key, value]) => {
+          Object.keys(childrenRows).forEach((child) => {
+            const childObject = childrenRows[child];
+            if (childObject && hasNestedRecords<BasicRecord>(childObject)) {
+              childObject.records.forEach((childRecord) => {
+                const newRecord: Record<string, unknown> = {};
+                Object.entries(childRecord).forEach(([key, value]) => {
                   Reflect.defineProperty(newRecord, `${child.toString()}.${key}`, { value });
                 });
-                newResults.push(newRecord);
+                // I guarantee that one of the keys will be the `attributes`
+                newResults.push(newRecord as BasicRecord);
               });
             }
           });
         }
         return newResults;
-      }, [] as unknown[]);
+      }, [] as BasicRecord[]);
     }
     return qr ?? queryResults;
   }
