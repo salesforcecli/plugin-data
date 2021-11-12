@@ -117,7 +117,7 @@ describe('ImportApi', () => {
       config = {
         plan: './test/unit/data/non-existant-plan.json',
       };
-      const expectedFilePath = path.resolve(process.cwd(), config.plan);
+      const expectedFilePath = path.resolve(process.cwd(), config.plan as string);
       try {
         // @ts-ignore
         const rv = await ImportApi.prototype.validate.call(context, config);
@@ -364,7 +364,7 @@ describe('ImportApi', () => {
       ImportApi.prototype.parseSObjectTreeFile
         .call(context, filepath, isJson, refRegex, resolveRefs, refMap)
         .then((rv) => {
-          expect(JSON.parse(rv.contentStr as string)).to.eql(accountsContactsTreeJSON);
+          expect(JSON.parse(rv.contentStr)).to.eql(accountsContactsTreeJSON);
           expect(rv.sobject).to.eql('account');
         }));
 
@@ -392,7 +392,7 @@ describe('ImportApi', () => {
       return ImportApi.prototype.parseSObjectTreeFile
         .call(context, filepath, isJson, refRegex, resolveRefs, refMap)
         .then((rv) => {
-          const contentJson = JSON.parse(rv.contentStr as string);
+          const contentJson = JSON.parse(rv.contentStr);
           expect(contentJson.records[0].AccountId).to.equal(refMap.get('sampleaccountref'));
           expect(contentJson.records[1].AccountId).to.equal(refMap.get('sampleacct2ref'));
         });
@@ -437,7 +437,7 @@ describe('ImportApi', () => {
       return ImportApi.prototype.parseSObjectTreeFile
         .call(context, filepath, isJson, refRegex, resolveRefs, refMap)
         .then((rv) => {
-          const contentJson = JSON.parse(rv.contentStr as string);
+          const contentJson = JSON.parse(rv.contentStr);
           expect(contentJson.records[0].Broker__c).to.equal(refMap.get('customobj__cref1'));
           expect(contentJson.records[1].Broker__c).to.equal(refMap.get('customobj__cref2'));
           expect(contentJson.records[2].Broker__c).to.equal(refMap.get('customobj__cref20'));
@@ -477,7 +477,7 @@ describe('ImportApi', () => {
         headers,
       };
       // @ts-ignore
-      ImportApi.prototype.sendSObjectTreeRequest.call(context, contentStr, sobject, 'test_instance_url', headers);
+      void ImportApi.prototype.sendSObjectTreeRequest.call(context, contentStr, sobject, 'test_instance_url', headers);
       expect(requestStub.args[0][0]).to.eql(expectedArgs);
     });
 
@@ -491,7 +491,7 @@ describe('ImportApi', () => {
         headers,
       };
       // @ts-ignore
-      ImportApi.prototype.sendSObjectTreeRequest.call(context, contentStr, sobject, 'test_instance_url', headers);
+      void ImportApi.prototype.sendSObjectTreeRequest.call(context, contentStr, sobject, 'test_instance_url', headers);
       expect(requestStub.args[0][0]).to.eql(expectedArgs);
     });
   });
