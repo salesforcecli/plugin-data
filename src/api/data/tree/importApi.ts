@@ -55,8 +55,8 @@ interface DataImportComponents {
 }
 
 export interface ImportConfig {
-  sobjectTreeFiles?: string[];
   contentType?: string;
+  sobjectTreeFiles?: string[];
   plan?: string;
 }
 
@@ -88,11 +88,9 @@ export class ImportApi {
   private sobjectTypes: Record<string, string> = {};
   private config!: ImportConfig;
   private importPlanConfig: DataPlanPart[] = [];
-  private instanceUrl: string;
   public constructor(private readonly org: Org) {
     this.logger = Logger.childFromRoot(this.constructor.name);
     this.schemaValidator = new SchemaValidator(this.logger, importPlanSchemaFile);
-    this.instanceUrl = this.org.getField(Org.Fields.INSTANCE_URL) as string;
   }
 
   /**
@@ -102,6 +100,7 @@ export class ImportApi {
    */
   public async import(config: ImportConfig): Promise<ImportResults> {
     const importResults: ImportResults = {};
+    const instanceUrl = this.org.getField(Org.Fields.INSTANCE_URL) as string;
 
     this.config = await this.validate(config);
 
@@ -112,22 +111,21 @@ export class ImportApi {
     try {
       // original version of this did files sequentially.  Not sure what happens if you did it in parallel
       // so this still awaits each file individually
-      for (const promise of sobjectTreeFiles
-        .map((file) =>
-          this.importSObjectTreeFile({
-            instanceUrl: this.instanceUrl,
-            refMap,
-            filepath: path.resolve(process.cwd(), file),
-            contentType,
-          })
-        )
-        .concat(this.getPlanPromises({ plan, contentType, refMap }))) {
+
+      for (const promise of plan
+        ? this.getPlanPromises({ plan, contentType, refMap, instanceUrl })
+        : sobjectTreeFiles.map((file) =>
+            this.importSObjectTreeFile({
+              instanceUrl,
+              refMap,
+              filepath: path.resolve(process.cwd(), file),
+              contentType,
+            })
+          )) {
         await promise;
       }
 
-      // await sequentialExecute(planFns);
       importResults.responseRefs = this.responseRefs;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       importResults.sobjectTypes = this.sobjectTypes;
     } catch (err) {
       const error = err as Error;
@@ -157,24 +155,20 @@ export class ImportApi {
     plan,
     contentType,
     refMap,
+    instanceUrl,
   }: {
-    plan?: string;
+    plan: string;
     contentType?: string;
     refMap: Map<string, string>;
+    instanceUrl: string;
   }): Array<Promise<void>> {
-    const output: Array<Promise<void>> = [];
-    if (!plan || !this.importPlanConfig.length) {
-      return output;
-    }
     // REVIEWME: support both files and plan in same invocation?
     const importPlanRootPath = path.dirname(plan);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    this.importPlanConfig.forEach((sobjectConfig: DataPlanPart) => {
+    return this.importPlanConfig.flatMap((sobjectConfig) => {
       const globalSaveRefs = sobjectConfig.saveRefs != null ? sobjectConfig.saveRefs : false;
       const globalResolveRefs = sobjectConfig.resolveRefs != null ? sobjectConfig.resolveRefs : false;
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      sobjectConfig.files.forEach((fileDef: string | (DataPlanPart & { file: string })) => {
+      return sobjectConfig.files.map((fileDef: string | (DataPlanPart & { file: string })) => {
         let filepath;
         let saveRefs = globalSaveRefs;
         let resolveRefs = globalResolveRefs;
@@ -197,18 +191,16 @@ export class ImportApi {
 
         filepath = path.resolve(importPlanRootPath, filepath);
         const importConfig: DataImportComponents = {
-          instanceUrl: this.instanceUrl,
+          instanceUrl,
           saveRefs,
           resolveRefs,
           refMap,
           filepath,
           contentType,
         };
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        output.push(this.importSObjectTreeFile(importConfig));
+        return this.importSObjectTreeFile(importConfig);
       });
     });
-    return output;
   }
 
   /**
