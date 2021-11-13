@@ -7,7 +7,6 @@
 
 import * as path from 'path';
 import { fs, Logger, Messages, Org, SfdxError } from '@salesforce/core';
-import { getString } from '@salesforce/ts-types';
 import { UX } from '@salesforce/command';
 import { DescribeSObjectResult, QueryResult } from 'jsforce';
 import {
@@ -51,7 +50,6 @@ export class ExportApi {
       resolveRefs: boolean;
     }
   > = {}; // registry for object type data plan descriptor
-  private idFromRefByType = new Map<string, Map<string, string>>(); // idFromRefByType.get('account').get(AccountRef1) => someAccountId
   private refFromIdByType = new Map<string, Map<string, string>>(); // refFromIdByType.get('account').get(someAccountId) => AccountRef1
   private typeRefIndexes = new Map<string, number>(); // registry for object type-specific ref counters
 
@@ -96,10 +94,8 @@ export class ExportApi {
     }
     if (plan) {
       return this.generateDataPlan(sobjectTree);
-    } else {
-      const fileName = `${Object.keys(this.objectTypeRegistry).join('-')}.json`;
-      return this.writeDataFileSync(fileName, sobjectTree);
     }
+    return this.writeDataFileSync(`${Object.keys(this.objectTypeRegistry).join('-')}.json`, sobjectTree);
   }
 
   //   P R I V A T E   M E T H O D S
@@ -137,9 +133,8 @@ export class ExportApi {
     try {
       fs.mkdirpSync(outputDir);
     } catch (err) {
-      // It is ok if the directory already exist
-      const error = err as Error;
-      if (error.name !== 'EEXIST') {
+      // It is ok if the directory already exists
+      if (err instanceof Error && err.name !== 'EEXIST') {
         throw err;
       }
     }
@@ -182,9 +177,8 @@ export class ExportApi {
 
     records.forEach((record) => {
       Object.entries(record).map(([key, value]) => {
-        if (hasNestedRecords(value)) {
-          const firstRec = value.records[0];
-          const type = getString(firstRec, 'attributes.type');
+        if (hasNestedRecords<BasicRecord>(value)) {
+          const type = value.records[0].attributes.type;
           // found a related object, add to map
           if (type && !this.objectTypeRegistry[type]) {
             this.objectTypeRegistry[type] = {
@@ -264,7 +258,8 @@ export class ExportApi {
     objRefId: string
   ): Promise<SObjectTreeInput> {
     const promises = Object.keys(record).map((key) => this.processRecordAttribute(record, key, treeRecord, objRefId));
-    return Promise.all(promises).then(() => treeRecord);
+    await Promise.all(promises);
+    return treeRecord;
   }
 
   private async processRecordAttribute(
@@ -397,14 +392,7 @@ export class ExportApi {
       throw new SfdxError(`Overriding ${type} reference for ${id}: existing ${refEntry}, incoming ${refId}`);
     }
 
-    // ensure no existing Id for that Ref
-    const idEntry = this.idFromRefByType.get(type)?.get(refId);
-    if (idEntry && idEntry !== id) {
-      throw new SfdxError(`Overriding ${type} reference for ${id}: existing ${idEntry}, incoming ${refId}`);
-    }
-
     this.refFromIdByType.set(type, (this.refFromIdByType.get(type) ?? new Map<string, string>()).set(id, refId));
-    this.idFromRefByType.set(type, (this.idFromRefByType.get(type) ?? new Map<string, string>()).set(refId, id));
   }
 
   /**
@@ -446,16 +434,17 @@ export class ExportApi {
     );
 
     // write data files and update data plan
-    objectsSorted.forEach((key) => {
-      const dataPlanPart = this.writeObjectTypeDataFile(
-        key,
-        !!this.objectTypeRegistry[key].saveRefs,
-        !!this.objectTypeRegistry[key].resolveRefs,
-        `${key}s.json`,
-        { records: objects.get(key) as SObjectTreeInput[] }
-      );
-      dataPlan.push(dataPlanPart);
-    });
+    dataPlan.push(
+      ...objectsSorted.map((key) =>
+        this.writeObjectTypeDataFile(
+          key,
+          !!this.objectTypeRegistry[key].saveRefs,
+          !!this.objectTypeRegistry[key].resolveRefs,
+          `${key}s.json`,
+          { records: objects.get(key) as SObjectTreeInput[] }
+        )
+      )
+    );
 
     // write data plan file
     const dataPlanFile = Object.keys(this.objectTypeRegistry).join('-') + DATA_PLAN_FILENAME_PART;
@@ -471,15 +460,11 @@ export class ExportApi {
     fileName: string,
     sObject: SObjectTreeFileContents
   ): DataPlanPart {
-    let finalFilename = fileName;
-    if (this.config.prefix) {
-      finalFilename = `${this.config.prefix}-${fileName}`;
-    }
     const dataPlanPart = {
       sobject: type,
       saveRefs,
       resolveRefs,
-      files: [finalFilename],
+      files: [this.getPrefixedFileName(fileName)],
     };
 
     this.writeDataFileSync(fileName, sObject);
@@ -541,26 +526,25 @@ export class ExportApi {
     return count;
   }
 
+  private getPrefixedFileName(fileName: string): string {
+    return this.config.prefix ? `${this.config.prefix}-${fileName}` : fileName;
+  }
+
   private writeDataFileSync<T extends SObjectTreeFileContents | DataPlanPart[]>(fileName: string, jsonObject: T): T {
     let recordCount = 0;
-    const { outputDir, prefix } = this.config;
 
-    if (prefix) {
-      fileName = `${prefix}-${fileName}`;
-    }
-
-    if (outputDir) {
-      fileName = path.join(outputDir, fileName);
-    }
+    const finalFilename = this.config.outputDir
+      ? path.join(this.config.outputDir, this.getPrefixedFileName(fileName))
+      : this.getPrefixedFileName(fileName);
 
     if (hasNestedRecords(jsonObject)) {
       recordCount = this.countRecords(jsonObject.records);
     }
 
-    fs.writeFileSync(fileName, JSON.stringify(jsonObject, null, 4));
+    fs.writeFileSync(finalFilename, JSON.stringify(jsonObject, null, 4));
 
     // TODO: move this to the command
-    this.ux.log(`Wrote ${recordCount} records to ${fileName}`);
+    this.ux.log(`Wrote ${recordCount} records to ${finalFilename}`);
 
     return jsonObject;
   }
