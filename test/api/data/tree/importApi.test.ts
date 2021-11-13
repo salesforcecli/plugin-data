@@ -151,7 +151,7 @@ describe('ImportApi', () => {
     });
   });
 
-  describe('import', () => {
+  describe.only('import', () => {
     let config: ImportConfig;
     const refMap = new Map();
     const instanceUrl = 'what is it';
@@ -173,7 +173,7 @@ describe('ImportApi', () => {
       context.validate.resolves(config);
     });
 
-    it('should call importSObjectTreeFile once with correct args for single file import', async () => {
+    it.only('should call importSObjectTreeFile once with correct args for single file import', async () => {
       config.sobjectTreeFiles = ['data_file1.json'];
       await ImportApi.prototype.import.call(context, config);
       expect(context.importSObjectTreeFile.calledOnce).to.be.true;

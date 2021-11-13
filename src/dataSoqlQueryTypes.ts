@@ -63,7 +63,7 @@ export type SObjectTreeFileContents = {
 };
 
 export const hasNestedRecords = <T>(element: { records: T[] } | unknown): element is { records: T[] } => {
-  return Array.isArray((element as { records: T[] }).records);
+  return Array.isArray((element as { records: T[] })?.records);
 };
 
 export const isAttributesElement = (
