@@ -8,7 +8,7 @@ import { EOL } from 'os';
 import { Logger, Messages } from '@salesforce/core';
 import { UX } from '@salesforce/command';
 import * as chalk from 'chalk';
-import { getNumber, isString, Optional } from '@salesforce/ts-types';
+import { get, getNumber, isString, Optional } from '@salesforce/ts-types';
 import { SoqlQueryResult, Field, FieldType, BasicRecord, hasNestedRecords } from './dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
@@ -215,7 +215,7 @@ export class CsvReporter extends QueryReporter {
 
     this.data.result.records.forEach((row) => {
       const values = attributeNames.map((name) => {
-        const value = row[name];
+        const value = get(row, name);
         if (isString(value)) {
           return this.escape(value);
         }
