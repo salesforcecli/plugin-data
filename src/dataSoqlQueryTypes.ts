@@ -8,7 +8,6 @@
 import { QueryResult } from 'jsforce';
 import { Optional } from '@salesforce/ts-types';
 
-// eslint-disable-next-line no-shadow
 export enum FieldType {
   field,
   subqueryField,
@@ -46,7 +45,6 @@ export interface DataPlanPart {
   sobject: string;
   saveRefs: boolean;
   resolveRefs: boolean;
-  // files: string[];
   files: Array<string | (DataPlanPart & { file: string })>;
 }
 

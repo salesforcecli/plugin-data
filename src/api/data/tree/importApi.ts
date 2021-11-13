@@ -460,7 +460,6 @@ export class ImportApi {
           for (let i = 0, len = response.results.length, ref; i < len; i++) {
             ref = response.results[i] as { referenceId: string; id: string };
             if (refMap) {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-call
               refMap.set(ref.referenceId.toLowerCase(), ref.id);
             }
           }
@@ -470,7 +469,6 @@ export class ImportApi {
       throw new SfdxError('SObject Tree API XML response parsing not implemented', 'FailedDataImport');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return response;
   }
 
