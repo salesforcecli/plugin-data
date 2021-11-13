@@ -46,7 +46,8 @@ export interface DataPlanPart {
   sobject: string;
   saveRefs: boolean;
   resolveRefs: boolean;
-  files: string[];
+  // files: string[];
+  files: Array<string | (DataPlanPart & { file: string })>;
 }
 
 export type SObjectTreeInput = {

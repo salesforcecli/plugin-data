@@ -11,7 +11,7 @@
 import * as path from 'path';
 import * as util from 'util';
 
-import { Dictionary, isObject, getString, JsonMap, AnyJson } from '@salesforce/ts-types';
+import { Dictionary, getString, JsonMap, AnyJson } from '@salesforce/ts-types';
 import { fs, Logger, Org, SfdxError, SchemaValidator } from '@salesforce/core';
 import { DataPlanPart, SObjectTreeInput, hasNestedRecords, isAttributesElement } from '../../../dataSoqlQueryTypes';
 
@@ -111,18 +111,19 @@ export class ImportApi {
     try {
       // original version of this did files sequentially.  Not sure what happens if you did it in parallel
       // so this still awaits each file individually
-
-      for (const promise of plan
-        ? this.getPlanPromises({ plan, contentType, refMap, instanceUrl })
-        : sobjectTreeFiles.map((file) =>
-            this.importSObjectTreeFile({
-              instanceUrl,
-              refMap,
-              filepath: path.resolve(process.cwd(), file),
-              contentType,
-            })
-          )) {
-        await promise;
+      if (plan) {
+        await this.getPlanPromises({ plan, contentType, refMap, instanceUrl });
+      } else {
+        for (const promise of sobjectTreeFiles.map((file) =>
+          this.importSObjectTreeFile({
+            instanceUrl,
+            refMap,
+            filepath: path.resolve(process.cwd(), file),
+            contentType,
+          })
+        )) {
+          await promise;
+        }
       }
 
       importResults.responseRefs = this.responseRefs;
@@ -151,7 +152,7 @@ export class ImportApi {
     return this.schemaValidator.loadSync();
   }
 
-  private getPlanPromises({
+  private async getPlanPromises({
     plan,
     contentType,
     refMap,
@@ -161,14 +162,13 @@ export class ImportApi {
     contentType?: string;
     refMap: Map<string, string>;
     instanceUrl: string;
-  }): Array<Promise<void>> {
+  }): Promise<void> {
     // REVIEWME: support both files and plan in same invocation?
     const importPlanRootPath = path.dirname(plan);
-    return this.importPlanConfig.flatMap((sobjectConfig) => {
+    for (const sobjectConfig of this.importPlanConfig) {
       const globalSaveRefs = sobjectConfig.saveRefs != null ? sobjectConfig.saveRefs : false;
       const globalResolveRefs = sobjectConfig.resolveRefs != null ? sobjectConfig.resolveRefs : false;
-
-      return sobjectConfig.files.map((fileDef: string | (DataPlanPart & { file: string })) => {
+      for (const fileDef of sobjectConfig.files) {
         let filepath;
         let saveRefs = globalSaveRefs;
         let resolveRefs = globalResolveRefs;
@@ -177,7 +177,7 @@ export class ImportApi {
         // has a filepath and overriding global config
         if (typeof fileDef === 'string') {
           filepath = fileDef;
-        } else if (isObject(fileDef)) {
+        } else if (fileDef.file) {
           filepath = fileDef.file;
 
           // override save references, if set
@@ -198,9 +198,9 @@ export class ImportApi {
           filepath,
           contentType,
         };
-        return this.importSObjectTreeFile(importConfig);
-      });
-    });
+        await this.importSObjectTreeFile(importConfig);
+      }
+    }
   }
 
   /**
@@ -369,8 +369,7 @@ export class ImportApi {
         contentJson = JSON.parse(contentStr) as { records: SObjectTreeInput[] };
 
         // All top level records should be of the same sObject type so just grab the first one
-        const type = contentJson.records[0].attributes.type;
-        sobject = type ? type.toLowerCase() : sobject;
+        sobject = contentJson.records[0].attributes.type.toLowerCase();
       } catch (e) {
         throw SfdxError.create('@salesforce/plugin-data', 'importApi', 'dataFileInvalidJson', [filepath]);
       }
