@@ -5,9 +5,6 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
 import * as path from 'path';
 import * as util from 'util';
 
@@ -266,7 +263,7 @@ export class ImportApi {
   private createSObjectTypeMap(content: string, isJson: boolean): void {
     let contentJson;
 
-    const getTypes = (records: SObjectTreeInput[]): any => {
+    const getTypes = (records: SObjectTreeInput[]): void => {
       records.forEach((record) => {
         Object.entries(record).forEach(([key, val]) => {
           if (key === 'attributes' && isAttributesElement(val)) {

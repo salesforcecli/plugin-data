@@ -5,9 +5,6 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-/* eslint-disable  @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
 import * as path from 'path';
 import { fs, Logger, Messages, Org, SfdxError } from '@salesforce/core';
 import { getString } from '@salesforce/ts-types';
@@ -49,7 +46,7 @@ export class ExportApi {
     string,
     {
       order: number;
-      type: unknown;
+      type: string;
       saveRefs: boolean;
       resolveRefs: boolean;
     }
@@ -171,7 +168,6 @@ export class ExportApi {
     if (!records.length) {
       // TODO: should be on the command
       this.ux.log('Query returned no results');
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return recordList;
     }
 
@@ -184,12 +180,9 @@ export class ExportApi {
       resolveRefs: false, // pre-save, don't resolve relationship references to parent ids (from previous save)
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     records.forEach((record) => {
       Object.entries(record).map(([key, value]) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         if (hasNestedRecords(value)) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           const firstRec = value.records[0];
           const type = getString(firstRec, 'attributes.type');
           // found a related object, add to map
@@ -208,7 +201,6 @@ export class ExportApi {
 
     // pre-load object metadata
     const promises = Object.keys(this.objectTypeRegistry).map((key) => this.loadMetadata(key));
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return Promise.all(promises).then(() => recordList);
   }
 
@@ -230,7 +222,7 @@ export class ExportApi {
     record: BasicRecord,
     sobjectTree: SObjectTreeFileContents,
     parentRef?: ParentRef
-  ): Promise<any> {
+  ): Promise<SObjectTreeFileContents> {
     // incremented every time we visit another record
     const objRefId = this.incrementTypeRefIndex(record.attributes.type);
 
@@ -270,10 +262,8 @@ export class ExportApi {
     record: BasicRecord,
     treeRecord: SObjectTreeInput,
     objRefId: string
-  ): Promise<any> {
+  ): Promise<SObjectTreeInput> {
     const promises = Object.keys(record).map((key) => this.processRecordAttribute(record, key, treeRecord, objRefId));
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return Promise.all(promises).then(() => treeRecord);
   }
 
@@ -341,7 +331,7 @@ export class ExportApi {
   }
 
   private isQueryResult(metadata: DescribeSObjectResult, fieldName: string): boolean {
-    return metadata.childRelationships.some((cr: any) => cr.relationshipName === fieldName);
+    return metadata.childRelationships.some((cr) => cr.relationshipName === fieldName);
   }
 
   private isSpecificTypeWithMetadata(metadata: DescribeSObjectResult, fieldName: string, fieldType: string): boolean {
@@ -427,7 +417,6 @@ export class ExportApi {
     const dataPlan: DataPlanPart[] = [];
 
     // loop thru object tree extracting type-specific records into separate tree structure
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     sobjectTree.records.forEach((record) => {
       const topLevelObjectType = record.attributes.type;
       if (!objects.has(topLevelObjectType)) {

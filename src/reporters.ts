@@ -8,7 +8,7 @@ import { EOL } from 'os';
 import { Logger, Messages } from '@salesforce/core';
 import { UX } from '@salesforce/command';
 import * as chalk from 'chalk';
-import { get, getNumber, isString, Optional } from '@salesforce/ts-types';
+import { getNumber, isString, Optional } from '@salesforce/ts-types';
 import { SoqlQueryResult, Field, FieldType, BasicRecord, hasNestedRecords } from './dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
@@ -97,7 +97,7 @@ export class HumanReporter extends QueryReporter {
     return { attributeNames, children, aggregates };
   }
 
-  public soqlQuery(columns: Array<Optional<string>>, records: unknown[], totalCount: number): void {
+  public soqlQuery(columns: Array<Optional<string>>, records: BasicRecord[], totalCount: number): void {
     this.prepNullValues(records);
     this.ux.table(records, { columns: this.prepColumns(columns) });
     this.log(chalk.bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
@@ -215,7 +215,7 @@ export class CsvReporter extends QueryReporter {
 
     this.data.result.records.forEach((row) => {
       const values = attributeNames.map((name) => {
-        const value = get(row, name);
+        const value = row[name];
         if (isString(value)) {
           return this.escape(value);
         }
@@ -256,7 +256,7 @@ export class CsvReporter extends QueryReporter {
       // Get max lengths by iterating over the records once
       this.data.result.records.forEach((result) => {
         [...typeLengths.keys()].forEach((key) => {
-          const record = get(result as never, key);
+          const record = result[key];
           const totalSize = getNumber(record, 'totalSize');
           if (!!totalSize && totalSize > (typeLengths.get(key) ?? 0)) {
             typeLengths.set(key, totalSize);
