@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.6.5](https://github.com/salesforcecli/plugin-data/compare/v0.6.4...v0.6.5) (2021-11-18)
+
+
+### Bug Fixes
+
+* adds note about non-inclusive language ([844f74a](https://github.com/salesforcecli/plugin-data/commit/844f74a5ceddb917491a519a760304fdd0b796f1))
+* remove "master-detail" from long desc ([67460fc](https://github.com/salesforcecli/plugin-data/commit/67460fcac2a0e2afb784a0d038760afda2239e96))
+
 ### [0.6.4](https://github.com/salesforcecli/plugin-data/compare/v0.6.3...v0.6.4) (2021-10-21)
 
 

@@ -128,7 +128,7 @@ EXAMPLES
   sfdx force:data:bulk:delete -s MyObject__c -f ./path/to/file.csv
 ```
 
-_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.3/src/commands/force/data/bulk/delete.ts)_
+_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.4/src/commands/force/data/bulk/delete.ts)_
 
 ## `sfdx force:data:bulk:status -i <string> [-b <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -170,7 +170,7 @@ EXAMPLES
   sfdx force:data:bulk:status -i 750xx000000005sAAA -b 751xx000000005nAAA
 ```
 
-_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.3/src/commands/force/data/bulk/status.ts)_
+_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.4/src/commands/force/data/bulk/status.ts)_
 
 ## `sfdx force:data:bulk:upsert -i <string> -f <filepath> -s <string> [-w <minutes>] [-r] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -233,7 +233,7 @@ EXAMPLES
   sfdx force:data:bulk:upsert -s MyObject__c -f ./path/to/file.csv -i Id -w 2
 ```
 
-_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.3/src/commands/force/data/bulk/upsert.ts)_
+_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.4/src/commands/force/data/bulk/upsert.ts)_
 
 ## `sfdx force:data:record:create -s <string> -v <string> [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -290,7 +290,7 @@ EXAMPLES
   sfdx force:data:record:create -s Account -v "Name=Acme" --perflog --json
 ```
 
-_See code: [src/commands/force/data/record/create.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.3/src/commands/force/data/record/create.ts)_
+_See code: [src/commands/force/data/record/create.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.4/src/commands/force/data/record/create.ts)_
 
 ## `sfdx force:data:record:delete -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -349,7 +349,7 @@ EXAMPLES
   sfdx force:data:record:delete -t -s TraceFlag -i 7tf170000009cU6AAI --perflog --json
 ```
 
-_See code: [src/commands/force/data/record/delete.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.3/src/commands/force/data/record/delete.ts)_
+_See code: [src/commands/force/data/record/delete.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.4/src/commands/force/data/record/delete.ts)_
 
 ## `sfdx force:data:record:get -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -409,7 +409,7 @@ EXAMPLES
   sfdx force:data:record:get -t -s TraceFlag -i 7tf170000009cUBAAY --perflog --json
 ```
 
-_See code: [src/commands/force/data/record/get.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.3/src/commands/force/data/record/get.ts)_
+_See code: [src/commands/force/data/record/get.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.4/src/commands/force/data/record/get.ts)_
 
 ## `sfdx force:data:record:update -s <string> -v <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -469,7 +469,7 @@ EXAMPLES
   sfdx force:data:record:update -s Account -i 001D000000Kv3dl -v "Name=NewAcme" --perflog --json
 ```
 
-_See code: [src/commands/force/data/record/update.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.3/src/commands/force/data/record/update.ts)_
+_See code: [src/commands/force/data/record/update.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.4/src/commands/force/data/record/update.ts)_
 
 ## `sfdx force:data:soql:query -q <string> [-t] [-r human|csv|json] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -521,7 +521,7 @@ EXAMPLES
   sfdx force:data:soql:query -q "SELECT Name FROM ApexTrigger" -t
 ```
 
-_See code: [src/commands/force/data/soql/query.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.3/src/commands/force/data/soql/query.ts)_
+_See code: [src/commands/force/data/soql/query.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.4/src/commands/force/data/soql/query.ts)_
 
 ## `sfdx force:data:tree:export -q <string> [-p] [-x <string>] [-d <directory>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -570,7 +570,7 @@ EXAMPLES
   sfdx force:data:tree:export -q <path to file containing soql query> -x export-demo -d /tmp/sfdx-out -p
 ```
 
-_See code: [src/commands/force/data/tree/export.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.3/src/commands/force/data/tree/export.ts)_
+_See code: [src/commands/force/data/tree/export.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.4/src/commands/force/data/tree/export.ts)_
 
 ## `sfdx force:data:tree:import [-f <array> | -p <filepath>] [--confighelp] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -578,6 +578,8 @@ import data into an org
 
 ```
 import data into an org
+IMPORTANT: Where possible, we changed noninclusive terms to align with our company value of Equality. We maintained certain terms to avoid any effect on customer implementations.
+
 Imports data into an org using the SObject Tree Save API.  This data can include master-detail relationships.
 To generate JSON files for use with force:data:tree:import, run "sfdx force:data:tree:export".
 The SObject Tree API supports requests that contain up to 200 records. For more information, see the REST API Developer Guide: https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobject_tree.htm
@@ -612,6 +614,9 @@ OPTIONS
                                                                                     this command invocation
 
 DESCRIPTION
+  IMPORTANT: Where possible, we changed noninclusive terms to align with our company value of Equality. We maintained 
+  certain terms to avoid any effect on customer implementations.
+
   Imports data into an org using the SObject Tree Save API.  This data can include master-detail relationships.
   To generate JSON files for use with force:data:tree:import, run "sfdx force:data:tree:export".
   The SObject Tree API supports requests that contain up to 200 records. For more information, see the REST API 
@@ -623,5 +628,5 @@ EXAMPLES
   sfdx force:data:tree:import -p Account-Contact-plan.json -u me@my.org
 ```
 
-_See code: [src/commands/force/data/tree/import.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.3/src/commands/force/data/tree/import.ts)_
+_See code: [src/commands/force/data/tree/import.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.4/src/commands/force/data/tree/import.ts)_
 <!-- commandsstop -->
