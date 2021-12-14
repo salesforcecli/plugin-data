@@ -57,7 +57,8 @@ export class HumanReporter extends QueryReporter {
 
   public display(): void {
     const { attributeNames, children, aggregates } = this.parseFields();
-    const totalCount = this.data.result.records.length;
+    // in case of count() there are no records, but there is a totalSize
+    const totalCount = this.data.result.records.length || this.data.result.totalSize;
     this.soqlQuery(attributeNames, this.massageRows(this.data.result.records, children, aggregates), totalCount);
   }
 

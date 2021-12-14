@@ -155,6 +155,14 @@ describe('data:soql:query command', () => {
       );
       expect(queryResult).to.match(/Total number of records retrieved: 1\./g);
     });
+    it('should handle count()', () => {
+      const queryResult = execCmd('force:data:soql:query -q "SELECT Count() from User"', {
+        ensureExitCode: 0,
+      }).shellOutput as string;
+
+      expect(queryResult).to.match(/Total number of records retrieved: [1-9]\d*\./g);
+    });
+
     it('should return successfully when querying ApexClass column SymbolTable using tooling API', () => {
       runQuery('SELECT Id, Name, SymbolTable from ApexClass', {
         ensureExitCode: 0,
