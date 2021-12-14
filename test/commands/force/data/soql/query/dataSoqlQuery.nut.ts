@@ -160,7 +160,7 @@ describe('data:soql:query command', () => {
         ensureExitCode: 0,
       }).shellOutput as string;
 
-      expect(queryResult).to.match(/Total number of records retrieved: \d*\./g);
+      expect(queryResult).to.match(/Total number of records retrieved: [1-9]\d*\./g);
     });
 
     it('should return successfully when querying ApexClass column SymbolTable using tooling API', () => {
