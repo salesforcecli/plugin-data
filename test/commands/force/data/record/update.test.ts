@@ -6,7 +6,7 @@
  */
 import { expect, test } from '@salesforce/command/lib/test';
 import { ensureJsonMap, ensureString } from '@salesforce/ts-types';
-import { SfdxError } from '../../../../../../sfdx-core';
+import { SfdxError } from '@salesforce/core';
 
 const sObjectId = '0011100001zhhyUAAQ';
 
