@@ -6,6 +6,7 @@
  */
 import { expect, test } from '@salesforce/command/lib/test';
 import { ensureJsonMap, ensureString } from '@salesforce/ts-types';
+import { SfdxError } from '../../../../../../sfdx-core';
 
 const sObjectId = '0011100001zhhyUAAQ';
 
@@ -59,6 +60,35 @@ describe('force:data:record:update', () => {
       expect(result.status).to.equal(0);
       expect(result.result.Id).to.equal('0011100001zhhyUAAQ');
       expect(result.result.Name).to.equal('NewName');
+    });
+
+  test
+    .withOrg({ username: 'test@org.com' }, true)
+    .withConnectionRequest(() => {
+      return Promise.reject({
+        errorCode: 'FIELD_CUSTOM_VALIDATION_EXCEPTION',
+        message: 'name cannot start with x',
+        fields: [],
+      });
+    })
+    .stdout()
+    .command([
+      'force:data:record:update',
+      '--targetusername',
+      'test@org.com',
+      '--sobjecttype',
+      'Account',
+      '--sobjectid',
+      sObjectId,
+      '-v',
+      '"Name=Xavier"',
+      '--json',
+    ])
+    .it('should print the error message with reasons why the record could not be updated', (ctx) => {
+      const result = JSON.parse(ctx.stdout) as SfdxError;
+      expect(result.message).to.include('name cannot start with x');
+      expect(result.message).to.include('FIELD_CUSTOM_VALIDATION_EXCEPTION');
+      expect(result.exitCode).to.equal(1);
     });
 
   test
