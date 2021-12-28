@@ -75,9 +75,13 @@ export default class Update extends DataCommand {
     } catch (err) {
       status = 'Failed';
       this.ux.stopSpinner(status);
-      if (Reflect.has(err, 'errorCode') && Reflect.has(err, 'fields')) {
+      const error = err as Error;
+      if (Reflect.has(error, 'errorCode') && Reflect.has(error, 'fields')) {
         throw new SfdxError(
-          messages.getMessage('updateFailureWithFields', [Reflect.get(err, 'errorCode'), Reflect.get(err, 'fields')])
+          messages.getMessage('updateFailureWithFields', [
+            Reflect.get(error, 'errorCode'),
+            Reflect.get(error, 'fields'),
+          ])
         );
       } else {
         throw err;

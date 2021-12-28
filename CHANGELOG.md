@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.6.6](https://github.com/salesforcecli/plugin-data/compare/v0.6.5...v0.6.6) (2021-12-02)
+
+
+### Features
+
+* bump deps ([20f2598](https://github.com/salesforcecli/plugin-data/commit/20f2598606e14b676653f32f3f88569765ab7801))
+
+### [0.6.5](https://github.com/salesforcecli/plugin-data/compare/v0.6.4...v0.6.5) (2021-11-18)
+
+
+### Bug Fixes
+
+* adds note about non-inclusive language ([844f74a](https://github.com/salesforcecli/plugin-data/commit/844f74a5ceddb917491a519a760304fdd0b796f1))
+* remove "master-detail" from long desc ([67460fc](https://github.com/salesforcecli/plugin-data/commit/67460fcac2a0e2afb784a0d038760afda2239e96))
+
+### [0.6.4](https://github.com/salesforcecli/plugin-data/compare/v0.6.3...v0.6.4) (2021-10-21)
+
+
+### Bug Fixes
+
+* downgrade eslint jsdoc dep ([8775d6c](https://github.com/salesforcecli/plugin-data/commit/8775d6cca6b7240b023958e282cfadbe2e16ec6e))
+
+### [0.6.3](https://github.com/salesforcecli/plugin-data/compare/v0.6.2...v0.6.3) (2021-10-12)
+
+### [0.6.2](https://github.com/salesforcecli/plugin-data/compare/v0.6.1...v0.6.2) (2021-10-05)
+
+
+### Bug Fixes
+
+* update deps ([c3b57d4](https://github.com/salesforcecli/plugin-data/commit/c3b57d4aae48a40eee90ba3380b4c650fe9df53e))
+
 ### 0.6.1 (2021-08-25)
 
 

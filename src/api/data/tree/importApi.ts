@@ -171,10 +171,11 @@ export class ImportApi {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       importResults.sobjectTypes = this.sobjectTypes;
     } catch (err) {
-      if (err.errorCode === 'ERROR_HTTP_400' && err.message != null) {
+      const error = err as Error;
+      if (getString(error, 'errorCode') === 'ERROR_HTTP_400' && error.message != null) {
         let msg;
         try {
-          msg = JSON.parse(err.message) as { hasErrors?: boolean; results?: [] };
+          msg = JSON.parse(error.message) as { hasErrors?: boolean; results?: [] };
           if (msg.hasErrors && msg.results && msg.results.length > 0) {
             importResults.errors = msg.results;
           }
@@ -183,7 +184,7 @@ export class ImportApi {
         }
       }
 
-      throw SfdxError.wrap(err);
+      throw SfdxError.wrap(error);
     }
 
     return importResults;
@@ -231,15 +232,16 @@ export class ImportApi {
       try {
         await this.schemaValidator.validate(this.importPlanConfig);
       } catch (err) {
-        if (err.name === 'ValidationSchemaFieldErrors') {
+        const error = err as Error;
+        if (error.name === 'ValidationSchemaFieldErrors') {
           const e = SfdxError.create('@salesforce/plugin-data', 'importApi', 'dataPlanValidationError', [
             planPath,
-            err.message,
+            error.message,
           ]);
           e.name = INVALID_DATA_IMPORT_ERR_NAME;
           throw e;
         }
-        throw SfdxError.wrap(err);
+        throw SfdxError.wrap(error);
       }
     }
     return config;
