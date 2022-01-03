@@ -14,5 +14,5 @@
   ],
   "updateSuccess": "Successfully updated record: %s.",
   "updateFailure": "Failed to update record. %s",
-  "updateFailureWithFields": "Failed to update record with code %s. Fields: %s"
+  "updateFailureWithFields": "Failed to update record with code %s. Message: %s. Fields: %s."
 }
