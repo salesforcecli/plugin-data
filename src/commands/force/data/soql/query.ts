@@ -131,7 +131,6 @@ export class DataSoqlQueryCommand extends DataCommand {
   public static readonly description = messages.getMessage('description');
   public static readonly requiresUsername = true;
   public static readonly examples = messages.getMessage('examples').split(os.EOL);
-
   public static readonly flagsConfig: FlagsConfig = {
     query: flags.string({
       char: 'q',

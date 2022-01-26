@@ -2242,4 +2242,67 @@ export const soqlQueryExemplars = {
       },
     },
   },
+  queryWithNestedObject: {
+    soqlQueryResult: {
+      query: 'select id, Metadata from RemoteProxy',
+      columns: [
+        {
+          fieldType: 0,
+          name: 'Id',
+        },
+        {
+          fieldType: 0,
+          name: 'Metadata',
+        },
+      ],
+      result: {
+        done: true,
+        totalSize: 3,
+        records: [
+          {
+            attributes: {
+              type: 'RemoteProxy',
+              url: '/services/data/v53.0/tooling/sobjects/RemoteProxy/0rpJ0000000SIabIAG',
+            },
+            Id: '0rpJ0000000SIabIAG',
+            Metadata: {
+              disableProtocolSecurity: false,
+              isActive: true,
+              url: 'http://www.apexdevnet.com',
+              urls: null,
+              description: null,
+            },
+          },
+          {
+            attributes: {
+              type: 'RemoteProxy',
+              url: '/services/data/v53.0/tooling/sobjects/RemoteProxy/0rpJ0000000SJdBIAW',
+            },
+            Id: '0rpJ0000000SJdBIAW',
+            Metadata: {
+              disableProtocolSecurity: false,
+              isActive: true,
+              url: 'https://nominatim.openstreetmap.org',
+              urls: null,
+              description: null,
+            },
+          },
+          {
+            attributes: {
+              type: 'RemoteProxy',
+              url: '/services/data/v53.0/tooling/sobjects/RemoteProxy/0rpJ0000000SLlVIAW',
+            },
+            Id: '0rpJ0000000SLlVIAW',
+            Metadata: {
+              disableProtocolSecurity: false,
+              isActive: false,
+              url: 'https://www.google.com',
+              urls: null,
+              description: null,
+            },
+          },
+        ],
+      },
+    },
+  },
 };

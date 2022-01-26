@@ -9,7 +9,7 @@ import { Logger, Messages } from '@salesforce/core';
 import { UX } from '@salesforce/command';
 import * as chalk from 'chalk';
 import { get, getArray, getNumber, isString, Optional } from '@salesforce/ts-types';
-import { SoqlQueryResult, Field, FieldType } from './dataSoqlQueryTypes';
+import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
@@ -113,6 +113,7 @@ export class HumanReporter extends QueryReporter {
         if (value === null) {
           Reflect.set(recordAsObject, propertyKey, chalk.bold('null'));
         } else if (typeof value === 'object') {
+          Reflect.set(recordAsObject, propertyKey, JSON.stringify(value, null, 2));
           this.prepNullValues([value]);
         }
       });
@@ -223,6 +224,8 @@ export class CsvReporter extends QueryReporter {
         const value = get(row, name);
         if (isString(value)) {
           return this.escape(value);
+        } else if (typeof value === 'object') {
+          return this.escape(JSON.stringify(value));
         }
         return value;
       });

@@ -11,9 +11,9 @@ import * as chaiAsPromised from 'chai-as-promised';
 import { UX } from '@salesforce/command';
 import { Logger } from '@salesforce/core';
 import { get, getPlainObject } from '@salesforce/ts-types';
+import { createSandbox } from 'sinon';
 import { Field, SoqlQueryResult } from '../src/dataSoqlQueryTypes';
-import { HumanReporter } from '../src/reporters';
-import { CsvReporter } from '../src/reporters';
+import { CsvReporter, HumanReporter } from '../src/reporters';
 import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars';
 
 chai.use(chaiAsPromised);
@@ -47,6 +47,30 @@ describe('reporter tests', () => {
       reporter.prepNullValues(massagedRows);
       expect(massagedRows).to.be.ok;
     });
+
+    it('stringifies JSON results correctly', async () => {
+      queryData = soqlQueryExemplars.queryWithNestedObject.soqlQueryResult;
+      const dataSoqlQueryResult: SoqlQueryResult = {
+        columns: queryData.columns,
+        query: queryData.query,
+        result: queryData.result,
+      };
+      const sb = createSandbox();
+      const reflectSpy = sb.spy(Reflect, 'set');
+      reporter = new HumanReporter(dataSoqlQueryResult, queryData.columns, await UX.create(), logger);
+      const { attributeNames, children, aggregates } = reporter.parseFields();
+      expect(attributeNames).to.be.ok;
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const massagedRows = reporter.massageRows(queryData.result.records, children, aggregates);
+      expect(massagedRows).to.be.deep.equal(queryData.result.records);
+      reporter.prepNullValues(massagedRows);
+      expect(massagedRows).to.be.ok;
+      // would be called 6 times if not called on Reporter~prepNullValues L116
+      expect(reflectSpy.callCount).to.equal(12);
+      expect(massagedRows).to.not.include('object Object');
+    });
+
     it('preps columns for display values in result', () => {});
   });
   describe('csv reporter tests', () => {
@@ -61,6 +85,33 @@ describe('reporter tests', () => {
       };
       reporter = new CsvReporter(dataSoqlQueryResult, queryData.columns, await UX.create(), logger);
     });
+
+    it('stringifies JSON results correctly', async () => {
+      queryData = soqlQueryExemplars.queryWithNestedObject.soqlQueryResult;
+      const dataSoqlQueryResult: SoqlQueryResult = {
+        columns: queryData.columns,
+        query: queryData.query,
+        result: queryData.result,
+      };
+      const sb = createSandbox();
+      reporter = new CsvReporter(dataSoqlQueryResult, queryData.columns, await UX.create(), logger);
+      const escapeSpy = sb.spy(reporter, 'escape');
+      const logStub = sb.stub(reporter, 'log');
+
+      const massagedRows = reporter.massageRows();
+      const data = getPlainObject(reporter, 'data');
+      reporter.display();
+      // callCount would be 5 if were printing '[object Object]' instead of the string representation
+      expect(escapeSpy.callCount).to.equal(8);
+      expect(logStub.called).to.be.true;
+      expect(massagedRows).to.be.deep.equal(
+        soqlQueryExemplars.queryWithNestedObject.soqlQueryResult.columns.map((column: Field) => column.name)
+      );
+      expect(get(data, 'result.records')).be.equal(
+        soqlQueryExemplars.queryWithNestedObject.soqlQueryResult.result.records
+      );
+    });
+
     it('massages report results', () => {
       const massagedRows = reporter.massageRows();
       const data = getPlainObject(reporter, 'data');
