@@ -138,8 +138,6 @@ export class HumanReporter extends QueryReporter {
     let qr;
     if (children.length > 0 || aggregates.length > 0) {
       qr = queryResults.reduce((newResults: unknown[], result) => {
-        newResults.push(result);
-
         // Aggregates are soql functions that aggregate data, like "SELECT avg(total)" and
         // are returned in the data as exprX. Aggregates can have aliases, like "avg(total) totalAverage"
         // and are returned in the data as the alias.
@@ -168,15 +166,17 @@ export class HumanReporter extends QueryReporter {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               childRecords.forEach((record: unknown) => {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                const newRecord = Object.assign({});
                 Object.entries(record as never).forEach(([key, value]) => {
-                  Reflect.defineProperty(newRecord, `${child.toString()}.${key}`, { value });
+                  // merge subqueries with the "parent" so they are on the same row
+                  Reflect.defineProperty(result as Record<string, unknown>, `${child.toString()}.${key}`, {
+                    value: [value ? value : chalk.bold('null')],
+                  });
                 });
-                newResults.push(newRecord);
               });
             }
           });
         }
+        newResults.push(result);
         return newResults;
       }, [] as unknown[]);
     }

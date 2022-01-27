@@ -8,8 +8,8 @@
 import { expect, test } from '@salesforce/command/lib/test';
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import sinon = require('sinon');
 import { SinonSandbox } from 'sinon';
+import sinon = require('sinon');
 import { SoqlQuery } from '../../../../../../src/commands/force/data/soql/query';
 import { soqlQueryExemplars } from '../../../../../test-files/soqlQuery.exemplars';
 
@@ -103,7 +103,7 @@ describe('Execute a SOQL statement', function (): void {
           sinon.assert.calledOnce(soqlQuerySpy);
           // test for expected snippet in output
           const stdout = ctx.stdout;
-          expect(/.*?United Oil & Gas, UK.*?\n.*?James.*?/.test(stdout)).to.be.true;
+          expect(/.*?United Oil & Gas, UK.*?James.*?/.test(stdout)).to.be.true;
           expect(ctx.stdout).to.include('records retrieved: 50');
         });
     });
