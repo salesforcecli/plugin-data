@@ -247,4 +247,20 @@ describe('data:record commands', () => {
       expect(result).to.have.property('Bool__c', false);
     });
   });
+
+  it('will parse JSON correctly for update', () => {
+    const result = execCmd('force:data:soql:query -q "SELECT Id FROM RemoteProxy LIMIT 1" -t --json', {
+      ensureExitCode: 0,
+    }).jsonOutput?.result as { records: Array<{ Id: string }> };
+
+    const update = execCmd(
+      'force:data:record:update ' +
+        '--sobjecttype RemoteProxy ' +
+        `--sobjectid ${result.records[0].Id} ` +
+        '--usetoolingapi ' +
+        '--values "Metadata=\'{\\"disableProtocolSecurity\\": false,\\"isActive\\": true,\\"url\\": \\"https://www.example.com\\",\\"urls\\": null,\\"description\\": null}\'" ',
+      { ensureExitCode: 0 }
+    );
+    expect(update).to.be.ok;
+  });
 });

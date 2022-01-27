@@ -170,5 +170,20 @@ describe('data:soql:query command', () => {
         toolingApi: true,
       });
     });
+
+    it('should print JSON output correctly', () => {
+      const result = runQuery('select id, isActive, Metadata from RemoteProxy', {
+        ensureExitCode: 0,
+        json: false,
+        toolingApi: true,
+      });
+      expect(result).to.not.include('[object Object]');
+      // the Metadata object parsed correctly
+      expect(result).to.include('disableProtocolSecurity');
+      expect(result).to.include('isActive');
+      expect(result).to.include('url');
+      expect(result).to.include('urls');
+      expect(result).to.include('description');
+    });
   });
 });
