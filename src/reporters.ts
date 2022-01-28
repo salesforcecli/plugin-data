@@ -113,7 +113,7 @@ export class HumanReporter extends QueryReporter {
         if (value === null) {
           Reflect.set(recordAsObject, propertyKey, chalk.bold('null'));
         } else if (typeof value === 'object') {
-          Reflect.set(recordAsObject, propertyKey, JSON.stringify(value, null, 2));
+          // Reflect.set(recordAsObject, propertyKey, JSON.stringify(value, null, 2));
           this.prepNullValues([value]);
         }
       });
@@ -134,6 +134,20 @@ export class HumanReporter extends QueryReporter {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public massageRows(queryResults: unknown[], children: string[], aggregates: Field[]): any {
+    // some fields will return a JSON object that isn't accessible via the query (SELECT Metadata FROM RemoteProxy)
+    // some will return a JSON that IS accessible via the query (SELECT owner.Profile.Name FROM Lead)
+    // querying (SELECT Metadata.isActive FROM RemoteProxy) throws a SOQL validation error, so we have to display the entire Metadata object
+    queryResults.map((qr) => {
+      const result = qr as Record<string, unknown>;
+      this.data.columns.forEach((col) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const entry = Reflect.get(result, col.name);
+        if (typeof entry === 'object' && col.fieldType === FieldType.field) {
+          Reflect.set(result, col.name, JSON.stringify(entry, null, 2));
+        }
+      });
+    });
+
     // There are subqueries or aggregates. Massage the data.
     let qr;
     if (children.length > 0 || aggregates.length > 0) {

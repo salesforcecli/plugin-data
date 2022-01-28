@@ -66,8 +66,8 @@ describe('reporter tests', () => {
       expect(massagedRows).to.be.deep.equal(queryData.result.records);
       reporter.prepNullValues(massagedRows);
       expect(massagedRows).to.be.ok;
-      // would be called 6 times if not called on Reporter~prepNullValues L116
-      expect(reflectSpy.callCount).to.equal(12);
+      // would be called 6 times if not set correctly in massageRows
+      expect(reflectSpy.callCount).to.equal(3);
       expect(massagedRows).to.not.include('object Object');
     });
 
