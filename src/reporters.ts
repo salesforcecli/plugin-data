@@ -113,7 +113,6 @@ export class HumanReporter extends QueryReporter {
         if (value === null) {
           Reflect.set(recordAsObject, propertyKey, chalk.bold('null'));
         } else if (typeof value === 'object') {
-          // Reflect.set(recordAsObject, propertyKey, JSON.stringify(value, null, 2));
           this.prepNullValues([value]);
         }
       });
@@ -144,6 +143,10 @@ export class HumanReporter extends QueryReporter {
         const entry = Reflect.get(result, col.name);
         if (typeof entry === 'object' && col.fieldType === FieldType.field) {
           Reflect.set(result, col.name, JSON.stringify(entry, null, 2));
+        } else if (typeof entry === 'object' && col.fields?.length && entry) {
+          col.fields.forEach((field) => {
+            Reflect.set(result, `${col.name}.${field.name}`, get(result, `${col.name}.records[0].${field.name}`));
+          });
         }
       });
     });
@@ -183,7 +186,7 @@ export class HumanReporter extends QueryReporter {
                 Object.entries(record as never).forEach(([key, value]) => {
                   // merge subqueries with the "parent" so they are on the same row
                   Reflect.defineProperty(result as Record<string, unknown>, `${child.toString()}.${key}`, {
-                    value: [value ? value : chalk.bold('null')],
+                    value: value ? value : chalk.bold('null'),
                   });
                 });
               });
