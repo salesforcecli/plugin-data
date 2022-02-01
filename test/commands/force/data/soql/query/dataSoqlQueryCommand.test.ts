@@ -8,12 +8,11 @@
 import { expect, test } from '@salesforce/command/lib/test';
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import { SinonSandbox } from 'sinon';
+import { SinonSandbox, SinonStub } from 'sinon';
+import { describe } from 'mocha';
 import sinon = require('sinon');
 import { SoqlQuery } from '../../../../../../src/commands/force/data/soql/query';
 import { soqlQueryExemplars } from '../../../../../test-files/soqlQuery.exemplars';
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 chai.use(chaiAsPromised);
 
@@ -30,10 +29,10 @@ describe('Execute a SOQL statement', function (): void {
     sandbox = sinon.createSandbox();
   });
   describe('handle query results', () => {
-    let soqlQuerySpy: any;
+    let soqlQueryStub: SinonStub;
     describe('handle empty results', () => {
       beforeEach(() => {
-        soqlQuerySpy = sandbox
+        soqlQueryStub = sandbox
           .stub(SoqlQuery.prototype, 'runSoqlQuery')
           .callsFake(() => Promise.resolve(soqlQueryExemplars.emptyQuery.soqlQueryResult));
       });
@@ -46,7 +45,7 @@ describe('Execute a SOQL statement', function (): void {
         .stderr()
         .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select '])
         .it('should have empty results', (ctx) => {
-          sinon.assert.calledOnce(soqlQuerySpy);
+          sinon.assert.calledOnce(soqlQueryStub);
           expect(ctx.stdout).to.include('records retrieved: 0');
         });
       test
@@ -55,7 +54,7 @@ describe('Execute a SOQL statement', function (): void {
         .stderr()
         .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'json'])
         .it('should have 0 totalSize and 0 records for empty result with json reporter', (ctx) => {
-          sinon.assert.calledOnce(soqlQuerySpy);
+          sinon.assert.calledOnce(soqlQueryStub);
           const jsonResults = JSON.parse(ctx.stdout) as QueryResult;
           expect(jsonResults).to.have.property('status', 0);
           expect(jsonResults.result).to.have.property('totalSize', 0);
@@ -64,7 +63,7 @@ describe('Execute a SOQL statement', function (): void {
     });
     describe('reporters produce the correct results for subquery', () => {
       beforeEach(() => {
-        soqlQuerySpy = sandbox
+        soqlQueryStub = sandbox
           .stub(SoqlQuery.prototype, 'runSoqlQuery')
           .callsFake(() => Promise.resolve(soqlQueryExemplars.subqueryAccountsAndContacts.soqlQueryResult));
       });
@@ -76,7 +75,7 @@ describe('Execute a SOQL statement', function (): void {
         .stdout()
         .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'csv'])
         .it('should have csv results', (ctx) => {
-          sinon.assert.calledOnce(soqlQuerySpy);
+          sinon.assert.calledOnce(soqlQueryStub);
           // test for expected snippet in output
           expect(ctx.stdout).to.include(
             'Contacts.totalSize,Contacts.records.3.LastName\n"Cisco Systems, Inc.",,,,,,,,\nASSMANN Electronic GmbH,,,,,,,,\n'
@@ -88,7 +87,7 @@ describe('Execute a SOQL statement', function (): void {
         .stderr()
         .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'json'])
         .it('should have json results', (ctx) => {
-          sinon.assert.calledOnce(soqlQuerySpy);
+          sinon.assert.calledOnce(soqlQueryStub);
           const jsonResults = JSON.parse(ctx.stdout) as QueryResult;
           expect(jsonResults).to.have.property('status', 0);
           expect(jsonResults.result).to.have.property('totalSize', 50);
@@ -100,16 +99,58 @@ describe('Execute a SOQL statement', function (): void {
         .stderr()
         .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'human'])
         .it('should have human results', (ctx) => {
-          sinon.assert.calledOnce(soqlQuerySpy);
+          sinon.assert.calledOnce(soqlQueryStub);
           // test for expected snippet in output
           const stdout = ctx.stdout;
           expect(/.*?United Oil & Gas, UK.*?James.*?/.test(stdout)).to.be.true;
           expect(ctx.stdout).to.include('records retrieved: 50');
         });
     });
+
+    describe('human readable output for complex subqueries', () => {
+      beforeEach(() => {
+        soqlQueryStub = sandbox
+          .stub(SoqlQuery.prototype, 'runSoqlQuery')
+          .callsFake(() => Promise.resolve(soqlQueryExemplars.complexSubQuery.soqlQueryResult));
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      test
+        .withOrg({ username: 'test@org.com' }, true)
+        .stdout()
+        .stderr()
+        .command([
+          QUERY_COMMAND,
+          '--targetusername',
+          'test@org.com',
+          '--query',
+          'SELECT Amount, Id, Name,StageName, CloseDate, (SELECT Id,  ListPrice, PriceBookEntry.UnitPrice, PricebookEntry.Name, PricebookEntry.Id, PricebookEntry.product2.Family FROM OpportunityLineItems) FROM Opportunity',
+        ])
+        .it('should have human results for a complex subquery', (ctx) => {
+          sinon.assert.calledOnce(soqlQueryStub);
+          // test for expected snippet in output
+          const stdout = ctx.stdout;
+          // properly expanded columns from query
+          expect(
+            /.*?AMOUNT.*?ID.*?OPPORTUNITYLINEITEMS.ID.*?OPPORTUNITYLINEITEMS.PRICEBOOKENTRY.PRODUCT2.FAMILY.*?/.test(
+              stdout
+            )
+          ).to.be.true;
+          // was able to parse the data for each column
+          expect(
+            /.*?1300.*?0063F00000RdvMKQAZ.*?My Opportunity.*?00k3F000007kBoDQAU.*?MyProduct.*?01u3F00000AwCfuQAF.*?/.test(
+              stdout
+            )
+          ).to.be.true;
+          expect(ctx.stdout).to.include('records retrieved: 1');
+        });
+    });
     describe('reporters produce the correct aggregate query', () => {
       beforeEach(() => {
-        soqlQuerySpy = sandbox
+        soqlQueryStub = sandbox
           .stub(SoqlQuery.prototype, 'runSoqlQuery')
           .callsFake(() => Promise.resolve(soqlQueryExemplars.queryWithAgregates.soqlQueryResult));
       });
@@ -122,7 +163,7 @@ describe('Execute a SOQL statement', function (): void {
         .stderr()
         .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'json'])
         .it('should have json results', (ctx) => {
-          sinon.assert.calledOnce(soqlQuerySpy);
+          sinon.assert.calledOnce(soqlQueryStub);
           const jsonResults = JSON.parse(ctx.stdout) as QueryResult;
           expect(jsonResults).to.have.property('status', 0);
           expect(jsonResults.result).to.have.property('totalSize', 16);
@@ -134,7 +175,7 @@ describe('Execute a SOQL statement', function (): void {
         .stderr()
         .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'human'])
         .it('should have human results', (ctx) => {
-          sinon.assert.calledOnce(soqlQuerySpy);
+          sinon.assert.calledOnce(soqlQueryStub);
           expect(/.*?United Oil & Gas Corp..*?5600000000.*/.test(ctx.stdout)).to.be.true;
           expect(ctx.stdout).to.include('records retrieved: 16');
         });
