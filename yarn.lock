@@ -893,9 +893,9 @@
     "@types/node" "*"
 
 "@types/jsforce@^1.9.35", "@types/jsforce@^1.9.38":
-  version "1.9.38"
-  resolved "https://registry.yarnpkg.com/@types/jsforce/-/jsforce-1.9.38.tgz#7c4b491d29e8becb9dcdd58c60472becce223139"
-  integrity sha512-+Iwf5jlDiK8z+zI2LAi4mzln8++5lETv2YofFEATu+dNkrP8LACB76lz2tPsXDx/a+5uW8HQhbwL/SyqIic0cg==
+  version "1.9.39"
+  resolved "https://registry.yarnpkg.com/@types/jsforce/-/jsforce-1.9.39.tgz#935dbb95f69271e4f8fe11c60fe0566e7446e06d"
+  integrity sha512-rUPF92EQQkNrtddsCLOJ6KeDQTCvjszXL6anMB5/n3QkDmjWGY2yBmmLCJfXc1fualaFwXsMUdMLN/qMsdBkrg==
   dependencies:
     "@types/node" "*"
 
