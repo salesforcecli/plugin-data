@@ -258,9 +258,25 @@ describe('data:record commands', () => {
         '--sobjecttype RemoteProxy ' +
         `--sobjectid ${result.records[0].Id} ` +
         '--usetoolingapi ' +
-        '--values "Metadata=\'{\\"disableProtocolSecurity\\": false,\\"isActive\\": true,\\"url\\": \\"https://www.example.com\\",\\"urls\\": null,\\"description\\": null}\'" ',
+        '--values "Metadata=\'{\\"disableProtocolSecurity\\": false,\\"isActive\\": true,\\"url\\": \\"https://www.example.com\\",\\"urls\\": null,\\"description\\": null}\'"',
       { ensureExitCode: 0 }
     );
+    expect(update).to.be.ok;
+  });
+
+  it('will parse invalid JSON data, but that contains {}', () => {
+    const result = execCmd('force:data:record:create -s Account -v "Name=Test" --json', {
+      ensureExitCode: 0,
+    }).jsonOutput?.result as { id: string };
+
+    const update = execCmd(
+      'force:data:record:update ' +
+        '--sobjecttype Account ' +
+        `--sobjectid ${result.id} ` +
+        '--values "Description=\'my new description { with invalid } JSON\'"',
+      { ensureExitCode: 0 }
+    );
+
     expect(update).to.be.ok;
   });
 });

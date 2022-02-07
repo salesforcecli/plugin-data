@@ -8,7 +8,7 @@
 import { SfdxCommand } from '@salesforce/command';
 import { AnyJson, Dictionary, get, Nullable } from '@salesforce/ts-types';
 import { fs, Messages, Org, SfdxError } from '@salesforce/core';
-import { BaseConnection, ErrorResult, Record as jsForceRecord, SObject } from 'jsforce';
+import { BaseConnection, ErrorResult, Record as jsforceRecord, SObject } from 'jsforce';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore because jsforce doesn't export http-api
 import * as HttpApi from 'jsforce/lib/http-api';
@@ -123,7 +123,7 @@ export abstract class DataCommand extends SfdxCommand {
     return connection;
   }
 
-  public async query(sobject: SObject<unknown>, where: string): Promise<jsForceRecord<unknown>> {
+  public async query(sobject: SObject<unknown>, where: string): Promise<jsforceRecord<unknown>> {
     const queryObject = this.stringToDictionary(where);
     const records = await sobject.find(queryObject, 'id');
     if (!records || records.length === 0) {
@@ -137,7 +137,7 @@ export abstract class DataCommand extends SfdxCommand {
       );
     }
 
-    return this.normalize<jsForceRecord<unknown>>(records);
+    return this.normalize<jsforceRecord<unknown>>(records);
   }
 
   protected stringToDictionary(str: string): Dictionary<string | boolean | Record<string, unknown>> {
@@ -183,7 +183,12 @@ export abstract class DataCommand extends SfdxCommand {
       } else {
         const key = pair.substr(0, eqPosition);
         if (pair.includes('{') && pair.includes('}')) {
-          constructedObject[key] = JSON.parse(pair.substr(eqPosition + 1)) as Record<string, unknown>;
+          try {
+            constructedObject[key] = JSON.parse(pair.substr(eqPosition + 1)) as Record<string, unknown>;
+          } catch {
+            // the data contained { and }, but wasn't valid JSON, default to parsing as-is
+            constructedObject[key] = this.convertToBooleanIfApplicable(pair.substr(eqPosition + 1));
+          }
         } else {
           constructedObject[key] = this.convertToBooleanIfApplicable(pair.substr(eqPosition + 1));
         }
