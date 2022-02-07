@@ -9,7 +9,7 @@ import { Logger, Messages } from '@salesforce/core';
 import { UX } from '@salesforce/command';
 import * as chalk from 'chalk';
 import { get, getArray, getNumber, isString, Optional } from '@salesforce/ts-types';
-import { SoqlQueryResult, Field, FieldType } from './dataSoqlQueryTypes';
+import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
@@ -133,12 +133,28 @@ export class HumanReporter extends QueryReporter {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public massageRows(queryResults: unknown[], children: string[], aggregates: Field[]): any {
+    // some fields will return a JSON object that isn't accessible via the query (SELECT Metadata FROM RemoteProxy)
+    // some will return a JSON that IS accessible via the query (SELECT owner.Profile.Name FROM Lead)
+    // querying (SELECT Metadata.isActive FROM RemoteProxy) throws a SOQL validation error, so we have to display the entire Metadata object
+    queryResults.map((qr) => {
+      const result = qr as Record<string, unknown>;
+      this.data.columns.forEach((col) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const entry = Reflect.get(result, col.name);
+        if (typeof entry === 'object' && col.fieldType === FieldType.field) {
+          Reflect.set(result, col.name, JSON.stringify(entry, null, 2));
+        } else if (typeof entry === 'object' && col.fields?.length && entry) {
+          col.fields.forEach((field) => {
+            Reflect.set(result, `${col.name}.${field.name}`, get(result, `${col.name}.records[0].${field.name}`));
+          });
+        }
+      });
+    });
+
     // There are subqueries or aggregates. Massage the data.
     let qr;
     if (children.length > 0 || aggregates.length > 0) {
       qr = queryResults.reduce((newResults: unknown[], result) => {
-        newResults.push(result);
-
         // Aggregates are soql functions that aggregate data, like "SELECT avg(total)" and
         // are returned in the data as exprX. Aggregates can have aliases, like "avg(total) totalAverage"
         // and are returned in the data as the alias.
@@ -167,15 +183,17 @@ export class HumanReporter extends QueryReporter {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               childRecords.forEach((record: unknown) => {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                const newRecord = Object.assign({});
                 Object.entries(record as never).forEach(([key, value]) => {
-                  Reflect.defineProperty(newRecord, `${child.toString()}.${key}`, { value });
+                  // merge subqueries with the "parent" so they are on the same row
+                  Reflect.defineProperty(result as Record<string, unknown>, `${child.toString()}.${key}`, {
+                    value: value ? value : chalk.bold('null'),
+                  });
                 });
-                newResults.push(newRecord);
               });
             }
           });
         }
+        newResults.push(result);
         return newResults;
       }, [] as unknown[]);
     }
@@ -223,6 +241,8 @@ export class CsvReporter extends QueryReporter {
         const value = get(row, name);
         if (isString(value)) {
           return this.escape(value);
+        } else if (typeof value === 'object') {
+          return this.escape(JSON.stringify(value));
         }
         return value;
       });

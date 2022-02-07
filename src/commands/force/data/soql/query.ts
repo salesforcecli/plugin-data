@@ -15,6 +15,7 @@ import {
   ensureString,
   getArray,
   isJsonArray,
+  JsonArray,
   toJsonMap,
 } from '@salesforce/ts-types';
 import { Tooling } from '@salesforce/core/lib/connection';
@@ -66,8 +67,13 @@ export class SoqlQuery {
     // eslint-disable-next-line no-underscore-dangle
     const columnUrl = `${connection._baseUrl()}/query?q=${encodeURIComponent(query)}&columns=true`;
     const results = toJsonMap(await connection.request(columnUrl));
+
+    return this.recursivelyFindColumns(ensureJsonArray(results.columnMetadata));
+  }
+
+  private recursivelyFindColumns(data: JsonArray): Field[] {
     const columns: Field[] = [];
-    for (let column of ensureJsonArray(results.columnMetadata)) {
+    for (let column of data) {
       column = ensureJsonMap(column);
       const name = ensureString(column.columnName);
 
@@ -78,12 +84,17 @@ export class SoqlQuery {
             name,
             fields: [],
           };
-          for (const subcolumn of column.joinColumns) {
-            const f: Field = {
-              fieldType: FieldType.field,
-              name: ensureString(ensureJsonMap(subcolumn).columnName),
-            };
-            if (field.fields) field.fields.push(f);
+          for (let subcolumn of column.joinColumns) {
+            subcolumn = ensureJsonMap(subcolumn);
+            if (isJsonArray(column.joinColumns) && column.joinColumns.length > 0) {
+              if (field.fields) field.fields.push(...this.recursivelyFindColumns([subcolumn]));
+            } else {
+              const f: Field = {
+                fieldType: FieldType.field,
+                name: ensureString(ensureJsonMap(subcolumn).columnName),
+              };
+              if (field.fields) field.fields.push(f);
+            }
           }
           columns.push(field);
         } else {
@@ -131,7 +142,6 @@ export class DataSoqlQueryCommand extends DataCommand {
   public static readonly description = messages.getMessage('description');
   public static readonly requiresUsername = true;
   public static readonly examples = messages.getMessage('examples').split(os.EOL);
-
   public static readonly flagsConfig: FlagsConfig = {
     query: flags.string({
       char: 'q',
