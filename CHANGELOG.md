@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.6.10](https://github.com/salesforcecli/plugin-data/compare/v0.6.9...v0.6.10) (2022-03-10)
+
+### Bug Fixes
+
+- bump core and jsforce versions ([#283](https://github.com/salesforcecli/plugin-data/issues/283)) ([11908be](https://github.com/salesforcecli/plugin-data/commit/11908bedd9538aeddc1631afa99f4ae01150935d))
+
 ### [0.6.9](https://github.com/salesforcecli/plugin-data/compare/v0.6.8...v0.6.9) (2022-02-07)
 
 ### Bug Fixes
