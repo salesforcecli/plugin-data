@@ -13,10 +13,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import * as path from 'path';
+import * as fs from 'fs';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-
-import { fs as fsCore, Messages, Org, SfdxError } from '@salesforce/core';
+import { Messages, Org } from '@salesforce/core';
 import { ImportApi, ImportConfig } from '../../../../src/api/data/tree/importApi';
 
 // Json files
@@ -369,9 +369,9 @@ describe('ImportApi', () => {
         }));
 
     it('should return an FlsError type error, or catch and wrap the error', () => {
-      const sfdxError = SfdxError.create('@salesforce/plugin-data', 'importApi', 'FlsError', ['field__c', 'object__c']);
+      const SfError = messages.createError('FlsError', ['field__c', 'object__c']);
       // @ts-ignore
-      sandbox.stub(ImportApi.prototype, 'parseSObjectTreeFile').throws(sfdxError);
+      sandbox.stub(ImportApi.prototype, 'parseSObjectTreeFile').throws(SfError);
 
       expect(() =>
         // @ts-ignore
@@ -426,7 +426,7 @@ describe('ImportApi', () => {
                     "Broker__c": "@CustomObj__cRef20"
                 }]
             }`;
-      sandbox.stub(fsCore, 'readFile').resolves(fileContents);
+      sandbox.stub(fs, 'readFile').resolves(fileContents);
       resolveRefs = true;
       filepath = '';
       refMap.set('customobj__cref1', 'custom_id1');
@@ -506,7 +506,9 @@ describe('ImportApi', () => {
 
     beforeEach(() => {
       context = {
-        logger: { debug: () => {} },
+        logger: {
+          debug: () => {},
+        },
         responseRefs: [],
       };
       response = { results: [] };
@@ -568,7 +570,9 @@ describe('ImportApi', () => {
       sobject: 'test_sobject',
     };
     const context: any = {
-      logger: { debug: () => {} },
+      logger: {
+        debug: () => {},
+      },
     };
 
     const args = {

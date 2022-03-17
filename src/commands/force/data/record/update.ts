@@ -6,10 +6,9 @@
  */
 
 import * as os from 'os';
-
 import { flags, FlagsConfig } from '@salesforce/command';
-import { Messages, SfdxError } from '@salesforce/core';
-import { RecordResult } from 'jsforce';
+import { Messages, SfError } from '@salesforce/core';
+import { SaveResult } from 'jsforce';
 import { DataCommand } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -52,7 +51,7 @@ export default class Update extends DataCommand {
     }),
   };
 
-  public async run(): Promise<RecordResult> {
+  public async run(): Promise<SaveResult> {
     this.validateIdXorWhereFlags();
 
     this.ux.startSpinner('Updating Record');
@@ -63,6 +62,8 @@ export default class Update extends DataCommand {
     try {
       const updateObject = this.stringToDictionary(this.flags.values);
       updateObject.Id = sObjectId;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       const result = await sobject.update(updateObject);
       if (result.success) {
         this.ux.log(messages.getMessage('updateSuccess', [sObjectId]));
@@ -77,7 +78,7 @@ export default class Update extends DataCommand {
       this.ux.stopSpinner(status);
       const error = err as Error;
       if (Reflect.has(error, 'errorCode') && Reflect.has(error, 'fields')) {
-        throw new SfdxError(
+        throw new SfError(
           messages.getMessage('updateFailureWithFields', [
             Reflect.get(error, 'errorCode'),
             Reflect.get(error, 'message'),

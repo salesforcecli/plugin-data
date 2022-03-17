@@ -48,7 +48,6 @@ describe('force:data:bulk:status', () => {
       };
       stubMethod($$.SANDBOX, Org.prototype, 'getConnection').returns(Job);
     })
-    .withOrg({ username: 'test@org.com' }, true)
     .stdout()
     .command([
       'force:data:bulk:status',
@@ -99,7 +98,6 @@ describe('force:data:bulk:status', () => {
       };
       stubMethod($$.SANDBOX, Org.prototype, 'getConnection').returns(Job);
     })
-    .withOrg({ username: 'test@org.com' }, true)
     .stdout()
     .command([
       'force:data:bulk:status',
@@ -160,7 +158,6 @@ describe('force:data:bulk:status', () => {
     .do(() => {
       stubMethod($$.SANDBOX, Batcher.prototype, 'fetchAndDisplayJobStatus').returns(expected);
     })
-    .withOrg({ username: 'test@org.com' }, true)
     .stdout()
     .command(['force:data:bulk:status', '--targetusername', 'test@org.com', '--jobid', '75054000006ybyHAAQ', '--json'])
     .it('will call Batcher to find jobid', (ctx) => {

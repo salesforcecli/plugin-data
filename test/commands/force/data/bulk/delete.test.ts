@@ -4,10 +4,10 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+import * as fs from 'fs';
 import { ReadStream } from 'fs';
 import { $$, expect, test } from '@salesforce/command/lib/test';
 import { stubMethod } from '@salesforce/ts-sinon';
-import { fs } from '@salesforce/core';
 import { Batcher } from '../../../../../src/batcher';
 
 interface DeleteResult {
@@ -15,9 +15,10 @@ interface DeleteResult {
   name: string;
   message: string;
 }
+
 describe('force:data:bulk:delete', () => {
   test
-    .withOrg({ username: 'test@org.com' }, true)
+
     .stdout()
     .command([
       'force:data:bulk:delete',
@@ -58,7 +59,7 @@ describe('force:data:bulk:delete', () => {
       stubMethod($$.SANDBOX, fs, 'createReadStream').returns(ReadStream.prototype);
       stubMethod($$.SANDBOX, Batcher.prototype, 'createAndExecuteBatches').resolves(expected);
     })
-    .withOrg({ username: 'test@org.com' }, true)
+
     .stdout()
     .command([
       'force:data:bulk:delete',

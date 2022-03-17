@@ -9,6 +9,7 @@ import { Logger, Messages } from '@salesforce/core';
 import { UX } from '@salesforce/command';
 import * as chalk from 'chalk';
 import { get, getArray, getNumber, isString, Optional } from '@salesforce/ts-types';
+import { CliUx } from '@oclif/core';
 import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
@@ -43,11 +44,6 @@ type ParsedFields = {
   attributeNames: Array<Optional<string>>;
   children: string[];
   aggregates: Field[];
-};
-
-type ColumnAttributes = {
-  key: string;
-  label: string;
 };
 
 export class HumanReporter extends QueryReporter {
@@ -100,7 +96,7 @@ export class HumanReporter extends QueryReporter {
 
   public soqlQuery(columns: Array<Optional<string>>, records: unknown[], totalCount: number): void {
     this.prepNullValues(records);
-    this.ux.table(records, { columns: this.prepColumns(columns) });
+    this.ux.table(records, this.prepColumns(columns));
     this.log(chalk.bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
   }
 
@@ -119,16 +115,13 @@ export class HumanReporter extends QueryReporter {
     });
   }
 
-  public prepColumns(columns: Array<Optional<string>>): ColumnAttributes[] {
-    return columns
+  public prepColumns(columns: Array<Optional<string>>): CliUx.Table.table.Columns<Record<string, unknown>> {
+    const formattedColumns: CliUx.Table.table.Columns<Record<string, unknown>> = {};
+    columns
       .map((field: Optional<string>) => field as string)
       .filter((field): string => field)
-      .map(
-        (field: string): ColumnAttributes => ({
-          key: field,
-          label: field.toUpperCase(),
-        })
-      );
+      .map((field: string) => (formattedColumns[field] = { header: field.toUpperCase() }));
+    return formattedColumns;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

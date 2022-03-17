@@ -5,10 +5,11 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import * as os from 'os';
+import * as fs from 'fs';
 import { ReadStream } from 'fs';
-import { Connection, Messages, SfdxError, fs } from '@salesforce/core';
+import { Connection, Messages, SfError } from '@salesforce/core';
 import { flags, FlagsConfig } from '@salesforce/command';
-import { Job, JobInfo } from 'jsforce';
+import { Job, JobInfo } from 'jsforce/job';
 import { Batcher, BulkResult } from '../../../../batcher';
 import { DataCommand } from '../../../../dataCommand';
 
@@ -47,7 +48,7 @@ export default class Delete extends DataCommand {
       this.ux.startSpinner('Bulk Delete');
 
       const csvRecords: ReadStream = fs.createReadStream(this.flags.csvfile, { encoding: 'utf-8' });
-      const job: Job = conn.bulk.createJob(this.flags.sobjecttype, 'delete');
+      const job: Job = conn.bulk.createJob(this.flags.sobjecttype, 'delete') as unknown as Job;
 
       const batcher: Batcher = new Batcher(conn, this.ux);
 
@@ -56,7 +57,7 @@ export default class Delete extends DataCommand {
       this.ux.stopSpinner();
     } catch (e) {
       this.ux.stopSpinner('error');
-      throw SfdxError.wrap(e as Error);
+      throw SfError.wrap(e as Error);
     }
 
     return result;

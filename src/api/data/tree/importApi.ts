@@ -11,19 +11,23 @@
 import * as path from 'path';
 import * as util from 'util';
 
+import * as fs from 'fs';
 import {
+  AnyJson,
   Dictionary,
-  isString,
-  isObject,
-  isArray,
   getNumber,
   getString,
-  JsonMap,
+  isArray,
+  isObject,
+  isString,
   JsonCollection,
-  AnyJson,
+  JsonMap,
 } from '@salesforce/ts-types';
-import { fs, Logger, Org, SfdxError, SchemaValidator } from '@salesforce/core';
+import { Logger, Messages, Org, SchemaValidator, SfError } from '@salesforce/core';
 import { sequentialExecute } from './executors';
+
+Messages.importMessagesDirectory(__dirname);
+const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
 const importPlanSchemaFile = path.join(__dirname, '..', '..', '..', '..', 'schema', 'dataImportPlanSchema.json');
 
@@ -66,6 +70,7 @@ interface RequestMeta {
   isJson: boolean;
   headers: Dictionary;
 }
+
 /**
  * Imports data into an org that was exported to files using the export API.
  */
@@ -75,9 +80,7 @@ export class ImportApi {
   private sobjectUrlMap: Map<string, string>;
   private schemaValidator: SchemaValidator;
   private sobjectTypes: Dictionary = {} as Dictionary;
-
   private config!: ImportConfig;
-
   // A JsonArray but we need to provide a better type to work with it properly.
   private importPlanConfig: any;
 
@@ -101,7 +104,7 @@ export class ImportApi {
     const refMap = new Map();
 
     const { contentType, plan, sobjectTreeFiles } = this.config;
-    const instanceUrl = this.org.getField(Org.Fields.INSTANCE_URL) as string;
+    const instanceUrl = this.org.getField<string>(Org.Fields.INSTANCE_URL);
 
     const fileFns: any = [];
     const planFns: any = [];
@@ -146,7 +149,7 @@ export class ImportApi {
             // override resolve references, if set
             resolveRefs = (def.resolveRefs == null ? globalResolveRefs : def.resolveRefs) as boolean;
           } else {
-            throw new SfdxError('file definition format unknown.', 'InvalidDataImportPlan');
+            throw new SfError('file definition format unknown.', 'InvalidDataImportPlan');
           }
 
           filepath = path.resolve(importPlanRootPath, filepath);
@@ -184,7 +187,7 @@ export class ImportApi {
         }
       }
 
-      throw SfdxError.wrap(error);
+      throw SfError.wrap(error);
     }
 
     return importResults;
@@ -206,15 +209,15 @@ export class ImportApi {
 
     // --sobjecttreefiles option is required when --plan option is unset
     if (!sobjectTreeFiles && !plan) {
-      const err = SfdxError.create('@salesforce/plugin-data', 'importApi', 'dataFileNotProvided');
-      err.name = INVALID_DATA_IMPORT_ERR_NAME;
+      const err = messages.createError('dataFileNotProvided');
+      err.toObject().name = INVALID_DATA_IMPORT_ERR_NAME;
       throw err;
     }
 
     // Prevent both --sobjecttreefiles and --plan option from being set
     if (sobjectTreeFiles && plan) {
-      const err = SfdxError.create('@salesforce/plugin-data', 'importApi', 'tooManyFiles');
-      err.name = INVALID_DATA_IMPORT_ERR_NAME;
+      const err = messages.createError('tooManyFiles');
+      err.toObject().name = INVALID_DATA_IMPORT_ERR_NAME;
       throw err;
     }
 
@@ -223,8 +226,8 @@ export class ImportApi {
       try {
         fs.statSync(planPath);
       } catch (e) {
-        const err = SfdxError.create('@salesforce/plugin-data', 'importApi', 'dataFileNotFound', [planPath]);
-        err.name = INVALID_DATA_IMPORT_ERR_NAME;
+        const err = messages.createError('dataFileNotFound', [planPath]);
+        err.toObject().name = INVALID_DATA_IMPORT_ERR_NAME;
         throw err;
       }
 
@@ -234,14 +237,11 @@ export class ImportApi {
       } catch (err) {
         const error = err as Error;
         if (error.name === 'ValidationSchemaFieldErrors') {
-          const e = SfdxError.create('@salesforce/plugin-data', 'importApi', 'dataPlanValidationError', [
-            planPath,
-            error.message,
-          ]);
-          e.name = INVALID_DATA_IMPORT_ERR_NAME;
+          const e = messages.createError('dataPlanValidationError', [planPath, error.message]);
+          e.toObject().name = INVALID_DATA_IMPORT_ERR_NAME;
           throw e;
         }
-        throw SfdxError.wrap(error);
+        throw SfError.wrap(error);
       }
     }
     return config;
@@ -297,8 +297,8 @@ export class ImportApi {
     try {
       fs.statSync(filepath);
     } catch (e) {
-      const err = SfdxError.create('@salesforce/plugin-data', 'importApi', 'dataFileNotFound', [filepath]);
-      err.name = INVALID_DATA_IMPORT_ERR_NAME;
+      const err = messages.createError('dataFileNotFound', [filepath]);
+      err.toObject().name = INVALID_DATA_IMPORT_ERR_NAME;
       throw err;
     }
 
@@ -315,8 +315,8 @@ export class ImportApi {
     // unable to determine content type from extension, was a global content type provided?
     if (!tmpContentType) {
       if (!contentType) {
-        const err = SfdxError.create('@salesforce/plugin-data', 'importApi', 'unknownContentType', [filepath]);
-        err.name = INVALID_DATA_IMPORT_ERR_NAME;
+        const err = messages.createError('unknownContentType', [filepath]);
+        err.toObject().name = INVALID_DATA_IMPORT_ERR_NAME;
         throw err;
       } else if (contentType.toUpperCase() === 'JSON') {
         tmpContentType = jsonContentType;
@@ -326,8 +326,8 @@ export class ImportApi {
         tmpContentType = xmlContentType;
         meta.refRegex = xmlRefRegex;
       } else {
-        const err = SfdxError.create('@salesforce/plugin-data', 'importApi', 'dataFileUnsupported', [contentType]);
-        err.name = INVALID_DATA_IMPORT_ERR_NAME;
+        const err = messages.createError('dataFileUnsupported', [contentType]);
+        err.toObject().name = INVALID_DATA_IMPORT_ERR_NAME;
         throw err;
       }
     }
@@ -353,9 +353,9 @@ export class ImportApi {
     const foundRefs = new Set<string>();
 
     // call identity() so the access token can be auto-updated
-    const content = await fs.readFile(filepath);
+    const content = await fs.promises.readFile(filepath);
     if (!content) {
-      throw SfdxError.create('@salesforce/plugin-data', 'importApi', 'dataFileEmpty', [filepath]);
+      throw messages.createError('dataFileEmpty', [filepath]);
     }
 
     contentStr = content.toString();
@@ -371,7 +371,7 @@ export class ImportApi {
           sobject = type.toLowerCase();
         }
       } catch (e) {
-        throw SfdxError.create('@salesforce/plugin-data', 'importApi', 'dataFileInvalidJson', [filepath]);
+        throw messages.createError('dataFileInvalidJson', [filepath]);
       }
     }
 
@@ -384,7 +384,7 @@ export class ImportApi {
       }
 
       if (foundRefs.size > 0 && refMap.size === 0) {
-        throw SfdxError.create('@salesforce/plugin-data', 'importApi', 'dataFileNoRefId', [filepath]);
+        throw messages.createError('dataFileNoRefId', [filepath]);
       }
 
       this.logger.debug(`Found references: ${Array.from(foundRefs).toString()}`);
@@ -430,7 +430,7 @@ export class ImportApi {
       method: 'POST',
       url: sobjectTreeApiUrl,
       body: contentStr,
-      headers,
+      headers: headers as Record<string, string>,
     });
   }
 
@@ -446,10 +446,7 @@ export class ImportApi {
       this.logger.debug(`SObject Tree API results:  ${JSON.stringify(response, null, 4)}`);
 
       if (response.hasErrors) {
-        throw SfdxError.create('@salesforce/plugin-data', 'importApi', 'dataImportFailed', [
-          filepath,
-          JSON.stringify(response.results, null, 4),
-        ]);
+        throw messages.createError('dataImportFailed', [filepath, JSON.stringify(response.results, null, 4)]);
       }
 
       if (getNumber(response, 'results.length')) {
@@ -470,7 +467,7 @@ export class ImportApi {
         }
       }
     } else {
-      throw new SfdxError('SObject Tree API XML response parsing not implemented', 'FailedDataImport');
+      throw new SfError('SObject Tree API XML response parsing not implemented', 'FailedDataImport');
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -500,9 +497,9 @@ export class ImportApi {
             (error as Error).message.lastIndexOf(' ') + 1,
             error.message.length
           );
-          throw SfdxError.create('@salesforce/plugin-data', 'importApi', 'FlsError', [field, object]);
+          throw messages.createError('FlsError', [field, object]);
         }
-        throw SfdxError.wrap(error);
+        throw SfError.wrap(error);
       });
   }
 }

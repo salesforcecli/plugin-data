@@ -9,7 +9,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import * as path from 'path';
-import { fs, Logger, Messages, Org, SfdxError } from '@salesforce/core';
+import * as fs from 'fs';
+import { Logger, Messages, Org, SfError } from '@salesforce/core';
 import { AnyArray, AnyJson, Dictionary, get, getNumber, getString, has, isArray } from '@salesforce/ts-types';
 import { UX } from '@salesforce/command';
 import { QueryResult } from 'jsforce';
@@ -67,14 +68,14 @@ export class ExportApi {
       this.setupOutputDirectory(outputDir);
     }
 
-    let queryResults: QueryResult<unknown>;
+    let queryResults: QueryResult<Record<string | number | symbol, unknown>>;
     try {
       queryResults = await this.org.getConnection().query(query);
     } catch (err) {
       if ((err as Error).name === 'MALFORMED_QUERY') {
         const errMsg = messages.getMessage('soqlMalformed');
         const errMsgAction = messages.getMessage('soqlMalformedAction');
-        throw new SfdxError(errMsg, 'MalformedQuery', [errMsgAction]);
+        throw new SfError(errMsg, 'MalformedQuery', [errMsgAction]);
       } else {
         throw err;
       }
@@ -104,7 +105,7 @@ export class ExportApi {
    */
   private validate(config: ExportConfig): ExportConfig {
     if (!config.query) {
-      throw SfdxError.create('@salesforce/plugin-data', 'exportApi', 'queryNotProvided');
+      throw messages.createError('queryNotProvided');
     }
 
     const filepath = path.resolve(process.cwd(), config.query);
@@ -112,13 +113,13 @@ export class ExportApi {
       config.query = fs.readFileSync(filepath, 'utf8');
 
       if (!config.query) {
-        throw SfdxError.create('@salesforce/plugin-data', 'exportApi', 'queryNotProvided');
+        throw messages.createError('queryNotProvided');
       }
     }
 
     config.query = config.query.toLowerCase().trim();
     if (!config.query.startsWith('select')) {
-      throw SfdxError.create('@salesforce/plugin-data', 'exportApi', 'soqlInvalid', [config.query]);
+      throw messages.createError('soqlInvalid', [config.query]);
     }
 
     return config;
@@ -126,7 +127,7 @@ export class ExportApi {
 
   private setupOutputDirectory(outputDir: string): void {
     try {
-      fs.mkdirpSync(outputDir);
+      fs.mkdirSync(outputDir);
     } catch (err) {
       // It is ok if the directory already exist
       const error = err as Error;
@@ -384,7 +385,7 @@ export class ExportApi {
     });
 
     if (!result) {
-      throw new SfdxError(`Unable to find relationship field name for ${metadata.name as string}`);
+      throw new SfError(`Unable to find relationship field name for ${metadata.name as string}`);
     }
 
     return result.name;
@@ -393,7 +394,7 @@ export class ExportApi {
   private isRelationship(objectName: string, fieldName: string): boolean {
     const metadata = describe[objectName] as Dictionary<any>;
     if (!metadata) {
-      throw new SfdxError(`Metadata not found for ${objectName}`);
+      throw new SfError(`Metadata not found for ${objectName}`);
     }
 
     return this.isRelationshipWithMetadata(metadata, fieldName);
@@ -406,7 +407,7 @@ export class ExportApi {
   private getRelatedTo(objectName: string, fieldName: string): string {
     const metadata = describe[objectName] as Dictionary<any>;
     if (!metadata) {
-      throw new SfdxError(`Metadata not found for ${objectName}`);
+      throw new SfError(`Metadata not found for ${objectName}`);
     }
 
     return this.getRelatedToWithMetadata(metadata, fieldName);
@@ -424,7 +425,7 @@ export class ExportApi {
     });
 
     if (!result) {
-      throw new SfdxError(`Unable to find relation for ${metadata.name as string}`);
+      throw new SfError(`Unable to find relation for ${metadata.name as string}`);
     }
 
     return result.referenceTo[0];
@@ -443,7 +444,7 @@ export class ExportApi {
     // ensure no existing reference
     const refEntry = this.referenceRegistry[type][id] as string;
     if (refEntry && refEntry !== ref) {
-      throw new SfdxError(`Overriding ${type} reference for ${id}: existing ${refEntry}, incoming ${ref}`);
+      throw new SfError(`Overriding ${type} reference for ${id}: existing ${refEntry}, incoming ${ref}`);
     }
 
     this.referenceRegistry[type][id] = ref;
@@ -564,7 +565,7 @@ export class ExportApi {
               const ref = this.referenceRegistry[refTo][id] as string;
 
               if (!ref) {
-                throw new SfdxError(`${objType} reference to ${refTo} (${id}) not found in query results.`);
+                throw new SfError(`${objType} reference to ${refTo} (${id}) not found in query results.`);
               }
 
               record[field] = `@${ref}`;

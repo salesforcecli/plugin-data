@@ -11,12 +11,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
+import * as fs from 'fs';
 import * as sinon from 'sinon';
-
-import { fs as fsCore, Messages, Org, Connection } from '@salesforce/core';
+import { Connection, Messages, Org } from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
 import { UX } from '@salesforce/command';
-import { expect, assert } from 'chai';
+import { assert, expect } from 'chai';
 import { ExportApi } from '../../../../src/api/data/tree/exportApi';
 
 //
@@ -230,8 +230,8 @@ describe('Export API', () => {
   let sobjectStub: any;
 
   beforeEach(async () => {
-    writeStub = sandbox.stub(fsCore, 'writeFileSync');
-    sandbox.stub(fsCore, 'existsSync').returns(false);
+    writeStub = sandbox.stub(fs, 'writeFileSync');
+    sandbox.stub(fs, 'existsSync').returns(false);
 
     const testOrg = new Org({ aliasOrUsername: testUsername });
     queryStub = sandbox.stub(Connection.prototype, 'query');
@@ -374,7 +374,7 @@ describe('Export API', () => {
   });
 
   it('should export query results to a file when query param is a file that contains a soql query', async () => {
-    sandbox.stub(fsCore, 'readFileSync').callsFake(() => 'select stuff');
+    sandbox.stub(fs, 'readFileSync').callsFake(() => 'select stuff');
     // @ts-ignore
     fsCore.existsSync['returns'](true);
     await exportApi.export({ query: 'queryInaFile.txt' });

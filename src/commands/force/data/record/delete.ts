@@ -8,8 +8,8 @@
 import * as os from 'os';
 
 import { flags, FlagsConfig } from '@salesforce/command';
-import { Messages, SfdxError } from '@salesforce/core';
-import { RecordResult } from 'jsforce';
+import { Messages, SfError } from '@salesforce/core';
+import { SaveResult } from 'jsforce';
 import { DataCommand } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -47,7 +47,7 @@ export default class Delete extends DataCommand {
     }),
   };
 
-  public async run(): Promise<RecordResult> {
+  public async run(): Promise<SaveResult> {
     this.validateIdXorWhereFlags();
 
     this.ux.startSpinner('Deleting Record');
@@ -56,7 +56,7 @@ export default class Delete extends DataCommand {
     try {
       const sobject = this.getConnection().sobject(this.flags.sobjecttype);
       const sObjectId = (this.flags.sobjectid || (await this.query(sobject, this.flags.where)).Id) as string;
-      const result = this.normalize<RecordResult>(await sobject.destroy(sObjectId));
+      const result = this.normalize<SaveResult>(await sobject.destroy(sObjectId));
 
       if (result.success) {
         this.ux.log(messages.getMessage('deleteSuccess', [sObjectId]));
@@ -70,7 +70,7 @@ export default class Delete extends DataCommand {
     } catch (err) {
       status = 'Failed';
       this.ux.stopSpinner(status);
-      throw new SfdxError((err as Error).name, (err as Error).message);
+      throw new SfError((err as Error).name, (err as Error).message);
     }
   }
 }

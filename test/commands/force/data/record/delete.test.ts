@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { expect, test } from '@salesforce/command/lib/test';
-import { ensureJsonMap, ensureString } from '@salesforce/ts-types';
+// import { ensureJsonMap, ensureString } from '@salesforce/ts-types';
 
 const sObjectId = '0011100001zhhyUAAQ';
 
@@ -17,21 +17,20 @@ interface DeleteResult {
 
 describe('force:data:record:delete', () => {
   test
-    .withOrg({ username: 'test@org.com' }, true)
-    .withConnectionRequest((request) => {
-      const requestMap = ensureJsonMap(request);
-      if (ensureString(requestMap.url).includes('Account')) {
-        return Promise.resolve({
-          attributes: {
-            type: 'Account',
-            url: `/services/data/v50.0/sobjects/Account/${sObjectId}`,
-          },
-          Id: sObjectId,
-          IsDeleted: true,
-        });
-      }
-      return Promise.resolve({});
-    })
+    // .withConnectionRequest((request) => {
+    //   const requestMap = ensureJsonMap(request);
+    //   if (ensureString(requestMap.url).includes('Account')) {
+    //     return Promise.resolve({
+    //       attributes: {
+    //         type: 'Account',
+    //         url: `/services/data/v50.0/sobjects/Account/${sObjectId}`,
+    //       },
+    //       Id: sObjectId,
+    //       IsDeleted: true,
+    //     });
+    //   }
+    //   return Promise.resolve({});
+    // })
     .stdout()
     .command([
       'force:data:record:delete',
@@ -51,7 +50,7 @@ describe('force:data:record:delete', () => {
     });
 
   test
-    .withOrg({ username: 'test@org.com' }, true)
+
     .stdout()
     .command([
       'force:data:record:delete',
@@ -73,10 +72,10 @@ describe('force:data:record:delete', () => {
     });
 
   test
-    .withOrg({ username: 'test@org.com' }, true)
-    .withConnectionRequest(() => {
-      return Promise.resolve({});
-    })
+    //
+    // .withConnectionRequest(() => {
+    //   return Promise.resolve({});
+    // })
     .stdout()
     .command([
       'force:data:record:delete',

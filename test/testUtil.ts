@@ -6,23 +6,13 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { Batch, BatchInfo } from 'jsforce/lib/api/bulk';
 
-import {
-  BaseConnection,
-  Batch,
-  BatchInfo,
-  Job,
-  QueryResult,
-  RecordResult,
-  SaveResult,
-  SObject,
-  UpsertResult,
-  UserInfo,
-} from 'jsforce';
-import Parser = require('fast-xml-parser');
+import { QueryResult, SaveResult, UpsertResult, UserInfo } from 'jsforce';
 import { Connection } from '@salesforce/core';
 
 import { getArray, getString } from '@salesforce/ts-types';
+import Parser = require('fast-xml-parser');
 import EventEmitter = NodeJS.EventEmitter;
 
 // needs an external _listeners object since its not included in the type definition
@@ -78,7 +68,7 @@ export const createBaseFakeEmitter = function (): EventEmitter {
 };
 /* eslint-enable @typescript-eslint/no-unsafe-return */
 
-export const createBaseFakeConnection = function (): BaseConnection {
+export const createBaseFakeConnection = function (): Connection {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return {
     instanceUrl: '',
@@ -111,7 +101,7 @@ export const createBaseFakeConnection = function (): BaseConnection {
       return {} as QueryResult<object>;
     },
     sobject: () => {
-      return {} as SObject<object>;
+      return {};
     },
     _baseUrl: () => {
       return 'https://some.sfdc.site.com';
@@ -138,7 +128,7 @@ export const createBaseFakeConnection = function (): BaseConnection {
         return {
           on: () => {},
           check: () => {
-            return {} as BatchInfo;
+            return {};
           },
           poll: () => {},
           execute: () => {},
@@ -153,7 +143,7 @@ export const createBaseFakeConnection = function (): BaseConnection {
         });
       },
       job: () => {
-        return {} as Job;
+        return {};
       },
     },
     tooling: {
@@ -166,22 +156,22 @@ export const createBaseFakeConnection = function (): BaseConnection {
         });
       },
       create: () => {
-        return new Promise<RecordResult>(function (resolve, reject) {
-          resolve({} as RecordResult);
+        return new Promise<SaveResult>(function (resolve, reject) {
+          resolve({} as SaveResult);
         });
       },
       update: () => {
-        return new Promise<RecordResult>(function (resolve, reject) {
-          resolve({} as RecordResult);
+        return new Promise<SaveResult>(function (resolve, reject) {
+          resolve({} as SaveResult);
         });
       },
       destroy: () => {
-        return new Promise<RecordResult>(function (resolve, reject) {
-          resolve({} as RecordResult);
+        return new Promise<SaveResult>(function (resolve, reject) {
+          resolve({} as SaveResult);
         });
       },
       sobject: () => {
-        return {} as SObject<object>;
+        return {};
       },
     },
   } as any;
@@ -229,7 +219,7 @@ export const createFakeConnection = function (): Connection {
       });
     },
     sobject: () => {
-      return {} as SObject<object>;
+      return {};
     },
     _baseUrl: () => {
       return 'https://some.sfdc.site.com';
@@ -256,7 +246,7 @@ export const createFakeConnection = function (): Connection {
         return {
           on: () => {},
           check: () => {
-            return {} as BatchInfo;
+            return {};
           },
           poll: () => {},
           execute: () => {},
@@ -271,7 +261,7 @@ export const createFakeConnection = function (): Connection {
         });
       },
       job: () => {
-        return {} as Job;
+        return {};
       },
     },
     tooling: {
@@ -291,28 +281,28 @@ export const createFakeConnection = function (): Connection {
         });
       },
       create: () => {
-        return new Promise<RecordResult>(function (resolve, reject) {
-          resolve({} as RecordResult);
+        return new Promise<SaveResult>(function (resolve, reject) {
+          resolve({} as SaveResult);
         });
       },
       update: () => {
-        return new Promise<RecordResult>(function (resolve, reject) {
-          resolve({} as RecordResult);
+        return new Promise<SaveResult>(function (resolve, reject) {
+          resolve({} as SaveResult);
         });
       },
       destroy: () => {
-        return new Promise<RecordResult>(function (resolve, reject) {
-          resolve({} as RecordResult);
+        return new Promise<SaveResult>(function (resolve, reject) {
+          resolve({} as SaveResult);
         });
       },
       sobject: () => {
-        return {} as SObject<object>;
+        return {};
       },
     },
   } as any;
 };
 
-export const createBaseFakeBatch = function (): Batch {
+export const createBaseFakeBatch = function (): typeof Batch {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return {
     on(event: string, callback?: (result: Record<string, any>) => any): void {},

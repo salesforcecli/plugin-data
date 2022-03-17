@@ -4,10 +4,10 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+import * as fs from 'fs';
 import { ReadStream } from 'fs';
 import { $$, expect, test } from '@salesforce/command/lib/test';
 import { stubMethod } from '@salesforce/ts-sinon';
-import { fs } from '@salesforce/core';
 import { Batcher } from '../../../../../src/batcher';
 
 interface UpsertResult {
@@ -34,7 +34,6 @@ describe('force:data:bulk:upsert', () => {
   };
 
   test
-    .withOrg({ username: 'test@org.com' }, true)
     .do(() => {
       stubMethod($$.SANDBOX, fs, 'fileExists').resolves(true);
       stubMethod($$.SANDBOX, fs, 'createReadStream').returns(ReadStream.prototype);
@@ -84,7 +83,7 @@ describe('force:data:bulk:upsert', () => {
   };
 
   test
-    .withOrg({ username: 'test@org.com' }, true)
+
     .do(() => {
       stubMethod($$.SANDBOX, fs, 'fileExists').resolves(true);
       stubMethod($$.SANDBOX, fs, 'createReadStream').returns(ReadStream.prototype);
@@ -111,7 +110,7 @@ describe('force:data:bulk:upsert', () => {
     });
 
   test
-    .withOrg({ username: 'test@org.com' }, true)
+
     .do(() => {
       stubMethod($$.SANDBOX, fs, 'fileExists').resolves(true);
       stubMethod($$.SANDBOX, fs, 'createReadStream').returns(ReadStream.prototype);
@@ -163,7 +162,7 @@ describe('force:data:bulk:upsert', () => {
   };
 
   test
-    .withOrg({ username: 'test@org.com' }, true)
+
     .do(() => {
       stubMethod($$.SANDBOX, fs, 'fileExists').resolves(true);
       stubMethod($$.SANDBOX, fs, 'createReadStream').returns(ReadStream.prototype);

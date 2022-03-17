@@ -9,7 +9,7 @@
 
 import { join as pathJoin } from 'path';
 import { expect, test } from '@salesforce/command/lib/test';
-import { ensureJsonMap, ensureString, AnyJson } from '@salesforce/ts-types';
+import { AnyJson } from '@salesforce/ts-types';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const dataImportPlanSchema = require('../../../../../schema/dataImportPlanSchema.json');
@@ -45,22 +45,22 @@ interface ImportResult {
 
 describe('force:data:tree:import', () => {
   test
-    .withOrg({ username: 'test@org.com' }, true)
-    .withConnectionRequest((request) => {
-      const requestMap = ensureJsonMap(request);
-      if (ensureString(requestMap.url).includes('composite/tree/account')) {
-        return Promise.resolve({
-          hasErrors: false,
-          results: [
-            { referenceId: 'SampleAccountRef', id: '0019A00000GkC21QAF' },
-            { referenceId: 'SampleAcct2Ref', id: '0019A00000GkC22QAF' },
-            { referenceId: 'PresidentSmithRef', id: '0039A00000Bzy8kQAB' },
-            { referenceId: 'VPEvansRef', id: '0039A00000Bzy8lQAB' },
-          ],
-        });
-      }
-      return Promise.resolve({});
-    })
+
+    // .withConnectionRequest((request) => {
+    //   const requestMap = ensureJsonMap(request);
+    //   if (ensureString(requestMap.url).includes('composite/tree/account')) {
+    //     return Promise.resolve({
+    //       hasErrors: false,
+    //       results: [
+    //         { referenceId: 'SampleAccountRef', id: '0019A00000GkC21QAF' },
+    //         { referenceId: 'SampleAcct2Ref', id: '0019A00000GkC22QAF' },
+    //         { referenceId: 'PresidentSmithRef', id: '0039A00000Bzy8kQAB' },
+    //         { referenceId: 'VPEvansRef', id: '0039A00000Bzy8lQAB' },
+    //       ],
+    //     });
+    //   }
+    //   return Promise.resolve({});
+    // })
     .stdout()
     .command([
       'force:data:tree:import',
@@ -77,22 +77,22 @@ describe('force:data:tree:import', () => {
     });
 
   test
-    .withOrg({ username: 'test@org.com' }, true)
-    .withConnectionRequest((request) => {
-      const requestMap = ensureJsonMap(request);
-      if (ensureString(requestMap.url).includes('composite/tree/account')) {
-        return Promise.resolve({
-          hasErrors: false,
-          results: [
-            { referenceId: 'SampleAccountRef', id: '0019A00000GkC21QAF' },
-            { referenceId: 'SampleAcct2Ref', id: '0019A00000GkC22QAF' },
-            { referenceId: 'PresidentSmithRef', id: '0039A00000Bzy8kQAB' },
-            { referenceId: 'VPEvansRef', id: '0039A00000Bzy8lQAB' },
-          ],
-        });
-      }
-      return Promise.resolve({});
-    })
+
+    // .withConnectionRequest((request) => {
+    //   const requestMap = ensureJsonMap(request);
+    //   if (ensureString(requestMap.url).includes('composite/tree/account')) {
+    //     return Promise.resolve({
+    //       hasErrors: false,
+    //       results: [
+    //         { referenceId: 'SampleAccountRef', id: '0019A00000GkC21QAF' },
+    //         { referenceId: 'SampleAcct2Ref', id: '0019A00000GkC22QAF' },
+    //         { referenceId: 'PresidentSmithRef', id: '0039A00000Bzy8kQAB' },
+    //         { referenceId: 'VPEvansRef', id: '0039A00000Bzy8lQAB' },
+    //       ],
+    //     });
+    //   }
+    //   return Promise.resolve({});
+    // })
     .stdout()
     .command([
       'force:data:tree:import',
@@ -109,7 +109,7 @@ describe('force:data:tree:import', () => {
     });
 
   test
-    .withOrg({ username: 'test@org.com' }, true)
+
     .stdout()
     .command(['force:data:tree:import', '--targetusername', 'test@org.com', '--confighelp', '--json'])
     .it('should return the schema with --confighelp param', (ctx) => {
@@ -119,7 +119,7 @@ describe('force:data:tree:import', () => {
     });
 
   test
-    .withOrg({ username: 'test@org.com' }, true)
+
     .stdout()
     .command(['force:data:tree:import', '--targetusername', 'test@org.com', '--json'])
     .it('should throw an error if data plan or file is not provided', (ctx) => {

@@ -5,13 +5,14 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
+import * as fs from 'fs';
 import { SfdxCommand } from '@salesforce/command';
 import { AnyJson, Dictionary, get, Nullable } from '@salesforce/ts-types';
-import { fs, Messages, Org, SfdxError } from '@salesforce/core';
-import { BaseConnection, ErrorResult, Record as jsforceRecord, SObject } from 'jsforce';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore because jsforce doesn't export http-api
+import { Connection, Messages, Org, SfError } from '@salesforce/core';
+import { Record as jsforceRecord, SaveResult, SObject } from 'jsforce';
+
 import * as HttpApi from 'jsforce/lib/http-api';
+import { Tooling } from '@salesforce/core/lib/org';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
@@ -20,6 +21,7 @@ export interface Metric {
   requestPath: string;
   perfMetrics: AnyJson;
 }
+
 interface Result {
   status: number;
   result: AnyJson;
@@ -34,9 +36,11 @@ interface Response {
 type ConnectionInternals = { callOptions?: { perfOption?: string } };
 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return */
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-const originalRequestMethod = HttpApi.prototype.request;
-HttpApi.prototype.request = function (req: unknown, ...args: unknown[]): unknown {
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/unbound-method
+const originalRequestMethod = HttpApi.default.prototype.request;
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+HttpApi.default.prototype.request = function (req: unknown, ...args: unknown[]): unknown {
   this.once('response', (response: Response) => {
     const metrics = response.headers.perfmetrics;
     if (metrics) {
@@ -47,8 +51,11 @@ HttpApi.prototype.request = function (req: unknown, ...args: unknown[]): unknown
       });
     }
   });
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   return originalRequestMethod.call(this, req, ...args);
 };
+
 /* eslint-enable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call*/
 
 export abstract class DataCommand extends SfdxCommand {
@@ -64,26 +71,26 @@ export abstract class DataCommand extends SfdxCommand {
 
   public validateIdXorWhereFlags(): void {
     if (!this.flags.where && !this.flags.sobjectid) {
-      throw new SfdxError(messages.getMessage('NeitherSobjectidNorWhereError'), 'NeitherSobjectidNorWhereError', [
+      throw new SfError(messages.getMessage('NeitherSobjectidNorWhereError'), 'NeitherSobjectidNorWhereError', [
         messages.getMessage('NeitherSobjectidNorWhereErrorActions'),
       ]);
     }
   }
 
-  public collectErrorMessages(result: ErrorResult): string {
+  public collectErrorMessages(result: SaveResult): string {
     let errors = '';
     if (result.errors) {
       errors = '\nErrors:\n';
-      result.errors.forEach((err) => {
-        errors += '  ' + err + '\n';
+      result.errors.map((err) => {
+        errors += '  ' + err?.message + '\n';
       });
     }
     return errors;
   }
 
   public async throwIfFileDoesntExist(path: string): Promise<void> {
-    if (!(await fs.fileExists(path))) {
-      throw new SfdxError(messages.getMessage('PathDoesNotExist', [path]), 'PathDoesNotExist');
+    if (!(await fs.promises.stat(path))) {
+      throw new SfError(messages.getMessage('PathDoesNotExist', [path]), 'PathDoesNotExist');
     }
   }
 
@@ -108,9 +115,9 @@ export abstract class DataCommand extends SfdxCommand {
     return this.org;
   }
 
-  public getConnection(): BaseConnection {
+  public getConnection(): (Tooling | Connection) & ConnectionInternals {
     const safeOrg = this.ensureOrg();
-    const connection: BaseConnection & ConnectionInternals = this.flags.usetoolingapi
+    const connection: (Tooling | Connection) & ConnectionInternals = this.flags.usetoolingapi
       ? safeOrg.getConnection().tooling
       : safeOrg.getConnection();
 
@@ -123,21 +130,27 @@ export abstract class DataCommand extends SfdxCommand {
     return connection;
   }
 
-  public async query(sobject: SObject<unknown>, where: string): Promise<jsforceRecord<unknown>> {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore enable any typing here
+  public async query(sobject: SObject<unknown>, where: string): Promise<jsforceRecord> {
     const queryObject = this.stringToDictionary(where);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
     const records = await sobject.find(queryObject, 'id');
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (!records || records.length === 0) {
-      throw new SfdxError('DataRecordGetNoRecord', messages.getMessage('DataRecordGetNoRecord'));
+      throw new SfError('DataRecordGetNoRecord', messages.getMessage('DataRecordGetNoRecord'));
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (records.length > 1) {
-      throw new SfdxError(
+      throw new SfError(
         'DataRecordGetMultipleRecords',
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         messages.getMessage('DataRecordGetMultipleRecords', [where, this.flags.sobjecttype, records.length])
       );
     }
 
-    return this.normalize<jsforceRecord<unknown>>(records);
+    return this.normalize<jsforceRecord>(records);
   }
 
   protected stringToDictionary(str: string): Dictionary<string | boolean | Record<string, unknown>> {
@@ -146,10 +159,10 @@ export abstract class DataCommand extends SfdxCommand {
   }
 
   protected normalize<T>(results: T | T[]): T {
-    // jsforce returns RecordResult | RecordResult[]
+    // jsforce returns SaveResult | SaveResult[]
     // but we're only ever dealing with a single sobject we are guaranteed to
-    // get back a single RecordResult. Nevertheless, we ensure that it's a
-    // single RecordResult to make Typescript happy
+    // get back a single SaveResult. Nevertheless, we ensure that it's a
+    // single SaveResult to make Typescript happy
     return Array.isArray(results) ? results[0] : results;
   }
 

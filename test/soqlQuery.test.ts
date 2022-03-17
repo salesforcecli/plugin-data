@@ -9,8 +9,8 @@
 import * as chai from 'chai';
 import { expect } from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import sinon = require('sinon');
 import { Logger } from '@salesforce/core';
+import sinon = require('sinon');
 import { SoqlQuery } from '../src/commands/force/data/soql/query';
 import * as TestUtil from './testUtil';
 import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars';
@@ -32,6 +32,8 @@ describe('soqlQuery tests', () => {
     sandbox
       .stub(fakeConnection, 'request')
       .resolves({ columnMetadata: queryFieldsExemplars.simpleQuery.columnMetadata });
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     querySpy = sandbox.stub(fakeConnection, 'autoFetchQuery').resolves(soqlQueryExemplars.simpleQuery.queryResult);
     const soqlQuery = new SoqlQuery();
     const results = await soqlQuery.runSoqlQuery(fakeConnection, 'SELECT id, name FROM Contact', logger);
@@ -40,6 +42,8 @@ describe('soqlQuery tests', () => {
   });
   it('should handle a query with a subquery', async () => {
     sandbox.stub(fakeConnection, 'request').resolves({ columnMetadata: queryFieldsExemplars.subquery.columnMetadata });
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     querySpy = sandbox.stub(fakeConnection, 'autoFetchQuery').resolves(soqlQueryExemplars.subQuery.queryResult);
     const soqlQuery = new SoqlQuery();
     const results = await soqlQuery.runSoqlQuery(

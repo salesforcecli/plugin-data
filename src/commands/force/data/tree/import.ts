@@ -51,11 +51,9 @@ export default class Import extends SfdxCommand {
 
   public static result: SfdxResult = {
     tableColumnData: {
-      columns: [
-        { key: 'refId', label: 'Reference ID' },
-        { key: 'type', label: 'Type' },
-        { key: 'id', label: 'ID' },
-      ],
+      refId: { header: 'Reference ID' },
+      type: { header: 'Type' },
+      id: { header: 'ID' },
     },
   };
 
