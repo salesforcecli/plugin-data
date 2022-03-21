@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { expect, test } from '@salesforce/command/lib/test';
-// import { ensureJsonMap, ensureString } from '@salesforce/ts-types';
+import { ensureJsonMap, ensureString } from '@salesforce/ts-types';
 import { SfError } from '@salesforce/core';
 
 const sObjectId = '0011100001zhhyUAAQ';
@@ -17,31 +17,31 @@ interface UpdateResult {
 
 describe('force:data:record:update', () => {
   test
-
-    // .withConnectionRequest((request) => {
-    //   const requestMap = ensureJsonMap(request);
-    //   if (ensureString(requestMap.url).includes('Account')) {
-    //     return Promise.resolve({
-    //       attributes: {
-    //         type: 'Account',
-    //         url: `/services/data/v50.0/sobjects/Account/${sObjectId}`,
-    //       },
-    //       Id: sObjectId,
-    //       IsDeleted: false,
-    //       Name: 'NewName',
-    //       PhotoUrl: `/services/images/photo/0011100001zhhyUAAQ${sObjectId}`,
-    //       OwnerId: '00511000009LARJAA4',
-    //       CreatedDate: '2020-11-17T21:47:42.000+0000',
-    //       CreatedById: '00511000009LARJAA4',
-    //       LastModifiedDate: '2020-11-17T21:47:42.000+0000',
-    //       LastModifiedById: '00511000009LARJAA4',
-    //       SystemModstamp: '2020-11-17T21:47:42.000+0000',
-    //       LastViewedDate: '2020-11-17T21:47:42.000+0000',
-    //       LastReferencedDate: '2020-11-17T21:47:42.000+0000',
-    //     });
-    //   }
-    //   return Promise.resolve({});
-    // })
+    .withOrg({ username: 'test@org.com' }, true)
+    .withConnectionRequest((request) => {
+      const requestMap = ensureJsonMap(request);
+      if (ensureString(requestMap.url).includes('Account')) {
+        return Promise.resolve({
+          attributes: {
+            type: 'Account',
+            url: `/services/data/v50.0/sobjects/Account/${sObjectId}`,
+          },
+          Id: sObjectId,
+          IsDeleted: false,
+          Name: 'NewName',
+          PhotoUrl: `/services/images/photo/0011100001zhhyUAAQ${sObjectId}`,
+          OwnerId: '00511000009LARJAA4',
+          CreatedDate: '2020-11-17T21:47:42.000+0000',
+          CreatedById: '00511000009LARJAA4',
+          LastModifiedDate: '2020-11-17T21:47:42.000+0000',
+          LastModifiedById: '00511000009LARJAA4',
+          SystemModstamp: '2020-11-17T21:47:42.000+0000',
+          LastViewedDate: '2020-11-17T21:47:42.000+0000',
+          LastReferencedDate: '2020-11-17T21:47:42.000+0000',
+        });
+      }
+      return Promise.resolve({});
+    })
     .stdout()
     .command([
       'force:data:record:update',
@@ -63,14 +63,14 @@ describe('force:data:record:update', () => {
     });
 
   test
-
-    // .withConnectionRequest(() => {
-    //   return Promise.reject({
-    //     errorCode: 'FIELD_CUSTOM_VALIDATION_EXCEPTION',
-    //     message: 'name cannot start with x',
-    //     fields: [],
-    //   });
-    // })
+    .withOrg({ username: 'test@org.com' }, true)
+    .withConnectionRequest(() => {
+      return Promise.reject({
+        errorCode: 'FIELD_CUSTOM_VALIDATION_EXCEPTION',
+        message: 'name cannot start with x',
+        fields: [],
+      });
+    })
     .stdout()
     .command([
       'force:data:record:update',
@@ -92,7 +92,7 @@ describe('force:data:record:update', () => {
     });
 
   test
-
+    .withOrg({ username: 'test@org.com' }, true)
     .stdout()
     .command([
       'force:data:record:update',

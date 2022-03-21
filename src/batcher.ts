@@ -9,6 +9,7 @@ import { Connection, Messages, SfError } from '@salesforce/core';
 import { UX } from '@salesforce/command';
 import { Job, JobInfo } from 'jsforce/job';
 import { BatchInfo, BulkIngestBatchResult, BulkQueryBatchResult } from 'jsforce/lib/api/bulk';
+import { Batch } from 'jsforce/batch';
 import parse = require('csv-parse');
 
 const BATCH_RECORDS_LIMIT = 10000;
@@ -131,9 +132,9 @@ export class Batcher {
     sobjectType: string,
     wait?: number
   ): Promise<BulkResult[] | JobInfo[]> {
-    let batchesCompleted = 0;
+    const batchesCompleted = 0;
     let batchesQueued = 0;
-    let overallInfo = false;
+    const overallInfo = false;
 
     const batches = await this.splitIntoBatches(records);
 
@@ -195,42 +196,7 @@ export class Batcher {
                 }
               );
             } else {
-              // resolve(this.waitForCompletion(newBatch, batchesCompleted, overallInfo, i + 1, batches.length, wait));
-
-              resolve(
-                new Promise((resolve1, reject1) => {
-                  newBatch.on(
-                    'queue',
-                    // we're using an async method on an event listener which doesn't fit the .on method parameter types
-                    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                    async (batchInfo: BatchInfo): Promise<void> => {
-                      const result = await newBatch.check();
-                      if (result.state === 'Failed') {
-                        reject1(result.stateMessage);
-                      } else {
-                        if (!overallInfo) {
-                          this.ux.log(messages.getMessage('PollingInfo', [POLL_FREQUENCY_MS / 1000, batchInfo.jobId]));
-                          overallInfo = true;
-                        }
-                      }
-                      this.ux.log(messages.getMessage('BatchQueued', [i + 1, batchInfo.id]));
-                      newBatch.poll(POLL_FREQUENCY_MS, wait * 60000);
-                    }
-                  );
-                  // we're using an async method on an event listener which doesn't fit the .on method parameter types
-                  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                  newBatch.on('response', async (results: BulkQueryBatchResult) => {
-                    const summary = await newBatch.check();
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore
-                    this.bulkStatus(summary, results, i + 1);
-                    batchesCompleted++;
-                    if (batchesCompleted === batches.length) {
-                      resolve1(await this.fetchAndDisplayJobStatus(summary.jobId));
-                    }
-                  });
-                })
-              );
+              resolve(this.waitForCompletion(newBatch, batchesCompleted, overallInfo, i + 1, batches.length, wait));
             }
 
             newBatch.execute(batch, (err) => {
@@ -276,45 +242,47 @@ export class Batcher {
    * @param totalNumBatches
    * @param waitMins
    */
-  // private async waitForCompletion(
-  //   newBatch: unknown,
-  //   batchesCompleted: number,
-  //   overallInfo: boolean,
-  //   batchNum: number,
-  //   totalNumBatches: number,
-  //   waitMins: number
-  // ): Promise<JobInfo> {
-  //   return new Promise((resolve, reject) => {
-  //     newBatch.on(
-  //       'queue',
-  //       // we're using an async method on an event listener which doesn't fit the .on method parameter types
-  //       // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  //       async (batchInfo: BatchInfo): Promise<void> => {
-  //         const result = await newBatch.check();
-  //         if (result.state === 'Failed') {
-  //           reject(result.stateMessage);
-  //         } else {
-  //           if (!overallInfo) {
-  //             this.ux.log(messages.getMessage('PollingInfo', [POLL_FREQUENCY_MS / 1000, batchInfo.jobId]));
-  //             overallInfo = true;
-  //           }
-  //         }
-  //         this.ux.log(messages.getMessage('BatchQueued', [batchNum, batchInfo.id]));
-  //         newBatch.poll(POLL_FREQUENCY_MS, waitMins * 60000);
-  //       }
-  //     );
-  //     // we're using an async method on an event listener which doesn't fit the .on method parameter types
-  //     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  //     newBatch.on('response', async (results: BulkQueryBatchResult) => {
-  //       const summary: BatchInfo = await newBatch.check();
-  //       this.bulkStatus(summary, results, batchNum);
-  //       batchesCompleted++;
-  //       if (batchesCompleted === totalNumBatches) {
-  //         resolve(await this.fetchAndDisplayJobStatus(summary.jobId));
-  //       }
-  //     });
-  //   });
-  // }
+  private async waitForCompletion(
+    newBatch: Batch,
+    batchesCompleted: number,
+    overallInfo: boolean,
+    batchNum: number,
+    totalNumBatches: number,
+    waitMins: number
+  ): Promise<JobInfo> {
+    return new Promise((resolve, reject) => {
+      newBatch.on(
+        'queue',
+        // we're using an async method on an event listener which doesn't fit the .on method parameter types
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        async (batchInfo: BatchInfo): Promise<void> => {
+          const result = await newBatch.check();
+          if (result.state === 'Failed') {
+            reject(result.stateMessage);
+          } else {
+            if (!overallInfo) {
+              this.ux.log(messages.getMessage('PollingInfo', [POLL_FREQUENCY_MS / 1000, batchInfo.jobId]));
+              overallInfo = true;
+            }
+          }
+          this.ux.log(messages.getMessage('BatchQueued', [batchNum, batchInfo.id]));
+          newBatch.poll(POLL_FREQUENCY_MS, waitMins * 60000);
+        }
+      );
+      // we're using an async method on an event listener which doesn't fit the .on method parameter types
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      newBatch.on('response', async (results: BulkQueryBatchResult) => {
+        const summary = await newBatch.check();
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        this.bulkStatus(summary, results, batchNum);
+        batchesCompleted++;
+        if (batchesCompleted === totalNumBatches) {
+          resolve(await this.fetchAndDisplayJobStatus(summary.jobId));
+        }
+      });
+    });
+  }
 
   /**
    * registers the listener in charge of distributing all csv records into batches

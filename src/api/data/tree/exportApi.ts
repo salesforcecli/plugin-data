@@ -105,7 +105,11 @@ export class ExportApi {
    */
   private validate(config: ExportConfig): ExportConfig {
     if (!config.query) {
-      throw messages.createError('queryNotProvided');
+      const e = messages.createError('queryNotProvided');
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore override readonly .name field
+      e.name = 'queryNotProvided';
+      throw e;
     }
 
     const filepath = path.resolve(process.cwd(), config.query);
@@ -113,13 +117,21 @@ export class ExportApi {
       config.query = fs.readFileSync(filepath, 'utf8');
 
       if (!config.query) {
-        throw messages.createError('queryNotProvided');
+        const e = messages.createError('queryNotProvided');
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore override readonly .name field
+        e.name = 'queryNotProvided';
+        throw e;
       }
     }
 
     config.query = config.query.toLowerCase().trim();
     if (!config.query.startsWith('select')) {
-      throw messages.createError('soqlInvalid', [config.query]);
+      const e = messages.createError('soqlInvalid', [config.query]);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore override readonly .name field
+      e.name = 'soqlInvalid';
+      throw e;
     }
 
     return config;
@@ -131,7 +143,7 @@ export class ExportApi {
     } catch (err) {
       // It is ok if the directory already exist
       const error = err as Error;
-      if (error.name !== 'EEXIST') {
+      if (!error.message.includes('EEXIST')) {
         throw err;
       }
     }

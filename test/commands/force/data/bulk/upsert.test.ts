@@ -6,6 +6,7 @@
  */
 import * as fs from 'fs';
 import { ReadStream } from 'fs';
+import * as fse from 'fs-extra';
 import { $$, expect, test } from '@salesforce/command/lib/test';
 import { stubMethod } from '@salesforce/ts-sinon';
 import { Batcher } from '../../../../../src/batcher';
@@ -34,8 +35,9 @@ describe('force:data:bulk:upsert', () => {
   };
 
   test
+    .withOrg({ username: 'test@org.com' }, true)
     .do(() => {
-      stubMethod($$.SANDBOX, fs, 'fileExists').resolves(true);
+      stubMethod($$.SANDBOX, fse, 'pathExists').resolves(true);
       stubMethod($$.SANDBOX, fs, 'createReadStream').returns(ReadStream.prototype);
       stubMethod($$.SANDBOX, Batcher.prototype, 'createAndExecuteBatches').resolves(expectedBatch);
     })
@@ -83,9 +85,9 @@ describe('force:data:bulk:upsert', () => {
   };
 
   test
-
+    .withOrg({ username: 'test@org.com' }, true)
     .do(() => {
-      stubMethod($$.SANDBOX, fs, 'fileExists').resolves(true);
+      stubMethod($$.SANDBOX, fse, 'pathExists').resolves(true);
       stubMethod($$.SANDBOX, fs, 'createReadStream').returns(ReadStream.prototype);
       stubMethod($$.SANDBOX, Batcher.prototype, 'createAndExecuteBatches').resolves(expectedJob);
     })
@@ -110,9 +112,9 @@ describe('force:data:bulk:upsert', () => {
     });
 
   test
-
+    .withOrg({ username: 'test@org.com' }, true)
     .do(() => {
-      stubMethod($$.SANDBOX, fs, 'fileExists').resolves(true);
+      stubMethod($$.SANDBOX, fse, 'pathExists').resolves(true);
       stubMethod($$.SANDBOX, fs, 'createReadStream').returns(ReadStream.prototype);
       stubMethod($$.SANDBOX, Batcher.prototype, 'createAndExecuteBatches').throws('Error');
     })
@@ -162,9 +164,9 @@ describe('force:data:bulk:upsert', () => {
   };
 
   test
-
+    .withOrg({ username: 'test@org.com' }, true)
     .do(() => {
-      stubMethod($$.SANDBOX, fs, 'fileExists').resolves(true);
+      stubMethod($$.SANDBOX, fse, 'pathExists').resolves(true);
       stubMethod($$.SANDBOX, fs, 'createReadStream').returns(ReadStream.prototype);
       stubMethod($$.SANDBOX, Batcher.prototype, 'createAndExecuteBatches').resolves(expectedSerialJob);
     })

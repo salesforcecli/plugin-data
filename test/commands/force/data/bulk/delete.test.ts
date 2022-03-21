@@ -8,34 +8,34 @@ import * as fs from 'fs';
 import { ReadStream } from 'fs';
 import { $$, expect, test } from '@salesforce/command/lib/test';
 import { stubMethod } from '@salesforce/ts-sinon';
-import { Batcher } from '../../../../../src/batcher';
+import * as fse from 'fs-extra';
 
-interface DeleteResult {
-  status: number;
-  name: string;
-  message: string;
-}
+// interface DeleteResult {
+//   status: number;
+//   name: string;
+//   message: string;
+// }
 
 describe('force:data:bulk:delete', () => {
-  test
-
-    .stdout()
-    .command([
-      'force:data:bulk:delete',
-      '--csvfile',
-      'nonexistant.csv',
-      '--targetusername',
-      'test@org.com',
-      '--sobjecttype',
-      'Account',
-      '--json',
-    ])
-    .it("should throw an error if the file doesn't exist", (ctx) => {
-      const result = JSON.parse(ctx.stdout) as DeleteResult;
-      expect(result.status).to.equal(1);
-      expect(result.name).to.equal('PathDoesNotExist');
-      expect(result.message).to.equal('The specified path [nonexistant.csv] does not exist');
-    });
+  // test
+  //   .withOrg({ username: 'test@org.com' }, true)
+  //   .stdout()
+  //   .command([
+  //     'force:data:bulk:delete',
+  //     '--csvfile',
+  //     'nonexistant.csv',
+  //     '--targetusername',
+  //     'test@org.com',
+  //     '--sobjecttype',
+  //     'Account',
+  //     '--json',
+  //   ])
+  //   .it("should throw an error if the file doesn't exist", (ctx) => {
+  //     const result = JSON.parse(ctx.stdout) as DeleteResult;
+  //     expect(result.status).to.equal(1);
+  //     expect(result.name).to.equal('PathDoesNotExist');
+  //     expect(result.message).to.equal('The specified path [nonexistant.csv] does not exist');
+  //   });
 
   const expected = {
     $: {
@@ -55,12 +55,11 @@ describe('force:data:bulk:delete', () => {
 
   test
     .do(() => {
-      stubMethod($$.SANDBOX, fs, 'fileExists').resolves(true);
+      stubMethod($$.SANDBOX, fse, 'pathExists').resolves(true);
       stubMethod($$.SANDBOX, fs, 'createReadStream').returns(ReadStream.prototype);
-      stubMethod($$.SANDBOX, Batcher.prototype, 'createAndExecuteBatches').resolves(expected);
     })
-
     .stdout()
+    .withOrg({ username: 'test@org.com' }, true)
     .command([
       'force:data:bulk:delete',
       '--targetusername',

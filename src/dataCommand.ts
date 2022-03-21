@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import * as fs from 'fs';
+import * as fse from 'fs-extra';
 import { SfdxCommand } from '@salesforce/command';
 import { AnyJson, Dictionary, get, Nullable } from '@salesforce/ts-types';
 import { Connection, Messages, Org, SfError } from '@salesforce/core';
@@ -89,7 +89,7 @@ export abstract class DataCommand extends SfdxCommand {
   }
 
   public async throwIfFileDoesntExist(path: string): Promise<void> {
-    if (!(await fs.promises.stat(path))) {
+    if (!(await fse.pathExists(path))) {
       throw new SfError(messages.getMessage('PathDoesNotExist', [path]), 'PathDoesNotExist');
     }
   }

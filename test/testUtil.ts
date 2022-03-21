@@ -7,10 +7,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Batch, BatchInfo } from 'jsforce/lib/api/bulk';
-
 import { QueryResult, SaveResult, UpsertResult, UserInfo } from 'jsforce';
 import { Connection } from '@salesforce/core';
-
 import { getArray, getString } from '@salesforce/ts-types';
 import Parser = require('fast-xml-parser');
 import EventEmitter = NodeJS.EventEmitter;

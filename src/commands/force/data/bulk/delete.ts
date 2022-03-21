@@ -55,11 +55,10 @@ export default class Delete extends DataCommand {
       result = await batcher.createAndExecuteBatches(job, csvRecords, this.flags.sobjecttype, this.flags.wait);
 
       this.ux.stopSpinner();
+      return result;
     } catch (e) {
       this.ux.stopSpinner('error');
       throw SfError.wrap(e as Error);
     }
-
-    return result;
   }
 }

@@ -7,43 +7,43 @@
 
 import * as fs from 'fs';
 import { expect, test } from '@salesforce/command/lib/test';
-import { AnyJson } from '@salesforce/ts-types';
+import { AnyJson, ensureJsonMap, ensureString, isString } from '@salesforce/ts-types';
 
 const query = 'SELECT Id, Name from Account';
 
 // Query response used by the connection stub.
-// const queryResponse = {
-//   totalSize: 1,
-//   done: true,
-//   records: [
-//     {
-//       attributes: {
-//         type: 'Account',
-//         url: '/services/data/v51.0/sobjects/Account/0019A00000GNvvAQAT',
-//       },
-//       Id: '0019A00000GNvvAQAT',
-//       Name: 'Sample Account for Entitlements',
-//     },
-//   ],
-// };
+const queryResponse = {
+  totalSize: 1,
+  done: true,
+  records: [
+    {
+      attributes: {
+        type: 'Account',
+        url: '/services/data/v51.0/sobjects/Account/0019A00000GNvvAQAT',
+      },
+      Id: '0019A00000GNvvAQAT',
+      Name: 'Sample Account for Entitlements',
+    },
+  ],
+};
 
 // Abbreviated response of Account SObject metadata used by the connection stub.
-// const ACCOUNT_META = {
-//   name: 'Account',
-//   childRelationships: [
-//     { childSObject: 'Case', field: 'AccountId', relationshipName: 'Cases' },
-//     {
-//       childSObject: 'Contact',
-//       field: 'AccountId',
-//       relationshipName: 'Contacts',
-//     },
-//   ],
-//   fields: [
-//     { name: 'Name', referenceTo: [], type: 'string' },
-//     { name: 'Type', referenceTo: [], type: 'picklist' },
-//     { name: 'Industry', referenceTo: [], type: 'picklist' },
-//   ],
-// };
+const ACCOUNT_META = {
+  name: 'Account',
+  childRelationships: [
+    { childSObject: 'Case', field: 'AccountId', relationshipName: 'Cases' },
+    {
+      childSObject: 'Contact',
+      field: 'AccountId',
+      relationshipName: 'Contacts',
+    },
+  ],
+  fields: [
+    { name: 'Name', referenceTo: [], type: 'string' },
+    { name: 'Type', referenceTo: [], type: 'picklist' },
+    { name: 'Industry', referenceTo: [], type: 'picklist' },
+  ],
+};
 
 interface ExportResult {
   status: string;
@@ -54,18 +54,18 @@ interface ExportResult {
 describe('force:data:tree:export', () => {
   test
     .stub(fs, 'writeFileSync', () => null)
-
-    // .withConnectionRequest((request) => {
-    //   if (isString(request) && request.includes('sobjects/Account/describe')) {
-    //     return Promise.resolve(ACCOUNT_META);
-    //   } else {
-    //     const requestMap = ensureJsonMap(request);
-    //     if (ensureString(requestMap.url).includes('query?q=select')) {
-    //       return Promise.resolve(queryResponse);
-    //     }
-    //   }
-    //   return Promise.resolve({});
-    // })
+    .withOrg({ username: 'test@org.com' }, true)
+    .withConnectionRequest((request) => {
+      if (isString(request) && request.includes('sobjects/Account/describe')) {
+        return Promise.resolve(ACCOUNT_META);
+      } else {
+        const requestMap = ensureJsonMap(request);
+        if (ensureString(requestMap.url).includes('query?q=select')) {
+          return Promise.resolve(queryResponse);
+        }
+      }
+      return Promise.resolve({});
+    })
     .stdout()
     .command(['force:data:tree:export', '--targetusername', 'test@org.com', '--query', query, '--json'])
     .it('returns Account record', (ctx) => {
@@ -85,7 +85,7 @@ describe('force:data:tree:export', () => {
     });
 
   test
-
+    .withOrg({ username: 'test@org.com' }, true)
     .stdout()
     .command(['force:data:tree:export', '--targetusername', 'test@org.com', '--json'])
     .it('should throw an error if --query is not provided', (ctx) => {

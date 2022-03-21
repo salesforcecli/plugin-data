@@ -59,7 +59,7 @@ export default class Upsert extends DataCommand {
 
     const concurrencyMode = this.flags.serial ? 'Serial' : 'Parallel';
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore // TODO: come back to
+    // @ts-ignore
     const job: Job = conn.bulk.createJob(this.flags.sobjecttype, 'upsert', {
       extIdField: this.flags.externalid as string,
       concurrencyMode,

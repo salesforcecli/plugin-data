@@ -376,7 +376,7 @@ describe('Export API', () => {
   it('should export query results to a file when query param is a file that contains a soql query', async () => {
     sandbox.stub(fs, 'readFileSync').callsFake(() => 'select stuff');
     // @ts-ignore
-    fsCore.existsSync['returns'](true);
+    fs.existsSync['returns'](true);
     await exportApi.export({ query: 'queryInaFile.txt' });
     const writeFileArgs = writeStub.args;
     const filenameArg = writeFileArgs[0][0];

@@ -149,7 +149,11 @@ export class ImportApi {
             // override resolve references, if set
             resolveRefs = (def.resolveRefs == null ? globalResolveRefs : def.resolveRefs) as boolean;
           } else {
-            throw new SfError('file definition format unknown.', 'InvalidDataImportPlan');
+            const e = new SfError('file definition format unknown.', 'InvalidDataImportPlan');
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore override readonly .name field
+            e.name = 'InvalidDateImportPlan';
+            throw e;
           }
 
           filepath = path.resolve(importPlanRootPath, filepath);
@@ -210,14 +214,18 @@ export class ImportApi {
     // --sobjecttreefiles option is required when --plan option is unset
     if (!sobjectTreeFiles && !plan) {
       const err = messages.createError('dataFileNotProvided');
-      err.toObject().name = INVALID_DATA_IMPORT_ERR_NAME;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore override readonly .name field
+      err.name = INVALID_DATA_IMPORT_ERR_NAME;
       throw err;
     }
 
     // Prevent both --sobjecttreefiles and --plan option from being set
     if (sobjectTreeFiles && plan) {
       const err = messages.createError('tooManyFiles');
-      err.toObject().name = INVALID_DATA_IMPORT_ERR_NAME;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore override readonly .name field
+      err.name = INVALID_DATA_IMPORT_ERR_NAME;
       throw err;
     }
 
@@ -227,7 +235,9 @@ export class ImportApi {
         fs.statSync(planPath);
       } catch (e) {
         const err = messages.createError('dataFileNotFound', [planPath]);
-        err.toObject().name = INVALID_DATA_IMPORT_ERR_NAME;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore override readonly .name field
+        err.name = INVALID_DATA_IMPORT_ERR_NAME;
         throw err;
       }
 
@@ -238,7 +248,9 @@ export class ImportApi {
         const error = err as Error;
         if (error.name === 'ValidationSchemaFieldErrors') {
           const e = messages.createError('dataPlanValidationError', [planPath, error.message]);
-          e.toObject().name = INVALID_DATA_IMPORT_ERR_NAME;
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore override readonly .name field
+          e.name = INVALID_DATA_IMPORT_ERR_NAME;
           throw e;
         }
         throw SfError.wrap(error);
@@ -298,7 +310,9 @@ export class ImportApi {
       fs.statSync(filepath);
     } catch (e) {
       const err = messages.createError('dataFileNotFound', [filepath]);
-      err.toObject().name = INVALID_DATA_IMPORT_ERR_NAME;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore override readonly .name field
+      err.name = INVALID_DATA_IMPORT_ERR_NAME;
       throw err;
     }
 
@@ -316,7 +330,9 @@ export class ImportApi {
     if (!tmpContentType) {
       if (!contentType) {
         const err = messages.createError('unknownContentType', [filepath]);
-        err.toObject().name = INVALID_DATA_IMPORT_ERR_NAME;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore override readonly .name field
+        err.name = INVALID_DATA_IMPORT_ERR_NAME;
         throw err;
       } else if (contentType.toUpperCase() === 'JSON') {
         tmpContentType = jsonContentType;
@@ -327,7 +343,9 @@ export class ImportApi {
         meta.refRegex = xmlRefRegex;
       } else {
         const err = messages.createError('dataFileUnsupported', [contentType]);
-        err.toObject().name = INVALID_DATA_IMPORT_ERR_NAME;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore override readonly .name field
+        err.name = INVALID_DATA_IMPORT_ERR_NAME;
         throw err;
       }
     }

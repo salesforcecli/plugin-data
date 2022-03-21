@@ -310,7 +310,7 @@ describe('ImportApi', () => {
       }
     });
 
-    it('should throw an InvalidDataImport error with unknown data file extention and unsupported content-type', () => {
+    it('should throw an InvalidDataImport error with unknown data file extension and unsupported content-type', () => {
       const filepath = path.join(__dirname, 'test-files', 'contacts-only-2.sdx');
       try {
         // @ts-ignore
@@ -426,7 +426,7 @@ describe('ImportApi', () => {
                     "Broker__c": "@CustomObj__cRef20"
                 }]
             }`;
-      sandbox.stub(fs, 'readFile').resolves(fileContents);
+      sandbox.stub(fs.promises, 'readFile').resolves(fileContents);
       resolveRefs = true;
       filepath = '';
       refMap.set('customobj__cref1', 'custom_id1');
