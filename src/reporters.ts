@@ -120,7 +120,13 @@ export class HumanReporter extends QueryReporter {
     columns
       .map((field: Optional<string>) => field as string)
       .filter((field): string => field)
-      .map((field: string) => (formattedColumns[field] = { header: field.toUpperCase() }));
+      .map(
+        (field: string) =>
+          (formattedColumns[field] = {
+            header: field.toUpperCase(),
+            get: (row): string => get(row, field) as string,
+          })
+      );
     return formattedColumns;
   }
 
