@@ -45,8 +45,8 @@ export default class Create extends DataCommand {
   public async run(): Promise<RecordResult> {
     this.ux.startSpinner(`Creating record for ${this.flags.sobjecttype as string}`);
 
-    const sobject = this.getConnection().sobject(this.flags.sobjecttype);
-    const values = this.stringToDictionary(this.flags.values);
+    const sobject = this.getConnection().sobject(this.flags.sobjecttype as string);
+    const values = this.stringToDictionary(this.flags.values as string);
     const result = this.normalize<RecordResult>(await sobject.insert(values));
     if (result.success) {
       this.ux.log(messages.getMessage('createSuccess', [result.id || 'unknown id']));

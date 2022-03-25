@@ -36,7 +36,7 @@ export default class Status extends DataCommand {
     const batcher = new Batcher(conn, this.ux);
     if (this.flags.jobid && this.flags.batchid) {
       // view batch status
-      const job: Job = conn.bulk.job(this.flags.jobid);
+      const job: Job = conn.bulk.job(this.flags.jobid as string);
       let found = false;
 
       const batches: BatchInfo[] = await job.list();
@@ -57,7 +57,7 @@ export default class Status extends DataCommand {
       return batches;
     } else {
       // view job status
-      const jobStatus = await batcher.fetchAndDisplayJobStatus(this.flags.jobid);
+      const jobStatus = await batcher.fetchAndDisplayJobStatus(this.flags.jobid as string);
       this.ux.stopSpinner();
       return jobStatus;
     }

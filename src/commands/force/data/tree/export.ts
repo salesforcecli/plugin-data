@@ -11,6 +11,7 @@ import { SfdxCommand } from '@salesforce/command';
 import { flags, FlagsConfig } from '@salesforce/command';
 import { Messages, Org } from '@salesforce/core';
 import { ExportApi, ExportConfig } from '../../../../api/data/tree/exportApi';
+import { DataPlanPart, SObjectTreeFileContents } from '../../../../dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.export');
@@ -39,7 +40,7 @@ export default class Export extends SfdxCommand {
     }),
   };
 
-  public async run(): Promise<unknown> {
+  public async run(): Promise<DataPlanPart[] | SObjectTreeFileContents> {
     const { query, plan, prefix, outputdir: outputDir } = this.flags;
     const exportApi = new ExportApi(this.org as Org, this.ux);
     const exportConfig: ExportConfig = {

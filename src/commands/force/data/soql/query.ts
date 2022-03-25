@@ -20,7 +20,7 @@ import {
 } from '@salesforce/ts-types';
 import { Tooling } from '@salesforce/core/lib/connection';
 import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../../../reporters';
-import { Field, FieldType, SoqlQueryResult } from '../../../../dataSoqlQueryTypes';
+import { BasicRecord, Field, FieldType, SoqlQueryResult } from '../../../../dataSoqlQueryTypes';
 import { DataCommand } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -37,7 +37,7 @@ export class SoqlQuery {
     let columns: Field[] = [];
     logger.debug('running query');
 
-    const result = await connection.autoFetchQuery(query, { autoFetch: true, maxFetch: 50000 });
+    const result = await connection.autoFetchQuery<BasicRecord>(query, { autoFetch: true, maxFetch: 50000 });
     logger.debug(`Query complete with ${result.totalSize} records returned`);
     if (result.totalSize) {
       logger.debug('fetching columns for query');
@@ -183,7 +183,7 @@ export class DataSoqlQueryCommand extends DataCommand {
       if (this.flags.resultformat !== 'json') this.ux.startSpinner(messages.getMessage('queryRunningMessage'));
       const query = new SoqlQuery();
       const conn = this.getConnection() as Connection | Tooling;
-      const queryResult: SoqlQueryResult = await query.runSoqlQuery(conn, this.flags.query, this.logger);
+      const queryResult: SoqlQueryResult = await query.runSoqlQuery(conn, this.flags.query as string, this.logger);
       const results = {
         ...queryResult,
       };

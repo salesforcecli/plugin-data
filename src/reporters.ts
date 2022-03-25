@@ -8,8 +8,8 @@ import { EOL } from 'os';
 import { Logger, Messages } from '@salesforce/core';
 import { UX } from '@salesforce/command';
 import * as chalk from 'chalk';
-import { get, getArray, getNumber, isString, Optional } from '@salesforce/ts-types';
-import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes';
+import { get, getNumber, isString, Optional } from '@salesforce/ts-types';
+import { BasicRecord, Field, FieldType, hasNestedRecords, SoqlQueryResult } from './dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
@@ -98,7 +98,7 @@ export class HumanReporter extends QueryReporter {
     return { attributeNames, children, aggregates };
   }
 
-  public soqlQuery(columns: Array<Optional<string>>, records: unknown[], totalCount: number): void {
+  public soqlQuery(columns: Array<Optional<string>>, records: BasicRecord[], totalCount: number): void {
     this.prepNullValues(records);
     this.ux.table(records, { columns: this.prepColumns(columns) });
     this.log(chalk.bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
@@ -131,8 +131,7 @@ export class HumanReporter extends QueryReporter {
       );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public massageRows(queryResults: unknown[], children: string[], aggregates: Field[]): any {
+  public massageRows(queryResults: BasicRecord[], children: string[], aggregates: Field[]): BasicRecord[] {
     // some fields will return a JSON object that isn't accessible via the query (SELECT Metadata FROM RemoteProxy)
     // some will return a JSON that IS accessible via the query (SELECT owner.Profile.Name FROM Lead)
     // querying (SELECT Metadata.isActive FROM RemoteProxy) throws a SOQL validation error, so we have to display the entire Metadata object
@@ -154,7 +153,9 @@ export class HumanReporter extends QueryReporter {
     // There are subqueries or aggregates. Massage the data.
     let qr;
     if (children.length > 0 || aggregates.length > 0) {
-      qr = queryResults.reduce((newResults: unknown[], result) => {
+      qr = queryResults.reduce((newResults, result) => {
+        newResults.push(result);
+
         // Aggregates are soql functions that aggregate data, like "SELECT avg(total)" and
         // are returned in the data as exprX. Aggregates can have aliases, like "avg(total) totalAverage"
         // and are returned in the data as the alias.
@@ -162,40 +163,36 @@ export class HumanReporter extends QueryReporter {
           for (let i = 0; i < aggregates.length; i++) {
             const aggregate = aggregates[i];
             if (!aggregate.alias) {
-              Reflect.set(result as never, aggregate.name, Reflect.get(result as never, `expr${i}`));
+              Reflect.set(result, aggregate.name, Reflect.get(result, `expr${i}`));
             }
           }
         }
 
         if (children.length > 0) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          const childrenRows = Object.assign({});
+          const childrenRows: Record<string, unknown> = {};
           children.forEach((child) => {
-            const aChild = get(result as never, child);
+            const aChild = result[child];
             Reflect.set(childrenRows, child, aChild);
-            Reflect.deleteProperty(result as never, child);
+            Reflect.deleteProperty(result, child);
           });
 
-          Reflect.ownKeys(childrenRows).forEach((child) => {
-            const childO = get(childrenRows, child as string);
-            if (childO) {
-              const childRecords = getArray(childO, 'records', []);
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              childRecords.forEach((record: unknown) => {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                Object.entries(record as never).forEach(([key, value]) => {
-                  // merge subqueries with the "parent" so they are on the same row
-                  Reflect.defineProperty(result as Record<string, unknown>, `${child.toString()}.${key}`, {
-                    value: value ? value : chalk.bold('null'),
-                  });
+          Object.keys(childrenRows).forEach((child) => {
+            const childObject = childrenRows[child];
+            if (childObject && hasNestedRecords<BasicRecord>(childObject)) {
+              childObject.records.forEach((childRecord) => {
+                const newRecord: Record<string, unknown> = {};
+
+                Object.entries(childRecord).forEach(([key, value]) => {
+                  Reflect.defineProperty(newRecord, `${child.toString()}.${key}`, { value });
                 });
+                // I guarantee that one of the keys will be the `attributes`
+                newResults.push(newRecord as BasicRecord);
               });
             }
           });
         }
-        newResults.push(result);
         return newResults;
-      }, [] as unknown[]);
+      }, [] as BasicRecord[]);
     }
     return qr ?? queryResults;
   }
@@ -281,7 +278,7 @@ export class CsvReporter extends QueryReporter {
       // Get max lengths by iterating over the records once
       this.data.result.records.forEach((result) => {
         [...typeLengths.keys()].forEach((key) => {
-          const record = get(result as never, key);
+          const record = result[key];
           const totalSize = getNumber(record, 'totalSize');
           if (!!totalSize && totalSize > (typeLengths.get(key) ?? 0)) {
             typeLengths.set(key, totalSize);
