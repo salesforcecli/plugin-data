@@ -2242,4 +2242,172 @@ export const soqlQueryExemplars = {
       },
     },
   },
+  queryWithNestedObject: {
+    soqlQueryResult: {
+      query: 'select id, Metadata from RemoteProxy',
+      columns: [
+        {
+          fieldType: 0,
+          name: 'Id',
+        },
+        {
+          fieldType: 0,
+          name: 'Metadata',
+        },
+      ],
+      result: {
+        done: true,
+        totalSize: 3,
+        records: [
+          {
+            attributes: {
+              type: 'RemoteProxy',
+              url: '/services/data/v53.0/tooling/sobjects/RemoteProxy/0rpJ0000000SIabIAG',
+            },
+            Id: '0rpJ0000000SIabIAG',
+            Metadata: {
+              disableProtocolSecurity: false,
+              isActive: true,
+              url: 'http://www.apexdevnet.com',
+              urls: null,
+              description: null,
+            },
+          },
+          {
+            attributes: {
+              type: 'RemoteProxy',
+              url: '/services/data/v53.0/tooling/sobjects/RemoteProxy/0rpJ0000000SJdBIAW',
+            },
+            Id: '0rpJ0000000SJdBIAW',
+            Metadata: {
+              disableProtocolSecurity: false,
+              isActive: true,
+              url: 'https://nominatim.openstreetmap.org',
+              urls: null,
+              description: null,
+            },
+          },
+          {
+            attributes: {
+              type: 'RemoteProxy',
+              url: '/services/data/v53.0/tooling/sobjects/RemoteProxy/0rpJ0000000SLlVIAW',
+            },
+            Id: '0rpJ0000000SLlVIAW',
+            Metadata: {
+              disableProtocolSecurity: false,
+              isActive: false,
+              url: 'https://www.google.com',
+              urls: null,
+              description: null,
+            },
+          },
+        ],
+      },
+    },
+  },
+  complexSubQuery: {
+    soqlQueryResult: {
+      query:
+        'SELECT Amount, Id, Name,StageName, CloseDate, (SELECT Id,  ListPrice, PriceBookEntry.UnitPrice, PricebookEntry.Name, PricebookEntry.Id, PricebookEntry.product2.Family FROM OpportunityLineItems) FROM Opportunity',
+      columns: [
+        {
+          fieldType: 0,
+          name: 'Amount',
+        },
+        {
+          fieldType: 0,
+          name: 'Id',
+        },
+        {
+          fieldType: 0,
+          name: 'Name',
+        },
+        {
+          fieldType: 0,
+          name: 'StageName',
+        },
+        {
+          fieldType: 0,
+          name: 'CloseDate',
+        },
+        {
+          fieldType: 1,
+          name: 'OpportunityLineItems',
+          fields: [
+            {
+              fieldType: 0,
+              name: 'Id',
+            },
+            {
+              fieldType: 0,
+              name: 'ListPrice',
+            },
+            {
+              fieldType: 0,
+              name: 'PricebookEntry.UnitPrice',
+            },
+            {
+              fieldType: 0,
+              name: 'PricebookEntry.Name',
+            },
+            {
+              fieldType: 0,
+              name: 'PricebookEntry.Id',
+            },
+            {
+              fieldType: 0,
+              name: 'PricebookEntry.Product2.Family',
+            },
+          ],
+        },
+      ],
+      result: {
+        done: true,
+        totalSize: 1,
+        records: [
+          {
+            attributes: {
+              type: 'Opportunity',
+              url: '/services/data/v53.0/sobjects/Opportunity/0063F00000RdvMKQAZ',
+            },
+            Amount: 1300,
+            Id: '0063F00000RdvMKQAZ',
+            Name: 'My Opportunity',
+            StageName: 'Prospecting',
+            CloseDate: '2022-02-01',
+            OpportunityLineItems: {
+              totalSize: 1,
+              done: true,
+              records: [
+                {
+                  attributes: {
+                    type: 'OpportunityLineItem',
+                    url: '/services/data/v53.0/sobjects/OpportunityLineItem/00k3F000007kBoDQAU',
+                  },
+                  Id: '00k3F000007kBoDQAU',
+                  ListPrice: 1300,
+                  PricebookEntry: {
+                    attributes: {
+                      type: 'PricebookEntry',
+                      url: '/services/data/v53.0/sobjects/PricebookEntry/01u3F00000AwCfuQAF',
+                    },
+                    UnitPrice: 1300,
+                    Name: 'MyProduct',
+                    Id: '01u3F00000AwCfuQAF',
+                    Product2: {
+                      attributes: {
+                        type: 'Product2',
+                        url: '/services/data/v53.0/sobjects/Product2/01t3F00000AM2qaQAD',
+                      },
+                      Family: 'None',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  },
 };

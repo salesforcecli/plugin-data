@@ -155,12 +155,35 @@ describe('data:soql:query command', () => {
       );
       expect(queryResult).to.match(/Total number of records retrieved: 1\./g);
     });
+    it('should handle count()', () => {
+      const queryResult = execCmd('force:data:soql:query -q "SELECT Count() from User"', {
+        ensureExitCode: 0,
+      }).shellOutput as string;
+
+      expect(queryResult).to.match(/Total number of records retrieved: [1-9]\d*\./g);
+    });
+
     it('should return successfully when querying ApexClass column SymbolTable using tooling API', () => {
       runQuery('SELECT Id, Name, SymbolTable from ApexClass', {
         ensureExitCode: 0,
         json: false,
         toolingApi: true,
       });
+    });
+
+    it('should print JSON output correctly', () => {
+      const result = runQuery('select id, isActive, Metadata from RemoteProxy', {
+        ensureExitCode: 0,
+        json: false,
+        toolingApi: true,
+      });
+      expect(result).to.not.include('[object Object]');
+      // the Metadata object parsed correctly
+      expect(result).to.include('disableProtocolSecurity');
+      expect(result).to.include('isActive');
+      expect(result).to.include('url');
+      expect(result).to.include('urls');
+      expect(result).to.include('description');
     });
   });
 });

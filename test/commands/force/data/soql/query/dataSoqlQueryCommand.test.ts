@@ -8,12 +8,11 @@
 import { expect, test } from '@salesforce/command/lib/test';
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import sinon = require('sinon');
 import { SinonSandbox } from 'sinon';
+import { describe } from 'mocha';
+import sinon = require('sinon');
 import { SoqlQuery } from '../../../../../../src/commands/force/data/soql/query';
 import { soqlQueryExemplars } from '../../../../../test-files/soqlQuery.exemplars';
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 chai.use(chaiAsPromised);
 
@@ -103,8 +102,50 @@ describe('Execute a SOQL statement', function (): void {
           sinon.assert.calledOnce(soqlQuerySpy);
           // test for expected snippet in output
           const stdout = ctx.stdout;
-          expect(/.*?United Oil & Gas, UK.*?\n.*?James.*?/.test(stdout)).to.be.true;
+          expect(/.*?United Oil & Gas, UK.*?James.*?/.test(stdout)).to.be.true;
           expect(ctx.stdout).to.include('records retrieved: 50');
+        });
+    });
+
+    describe('human readable output for complex subqueries', () => {
+      beforeEach(() => {
+        soqlQuerySpy = sandbox
+          .stub(SoqlQuery.prototype, 'runSoqlQuery')
+          .callsFake(() => Promise.resolve(soqlQueryExemplars.complexSubQuery.soqlQueryResult));
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      test
+        .withOrg({ username: 'test@org.com' }, true)
+        .stdout()
+        .stderr()
+        .command([
+          QUERY_COMMAND,
+          '--targetusername',
+          'test@org.com',
+          '--query',
+          'SELECT Amount, Id, Name,StageName, CloseDate, (SELECT Id,  ListPrice, PriceBookEntry.UnitPrice, PricebookEntry.Name, PricebookEntry.Id, PricebookEntry.product2.Family FROM OpportunityLineItems) FROM Opportunity',
+        ])
+        .it('should have human results for a complex subquery', (ctx) => {
+          sinon.assert.calledOnce(soqlQuerySpy);
+          // test for expected snippet in output
+          const stdout = ctx.stdout;
+          // properly expanded columns from query
+          expect(
+            /.*?AMOUNT.*?ID.*?OPPORTUNITYLINEITEMS.ID.*?OPPORTUNITYLINEITEMS.PRICEBOOKENTRY.PRODUCT2.FAMILY.*?/.test(
+              stdout
+            )
+          ).to.be.true;
+          // was able to parse the data for each column
+          expect(
+            /.*?1300.*?0063F00000RdvMKQAZ.*?My Opportunity.*?00k3F000007kBoDQAU.*?MyProduct.*?01u3F00000AwCfuQAF.*?/.test(
+              stdout
+            )
+          ).to.be.true;
+          expect(ctx.stdout).to.include('records retrieved: 1');
         });
     });
     describe('reporters produce the correct aggregate query', () => {

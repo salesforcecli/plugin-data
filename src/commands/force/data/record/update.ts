@@ -80,6 +80,7 @@ export default class Update extends DataCommand {
         throw new SfdxError(
           messages.getMessage('updateFailureWithFields', [
             Reflect.get(error, 'errorCode'),
+            Reflect.get(error, 'message'),
             Reflect.get(error, 'fields'),
           ])
         );

@@ -7,8 +7,8 @@
 
 import { SfdxCommand } from '@salesforce/command';
 import { AnyJson, Dictionary, get, Nullable } from '@salesforce/ts-types';
-import { fs, Messages, SfdxError, Org } from '@salesforce/core';
-import { BaseConnection, ErrorResult, Record, SObject } from 'jsforce';
+import { fs, Messages, Org, SfdxError } from '@salesforce/core';
+import { BaseConnection, ErrorResult, Record as jsforceRecord, SObject } from 'jsforce';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore because jsforce doesn't export http-api
 import * as HttpApi from 'jsforce/lib/http-api';
@@ -122,7 +122,7 @@ export abstract class DataCommand extends SfdxCommand {
     return connection;
   }
 
-  public async query(sobject: SObject<unknown>, where: string): Promise<Record<unknown>> {
+  public async query(sobject: SObject<unknown>, where: string): Promise<jsforceRecord<unknown>> {
     const queryObject = this.stringToDictionary(where);
     const records = await sobject.find(queryObject, 'id');
     if (!records || records.length === 0) {
@@ -136,10 +136,10 @@ export abstract class DataCommand extends SfdxCommand {
       );
     }
 
-    return this.normalize<Record<unknown>>(records);
+    return this.normalize<jsforceRecord<unknown>>(records);
   }
 
-  protected stringToDictionary(str: string): Dictionary<string | boolean> {
+  protected stringToDictionary(str: string): Dictionary<string | boolean | Record<string, unknown>> {
     const keyValuePairs = this.parseKeyValueSequence(str);
     return this.transformKeyValueSequence(keyValuePairs);
   }
@@ -171,8 +171,8 @@ export abstract class DataCommand extends SfdxCommand {
    *
    * @param [keyValuePairs] - The list of key=value pair strings.
    */
-  private transformKeyValueSequence(keyValuePairs: string[]): Dictionary<string | boolean> {
-    const constructedObject: Dictionary<string | boolean> = {};
+  private transformKeyValueSequence(keyValuePairs: string[]): Dictionary<string | boolean | Record<string, unknown>> {
+    const constructedObject: Dictionary<string | boolean | Record<string, unknown>> = {};
 
     keyValuePairs.forEach((pair) => {
       // Look for the *first* '=' and splits there, ignores any subsequent '=' for this pair
@@ -181,7 +181,16 @@ export abstract class DataCommand extends SfdxCommand {
         throw new Error(messages.getMessage('TextUtilMalformedKeyValuePair', [pair]));
       } else {
         const key = pair.substr(0, eqPosition);
-        constructedObject[key] = this.convertToBooleanIfApplicable(pair.substr(eqPosition + 1));
+        if (pair.includes('{') && pair.includes('}')) {
+          try {
+            constructedObject[key] = JSON.parse(pair.substr(eqPosition + 1)) as Record<string, unknown>;
+          } catch {
+            // the data contained { and }, but wasn't valid JSON, default to parsing as-is
+            constructedObject[key] = this.convertToBooleanIfApplicable(pair.substr(eqPosition + 1));
+          }
+        } else {
+          constructedObject[key] = this.convertToBooleanIfApplicable(pair.substr(eqPosition + 1));
+        }
       }
     });
 

@@ -9,7 +9,7 @@ import { Logger, Messages } from '@salesforce/core';
 import { UX } from '@salesforce/command';
 import * as chalk from 'chalk';
 import { get, getNumber, isString, Optional } from '@salesforce/ts-types';
-import { SoqlQueryResult, Field, FieldType, BasicRecord, hasNestedRecords } from './dataSoqlQueryTypes';
+import { BasicRecord, Field, FieldType, hasNestedRecords, SoqlQueryResult } from './dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
@@ -57,7 +57,8 @@ export class HumanReporter extends QueryReporter {
 
   public display(): void {
     const { attributeNames, children, aggregates } = this.parseFields();
-    const totalCount = this.data.result.records.length;
+    // in case of count() there are no records, but there is a totalSize
+    const totalCount = this.data.result.records.length || this.data.result.totalSize;
     this.soqlQuery(attributeNames, this.massageRows(this.data.result.records, children, aggregates), totalCount);
   }
 
@@ -131,6 +132,24 @@ export class HumanReporter extends QueryReporter {
   }
 
   public massageRows(queryResults: BasicRecord[], children: string[], aggregates: Field[]): BasicRecord[] {
+    // some fields will return a JSON object that isn't accessible via the query (SELECT Metadata FROM RemoteProxy)
+    // some will return a JSON that IS accessible via the query (SELECT owner.Profile.Name FROM Lead)
+    // querying (SELECT Metadata.isActive FROM RemoteProxy) throws a SOQL validation error, so we have to display the entire Metadata object
+    queryResults.map((qr) => {
+      const result = qr as Record<string, unknown>;
+      this.data.columns.forEach((col) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const entry = Reflect.get(result, col.name);
+        if (typeof entry === 'object' && col.fieldType === FieldType.field) {
+          Reflect.set(result, col.name, JSON.stringify(entry, null, 2));
+        } else if (typeof entry === 'object' && col.fields?.length && entry) {
+          col.fields.forEach((field) => {
+            Reflect.set(result, `${col.name}.${field.name}`, get(result, `${col.name}.records[0].${field.name}`));
+          });
+        }
+      });
+    });
+
     // There are subqueries or aggregates. Massage the data.
     let qr;
     if (children.length > 0 || aggregates.length > 0) {
@@ -162,6 +181,7 @@ export class HumanReporter extends QueryReporter {
             if (childObject && hasNestedRecords<BasicRecord>(childObject)) {
               childObject.records.forEach((childRecord) => {
                 const newRecord: Record<string, unknown> = {};
+
                 Object.entries(childRecord).forEach(([key, value]) => {
                   Reflect.defineProperty(newRecord, `${child.toString()}.${key}`, { value });
                 });
@@ -218,6 +238,8 @@ export class CsvReporter extends QueryReporter {
         const value = get(row, name);
         if (isString(value)) {
           return this.escape(value);
+        } else if (typeof value === 'object') {
+          return this.escape(JSON.stringify(value));
         }
         return value;
       });
