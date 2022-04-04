@@ -81,12 +81,12 @@
     "test:command-reference": "./bin/run commandreference:generate --erroronwarnings",
     "test:deprecation-policy": "./bin/run snapshot:compare",
     "test:nuts": "nyc mocha \"./test/**/*.nut.ts\" --slow 4500 --timeout 600000 --parallel",
-    "version": "oclif-dev readme"
+    "version": "oclif readme"
   },
   "dependencies": {
-    "@oclif/core": "^1.6.0",
-    "@salesforce/command": "^5.0.1",
-    "@salesforce/core": "^3.8.0",
+    "@oclif/core": "^1.6.4",
+    "@salesforce/command": "^5.0.4",
+    "@salesforce/core": "^3.11.1",
     "@salesforce/ts-types": "^1.5.20",
     "@types/fs-extra": "^9.0.13",
     "chalk": "^4.1.0",
@@ -95,8 +95,8 @@
     "tslib": "^2"
   },
   "devDependencies": {
-    "@oclif/dev-cli": "^1",
-    "@oclif/plugin-command-snapshot": "^2.1.1",
+    "oclif": "^2.6.3",
+    "@oclif/plugin-command-snapshot": "^3.1.3",
     "@salesforce/cli-plugins-testkit": "^1.4.24",
     "@salesforce/dev-config": "^3.0.1",
     "@salesforce/dev-scripts": "2.0.1",

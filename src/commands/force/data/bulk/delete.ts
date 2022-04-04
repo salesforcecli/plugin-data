@@ -24,18 +24,18 @@ export default class Delete extends DataCommand {
     csvfile: flags.filepath({
       char: 'f',
       description: messages.getMessage('flags.csvfile'),
-      required: true
+      required: true,
     }),
     sobjecttype: flags.string({
       char: 's',
       description: messages.getMessage('flags.sobjecttype'),
-      required: true
+      required: true,
     }),
     wait: flags.minutes({
       char: 'w',
       description: messages.getMessage('flags.wait'),
-      min: 0
-    })
+      min: 0,
+    }),
   };
 
   public async run(): Promise<BulkResult[] | JobInfo[]> {
@@ -47,7 +47,7 @@ export default class Delete extends DataCommand {
       const conn: Connection = this.ensureOrg().getConnection();
       this.ux.startSpinner('Bulk Delete');
 
-      const csvRecords: ReadStream = fs.createReadStream(this.flags.csvfile as string, {encoding: 'utf-8'});
+      const csvRecords: ReadStream = fs.createReadStream(this.flags.csvfile as string, { encoding: 'utf-8' });
       const job: Job = conn.bulk.createJob(this.flags.sobjecttype, 'delete') as unknown as Job;
 
       const batcher: Batcher = new Batcher(conn, this.ux);

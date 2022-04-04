@@ -7,21 +7,10 @@
 
 import * as path from 'path';
 import * as util from 'util';
-
 import * as fs from 'fs';
-import {
-  AnyJson,
-  Dictionary,
-  getNumber,
-  getString,
-  isArray,
-  isObject,
-  isString,
-  JsonCollection,
-  JsonMap,
-} from '@salesforce/ts-types';
+import { AnyJson, Dictionary, getString, JsonMap } from '@salesforce/ts-types';
 import { Logger, Messages, Org, SchemaValidator, SfError } from '@salesforce/core';
-import { sequentialExecute } from './executors';
+import { DataPlanPart, hasNestedRecords, isAttributesElement, SObjectTreeInput } from '../../../dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
@@ -96,12 +85,9 @@ export class ImportApi {
   private responseRefs: ResponseRefs[] = [];
   private sobjectUrlMap = new Map<string, string>();
   private schemaValidator: SchemaValidator;
-
-  private sobjectTypes: Dictionary = {} as Dictionary;
+  private sobjectTypes: Record<string, string> = {};
   private config!: ImportConfig;
-  // A JsonArray but we need to provide a better type to work with it properly.
-  private importPlanConfig: any;
-
+  private importPlanConfig: DataPlanPart[] = [];
 
   public constructor(private readonly org: Org) {
     this.logger = Logger.childFromRoot(this.constructor.name);
@@ -115,12 +101,11 @@ export class ImportApi {
    */
   public async import(config: ImportConfig): Promise<ImportResults> {
     const importResults: ImportResults = {};
-    const instanceUrl = this.org.getField(Org.Fields.INSTANCE_URL) as string;
+    const instanceUrl = this.org.getField<string>(Org.Fields.INSTANCE_URL);
 
     this.config = await this.validate(config);
 
     const refMap = new Map<string, string>();
-
 
     const { contentType, plan, sobjectTreeFiles = [] } = this.config;
 
@@ -231,20 +216,12 @@ export class ImportApi {
 
     // --sobjecttreefiles option is required when --plan option is unset
     if (!sobjectTreeFiles && !plan) {
-      const err = messages.createError('dataFileNotProvided');
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore override readonly .name field
-      err.name = INVALID_DATA_IMPORT_ERR_NAME;
-      throw err;
+      throw new SfError(messages.getMessage('dataFileNotProvided'), INVALID_DATA_IMPORT_ERR_NAME);
     }
 
     // Prevent both --sobjecttreefiles and --plan option from being set
     if (sobjectTreeFiles && plan) {
-      const err = messages.createError('tooManyFiles');
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore override readonly .name field
-      err.name = INVALID_DATA_IMPORT_ERR_NAME;
-      throw err;
+      throw new SfError(messages.getMessage('tooManyFiles'), INVALID_DATA_IMPORT_ERR_NAME);
     }
 
     if (plan) {
@@ -252,11 +229,7 @@ export class ImportApi {
       try {
         fs.statSync(planPath);
       } catch (e) {
-        const err = messages.createError('dataFileNotFound', [planPath]);
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore override readonly .name field
-        err.name = INVALID_DATA_IMPORT_ERR_NAME;
-        throw err;
+        throw new SfError(messages.getMessage('dataFileNotFound', [planPath]), INVALID_DATA_IMPORT_ERR_NAME);
       }
 
       this.importPlanConfig = JSON.parse(fs.readFileSync(planPath, 'utf8')) as DataPlanPart[];
@@ -265,11 +238,10 @@ export class ImportApi {
       } catch (err) {
         const error = err as Error;
         if (error.name === 'ValidationSchemaFieldErrors') {
-          const e = messages.createError('dataPlanValidationError', [planPath, error.message]);
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore override readonly .name field
-          e.name = INVALID_DATA_IMPORT_ERR_NAME;
-          throw e;
+          throw new SfError(
+            messages.getMessage('dataPlanValidationError', [planPath, error.message]),
+            INVALID_DATA_IMPORT_ERR_NAME
+          );
         }
         throw SfError.wrap(error);
       }
@@ -321,11 +293,7 @@ export class ImportApi {
     try {
       fs.statSync(filepath);
     } catch (e) {
-      const err = messages.createError('dataFileNotFound', [filepath]);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore override readonly .name field
-      err.name = INVALID_DATA_IMPORT_ERR_NAME;
-      throw err;
+      throw new SfError(messages.getMessage('dataFileNotFound', [filepath]), INVALID_DATA_IMPORT_ERR_NAME);
     }
 
     // determine content type
@@ -341,11 +309,7 @@ export class ImportApi {
     // unable to determine content type from extension, was a global content type provided?
     if (!tmpContentType) {
       if (!contentType) {
-        const err = messages.createError('unknownContentType', [filepath]);
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore override readonly .name field
-        err.name = INVALID_DATA_IMPORT_ERR_NAME;
-        throw err;
+        throw new SfError(messages.getMessage('unknownContentType', [filepath]), INVALID_DATA_IMPORT_ERR_NAME);
       } else if (contentType.toUpperCase() === 'JSON') {
         tmpContentType = jsonContentType;
         meta.isJson = true;
@@ -354,11 +318,7 @@ export class ImportApi {
         tmpContentType = xmlContentType;
         meta.refRegex = xmlRefRegex;
       } else {
-        const err = messages.createError('dataFileUnsupported', [contentType]);
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore override readonly .name field
-        err.name = INVALID_DATA_IMPORT_ERR_NAME;
-        throw err;
+        throw new SfError(messages.getMessage('dataFileUnsupported', [contentType]), INVALID_DATA_IMPORT_ERR_NAME);
       }
     }
 
@@ -505,29 +465,6 @@ export class ImportApi {
     const { isJson, refRegex, headers } = this.getSObjectTreeFileMeta(components.filepath, components.contentType);
 
     this.logger.debug(`Importing SObject Tree data from file ${components.filepath}`);
-<<<<<<< HEAD
-
-    return this.parseSObjectTreeFile(components.filepath, isJson, refRegex, components.resolveRefs, components.refMap)
-      .then(({ contentStr, sobject }) =>
-        this.sendSObjectTreeRequest(contentStr, sobject, components.instanceUrl, headers)
-      )
-      .then((response) =>
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        this.parseSObjectTreeResponse(response, components.filepath, isJson, components.saveRefs, components.refMap)
-      )
-      .catch((error) => {
-        // break the error message string into the variables we want
-        if (error.errorCode === 'INVALID_FIELD') {
-          const field = (error as Error).message.split("'")[1];
-          const object = (error as Error).message.substr(
-            (error as Error).message.lastIndexOf(' ') + 1,
-            error.message.length
-          );
-          throw messages.createError('FlsError', [field, object]);
-        }
-        throw SfError.wrap(error);
-      });
-=======
     try {
       const { contentStr, sobject } = await this.parseSObjectTreeFile(
         components.filepath,
@@ -542,10 +479,9 @@ export class ImportApi {
       if (error instanceof Error && getString(error, 'errorCode') === 'INVALID_FIELD') {
         const field = error.message.split("'")[1];
         const object = error.message.substr(error.message.lastIndexOf(' ') + 1, error.message.length);
-        throw SfdxError.create('@salesforce/plugin-data', 'importApi', 'FlsError', [field, object]);
+        throw messages.createError('FlsError', [field, object]);
       }
-      throw SfdxError.wrap(error as Error);
+      throw SfError.wrap(error as Error);
     }
->>>>>>> main
   }
 }

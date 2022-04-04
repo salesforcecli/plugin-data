@@ -8,7 +8,7 @@ import * as os from 'os';
 import { BatchInfo } from 'jsforce/lib/api/bulk';
 import { JobInfo } from 'jsforce/job';
 import { flags, FlagsConfig } from '@salesforce/command';
-import { Connection, Messages } from '@salesforce/core';
+import { Connection, Messages, SfError } from '@salesforce/core';
 import { Batcher } from '../../../../batcher';
 import { DataCommand } from '../../../../dataCommand';
 
@@ -48,7 +48,7 @@ export default class Status extends DataCommand {
         }
       });
       if (!found) {
-        throw messages.createError('NoBatchFound', [this.flags.batchid, this.flags.jobid]);
+        throw new SfError(messages.getMessage('NoBatchFound', [this.flags.batchid, this.flags.jobid]));
       }
 
       this.ux.stopSpinner();

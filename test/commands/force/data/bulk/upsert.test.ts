@@ -20,11 +20,11 @@ interface UpsertResult {
 
 describe('force:data:bulk:upsert', () => {
   test
-    .withOrg({ username: 'test@org.com' }, true)
     .do(() => {
       stubMethod($$.SANDBOX, fse, 'pathExists').resolves(true);
       stubMethod($$.SANDBOX, fs, 'createReadStream').throws(new SfError('Error'));
     })
+    .withOrg({ username: 'test@org.com' }, true)
     .stdout()
     .command([
       'force:data:bulk:upsert',

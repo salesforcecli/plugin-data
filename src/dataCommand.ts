@@ -107,7 +107,7 @@ export abstract class DataCommand extends SfdxCommand {
    */
   public ensureOrg(): Org {
     if (!this.org) {
-      throw new Error(
+      throw new SfError(
         'This command requires a username. Specify it with the -u parameter or with the "sfdx config:set defaultusername=<username>" command.'
       );
     }

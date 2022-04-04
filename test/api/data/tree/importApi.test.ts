@@ -73,7 +73,7 @@ describe('ImportApi', () => {
 
     it('should throw an InvalidDataImport error when both --sobjecttreefiles and --plan ARE NOT set', async () => {
       try {
-        // @ts-ignore
+        // @ts-ignore private method `validate`
         const rv = await ImportApi.prototype.validate.call(context, config);
 
         // this should never execute but if it does it will cause the test to fail
