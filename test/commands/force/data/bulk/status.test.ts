@@ -6,7 +6,7 @@
  */
 import { $$, expect, test } from '@salesforce/command/lib/test';
 import { stubMethod } from '@salesforce/ts-sinon';
-import { Org } from '../../../../../../sfdx-core';
+import { Org } from '@salesforce/core';
 
 interface StatusResult {
   status: number;

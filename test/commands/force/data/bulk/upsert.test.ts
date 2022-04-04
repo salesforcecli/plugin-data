@@ -4,13 +4,11 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-
 import * as fs from 'fs';
 import * as fse from 'fs-extra';
+import { $$, expect, test } from '@salesforce/command/lib/test';
 import { stubMethod } from '@salesforce/ts-sinon';
-import { expect } from 'chai';
-import { $$, test } from '../../../../../../command/lib/test';
-import { SfError } from '../../../../../../sfdx-core';
+import { SfError } from '@salesforce/core';
 
 interface UpsertResult {
   commandName: string;
