@@ -8,7 +8,6 @@
 import { QueryResult } from 'jsforce';
 import { Optional } from '@salesforce/ts-types';
 
-// eslint-disable-next-line no-shadow
 export enum FieldType {
   field,
   subqueryField,
@@ -34,4 +33,44 @@ export type SoqlQueryResult = {
   // @ts-ignore //TODO
   result: QueryResult<unknown>;
   columns: Field[];
+};
+
+export type BasicRecord = {
+  [index: string]: { records: BasicRecord[] } | unknown;
+  attributes: {
+    type: string;
+    url?: string;
+  };
+};
+
+export interface DataPlanPart {
+  sobject: string;
+  saveRefs: boolean;
+  resolveRefs: boolean;
+  files: Array<string | (DataPlanPart & { file: string })>;
+}
+
+export type SObjectTreeInput = {
+  attributes: {
+    type: string;
+    referenceId: string;
+  };
+} & {
+  [index: string]: { records: SObjectTreeInput[] } | unknown;
+};
+
+export type SObjectTreeFileContents = {
+  records: SObjectTreeInput[];
+};
+
+export const hasNestedRecords = <T>(element: { records: T[] } | unknown): element is { records: T[] } => {
+  return Array.isArray((element as { records: T[] })?.records);
+};
+
+export const isAttributesElement = (
+  element: SObjectTreeInput['attributes'] | unknown
+): element is SObjectTreeInput['attributes'] => {
+  return (
+    !!(element as SObjectTreeInput['attributes']).referenceId && !!(element as SObjectTreeInput['attributes']).type
+  );
 };

@@ -307,7 +307,7 @@ export class Batcher {
 
       readStream.pipe(parser);
 
-      parser.on('data', (element) => {
+      parser.on('data', (element: BatchEntry) => {
         batches[batchIndex].push(element);
         if (batches[batchIndex].length === BATCH_RECORDS_LIMIT) {
           // TODO: we can start processing this batch here

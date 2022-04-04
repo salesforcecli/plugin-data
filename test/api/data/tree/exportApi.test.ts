@@ -297,7 +297,7 @@ describe('Export API', () => {
     await exportApi.export({ query: 'select' });
     const writeFileArgs = writeStub.args;
     const filenameArg = writeFileArgs[0][0];
-    const fileContentsJsonArg = JSON.parse(writeFileArgs[0][1]);
+    const fileContentsJsonArg = JSON.parse(writeFileArgs[0][1] as string);
 
     expect(writeStub.callCount).to.equal(1);
     expect(filenameArg).to.equal('Account-Case-Contact.json');
@@ -327,10 +327,10 @@ describe('Export API', () => {
     expect(writeStub.calledWith('Account-Case-Contact-plan.json')).to.be.true;
 
     // Verify file contents
-    expect(JSON.parse(fsWriteCall1[1])).to.eql(expectedPlan.Accounts);
-    expect(JSON.parse(fsWriteCall2[1])).to.eql(expectedPlan.Cases);
-    expect(JSON.parse(fsWriteCall3[1])).to.eql(expectedPlan.Contacts);
-    expect(JSON.parse(fsWriteCall4[1])).to.eql(expectedPlan.planFile);
+    expect(JSON.parse(fsWriteCall1[1] as string)).to.eql(expectedPlan.Accounts);
+    expect(JSON.parse(fsWriteCall2[1] as string)).to.eql(expectedPlan.Cases);
+    expect(JSON.parse(fsWriteCall3[1] as string)).to.eql(expectedPlan.Contacts);
+    expect(JSON.parse(fsWriteCall4[1] as string)).to.eql(expectedPlan.planFile);
   });
 
   it('should export query results to a plan using a prefix', async () => {
@@ -367,10 +367,10 @@ describe('Export API', () => {
     expect(writeStub.calledWith(`${PREFIX}-Account-Case-Contact-plan.json`)).to.be.true;
 
     // Verify file contents
-    expect(JSON.parse(fsWriteCall1[1])).to.eql(expectedPlan.Accounts);
-    expect(JSON.parse(fsWriteCall2[1])).to.eql(expectedPlan.Cases);
-    expect(JSON.parse(fsWriteCall3[1])).to.eql(expectedPlan.Contacts);
-    expect(JSON.parse(fsWriteCall4[1])).to.eql(expectedPlan.planFile);
+    expect(JSON.parse(fsWriteCall1[1] as string)).to.eql(expectedPlan.Accounts);
+    expect(JSON.parse(fsWriteCall2[1] as string)).to.eql(expectedPlan.Cases);
+    expect(JSON.parse(fsWriteCall3[1] as string)).to.eql(expectedPlan.Contacts);
+    expect(JSON.parse(fsWriteCall4[1] as string)).to.eql(expectedPlan.planFile);
   });
 
   it('should export query results to a file when query param is a file that contains a soql query', async () => {
@@ -380,7 +380,7 @@ describe('Export API', () => {
     await exportApi.export({ query: 'queryInaFile.txt' });
     const writeFileArgs = writeStub.args;
     const filenameArg = writeFileArgs[0][0];
-    const fileContentsJsonArg = JSON.parse(writeFileArgs[0][1]);
+    const fileContentsJsonArg = JSON.parse(writeFileArgs[0][1] as string);
 
     expect(writeStub.callCount).to.equal(1);
     expect(filenameArg).to.equal('Account-Case-Contact.json');
@@ -409,7 +409,7 @@ describe('Export API', () => {
     await exportApi.export({ query: 'select' });
     const writeFileArgs = writeStub.args;
     const filenameArg = writeFileArgs[0][0];
-    const fileContentsJsonArg = JSON.parse(writeFileArgs[0][1]);
+    const fileContentsJsonArg = JSON.parse(writeFileArgs[0][1] as string);
 
     expect(writeStub.callCount).to.equal(1);
     expect(filenameArg).to.equal('Account-Case-Contact.json');

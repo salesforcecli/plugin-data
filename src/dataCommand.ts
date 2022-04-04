@@ -44,7 +44,6 @@ HttpApi.default.prototype.request = function (req: unknown, ...args: unknown[]):
   this.once('response', (response: Response) => {
     const metrics = response.headers.perfmetrics;
     if (metrics) {
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       DataCommand.addMetric({
         requestPath: response.req.path,
         perfMetrics: JSON.parse(metrics) as AnyJson,

@@ -52,10 +52,10 @@ export default class Upsert extends DataCommand {
     const conn: Connection = this.ensureOrg().getConnection();
     this.ux.startSpinner('Bulk Upsert');
 
-    await this.throwIfFileDoesntExist(this.flags.csvfile);
+    await this.throwIfFileDoesntExist(this.flags.csvfile as string);
 
     const batcher: Batcher = new Batcher(conn, this.ux);
-    const csvStream: ReadStream = fs.createReadStream(this.flags.csvfile, { encoding: 'utf-8' });
+    const csvStream: ReadStream = fs.createReadStream(this.flags.csvfile as string, { encoding: 'utf-8' });
 
     const concurrencyMode = this.flags.serial ? 'Serial' : 'Parallel';
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -72,7 +72,14 @@ export default class Upsert extends DataCommand {
       });
 
       try {
-        resolve(await batcher.createAndExecuteBatches(job, csvStream, this.flags.sobjecttype, this.flags.wait));
+        resolve(
+          await batcher.createAndExecuteBatches(
+            job,
+            csvStream,
+            this.flags.sobjecttype as string,
+            this.flags.wait as number
+          )
+        );
         this.ux.stopSpinner();
       } catch (e) {
         this.ux.stopSpinner('error');

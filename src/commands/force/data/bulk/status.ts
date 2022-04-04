@@ -55,7 +55,7 @@ export default class Status extends DataCommand {
       return batches;
     } else {
       // view job status
-      const jobStatus = await batcher.fetchAndDisplayJobStatus(this.flags.jobid);
+      const jobStatus = await batcher.fetchAndDisplayJobStatus(this.flags.jobid as string);
       this.ux.stopSpinner();
       return jobStatus;
     }

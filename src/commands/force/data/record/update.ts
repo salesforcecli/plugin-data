@@ -57,10 +57,10 @@ export default class Update extends DataCommand {
     this.ux.startSpinner('Updating Record');
 
     let status = 'Success';
-    const sobject = this.getConnection().sobject(this.flags.sobjecttype);
-    const sObjectId = (this.flags.sobjectid || (await this.query(sobject, this.flags.where)).Id) as string;
+    const sobject = this.getConnection().sobject(this.flags.sobjecttype as string);
+    const sObjectId = (this.flags.sobjectid || (await this.query(sobject, this.flags.where as string)).Id) as string;
     try {
-      const updateObject = this.stringToDictionary(this.flags.values);
+      const updateObject = this.stringToDictionary(this.flags.values as string);
       updateObject.Id = sObjectId;
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore

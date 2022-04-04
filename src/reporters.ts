@@ -130,6 +130,7 @@ export class HumanReporter extends QueryReporter {
     return formattedColumns;
   }
 
+  //  public massageRows(queryResults: BasicRecord[], children: string[], aggregates: Field[]): BasicRecord[] {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public massageRows(queryResults: unknown[], children: string[], aggregates: Field[]): any {
     // some fields will return a JSON object that isn't accessible via the query (SELECT Metadata FROM RemoteProxy)
@@ -167,8 +168,7 @@ export class HumanReporter extends QueryReporter {
         }
 
         if (children.length > 0) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          const childrenRows = Object.assign({});
+          const childrenRows: Record<string, unknown> = {};
           children.forEach((child) => {
             const aChild = get(result as never, child);
             Reflect.set(childrenRows, child, aChild);

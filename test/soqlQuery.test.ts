@@ -23,8 +23,8 @@ describe('soqlQuery tests', () => {
   const fakeConnection = TestUtil.createFakeConnection();
   const logger = Logger.childFromRoot('soqlQuery.test');
   const sandbox = sinon.createSandbox();
-  let querySpy: any;
-  let requestSpy: any;
+  let querySpy: sinon.SinonSpy;
+  let requestSpy: sinon.SinonSpy;
   afterEach(() => {
     sandbox.restore();
   });
