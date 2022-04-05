@@ -240,6 +240,9 @@ export class CsvReporter extends QueryReporter {
         const value = get(row, name);
         if (isString(value)) {
           return this.escape(value);
+          // if value is null, then typeof value === 'object' so check before typeof to avoid illegal csv
+        } else if (value === null) {
+          return;
         } else if (typeof value === 'object') {
           return this.escape(JSON.stringify(value));
         }

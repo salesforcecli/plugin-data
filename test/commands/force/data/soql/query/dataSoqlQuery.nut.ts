@@ -20,6 +20,7 @@ interface QueryOptions {
   ensureExitCode?: number;
   toolingApi?: boolean;
 }
+
 function verifyRecordFields(accountRecord: Dictionary, fields: string[]) {
   expect(accountRecord).to.have.all.keys(...fields);
 }
@@ -124,7 +125,7 @@ describe('data:soql:query command', () => {
   describe('data:soql:query verify human results', () => {
     it('should return Lead.owner.name (multi-level relationships)', () => {
       execCmd('force:data:record:create -s Lead -v "Company=Salesforce LastName=Astro"', { ensureExitCode: 0 });
-      const query = 'SELECT owner.Profile.Name FROM lead LIMIT 1';
+      const query = 'SELECT owner.Profile.Name, Title, Name FROM lead LIMIT 1';
 
       const queryResult = runQuery(query, { ensureExitCode: 0 });
       expect(queryResult).to.not.include('[object Object]');
@@ -133,6 +134,8 @@ describe('data:soql:query command', () => {
       const queryResultCSV = runQuery(query + '" --resultformat "csv', { ensureExitCode: 0 });
       expect(queryResultCSV).to.not.include('[object Object]');
       expect(queryResultCSV).to.include('System Administrator');
+      // Title is null and represented as ,, (empty) in csv
+      expect(queryResultCSV).to.include(',,');
     });
 
     it('should return account records', () => {
