@@ -42,7 +42,6 @@ export default class Create extends DataCommand {
     }),
   };
 
-  // TODO: can we change this return type in a non-breaking change at the cli level?
   public async run(): Promise<SaveResult> {
     this.ux.startSpinner(`Creating record for ${this.flags.sobjecttype as string}`);
 

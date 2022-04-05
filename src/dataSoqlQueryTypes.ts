@@ -30,7 +30,7 @@ export interface Field {
 export type SoqlQueryResult = {
   query: string;
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore //TODO
+  // @ts-ignore jsforce v2 types are too strict for running general queries
   result: QueryResult<unknown>;
   columns: Field[];
 };
