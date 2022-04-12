@@ -85,8 +85,8 @@
   },
   "dependencies": {
     "@oclif/core": "^1.6.4",
-    "@salesforce/command": "^5.0.4",
-    "@salesforce/core": "^3.11.1",
+    "@salesforce/command": "^5.0.5",
+    "@salesforce/core": "^3.12.1",
     "@salesforce/ts-types": "^1.5.20",
     "@types/fs-extra": "^9.0.13",
     "chalk": "^4.1.0",

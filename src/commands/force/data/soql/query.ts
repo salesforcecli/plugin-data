@@ -101,12 +101,13 @@ export class SoqlQuery {
           columns.push(field);
         } else {
           for (const subcolumn of column.joinColumns) {
-            const allSubFieldNames = this.searchSubColumns(subcolumn);
-            const f: Field = {
-              fieldType: FieldType.field,
-              name: `${name}.${allSubFieldNames}`,
-            };
-            columns.push(f);
+            const allSubFieldNames = this.searchSubColumnsRecursively(subcolumn);
+            for (const subFields of allSubFieldNames) {
+              columns.push({
+                fieldType: FieldType.field,
+                name: `${name}.${subFields}`,
+              });
+            }
           }
         }
       } else if (column.aggregate) {
@@ -126,17 +127,19 @@ export class SoqlQuery {
     return columns;
   }
 
-  private searchSubColumns(parent: AnyJson): string {
+  private searchSubColumnsRecursively(parent: AnyJson): string[] {
     const column = ensureJsonMap(parent);
     const name = ensureString(column.columnName);
 
-    const names = [name];
+    let names = [name];
     const child = getArray(parent, 'joinColumns') as AnyJson[];
     if (child.length) {
+      // if we're recursively searching, reset the 'parent' - it gets added back below
+      names = [];
       // recursively search for related column names
-      child.map((c) => names.push(this.searchSubColumns(c)));
+      child.map((c) => names.push(`${name}.${this.searchSubColumnsRecursively(c).join('.')}`));
     }
-    return names.join('.');
+    return names;
   }
 }
 
