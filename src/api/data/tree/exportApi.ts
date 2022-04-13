@@ -10,7 +10,7 @@ import * as fs from 'fs';
 import { Logger, Messages, Org, SfError } from '@salesforce/core';
 import { UX } from '@salesforce/command';
 import { DescribeSObjectResult, QueryResult } from 'jsforce';
-import { mkdirpSync } from 'fs-extra';
+import { ensureDirSync } from 'fs-extra';
 import {
   BasicRecord,
   DataPlanPart,
@@ -74,7 +74,7 @@ export class ExportApi {
     const { outputDir, plan, query } = this.config;
 
     if (outputDir) {
-      this.setupOutputDirectory(outputDir);
+      ensureDirSync(outputDir);
     }
 
     let queryResults: QueryResult<BasicRecord>;
@@ -132,16 +132,16 @@ export class ExportApi {
     return config;
   }
 
-  private setupOutputDirectory(outputDir: string): void {
-    try {
-      mkdirpSync(outputDir);
-    } catch (err) {
-      // It is ok if the directory already exists
-      if (err instanceof Error && err.name !== 'EEXIST') {
-        throw err;
-      }
-    }
-  }
+  // private setupOutputDirectory(outputDir: string): void {
+  //   try {
+  //     mkdirpSync(outputDir);
+  //   } catch (err) {
+  //     // It is ok if the directory already exists
+  //     if (err instanceof Error && err.name !== 'EEXIST') {
+  //       throw err;
+  //     }
+  //   }
+  // }
 
   // Process query results generating SObject Tree format
   private async processQueryResults(recordList: QueryResult<BasicRecord>): Promise<SObjectTreeFileContents> {

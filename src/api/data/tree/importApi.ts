@@ -226,9 +226,8 @@ export class ImportApi {
 
     if (plan) {
       const planPath = path.resolve(process.cwd(), plan);
-      try {
-        fs.statSync(planPath);
-      } catch (e) {
+
+      if (!fs.existsSync(planPath)) {
         throw new SfError(messages.getMessage('dataFileNotFound', [planPath]), INVALID_DATA_IMPORT_ERR_NAME);
       }
 
