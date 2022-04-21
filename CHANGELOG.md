@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.6.13](https://github.com/salesforcecli/plugin-data/compare/v0.6.12...v0.6.13) (2022-04-14)
+
+### Bug Fixes
+
+- bulk batching wide fIles (cli/[#1460](https://github.com/salesforcecli/plugin-data/issues/1460)) ([c8b2855](https://github.com/salesforcecli/plugin-data/commit/c8b2855786fd6e1c13fc879bc4ab7e556cfc0600))
+
 ### [0.6.12](https://github.com/salesforcecli/plugin-data/compare/v0.6.11...v0.6.12) (2022-03-30)
 
 ### [0.6.11](https://github.com/salesforcecli/plugin-data/compare/v0.6.10...v0.6.11) (2022-03-25)

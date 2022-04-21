@@ -108,6 +108,40 @@ describe('batcher', () => {
       expect(exitSpy.notCalled).to.equal(true);
     });
 
+    it('Should not create another batch for exactly 10000 records', async () => {
+      inStream.push(`name , field1, field2${os.EOL}`);
+      for (let i = 0; i < 10000; i++) {
+        inStream.push(`obj1,val1,val2${os.EOL}`);
+      }
+      inStream.push(null);
+      // @ts-ignore private method
+      const batches = batcher.splitIntoBatches(inStream);
+      const result = await batches;
+      expect(result.length).to.equal(1);
+      expect(result[0].length).to.equal(10000);
+      expect(exitSpy.notCalled).to.equal(true);
+    });
+
+    it('Should create another batch after 10MB of data', async () => {
+      // generate a large string for use as a field value
+      let bigField = '';
+      while (bigField.length <= 2000) {
+        bigField += 'l';
+      }
+      inStream.push(`"n""am""e",field1,field2${os.EOL}`);
+      for (let i = 0; i < 5000; i++) {
+        inStream.push(`obj1,"v""al""1",${bigField}${os.EOL}`);
+      }
+      inStream.push(null);
+      // @ts-ignore private method
+      const batches = batcher.splitIntoBatches(inStream);
+      const result = await batches;
+      expect(result.length).to.equal(2);
+      expect(result[0].length).to.equal(4952);
+      expect(result[1].length).to.equal(48);
+      expect(exitSpy.notCalled).to.equal(true);
+    });
+
     it('should be able to read through line breaks within fields', async () => {
       inStream.push(`name,field1,field2${os.EOL}`);
       inStream.push(`obj1,"val1\n\nval1","\nval2"${os.EOL}`);

@@ -10,9 +10,13 @@ import { UX } from '@salesforce/command';
 import { Job, JobInfo } from 'jsforce/job';
 import { BatchInfo, BulkIngestBatchResult, BulkQueryBatchResult } from 'jsforce/lib/api/bulk';
 import { Batch } from 'jsforce/batch';
+import { stringify } from 'csv-stringify/sync';
 import parse = require('csv-parse');
 
+// max rows per file in Bulk 1.0
 const BATCH_RECORDS_LIMIT = 10000;
+/// max characters/bytes per file in Bulk 1.0
+const BATCH_BYTES_LIMIT = 10000000;
 const POLL_FREQUENCY_MS = 5000;
 
 Messages.importMessagesDirectory(__dirname);
@@ -294,6 +298,8 @@ export class Batcher {
     // split all records into batches
     const batches: Batches = [];
     let batchIndex = 0;
+    let batchBytes = 0;
+    let batchHeaderBytes = 0;
     batches[batchIndex] = [];
 
     return await new Promise((resolve, reject) => {
@@ -308,14 +314,24 @@ export class Batcher {
       readStream.pipe(parser);
 
       parser.on('data', (element: BatchEntry) => {
-        batches[batchIndex].push(element);
-        if (batches[batchIndex].length === BATCH_RECORDS_LIMIT) {
+        if (!batchHeaderBytes) {
+          // capture header byte length
+          batchHeaderBytes = Buffer.byteLength(stringify([Object.keys(element)]) + '\n', 'utf8');
+          batchBytes = batchHeaderBytes;
+        }
+        // capture row byte length
+        const rowBytes = Buffer.byteLength(stringify([Object.values(element)]) + '\n', 'utf8');
+        if (batches[batchIndex].length === BATCH_RECORDS_LIMIT || rowBytes + batchBytes > BATCH_BYTES_LIMIT) {
           // TODO: we can start processing this batch here
           // we need event listeners to remove all of the `await new Promise`
           // next batch
           batchIndex++;
           batches[batchIndex] = [];
+          // reset file size to just the headers
+          batchBytes = batchHeaderBytes;
         }
+        batchBytes += rowBytes;
+        batches[batchIndex].push(element);
       });
 
       parser.on('error', (err) => {
