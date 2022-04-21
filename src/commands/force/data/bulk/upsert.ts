@@ -52,7 +52,7 @@ export default class Upsert extends DataCommand {
     const conn: Connection = this.ensureOrg().getConnection();
     this.ux.startSpinner('Bulk Upsert');
 
-    await this.throwIfFileDoesntExist(this.flags.csvfile as string);
+    await this.throwIfPathDoesntExist(this.flags.csvfile as string);
 
     const batcher: Batcher = new Batcher(conn, this.ux);
     const csvStream: ReadStream = fs.createReadStream(this.flags.csvfile as string, { encoding: 'utf-8' });

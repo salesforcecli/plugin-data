@@ -42,7 +42,7 @@ export default class Delete extends DataCommand {
     let result: BulkResult[] | JobInfo[];
 
     try {
-      await this.throwIfFileDoesntExist(this.flags.csvfile as string);
+      await this.throwIfPathDoesntExist(this.flags.csvfile as string);
 
       const conn: Connection = this.ensureOrg().getConnection();
       this.ux.startSpinner('Bulk Delete');

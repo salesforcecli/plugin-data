@@ -87,7 +87,7 @@ export abstract class DataCommand extends SfdxCommand {
     return errors;
   }
 
-  public async throwIfFileDoesntExist(path: string): Promise<void> {
+  public async throwIfPathDoesntExist(path: string): Promise<void> {
     if (!(await fse.pathExists(path))) {
       throw new SfError(messages.getMessage('PathDoesNotExist', [path]), 'PathDoesNotExist');
     }
