@@ -66,9 +66,7 @@ export class SoqlQuery {
   public async retrieveColumns(connection: Connection, query: string): Promise<Field[]> {
     // eslint-disable-next-line no-underscore-dangle
     const columnUrl = `${connection._baseUrl()}/query?q=${encodeURIComponent(query)}&columns=true`;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const results = toJsonMap(await connection.request(columnUrl));
+    const results = toJsonMap(await connection.request<Record<string, unknown>>(columnUrl));
 
     return this.recursivelyFindColumns(ensureJsonArray(results.columnMetadata));
   }

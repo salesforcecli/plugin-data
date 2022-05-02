@@ -8,8 +8,8 @@ import { ReadStream } from 'fs';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { UX } from '@salesforce/command';
 import { Job, JobInfo } from 'jsforce/job';
-import { BatchInfo, BulkIngestBatchResult, BulkQueryBatchResult } from 'jsforce/lib/api/bulk';
-import { Batch } from 'jsforce/batch';
+import { BulkIngestBatchResult } from 'jsforce/lib/api/bulk';
+import { Batch, BatchInfo } from 'jsforce/batch';
 import { stringify } from 'csv-stringify/sync';
 import parse = require('csv-parse');
 
@@ -275,10 +275,8 @@ export class Batcher {
       );
       // we're using an async method on an event listener which doesn't fit the .on method parameter types
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      newBatch.on('response', async (results: BulkQueryBatchResult) => {
-        const summary = await newBatch.check();
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
+      newBatch.on('response', async (results: BulkIngestBatchResult) => {
+        const summary: BatchInfo = await newBatch.check();
         this.bulkStatus(summary, results, batchNum);
         batchesCompleted++;
         if (batchesCompleted === totalNumBatches) {

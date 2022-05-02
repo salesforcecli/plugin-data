@@ -58,12 +58,10 @@ export default class Upsert extends DataCommand {
     const csvStream: ReadStream = fs.createReadStream(this.flags.csvfile as string, { encoding: 'utf-8' });
 
     const concurrencyMode = this.flags.serial ? 'Serial' : 'Parallel';
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     const job: Job = conn.bulk.createJob(this.flags.sobjecttype, 'upsert', {
       extIdField: this.flags.externalid as string,
       concurrencyMode,
-    });
+    }) as unknown as Job;
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
     return new Promise(async (resolve, reject) => {
