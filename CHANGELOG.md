@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.6.14](https://github.com/salesforcecli/plugin-data/compare/v0.6.13...v0.6.14) (2022-04-26)
+
+### Bug Fixes
+
+- update schema to support AJV ([6fe5f21](https://github.com/salesforcecli/plugin-data/commit/6fe5f2188ceed5b1fa1773634cf1684bc75aa9e1))
+
 ### [0.6.13](https://github.com/salesforcecli/plugin-data/compare/v0.6.12...v0.6.13) (2022-04-14)
 
 ### Bug Fixes
