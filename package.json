@@ -85,7 +85,7 @@
   "dependencies": {
     "@oclif/config": "^1",
     "@salesforce/command": "^4.2.0",
-    "@salesforce/core": "^2.35.3",
+    "@salesforce/core": "^2.37.1",
     "@salesforce/ts-types": "^1.5.20",
     "chalk": "^4.1.0",
     "csv-parse": "^4.16.3",
