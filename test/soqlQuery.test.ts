@@ -34,7 +34,7 @@ describe('soqlQuery tests', () => {
       .stub(fakeConnection, 'request')
       .resolves({ columnMetadata: queryFieldsExemplars.simpleQuery.columnMetadata });
     querySpy = sandbox
-      .stub(fakeConnection, 'autoFetchQuery')
+      .stub(fakeConnection, 'query')
       .resolves(soqlQueryExemplars.simpleQuery.queryResult as unknown as QueryResult<any>);
     const soqlQuery = new SoqlQuery();
     const results = await soqlQuery.runSoqlQuery(fakeConnection, 'SELECT id, name FROM Contact', logger);
@@ -44,7 +44,7 @@ describe('soqlQuery tests', () => {
   it('should handle a query with a subquery', async () => {
     sandbox.stub(fakeConnection, 'request').resolves({ columnMetadata: queryFieldsExemplars.subquery.columnMetadata });
     querySpy = sandbox
-      .stub(fakeConnection, 'autoFetchQuery')
+      .stub(fakeConnection, 'query')
       .resolves(soqlQueryExemplars.subQuery.queryResult as unknown as QueryResult<any>);
     const soqlQuery = new SoqlQuery();
     const results = await soqlQuery.runSoqlQuery(
@@ -57,9 +57,7 @@ describe('soqlQuery tests', () => {
   });
   it('should handle empty query', async () => {
     requestSpy = sandbox.stub(fakeConnection, 'request');
-    querySpy = sandbox
-      .stub(fakeConnection, 'autoFetchQuery')
-      .callsFake(() => Promise.resolve(soqlQueryExemplars.emptyQuery.queryResult));
+    querySpy = sandbox.stub(fakeConnection, 'query').resolves(soqlQueryExemplars.emptyQuery.queryResult);
     const soqlQuery = new SoqlQuery();
     const results = await soqlQuery.runSoqlQuery(
       fakeConnection,

@@ -36,7 +36,7 @@ export class SoqlQuery {
     let columns: Field[] = [];
     logger.debug('running query');
 
-    const result = await connection.autoFetchQuery(query, { autoFetch: true, maxFetch: 50000 });
+    const result = await connection.query(query, { autoFetch: true, maxFetch: 50000 });
     logger.debug(`Query complete with ${result.totalSize} records returned`);
     if (result.totalSize) {
       logger.debug('fetching columns for query');

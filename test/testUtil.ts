@@ -201,11 +201,6 @@ export const createFakeConnection = function (): Connection {
         resolve({});
       });
     },
-    autoFetchQuery: () => {
-      return new Promise<QueryResult<object>>(function (resolve, reject) {
-        resolve({} as QueryResult<object>);
-      });
-    },
     query: () => {
       return new Promise<QueryResult<object>>(function (resolve, reject) {
         resolve({} as QueryResult<object>);
@@ -264,11 +259,6 @@ export const createFakeConnection = function (): Connection {
     },
     tooling: {
       query: () => {
-        return new Promise<QueryResult<object>>(function (resolve, reject) {
-          resolve({} as QueryResult<object>);
-        });
-      },
-      autoFetchQuery: () => {
         return new Promise<QueryResult<object>>(function (resolve, reject) {
           resolve({} as QueryResult<object>);
         });
