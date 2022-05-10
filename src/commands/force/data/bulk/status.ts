@@ -48,7 +48,7 @@ export default class Status extends DataCommand {
         }
       });
       if (!found) {
-        throw new SfError(messages.getMessage('NoBatchFound', [this.flags.batchid, this.flags.jobid]));
+        throw new SfError(messages.getMessage('NoBatchFound', [this.flags.batchid, this.flags.jobid]), 'NoBatchFound');
       }
 
       this.ux.stopSpinner();
