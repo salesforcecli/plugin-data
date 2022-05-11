@@ -11,7 +11,7 @@ import { AnyJson, Dictionary, get, Nullable } from '@salesforce/ts-types';
 import { Connection, Messages, Org, SfError } from '@salesforce/core';
 import { Record as jsforceRecord, SaveResult, SObject } from 'jsforce';
 
-import * as HttpApi from 'jsforce/lib/http-api';
+import { HttpApi } from 'jsforce/lib/http-api';
 import { Tooling } from '@salesforce/core/lib/org';
 
 Messages.importMessagesDirectory(__dirname);
@@ -33,19 +33,19 @@ interface Response {
   req: { path: string };
 }
 
-type ConnectionInternals = { callOptions?: { perfOption?: string } };
+type ConnectionInternals = { _callOptions?: { perfOption?: string } };
 
-/* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return */
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/unbound-method
-const originalRequestMethod = HttpApi.default.prototype.request;
+// eslint-disable-next-line @typescript-eslint/unbound-method
+const originalRequestMethod = HttpApi.prototype.request;
+
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-HttpApi.default.prototype.request = function (req: unknown, ...args: unknown[]): unknown {
+HttpApi.prototype.request = function (req, ...args: unknown[]): unknown {
   this.once('response', (response: Response) => {
     const metrics = response.headers.perfmetrics;
     if (metrics) {
       DataCommand.addMetric({
-        requestPath: response.req.path,
+        requestPath: `/services${req?.url?.split('/services')[1]}`,
         perfMetrics: JSON.parse(metrics) as AnyJson,
       });
     }
@@ -116,15 +116,20 @@ export abstract class DataCommand extends SfdxCommand {
 
   public getConnection(): (Tooling | Connection) & ConnectionInternals {
     const safeOrg = this.ensureOrg();
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     const connection: (Tooling | Connection) & ConnectionInternals = this.flags.usetoolingapi
       ? safeOrg.getConnection().tooling
       : safeOrg.getConnection();
 
     if (this.flags.perflog) {
-      if (!connection.callOptions) {
-        connection.callOptions = {};
+      // eslint-disable-next-line no-underscore-dangle
+      if (!connection._callOptions) {
+        // eslint-disable-next-line no-underscore-dangle
+        connection._callOptions = {};
       }
-      connection.callOptions.perfOption = 'MINIMUM';
+      // eslint-disable-next-line no-underscore-dangle
+      connection._callOptions.perfOption = 'MINIMUM';
     }
     return connection;
   }
