@@ -1111,10 +1111,10 @@
     semver "^7.3.5"
     ts-retry-promise "^0.6.0"
 
-"@salesforce/core@^3.12.1", "@salesforce/core@^3.15.3":
-  version "3.16.0"
-  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-3.16.0.tgz#e74220b98f20d0bb84dcd31c8e905c712bae61b2"
-  integrity sha512-ULwviOiOrDlJKW08ONQs8Qcw+FzsBBWLh9xxTpt/Zo1jng4vKb5FO+WaooK14tNq2KSMIS7pK3xyVxi5Y5RkEA==
+"@salesforce/core@^3.15.3", "@salesforce/core@^3.16.2":
+  version "3.16.2"
+  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-3.16.2.tgz#2955edc0c747d13c10a3bed2ba7ed63f404fc439"
+  integrity sha512-iP3h9e7td+zDQABRzyX5Bl+qXEdl4ITOTTmEs0W1Nu8EBJlM8DqXLIIu5xrxMRLuqeSQpsP+fQuGwhKirxeRSg==
   dependencies:
     "@salesforce/bunyan" "^2.0.0"
     "@salesforce/kit" "^1.5.34"
