@@ -6,7 +6,7 @@
  */
 import { expect, test } from '@salesforce/command/lib/test';
 import { ensureJsonMap, ensureString } from '@salesforce/ts-types';
-import { SfdxError } from '@salesforce/core';
+import { SfError } from '@salesforce/core';
 
 const sObjectId = '0011100001zhhyUAAQ';
 
@@ -85,7 +85,7 @@ describe('force:data:record:update', () => {
       '--json',
     ])
     .it('should print the error message with reasons why the record could not be updated', (ctx) => {
-      const result = JSON.parse(ctx.stdout) as SfdxError;
+      const result = JSON.parse(ctx.stdout) as SfError;
       expect(result.message).to.include('name cannot start with x');
       expect(result.message).to.include('FIELD_CUSTOM_VALIDATION_EXCEPTION');
       expect(result.exitCode).to.equal(1);

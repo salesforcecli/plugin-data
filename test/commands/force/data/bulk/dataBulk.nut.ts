@@ -134,6 +134,45 @@ describe('data:bulk commands', () => {
         // Query for the status of the bulk delete job and make sure it completed
         checkBulkStatusJsonResponse(bulkUpsertResult.jobId, bulkUpsertResult.id);
       });
+
+      it('should upsert, query, and delete 10 accounts all serially', () => {
+        // Bulk upsert 10 accounts
+        const response = execCmd<BulkUpsertDelete[]>(
+          `force:data:bulk:upsert --sobjecttype Account --csvfile ${path.join(
+            '.',
+            'data',
+            'bulkUpsert.csv'
+          )} --externalid Id --serial --json`,
+          { ensureExitCode: 0 }
+        ).jsonOutput?.result ?? [{ id: '', jobId: '' }];
+        expect(response).to.be.an('array').with.lengthOf(1);
+        const bulkUpsertResult = response[0];
+        expect(bulkUpsertResult).to.have.property('jobId');
+        expect(bulkUpsertResult).to.have.property('id');
+
+        checkBulkStatusJsonResponse(bulkUpsertResult.jobId, bulkUpsertResult.id);
+
+        const records = queryAccountRecords();
+
+        const accountIds = records.map((account) => account.Id);
+        const idsFile = path.join(testSession.project?.dir ?? '.', 'data', 'deleteAccounts.csv');
+        fs.writeFileSync(idsFile, `Id\n${accountIds.join('\n')}\n`);
+
+        // Run bulk delete
+        const deleteResponse = execCmd<BulkUpsertDelete[]>(
+          `force:data:bulk:delete --sobjecttype Account --csvfile ${idsFile} --json`,
+          {
+            ensureExitCode: 0,
+          }
+        ).jsonOutput?.result ?? [{ id: '', jobId: '' }];
+        expect(deleteResponse).to.be.an('array').with.lengthOf(1);
+        const bulkDeleteResult = deleteResponse[0];
+        expect(bulkDeleteResult).to.have.property('jobId');
+        expect(bulkDeleteResult).to.have.property('id');
+
+        // Query for the status of the bulk delete job and make sure it completed
+        checkBulkStatusJsonResponse(bulkUpsertResult.jobId, bulkUpsertResult.id);
+      });
     });
   });
   describe('data:bulk verify human responses', () => {

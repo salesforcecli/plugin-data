@@ -9,8 +9,9 @@
 import * as chai from 'chai';
 import { expect } from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import sinon = require('sinon');
 import { Logger } from '@salesforce/core';
+import { QueryResult } from 'jsforce';
+import sinon = require('sinon');
 import { SoqlQuery } from '../src/commands/force/data/soql/query';
 import * as TestUtil from './testUtil';
 import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars';
@@ -32,7 +33,9 @@ describe('soqlQuery tests', () => {
     sandbox
       .stub(fakeConnection, 'request')
       .resolves({ columnMetadata: queryFieldsExemplars.simpleQuery.columnMetadata });
-    querySpy = sandbox.stub(fakeConnection, 'autoFetchQuery').resolves(soqlQueryExemplars.simpleQuery.queryResult);
+    querySpy = sandbox
+      .stub(fakeConnection, 'query')
+      .resolves(soqlQueryExemplars.simpleQuery.queryResult as unknown as QueryResult<any>);
     const soqlQuery = new SoqlQuery();
     const results = await soqlQuery.runSoqlQuery(fakeConnection, 'SELECT id, name FROM Contact', logger);
     sinon.assert.calledOnce(querySpy);
@@ -40,7 +43,9 @@ describe('soqlQuery tests', () => {
   });
   it('should handle a query with a subquery', async () => {
     sandbox.stub(fakeConnection, 'request').resolves({ columnMetadata: queryFieldsExemplars.subquery.columnMetadata });
-    querySpy = sandbox.stub(fakeConnection, 'autoFetchQuery').resolves(soqlQueryExemplars.subQuery.queryResult);
+    querySpy = sandbox
+      .stub(fakeConnection, 'query')
+      .resolves(soqlQueryExemplars.subQuery.queryResult as unknown as QueryResult<any>);
     const soqlQuery = new SoqlQuery();
     const results = await soqlQuery.runSoqlQuery(
       fakeConnection,
@@ -52,9 +57,7 @@ describe('soqlQuery tests', () => {
   });
   it('should handle empty query', async () => {
     requestSpy = sandbox.stub(fakeConnection, 'request');
-    querySpy = sandbox
-      .stub(fakeConnection, 'autoFetchQuery')
-      .callsFake(() => Promise.resolve(soqlQueryExemplars.emptyQuery.queryResult));
+    querySpy = sandbox.stub(fakeConnection, 'query').resolves(soqlQueryExemplars.emptyQuery.queryResult);
     const soqlQuery = new SoqlQuery();
     const results = await soqlQuery.runSoqlQuery(
       fakeConnection,

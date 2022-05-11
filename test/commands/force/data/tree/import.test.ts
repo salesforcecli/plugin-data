@@ -9,7 +9,7 @@
 
 import { join as pathJoin } from 'path';
 import { expect, test } from '@salesforce/command/lib/test';
-import { ensureJsonMap, ensureString, AnyJson } from '@salesforce/ts-types';
+import { AnyJson, ensureJsonMap, ensureString } from '@salesforce/ts-types';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const dataImportPlanSchema = require('../../../../../schema/dataImportPlanSchema.json');

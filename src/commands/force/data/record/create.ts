@@ -9,7 +9,7 @@ import * as os from 'os';
 
 import { flags, FlagsConfig } from '@salesforce/command';
 import { Messages } from '@salesforce/core';
-import { RecordResult } from 'jsforce';
+import { SaveResult } from 'jsforce';
 import { DataCommand } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -42,12 +42,12 @@ export default class Create extends DataCommand {
     }),
   };
 
-  public async run(): Promise<RecordResult> {
+  public async run(): Promise<SaveResult> {
     this.ux.startSpinner(`Creating record for ${this.flags.sobjecttype as string}`);
 
-    const sobject = this.getConnection().sobject(this.flags.sobjecttype as string);
-    const values = this.stringToDictionary(this.flags.values as string);
-    const result = this.normalize<RecordResult>(await sobject.insert(values));
+    const sobject = this.getConnection().sobject(this.flags.sobjecttype);
+    const values = this.stringToDictionary(this.flags.values);
+    const result = this.normalize<SaveResult>(await sobject.insert(values));
     if (result.success) {
       this.ux.log(messages.getMessage('createSuccess', [result.id || 'unknown id']));
       this.ux.stopSpinner();

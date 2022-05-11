@@ -23,7 +23,7 @@ interface QueryResult {
   result: { totalSize: number; records: [] };
 }
 
-describe('Execute a SOQL statement', function (): void {
+describe.skip('Execute a SOQL statement', function (): void {
   let sandbox: SinonSandbox;
   beforeEach(() => {
     sandbox = sinon.createSandbox();
@@ -34,7 +34,7 @@ describe('Execute a SOQL statement', function (): void {
       beforeEach(() => {
         soqlQuerySpy = sandbox
           .stub(SoqlQuery.prototype, 'runSoqlQuery')
-          .callsFake(() => Promise.resolve(soqlQueryExemplars.emptyQuery.soqlQueryResult));
+          .resolves(soqlQueryExemplars.emptyQuery.soqlQueryResult);
       });
       afterEach(() => {
         sandbox.restore();
@@ -111,7 +111,7 @@ describe('Execute a SOQL statement', function (): void {
       beforeEach(() => {
         soqlQuerySpy = sandbox
           .stub(SoqlQuery.prototype, 'runSoqlQuery')
-          .callsFake(() => Promise.resolve(soqlQueryExemplars.complexSubQuery.soqlQueryResult));
+          .resolves(soqlQueryExemplars.complexSubQuery.soqlQueryResult);
       });
 
       afterEach(() => {
@@ -152,7 +152,7 @@ describe('Execute a SOQL statement', function (): void {
       beforeEach(() => {
         soqlQuerySpy = sandbox
           .stub(SoqlQuery.prototype, 'runSoqlQuery')
-          .callsFake(() => Promise.resolve(soqlQueryExemplars.queryWithAgregates.soqlQueryResult));
+          .resolves(soqlQueryExemplars.queryWithAgregates.soqlQueryResult);
       });
       afterEach(() => {
         sandbox.restore();

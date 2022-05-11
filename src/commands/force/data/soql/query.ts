@@ -18,9 +18,8 @@ import {
   JsonArray,
   toJsonMap,
 } from '@salesforce/ts-types';
-import { Tooling } from '@salesforce/core/lib/connection';
 import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../../../reporters';
-import { BasicRecord, Field, FieldType, SoqlQueryResult } from '../../../../dataSoqlQueryTypes';
+import { Field, FieldType, SoqlQueryResult } from '../../../../dataSoqlQueryTypes';
 import { DataCommand } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -33,11 +32,11 @@ const commonMessages = Messages.loadMessages('@salesforce/plugin-data', 'message
  * Will collect all records and the column metadata of the query
  */
 export class SoqlQuery {
-  public async runSoqlQuery(connection: Connection | Tooling, query: string, logger: Logger): Promise<SoqlQueryResult> {
+  public async runSoqlQuery(connection: Connection, query: string, logger: Logger): Promise<SoqlQueryResult> {
     let columns: Field[] = [];
     logger.debug('running query');
 
-    const result = await connection.autoFetchQuery<BasicRecord>(query, { autoFetch: true, maxFetch: 50000 });
+    const result = await connection.query(query, { autoFetch: true, maxFetch: 50000 });
     logger.debug(`Query complete with ${result.totalSize} records returned`);
     if (result.totalSize) {
       logger.debug('fetching columns for query');
@@ -53,6 +52,7 @@ export class SoqlQuery {
       result,
     };
   }
+
   /**
    * Utility to fetch the columns involved in a soql query.
    *
@@ -63,10 +63,10 @@ export class SoqlQuery {
    * @param query
    */
 
-  public async retrieveColumns(connection: Connection | Tooling, query: string): Promise<Field[]> {
+  public async retrieveColumns(connection: Connection, query: string): Promise<Field[]> {
     // eslint-disable-next-line no-underscore-dangle
     const columnUrl = `${connection._baseUrl()}/query?q=${encodeURIComponent(query)}&columns=true`;
-    const results = toJsonMap(await connection.request(columnUrl));
+    const results = toJsonMap(await connection.request<Record<string, unknown>>(columnUrl));
 
     return this.recursivelyFindColumns(ensureJsonArray(results.columnMetadata));
   }
@@ -99,12 +99,13 @@ export class SoqlQuery {
           columns.push(field);
         } else {
           for (const subcolumn of column.joinColumns) {
-            const allSubFieldNames = this.searchSubColumns(subcolumn);
-            const f: Field = {
-              fieldType: FieldType.field,
-              name: `${name}.${allSubFieldNames}`,
-            };
-            columns.push(f);
+            const allSubFieldNames = this.searchSubColumnsRecursively(subcolumn);
+            for (const subFields of allSubFieldNames) {
+              columns.push({
+                fieldType: FieldType.field,
+                name: `${name}.${subFields}`,
+              });
+            }
           }
         }
       } else if (column.aggregate) {
@@ -124,17 +125,19 @@ export class SoqlQuery {
     return columns;
   }
 
-  private searchSubColumns(parent: AnyJson): string {
+  private searchSubColumnsRecursively(parent: AnyJson): string[] {
     const column = ensureJsonMap(parent);
     const name = ensureString(column.columnName);
 
-    const names = [name];
+    let names = [name];
     const child = getArray(parent, 'joinColumns') as AnyJson[];
     if (child.length) {
+      // if we're recursively searching, reset the 'parent' - it gets added back below
+      names = [];
       // recursively search for related column names
-      child.map((c) => names.push(this.searchSubColumns(c)));
+      child.map((c) => names.push(`${name}.${this.searchSubColumnsRecursively(c).join('.')}`));
     }
-    return names.join('.');
+    return names;
   }
 }
 
@@ -182,8 +185,8 @@ export class DataSoqlQueryCommand extends DataCommand {
     try {
       if (this.flags.resultformat !== 'json') this.ux.startSpinner(messages.getMessage('queryRunningMessage'));
       const query = new SoqlQuery();
-      const conn = this.getConnection() as Connection | Tooling;
-      const queryResult: SoqlQueryResult = await query.runSoqlQuery(conn, this.flags.query as string, this.logger);
+      const conn = this.getConnection();
+      const queryResult: SoqlQueryResult = await query.runSoqlQuery(conn as Connection, this.flags.query, this.logger);
       const results = {
         ...queryResult,
       };
