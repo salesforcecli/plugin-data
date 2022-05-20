@@ -417,7 +417,7 @@ EXAMPLES
 
   $ sfdx force:data:record:update -t -s TraceFlag -i 7tf170000009cUBAAY -v "ExpirationDate=2017-12-01T00:58:04.000+0000"
 
-  $ sfdx force:data:record:update -s Account -i 001D000000Kv3dl -v "Name=NewAcme" --perflog --json
+  $sfdx force:data:record:update -s Account -i 001D000000Kv3dl -v "Name=NewAcme" --perflog --json
 ```
 
 _See code: [src/commands/force/data/record/update.ts](https://github.com/salesforcecli/plugin-data/blob/v2.0.0/src/commands/force/data/record/update.ts)_
