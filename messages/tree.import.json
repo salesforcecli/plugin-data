@@ -5,8 +5,8 @@
   "contenttype": "if data file extension is not .json, provide content type (applies to all files)",
   "confighelp": "display schema information for the --plan configuration file to stdout; if you use this option, all other options except --json are ignored",
   "examples": [
-    "sfdx force:data:tree:import -f Contact.json,Account.json -u me@my.org",
-    "sfdx force:data:tree:import -p Account-Contact-plan.json -u me@my.org"
+    "$ sfdx force:data:tree:import -f Contact.json,Account.json -u me@my.org",
+    "$ sfdx force:data:tree:import -p Account-Contact-plan.json -u me@my.org"
   ],
   "importFailure": "Data plan file %s did not validate against the schema.",
   "importFailureActions": "Did you run the force:data:tree:export command with the --plan flag?\nMake sure you are importing a plan file.\nYou can get help with the import plan schema by running $ sfdx force:data:tree:import --confighelp"
