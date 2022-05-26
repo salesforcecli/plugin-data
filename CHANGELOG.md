@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.2](https://github.com/salesforcecli/plugin-data/compare/v2.0.1...v2.0.2) (2022-05-26)
+
+### Bug Fixes
+
+- respect maxQueryLimit config ([#306](https://github.com/salesforcecli/plugin-data/issues/306)) ([e9bf141](https://github.com/salesforcecli/plugin-data/commit/e9bf141f9e175c2def51896844ab876b08baa57a))
+
 ### [2.0.1](https://github.com/salesforcecli/plugin-data/compare/v2.0.0...v2.0.1) (2022-05-20)
 
 ## [2.0.0](https://github.com/salesforcecli/plugin-data/compare/v0.6.15...v2.0.0) (2022-05-11)
