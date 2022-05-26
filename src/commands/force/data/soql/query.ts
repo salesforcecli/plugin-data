@@ -7,13 +7,16 @@
 
 import * as os from 'os';
 import { flags, FlagsConfig } from '@salesforce/command';
-import { Connection, Logger, Messages } from '@salesforce/core';
+import { CliUx } from '@oclif/core';
+import { Connection, Logger, Messages, SfdxConfigAggregator } from '@salesforce/core';
+import { QueryOptions, Record } from 'jsforce';
 import {
   AnyJson,
   ensureJsonArray,
   ensureJsonMap,
   ensureString,
   getArray,
+  getNumber,
   isJsonArray,
   JsonArray,
   toJsonMap,
@@ -33,19 +36,44 @@ const commonMessages = Messages.loadMessages('@salesforce/plugin-data', 'message
  */
 export class SoqlQuery {
   public async runSoqlQuery(connection: Connection, query: string, logger: Logger): Promise<SoqlQueryResult> {
+    const config: SfdxConfigAggregator = await SfdxConfigAggregator.create();
+
     let columns: Field[] = [];
     logger.debug('running query');
 
-    const result = await connection.query(query, { autoFetch: true, maxFetch: 50000 });
-    logger.debug(`Query complete with ${result.totalSize} records returned`);
-    if (result.totalSize) {
+    // take the limit from the config, then default 10,000
+    const queryOpts: Partial<QueryOptions> = {
+      autoFetch: true,
+      maxFetch: (config.getInfo('maxQueryLimit').value as number) || 10000,
+    };
+
+    const records: Record[] = [];
+
+    const result = await connection.query(query, queryOpts).on('record', (rec) => records.push(rec));
+
+    const totalSize = getNumber(result, 'totalSize', 0);
+
+    if (records.length && totalSize > records.length) {
+      CliUx.ux.warn(
+        `The query result is missing ${totalSize - records.length} records due to a ${
+          queryOpts.maxFetch
+        } record limit. Increase the number of records returned by setting the config value "maxQueryLimit" or the environment variable "SFDX_MAX_QUERY_LIMIT" to ${totalSize} or greater than ${
+          queryOpts.maxFetch
+        }.`
+      );
+    }
+
+    logger.debug(`Query complete with ${totalSize} records returned`);
+    if (totalSize) {
       logger.debug('fetching columns for query');
       columns = await this.retrieveColumns(connection, query);
     }
 
+    result.records = records;
     // remove nextRecordsUrl and force done to true
     delete result.nextRecordsUrl;
     result.done = true;
+
     return {
       query,
       columns,
@@ -66,7 +94,7 @@ export class SoqlQuery {
   public async retrieveColumns(connection: Connection, query: string): Promise<Field[]> {
     // eslint-disable-next-line no-underscore-dangle
     const columnUrl = `${connection._baseUrl()}/query?q=${encodeURIComponent(query)}&columns=true`;
-    const results = toJsonMap(await connection.request<Record<string, unknown>>(columnUrl));
+    const results = toJsonMap(await connection.request<Record>(columnUrl));
 
     return this.recursivelyFindColumns(ensureJsonArray(results.columnMetadata));
   }

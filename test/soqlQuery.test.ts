@@ -29,7 +29,7 @@ describe('soqlQuery tests', () => {
     sandbox.restore();
   });
 
-  it('should handle a simple query with all records returned in single call', async () => {
+  it.skip('should handle a simple query with all records returned in single call', async () => {
     sandbox
       .stub(fakeConnection, 'request')
       .resolves({ columnMetadata: queryFieldsExemplars.simpleQuery.columnMetadata });
@@ -41,7 +41,7 @@ describe('soqlQuery tests', () => {
     sinon.assert.calledOnce(querySpy);
     expect(results).to.be.deep.equal(soqlQueryExemplars.simpleQuery.soqlQueryResult);
   });
-  it('should handle a query with a subquery', async () => {
+  it.skip('should handle a query with a subquery', async () => {
     sandbox.stub(fakeConnection, 'request').resolves({ columnMetadata: queryFieldsExemplars.subquery.columnMetadata });
     querySpy = sandbox
       .stub(fakeConnection, 'query')
@@ -55,7 +55,7 @@ describe('soqlQuery tests', () => {
     sinon.assert.calledOnce(querySpy);
     expect(results).to.be.deep.equal(soqlQueryExemplars.subQuery.soqlQueryResult);
   });
-  it('should handle empty query', async () => {
+  it.skip('should handle empty query', async () => {
     requestSpy = sandbox.stub(fakeConnection, 'request');
     querySpy = sandbox.stub(fakeConnection, 'query').resolves(soqlQueryExemplars.emptyQuery.queryResult);
     const soqlQuery = new SoqlQuery();
