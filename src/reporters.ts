@@ -124,7 +124,15 @@ export class HumanReporter extends QueryReporter {
         (field: string) =>
           (formattedColumns[field] = {
             header: field.toUpperCase(),
-            get: (row): string => get(row, field) as string,
+            get: (row): string => {
+              // first test if key exists, if so, return value
+              if (Reflect.has(row, field)) {
+                return (Reflect.get(row, field) as string) || '';
+              } else {
+                // if not, try to find it query
+                return get(row, field) as string;
+              }
+            },
           })
       );
     return formattedColumns;
@@ -136,7 +144,7 @@ export class HumanReporter extends QueryReporter {
     // some fields will return a JSON object that isn't accessible via the query (SELECT Metadata FROM RemoteProxy)
     // some will return a JSON that IS accessible via the query (SELECT owner.Profile.Name FROM Lead)
     // querying (SELECT Metadata.isActive FROM RemoteProxy) throws a SOQL validation error, so we have to display the entire Metadata object
-    queryResults.map((qr) => {
+    queryResults.forEach((qr) => {
       const result = qr as Record<string, unknown>;
       this.data.columns.forEach((col) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -167,6 +175,7 @@ export class HumanReporter extends QueryReporter {
           }
         }
 
+        const subResults: Array<Record<string, unknown>> = [];
         if (children.length > 0) {
           const childrenRows: Record<string, unknown> = {};
           children.forEach((child) => {
@@ -180,19 +189,28 @@ export class HumanReporter extends QueryReporter {
             if (childO) {
               const childRecords = getArray(childO, 'records', []);
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              childRecords.forEach((record: unknown) => {
+              childRecords.forEach((record: unknown, index) => {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                const newResult: Record<string, unknown> = {};
                 Object.entries(record as never).forEach(([key, value]) => {
-                  // merge subqueries with the "parent" so they are on the same row
-                  Reflect.defineProperty(result as Record<string, unknown>, `${child.toString()}.${key}`, {
-                    value: value ? value : chalk.bold('null'),
-                  });
+                  if (!index) {
+                    Reflect.defineProperty(result as Record<string, unknown>, `${child.toString()}.${key}`, {
+                      value: value ? value : chalk.bold('null'),
+                    });
+                  } else {
+                    Reflect.defineProperty(newResult, `${child.toString()}.${key}`, {
+                      value: value ? value : chalk.bold('null'),
+                    });
+                  }
                 });
+                if (index) {
+                  subResults.push(newResult);
+                }
               });
             }
           });
         }
-        newResults.push(result);
+        newResults.push(result, ...subResults);
         return newResults;
       }, [] as unknown[]);
     }
