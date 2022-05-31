@@ -130,7 +130,7 @@ export class HumanReporter extends QueryReporter {
                 return (Reflect.get(row, field) as string) || '';
               } else {
                 // if not, try to find it query
-                return get(row, field) as string;
+                return (get(row, field) as string) || '';
               }
             },
           })
