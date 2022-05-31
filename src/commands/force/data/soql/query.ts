@@ -9,7 +9,7 @@ import * as os from 'os';
 import { flags, FlagsConfig } from '@salesforce/command';
 import { CliUx } from '@oclif/core';
 import { Connection, Logger, Messages, SfdxConfigAggregator } from '@salesforce/core';
-import { QueryOptions, Record } from 'jsforce';
+import { QueryOptions, QueryResult, Record } from 'jsforce';
 import {
   AnyJson,
   ensureJsonArray,
@@ -35,44 +35,53 @@ const commonMessages = Messages.loadMessages('@salesforce/plugin-data', 'message
  * Will collect all records and the column metadata of the query
  */
 export class SoqlQuery {
-  public async runSoqlQuery(connection: Connection, query: string, logger: Logger): Promise<SoqlQueryResult> {
-    const config: SfdxConfigAggregator = await SfdxConfigAggregator.create();
-
+  public async runSoqlQuery(
+    connection: Connection,
+    query: string,
+    logger: Logger,
+    configAgg: SfdxConfigAggregator
+  ): Promise<SoqlQueryResult> {
     let columns: Field[] = [];
     logger.debug('running query');
 
-    // take the limit from the config, then default 10,000
+    // take the limit from the config, then default 50,000
     const queryOpts: Partial<QueryOptions> = {
       autoFetch: true,
-      maxFetch: (config.getInfo('maxQueryLimit').value as number) || 10000,
+      maxFetch: (configAgg.getInfo('maxQueryLimit').value as number) || 50000,
     };
 
     const records: Record[] = [];
 
-    const result = await connection.query(query, queryOpts).on('record', (rec) => records.push(rec));
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
+    const result: QueryResult<Record> = await new Promise(async (resolve, reject) => {
+      const res = await connection
+        .query(query, queryOpts)
+        .on('record', (rec) => records.push(rec))
+        .on('error', (err) => reject(err))
+        .on('end', () => {
+          resolve({
+            done: true,
+            totalSize: getNumber(res, 'totalSize', 0),
+            records,
+          });
+        });
+    });
 
-    const totalSize = getNumber(result, 'totalSize', 0);
-
-    if (records.length && totalSize > records.length) {
+    if (result.records.length && result.totalSize > result.records.length) {
       CliUx.ux.warn(
-        `The query result is missing ${totalSize - records.length} records due to a ${
+        `The query result is missing ${result.totalSize - result.records.length} records due to a ${
           queryOpts.maxFetch
-        } record limit. Increase the number of records returned by setting the config value "maxQueryLimit" or the environment variable "SFDX_MAX_QUERY_LIMIT" to ${totalSize} or greater than ${
-          queryOpts.maxFetch
-        }.`
+        } record limit. Increase the number of records returned by setting the config value "maxQueryLimit" or the environment variable "SFDX_MAX_QUERY_LIMIT" to ${
+          result.totalSize
+        } or greater than ${queryOpts.maxFetch}.`
       );
     }
 
-    logger.debug(`Query complete with ${totalSize} records returned`);
-    if (totalSize) {
+    logger.debug(`Query complete with ${result.totalSize} records returned`);
+    if (result.totalSize) {
       logger.debug('fetching columns for query');
       columns = await this.retrieveColumns(connection, query);
     }
-
-    result.records = records;
-    // remove nextRecordsUrl and force done to true
-    delete result.nextRecordsUrl;
-    result.done = true;
 
     return {
       query,
@@ -214,7 +223,12 @@ export class DataSoqlQueryCommand extends DataCommand {
       if (this.flags.resultformat !== 'json') this.ux.startSpinner(messages.getMessage('queryRunningMessage'));
       const query = new SoqlQuery();
       const conn = this.getConnection();
-      const queryResult: SoqlQueryResult = await query.runSoqlQuery(conn as Connection, this.flags.query, this.logger);
+      const queryResult: SoqlQueryResult = await query.runSoqlQuery(
+        conn as Connection,
+        this.flags.query,
+        this.logger,
+        this.configAggregator
+      );
       const results = {
         ...queryResult,
       };
