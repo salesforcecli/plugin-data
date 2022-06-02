@@ -164,6 +164,8 @@ describe('data:soql:query command', () => {
         /ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY\s+?CONTACTS.LASTNAME\s+?CONTACTS.TITLE\s+?CONTACTS.EMAIL/g
       );
       const nestedContacts = queryResult.split(/\r?\n/).filter((contact) => /^\s+?Smith|^\s+?Washington/.test(contact));
+      // eslint-disable-next-line no-console
+      console.log(nestedContacts);
       expect(nestedContacts).to.have.lengthOf(2);
       expect(queryResult).to.match(/Total number of records retrieved: 2\./g);
     });
