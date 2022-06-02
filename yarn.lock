@@ -2746,9 +2746,9 @@ csv-stringify@^5.3.4:
   integrity sha512-PjiQ659aQ+fUTQqSrd1XEDnOr52jh30RBurfzkscaE2tPaFsDH5wOAHJiw8XAHphRknCwMUE9KRayc4K/NbO8A==
 
 csv-stringify@^6.0.5:
-  version "6.0.5"
-  resolved "https://registry.yarnpkg.com/csv-stringify/-/csv-stringify-6.0.5.tgz#3474a4fe784249eb5c91d455f616e1f70961cdc0"
-  integrity sha512-7xpV3uweJCFF/Ssn56l3xsR/k2r3UqszwjEhej9qEn2cCPzyK1WyHCgoUVzBA792x8HbwonNX7CU9XM2K5s5yw==
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/csv-stringify/-/csv-stringify-6.1.0.tgz#6b79e2717bc35ae063800a490244117998a2e86c"
+  integrity sha512-rdBqiy77TczvhGlpLHyoph2adMs6WMnmQY4PBRqeIWykI1FLnVCppnRdso8faGj2+eN7izk9YlbFyZkOrL9rAQ==
 
 cz-conventional-changelog@3.2.0:
   version "3.2.0"
