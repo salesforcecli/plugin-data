@@ -4,6 +4,7 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+import * as os from 'os';
 import * as path from 'path';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
@@ -161,7 +162,7 @@ describe('data:soql:query command', () => {
       expect(queryResult).to.match(
         /ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY\s+?CONTACTS.LASTNAME\s+?CONTACTS.TITLE\s+?CONTACTS.EMAIL/g
       );
-      const nestedContacts = queryResult.split('\n').filter((contact) => /^Smith|Washington/.test(contact.trim()));
+      const nestedContacts = queryResult.split(os.EOL).filter((contact) => /^Smith|Washington/.test(contact.trim()));
       expect(nestedContacts).to.have.lengthOf(2);
       expect(queryResult).to.match(/Total number of records retrieved: 2\./g);
     });
