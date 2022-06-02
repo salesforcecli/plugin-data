@@ -161,8 +161,7 @@ describe('data:soql:query command', () => {
       expect(queryResult).to.match(
         /ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY\s+?CONTACTS.LASTNAME\s+?CONTACTS.TITLE\s+?CONTACTS.EMAIL/g
       );
-      expect(queryResult).to.match(/\s{50,}?Smith/g);
-      expect(queryResult).to.match(/\s{50,}?Washington/g);
+      expect(queryResult).to.match(/\s{30,30}Smith/g);
       expect(queryResult).to.match(/Total number of records retrieved: 2\./g);
     });
     it('should handle count()', () => {
