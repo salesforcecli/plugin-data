@@ -154,14 +154,16 @@ describe('data:soql:query command', () => {
     });
     it('should return account records with nested contacts', () => {
       const query =
-        "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry, (SELECT Lastname, Title, Email FROM Contacts) FROM Account  WHERE Name LIKE 'SampleAccount%' limit 1";
+        "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry, (SELECT Lastname, Title, Email FROM Contacts) FROM Account  WHERE Name LIKE 'SampleAccount%'";
 
       const queryResult = runQuery(query, { ensureExitCode: 0, json: false }) as string;
 
       expect(queryResult).to.match(
         /ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY\s+?CONTACTS.LASTNAME\s+?CONTACTS.TITLE\s+?CONTACTS.EMAIL/g
       );
-      expect(queryResult).to.match(/Total number of records retrieved: 1\./g);
+      const nestedContacts = queryResult.split('\n').filter((contact) => /^Smith|Washington/.test(contact.trim()));
+      expect(nestedContacts).to.have.lengthOf(2);
+      expect(queryResult).to.match(/Total number of records retrieved: 2\./g);
     });
     it('should handle count()', () => {
       const queryResult = execCmd('force:data:soql:query -q "SELECT Count() from User"', {
