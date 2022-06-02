@@ -158,6 +158,8 @@ describe('data:soql:query command', () => {
 
       const queryResult = runQuery(query, { ensureExitCode: 0, json: false }) as string;
 
+      // eslint-disable-next-line no-console
+      console.log(Buffer.from(queryResult).toString('base64'));
       expect(queryResult).to.match(
         /ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY\s+?CONTACTS.LASTNAME\s+?CONTACTS.TITLE\s+?CONTACTS.EMAIL/g
       );
