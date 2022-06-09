@@ -52,10 +52,9 @@ export class SoqlQuery {
 
     const records: Record[] = [];
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
-    const result: QueryResult<Record> = await new Promise(async (resolve, reject) => {
-      const res = await connection
-        .query(query, queryOpts)
+    const result: QueryResult<Record> = await new Promise((resolve, reject) => {
+      const res = connection
+        .query(query)
         .on('record', (rec) => records.push(rec))
         .on('error', (err) => reject(err))
         .on('end', () => {
@@ -64,7 +63,8 @@ export class SoqlQuery {
             totalSize: getNumber(res, 'totalSize', 0),
             records,
           });
-        });
+        })
+        .run(queryOpts);
     });
 
     if (result.records.length && result.totalSize > result.records.length) {
