@@ -6,8 +6,7 @@
  */
 import * as path from 'path';
 import * as shell from 'shelljs';
-import { Env } from '@salesforce/kit';
-import { ensureString } from '@salesforce/ts-types';
+import { isArray, AnyJson, ensureString } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { Dictionary, getString } from '@salesforce/ts-types';
@@ -51,12 +50,14 @@ function runQuery(query: string, options: QueryOptions = { json: true, ensureExi
 
 describe('data:soql:query command', () => {
   let testSession: TestSession;
+  let hubOrgUsername: string;
 
   before(async () => {
     testSession = await TestSession.create({
       setupCommands: [
         'sfdx force:org:create -f config/project-scratch-def.json --setdefaultusername --wait 10 --durationdays 1',
         'sfdx force:source:push',
+        'sfdx config:get defaultdevhubusername --json',
       ],
       project: { sourceDir: path.join('test', 'test-files', 'data-project') },
     });
@@ -64,6 +65,15 @@ describe('data:soql:query command', () => {
     execCmd(`force:data:tree:import --plan ${path.join('.', 'data', 'accounts-contacts-plan.json')}`, {
       ensureExitCode: 0,
     });
+
+    // get default devhub username
+    if (isArray<AnyJson>(testSession.setup)) {
+      hubOrgUsername = ensureString(
+        (testSession.setup[2] as { result: [{ key: string; value: string }] }).result.find(
+          (config) => config.key === 'defaultdevhubusername'
+        )?.value
+      );
+    }
   });
 
   after(async () => {
@@ -82,14 +92,12 @@ describe('data:soql:query command', () => {
     });
 
     it('should return 3756 ScratchOrgInfo records', () => {
-      const env = new Env();
-      const username = ensureString(env.getString('TESTKIT_HUB_USERNAME'));
       //
       // set maxQueryLimit to 2456 globally
       shell.exec('sfdx config:set maxQueryLimit=3756 -g', { silent: true });
 
       const soqlQuery = 'SELECT Id FROM ScratchOrgInfo';
-      const queryCmd = `force:data:soql:query --query "${soqlQuery}" --json --targetusername ${username}`;
+      const queryCmd = `force:data:soql:query --query "${soqlQuery}" --json --targetusername ${hubOrgUsername}`;
       const results = execCmd<QueryResult>(queryCmd, { ensureExitCode: 0 });
 
       const queryResult: QueryResult = results.jsonOutput?.result ?? { done: false, records: [], totalSize: 0 };
