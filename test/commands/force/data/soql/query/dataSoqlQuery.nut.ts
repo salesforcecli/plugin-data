@@ -5,6 +5,9 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import * as path from 'path';
+import * as shell from 'shelljs';
+import { Env } from '@salesforce/kit';
+import { ensureString } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { Dictionary, getString } from '@salesforce/ts-types';
@@ -65,6 +68,37 @@ describe('data:soql:query command', () => {
 
   after(async () => {
     await testSession?.clean();
+  });
+
+  describe('data:soql:query respects maxQueryLimit config', () => {
+    it('should return 1 account record', () => {
+      // set maxQueryLimit to 1 globally
+      shell.exec('sfdx config:set maxQueryLimit=1 -g', { silent: true });
+
+      const result = runQuery('SELECT Id, Name, Phone FROM Account', { json: true }) as QueryResult;
+
+      expect(result.records.length).to.equal(1);
+      verifyRecordFields(result?.records[0], ['Id', 'Name', 'Phone', 'attributes']);
+    });
+
+    it('should return 3756 ScratchOrgInfo records', () => {
+      const env = new Env();
+      const username = ensureString(env.getString('TESTKIT_HUB_USERNAME'));
+      //
+      // set maxQueryLimit to 2456 globally
+      shell.exec('sfdx config:set maxQueryLimit=3756 -g', { silent: true });
+
+      const soqlQuery = 'SELECT Id FROM ScratchOrgInfo';
+      const queryCmd = `force:data:soql:query --query "${soqlQuery}" --json --targetusername ${username}`;
+      const results = execCmd<QueryResult>(queryCmd, { ensureExitCode: 0 });
+
+      const queryResult: QueryResult = results.jsonOutput?.result ?? { done: false, records: [], totalSize: 0 };
+      expect(queryResult).to.have.property('totalSize').to.be.greaterThan(0);
+      expect(queryResult).to.have.property('done', true);
+      expect(queryResult).to.have.property('records').to.not.have.lengthOf(0);
+      expect(queryResult.records.length).to.equal(3756);
+      verifyRecordFields(queryResult?.records[0], ['Id', 'attributes']);
+    });
   });
 
   describe('data:soql:query verify query errors', () => {
