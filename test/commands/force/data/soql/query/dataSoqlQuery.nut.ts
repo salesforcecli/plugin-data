@@ -93,7 +93,7 @@ describe('data:soql:query command', () => {
 
     it('should return 3756 ScratchOrgInfo records', () => {
       //
-      // set maxQueryLimit to 2456 globally
+      // set maxQueryLimit to 3756 globally
       shell.exec('sfdx config:set maxQueryLimit=3756 -g', { silent: true });
 
       const soqlQuery = 'SELECT Id FROM ScratchOrgInfo';
