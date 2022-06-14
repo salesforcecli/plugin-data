@@ -41,18 +41,16 @@ export class SoqlQuery {
     logger: Logger,
     configAgg: SfdxConfigAggregator
   ): Promise<SoqlQueryResult> {
-    let columns: Field[] = [];
     logger.debug('running query');
 
     // take the limit from the config, then default 50,000
     const queryOpts: Partial<QueryOptions> = {
       autoFetch: true,
-      maxFetch: (configAgg.getInfo('maxQueryLimit').value as number) || 50000,
+      maxFetch: (configAgg.getInfo('maxQueryLimit').value as number) ?? 50000,
     };
 
-    const records: Record[] = [];
-
     const result: QueryResult<Record> = await new Promise((resolve, reject) => {
+      const records: Record[] = [];
       const res = connection
         .query(query)
         .on('record', (rec) => records.push(rec))
@@ -78,10 +76,8 @@ export class SoqlQuery {
     }
 
     logger.debug(`Query complete with ${result.totalSize} records returned`);
-    if (result.totalSize) {
-      logger.debug('fetching columns for query');
-      columns = await this.retrieveColumns(connection, query);
-    }
+
+    const columns = result.totalSize ? await this.retrieveColumns(connection, query, logger) : [];
 
     return {
       query,
@@ -100,7 +96,8 @@ export class SoqlQuery {
    * @param query
    */
 
-  public async retrieveColumns(connection: Connection, query: string): Promise<Field[]> {
+  public async retrieveColumns(connection: Connection, query: string, logger?: Logger): Promise<Field[]> {
+    logger?.debug('fetching columns for query');
     // eslint-disable-next-line no-underscore-dangle
     const columnUrl = `${connection._baseUrl()}/query?q=${encodeURIComponent(query)}&columns=true`;
     const results = toJsonMap(await connection.request<Record>(columnUrl));
