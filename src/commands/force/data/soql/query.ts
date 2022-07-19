@@ -8,7 +8,7 @@
 import * as os from 'os';
 import { flags, FlagsConfig } from '@salesforce/command';
 import { CliUx } from '@oclif/core';
-import { Connection, Logger, Messages, SfdxConfigAggregator } from '@salesforce/core';
+import { Connection, Logger, Messages, SfdxConfigAggregator, SfError } from '@salesforce/core';
 import { QueryOptions, QueryResult, Record } from 'jsforce';
 import {
   AnyJson,
@@ -21,6 +21,7 @@ import {
   JsonArray,
   toJsonMap,
 } from '@salesforce/ts-types';
+import { Duration } from '@salesforce/kit';
 import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../../../reporters';
 import { Field, FieldType, SoqlQueryResult } from '../../../../dataSoqlQueryTypes';
 import { DataCommand } from '../../../../dataCommand';
@@ -35,6 +36,56 @@ const commonMessages = Messages.loadMessages('@salesforce/plugin-data', 'message
  * Will collect all records and the column metadata of the query
  */
 export class SoqlQuery {
+  /**
+   * Executs a SOQL query using the bulk 2.0 API
+   *
+   * @param connection
+   * @param query
+   * @param timeout
+   */
+  public async runBulkSoqlQuery(
+    connection: Connection,
+    query: string,
+    timeout: Duration = Duration.seconds(10)
+  ): Promise<SoqlQueryResult> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    connection.bulk.v2.pollTimeout = timeout.milliseconds ?? Duration.minutes(5).milliseconds;
+    let res: Record[];
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+      res = (await connection.bulk.v2.query(query)) ?? [];
+      return this.transformBulkResults(res, query);
+    } catch (e) {
+      const err = e as Error & { jobId: string };
+      if (timeout.minutes === 0 && err.message.includes('Polling time out')) {
+        // async query, so we can't throw an error, suggest force:data:query:report --queryid <id>
+        CliUx.ux.log(messages.getMessage('bulkQueryTimeout', [err.jobId, err.jobId, connection.getUsername()]));
+        return { columns: [], result: { done: true, records: [], totalSize: 0 }, query };
+      } else {
+        throw SfError.wrap(err);
+      }
+    }
+  }
+
+  /**
+   * transforms Bulk 2.0 results to match the SOQL query results
+   *
+   * @param results results object
+   * @param query query string
+   */
+  public transformBulkResults(results: Record[], query: string): SoqlQueryResult {
+    const columns: Field[] = Object.keys(results[0]).map((key) => ({
+      fieldType: FieldType.field,
+      name: key,
+    }));
+
+    return {
+      columns,
+      result: { done: true, records: results, totalSize: results.length },
+      query,
+    };
+  }
+
   public async runSoqlQuery(
     connection: Connection,
     query: string,
@@ -189,6 +240,17 @@ export class DataSoqlQueryCommand extends DataCommand {
       char: 't',
       description: messages.getMessage('queryToolingDescription'),
     }),
+    bulk: flags.boolean({
+      char: 'b',
+      default: false,
+      description: messages.getMessage('bulkDescription'),
+      exclusive: ['usetoolingapi'],
+    }),
+    wait: flags.minutes({
+      char: 'w',
+      description: messages.getMessage('waitDescription'),
+      dependsOn: ['bulk'],
+    }),
     resultformat: flags.enum({
       char: 'r',
       description: messages.getMessage('resultFormatDescription'),
@@ -218,25 +280,29 @@ export class DataSoqlQueryCommand extends DataCommand {
   public async run(): Promise<unknown> {
     try {
       if (this.flags.resultformat !== 'json') this.ux.startSpinner(messages.getMessage('queryRunningMessage'));
-      const query = new SoqlQuery();
-      const conn = this.getConnection();
-      const queryResult: SoqlQueryResult = await query.runSoqlQuery(
-        conn as Connection,
-        this.flags.query,
-        this.logger,
-        this.configAggregator
-      );
-      const results = {
-        ...queryResult,
-      };
-      this.displayResults(results);
+      const query = this.flags.query as string;
+      let queryResult: SoqlQueryResult;
+      const soqlQuery = new SoqlQuery();
+
+      if (this.flags.bulk) {
+        queryResult = await soqlQuery.runBulkSoqlQuery(this.org!.getConnection(), query, this.flags.wait);
+      } else {
+        queryResult = await soqlQuery.runSoqlQuery(
+          this.getConnection() as Connection,
+          query,
+          this.logger,
+          this.configAggregator
+        );
+      }
+
+      this.displayResults({ ...queryResult });
       return queryResult.result;
     } finally {
       if (this.flags.resultformat !== 'json') this.ux.stopSpinner();
     }
   }
 
-  private displayResults(queryResult: SoqlQueryResult): void {
+  public displayResults(queryResult: SoqlQueryResult): void {
     // bypass if --json flag present
     if (!this.flags.json) {
       let reporter;
