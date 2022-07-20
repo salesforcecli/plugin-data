@@ -245,7 +245,7 @@ describe('data:soql:query command', () => {
       expect(result).to.include('description');
     });
   });
-  describe.only('data:soql:query --bulk', () => {
+  describe('data:soql:query --bulk', () => {
     it('should return Lead.owner.name (multi-level relationships)', () => {
       execCmd('force:data:record:create -s Lead -v "Company=Salesforce LastName=Astro"', { ensureExitCode: 0 });
 
@@ -290,10 +290,10 @@ describe('data:soql:query command', () => {
 
     it('should handle count() error correctly', () => {
       const queryResult = execCmd('force:data:soql:query -q "SELECT Count() from User" --bulk', {
-        ensureExitCode: 0,
+        ensureExitCode: 1,
       }).shellOutput as string;
 
-      expect(queryResult).to.match(/Total number of records retrieved: [1-9]\d*\./g);
+      expect(queryResult).to.match(/COUNT not supported in Bulk Query/g);
     });
 
     it('should emit suggestion to use query:report', () => {

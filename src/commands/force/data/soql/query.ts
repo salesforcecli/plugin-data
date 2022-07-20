@@ -6,7 +6,7 @@
  */
 
 import * as os from 'os';
-import { flags, FlagsConfig } from '@salesforce/command';
+import { flags, FlagsConfig, UX } from '@salesforce/command';
 import { CliUx } from '@oclif/core';
 import { Connection, Logger, Messages, SfdxConfigAggregator, SfError } from '@salesforce/core';
 import { QueryOptions, QueryResult, Record } from 'jsforce';
@@ -42,25 +42,25 @@ export class SoqlQuery {
    * @param connection
    * @param query
    * @param timeout
+   * @param ux
    */
   public async runBulkSoqlQuery(
     connection: Connection,
     query: string,
-    timeout: Duration = Duration.seconds(10)
+    timeout: Duration = Duration.seconds(10),
+    ux: UX
   ): Promise<SoqlQueryResult> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     connection.bulk.v2.pollTimeout = timeout.milliseconds ?? Duration.minutes(5).milliseconds;
     let res: Record[];
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
       res = (await connection.bulk.v2.query(query)) ?? [];
       return this.transformBulkResults(res, query);
     } catch (e) {
       const err = e as Error & { jobId: string };
       if (timeout.minutes === 0 && err.message.includes('Polling time out')) {
         // async query, so we can't throw an error, suggest force:data:query:report --queryid <id>
-        CliUx.ux.log(messages.getMessage('bulkQueryTimeout', [err.jobId, err.jobId, connection.getUsername()]));
-        return { columns: [], result: { done: true, records: [], totalSize: 0 }, query };
+        ux.log(messages.getMessage('bulkQueryTimeout', [err.jobId, err.jobId, connection.getUsername()]));
+        return { columns: [], result: { done: false, records: [], totalSize: 0, id: err.jobId }, query };
       } else {
         throw SfError.wrap(err);
       }
@@ -74,9 +74,13 @@ export class SoqlQuery {
    * @param query query string
    */
   public transformBulkResults(results: Record[], query: string): SoqlQueryResult {
-    const columns: Field[] = Object.keys(results[0]).map((key) => ({
+    /*
+    bulk queries return a different payload, it's a [{column: data}, {column: data}]
+    so we just need to grab the first object, find the keys (columns) and create the columns
+     */
+    const columns: Field[] = Object.keys(results[0] ?? {}).map((name) => ({
       fieldType: FieldType.field,
-      name: key,
+      name,
     }));
 
     return {
@@ -285,7 +289,7 @@ export class DataSoqlQueryCommand extends DataCommand {
       const soqlQuery = new SoqlQuery();
 
       if (this.flags.bulk) {
-        queryResult = await soqlQuery.runBulkSoqlQuery(this.org!.getConnection(), query, this.flags.wait);
+        queryResult = await soqlQuery.runBulkSoqlQuery(this.org!.getConnection(), query, this.flags.wait, this.ux);
       } else {
         queryResult = await soqlQuery.runSoqlQuery(
           this.getConnection() as Connection,
