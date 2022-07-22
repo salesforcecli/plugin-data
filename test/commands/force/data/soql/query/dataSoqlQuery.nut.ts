@@ -116,7 +116,7 @@ describe('data:soql:query command', () => {
       expect(stdError).to.include('unexpected token');
     });
 
-    it('should return account records, from --soqlqueryfile', () => {
+    it('should produce correct error when invalid soql provided', () => {
       const filepath = path.join(testSession.dir, 'soql.txt');
       fs.writeFileSync(filepath, 'SELECT');
 

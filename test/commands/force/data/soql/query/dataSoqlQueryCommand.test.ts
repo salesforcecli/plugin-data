@@ -149,19 +149,8 @@ describe('Execute a SOQL statement', function (): void {
         });
     });
     describe('flag validation between --query and --soqlqueryfile', () => {
-      beforeEach(() => {
-        soqlQuerySpy = sandbox
-          .stub(SoqlQuery.prototype, 'runSoqlQuery')
-          .resolves(soqlQueryExemplars.complexSubQuery.soqlQueryResult);
-      });
-
-      afterEach(() => {
-        sandbox.restore();
-      });
-
       test
         .withOrg({ username: 'test@org.com' }, true)
-        .stdout()
         .stderr()
         .command([
           QUERY_COMMAND,
