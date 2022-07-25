@@ -161,7 +161,7 @@ describe('Execute a SOQL statement', function (): void {
           '--soqlqueryfile',
           'soql.txt',
         ])
-        .it('should have human results for a complex subquery', (ctx) => {
+        .it('should throw an error when both query (inline/file query) flags are specified', (ctx) => {
           expect(ctx.stderr).to.include('--soqlqueryfile= cannot also be provided when using --query=');
         });
     });

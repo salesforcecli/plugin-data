@@ -185,11 +185,13 @@ export class DataSoqlQueryCommand extends DataCommand {
       char: 'q',
       description: messages.getMessage('queryToExecute'),
       exclusive: ['soqlqueryfile'],
+      exactlyOne: ['query', 'soqlqueryfile'],
     }),
     soqlqueryfile: flags.filepath({
       char: 'f',
       description: messages.getMessage('soqlqueryfile'),
       exclusive: ['query'],
+      exactlyOne: ['query', 'soqlqueryfile'],
     }),
     usetoolingapi: flags.boolean({
       char: 't',
