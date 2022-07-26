@@ -23,7 +23,7 @@ interface QueryResult {
   result: { totalSize: number; records: [] };
 }
 
-describe.skip('Execute a SOQL statement', function (): void {
+describe('Execute a SOQL statement', function (): void {
   let sandbox: SinonSandbox;
   beforeEach(() => {
     sandbox = sinon.createSandbox();
@@ -146,6 +146,23 @@ describe.skip('Execute a SOQL statement', function (): void {
             )
           ).to.be.true;
           expect(ctx.stdout).to.include('records retrieved: 1');
+        });
+    });
+    describe('flag validation between --query and --soqlqueryfile', () => {
+      test
+        .withOrg({ username: 'test@org.com' }, true)
+        .stderr()
+        .command([
+          QUERY_COMMAND,
+          '--targetusername',
+          'test@org.com',
+          '--query',
+          'SELECT Amount, Id, Name,StageName, CloseDate, (SELECT Id,  ListPrice, PriceBookEntry.UnitPrice, PricebookEntry.Name, PricebookEntry.Id, PricebookEntry.product2.Family FROM OpportunityLineItems) FROM Opportunity',
+          '--soqlqueryfile',
+          'soql.txt',
+        ])
+        .it('should throw an error when both query (inline/file query) flags are specified', (ctx) => {
+          expect(ctx.stderr).to.include('--soqlqueryfile= cannot also be provided when using --query=');
         });
     });
     describe('reporters produce the correct aggregate query', () => {

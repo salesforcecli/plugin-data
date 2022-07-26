@@ -6,6 +6,7 @@
  */
 
 import * as os from 'os';
+import * as fs from 'fs';
 import { flags, FlagsConfig } from '@salesforce/command';
 import { CliUx } from '@oclif/core';
 import { Connection, Logger, Messages, SfdxConfigAggregator } from '@salesforce/core';
@@ -182,8 +183,15 @@ export class DataSoqlQueryCommand extends DataCommand {
   public static readonly flagsConfig: FlagsConfig = {
     query: flags.string({
       char: 'q',
-      required: true,
       description: messages.getMessage('queryToExecute'),
+      exclusive: ['soqlqueryfile'],
+      exactlyOne: ['query', 'soqlqueryfile'],
+    }),
+    soqlqueryfile: flags.filepath({
+      char: 'f',
+      description: messages.getMessage('soqlqueryfile'),
+      exclusive: ['query'],
+      exactlyOne: ['query', 'soqlqueryfile'],
     }),
     usetoolingapi: flags.boolean({
       char: 't',
@@ -220,9 +228,10 @@ export class DataSoqlQueryCommand extends DataCommand {
       if (this.flags.resultformat !== 'json') this.ux.startSpinner(messages.getMessage('queryRunningMessage'));
       const query = new SoqlQuery();
       const conn = this.getConnection();
+      const queryString = (this.flags.query as string) ?? fs.readFileSync(this.flags.soqlqueryfile, 'utf8');
       const queryResult: SoqlQueryResult = await query.runSoqlQuery(
         conn as Connection,
-        this.flags.query,
+        queryString,
         this.logger,
         this.configAggregator
       );

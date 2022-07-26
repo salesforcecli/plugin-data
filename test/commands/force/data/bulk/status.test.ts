@@ -15,7 +15,6 @@ interface StatusResult {
 
 describe('force:data:bulk:status', () => {
   test
-    .skip()
     .do(() => {
       const Job = {
         getAuthInfoFields: () => {
@@ -70,7 +69,6 @@ describe('force:data:bulk:status', () => {
     });
 
   test
-    .skip()
     .do(() => {
       const Job = {
         getAuthInfoFields: () => {
