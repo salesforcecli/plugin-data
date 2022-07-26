@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/salesforcecli/plugin-data/compare/v2.0.4...v2.1.0) (2022-07-26)
+
+### Features
+
+- add a soqlqueryfile parameter to allow longer queries ([#327](https://github.com/salesforcecli/plugin-data/issues/327)) ([966096d](https://github.com/salesforcecli/plugin-data/commit/966096ddd8338c1a92c02d706cbad46ba5e122ad))
+
 ### [2.0.4](https://github.com/salesforcecli/plugin-data/compare/v2.0.3...v2.0.4) (2022-06-16)
 
 ### Bug Fixes
