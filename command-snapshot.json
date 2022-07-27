@@ -2,12 +2,14 @@
   {
     "command": "force:data:bulk:delete",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["apiversion", "csvfile", "json", "loglevel", "sobjecttype", "targetusername", "wait"]
+    "flags": ["apiversion", "csvfile", "json", "loglevel", "sobjecttype", "targetusername", "wait"],
+    "alias": []
   },
   {
     "command": "force:data:bulk:status",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["apiversion", "batchid", "jobid", "json", "loglevel", "targetusername"]
+    "flags": ["apiversion", "batchid", "jobid", "json", "loglevel", "targetusername"],
+    "alias": []
   },
   {
     "command": "force:data:bulk:upsert",
@@ -22,12 +24,14 @@
       "sobjecttype",
       "targetusername",
       "wait"
-    ]
+    ],
+    "alias": []
   },
   {
     "command": "force:data:record:create",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["apiversion", "json", "loglevel", "perflog", "sobjecttype", "targetusername", "usetoolingapi", "values"]
+    "flags": ["apiversion", "json", "loglevel", "perflog", "sobjecttype", "targetusername", "usetoolingapi", "values"],
+    "alias": []
   },
   {
     "command": "force:data:record:delete",
@@ -42,7 +46,8 @@
       "targetusername",
       "usetoolingapi",
       "where"
-    ]
+    ],
+    "alias": []
   },
   {
     "command": "force:data:record:get",
@@ -57,7 +62,8 @@
       "targetusername",
       "usetoolingapi",
       "where"
-    ]
+    ],
+    "alias": []
   },
   {
     "command": "force:data:record:update",
@@ -73,17 +79,30 @@
       "usetoolingapi",
       "values",
       "where"
-    ]
+    ],
+    "alias": []
   },
   {
     "command": "force:data:soql:query",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["apiversion", "json", "loglevel", "perflog", "query", "resultformat", "targetusername", "usetoolingapi"]
+    "flags": [
+      "apiversion",
+      "json",
+      "loglevel",
+      "perflog",
+      "query",
+      "resultformat",
+      "soqlqueryfile",
+      "targetusername",
+      "usetoolingapi"
+    ],
+    "alias": []
   },
   {
     "command": "force:data:tree:export",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["apiversion", "json", "loglevel", "outputdir", "plan", "prefix", "query", "targetusername"]
+    "flags": ["apiversion", "json", "loglevel", "outputdir", "plan", "prefix", "query", "targetusername"],
+    "alias": []
   },
   {
     "command": "force:data:tree:import",
@@ -97,6 +116,7 @@
       "plan",
       "sobjecttreefiles",
       "targetusername"
-    ]
+    ],
+    "alias": []
   }
 ]

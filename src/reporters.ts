@@ -8,8 +8,9 @@ import { EOL } from 'os';
 import { Logger, Messages } from '@salesforce/core';
 import { UX } from '@salesforce/command';
 import * as chalk from 'chalk';
-import { get, getNumber, isString, Optional } from '@salesforce/ts-types';
-import { BasicRecord, Field, FieldType, hasNestedRecords, SoqlQueryResult } from './dataSoqlQueryTypes';
+import { get, getArray, getNumber, isString, Optional } from '@salesforce/ts-types';
+import { CliUx } from '@oclif/core';
+import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
@@ -43,11 +44,6 @@ type ParsedFields = {
   attributeNames: Array<Optional<string>>;
   children: string[];
   aggregates: Field[];
-};
-
-type ColumnAttributes = {
-  key: string;
-  label: string;
 };
 
 export class HumanReporter extends QueryReporter {
@@ -98,9 +94,9 @@ export class HumanReporter extends QueryReporter {
     return { attributeNames, children, aggregates };
   }
 
-  public soqlQuery(columns: Array<Optional<string>>, records: BasicRecord[], totalCount: number): void {
+  public soqlQuery(columns: Array<Optional<string>>, records: unknown[], totalCount: number): void {
     this.prepNullValues(records);
-    this.ux.table(records, { columns: this.prepColumns(columns) });
+    this.ux.table(records, this.prepColumns(columns));
     this.log(chalk.bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
   }
 
@@ -119,23 +115,36 @@ export class HumanReporter extends QueryReporter {
     });
   }
 
-  public prepColumns(columns: Array<Optional<string>>): ColumnAttributes[] {
-    return columns
+  public prepColumns(columns: Array<Optional<string>>): CliUx.Table.table.Columns<Record<string, unknown>> {
+    const formattedColumns: CliUx.Table.table.Columns<Record<string, unknown>> = {};
+    columns
       .map((field: Optional<string>) => field as string)
       .filter((field): string => field)
       .map(
-        (field: string): ColumnAttributes => ({
-          key: field,
-          label: field.toUpperCase(),
-        })
+        (field: string) =>
+          (formattedColumns[field] = {
+            header: field.toUpperCase(),
+            get: (row): string => {
+              // first test if key exists, if so, return value
+              if (Reflect.has(row, field)) {
+                return (Reflect.get(row, field) as string) || '';
+              } else {
+                // if not, try to find it query
+                return (get(row, field) as string) || '';
+              }
+            },
+          })
       );
+    return formattedColumns;
   }
 
-  public massageRows(queryResults: BasicRecord[], children: string[], aggregates: Field[]): BasicRecord[] {
+  //  public massageRows(queryResults: BasicRecord[], children: string[], aggregates: Field[]): BasicRecord[] {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public massageRows(queryResults: unknown[], children: string[], aggregates: Field[]): any {
     // some fields will return a JSON object that isn't accessible via the query (SELECT Metadata FROM RemoteProxy)
     // some will return a JSON that IS accessible via the query (SELECT owner.Profile.Name FROM Lead)
     // querying (SELECT Metadata.isActive FROM RemoteProxy) throws a SOQL validation error, so we have to display the entire Metadata object
-    queryResults.map((qr) => {
+    queryResults.forEach((qr) => {
       const result = qr as Record<string, unknown>;
       this.data.columns.forEach((col) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -153,9 +162,7 @@ export class HumanReporter extends QueryReporter {
     // There are subqueries or aggregates. Massage the data.
     let qr;
     if (children.length > 0 || aggregates.length > 0) {
-      qr = queryResults.reduce((newResults, result) => {
-        newResults.push(result);
-
+      qr = queryResults.reduce((newResults: unknown[], result) => {
         // Aggregates are soql functions that aggregate data, like "SELECT avg(total)" and
         // are returned in the data as exprX. Aggregates can have aliases, like "avg(total) totalAverage"
         // and are returned in the data as the alias.
@@ -163,36 +170,49 @@ export class HumanReporter extends QueryReporter {
           for (let i = 0; i < aggregates.length; i++) {
             const aggregate = aggregates[i];
             if (!aggregate.alias) {
-              Reflect.set(result, aggregate.name, Reflect.get(result, `expr${i}`));
+              Reflect.set(result as never, aggregate.name, Reflect.get(result as never, `expr${i}`));
             }
           }
         }
 
+        const subResults: Array<Record<string, unknown>> = [];
         if (children.length > 0) {
           const childrenRows: Record<string, unknown> = {};
           children.forEach((child) => {
-            const aChild = result[child];
+            const aChild = get(result as never, child);
             Reflect.set(childrenRows, child, aChild);
-            Reflect.deleteProperty(result, child);
+            Reflect.deleteProperty(result as never, child);
           });
 
-          Object.keys(childrenRows).forEach((child) => {
-            const childObject = childrenRows[child];
-            if (childObject && hasNestedRecords<BasicRecord>(childObject)) {
-              childObject.records.forEach((childRecord) => {
-                const newRecord: Record<string, unknown> = {};
-
-                Object.entries(childRecord).forEach(([key, value]) => {
-                  Reflect.defineProperty(newRecord, `${child.toString()}.${key}`, { value });
+          Reflect.ownKeys(childrenRows).forEach((child) => {
+            const childO = get(childrenRows, child as string);
+            if (childO) {
+              const childRecords = getArray(childO, 'records', []);
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              childRecords.forEach((record: unknown, index) => {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                const newResult: Record<string, unknown> = {};
+                Object.entries(record as never).forEach(([key, value]) => {
+                  if (!index) {
+                    Reflect.defineProperty(result as Record<string, unknown>, `${child.toString()}.${key}`, {
+                      value: value ? value : chalk.bold('null'),
+                    });
+                  } else {
+                    Reflect.defineProperty(newResult, `${child.toString()}.${key}`, {
+                      value: value ? value : chalk.bold('null'),
+                    });
+                  }
                 });
-                // I guarantee that one of the keys will be the `attributes`
-                newResults.push(newRecord as BasicRecord);
+                if (index) {
+                  subResults.push(newResult);
+                }
               });
             }
           });
         }
+        newResults.push(result, ...subResults);
         return newResults;
-      }, [] as BasicRecord[]);
+      }, [] as unknown[]);
     }
     return qr ?? queryResults;
   }
@@ -238,6 +258,9 @@ export class CsvReporter extends QueryReporter {
         const value = get(row, name);
         if (isString(value)) {
           return this.escape(value);
+          // if value is null, then typeof value === 'object' so check before typeof to avoid illegal csv
+        } else if (value === null) {
+          return;
         } else if (typeof value === 'object') {
           return this.escape(JSON.stringify(value));
         }
@@ -278,7 +301,7 @@ export class CsvReporter extends QueryReporter {
       // Get max lengths by iterating over the records once
       this.data.result.records.forEach((result) => {
         [...typeLengths.keys()].forEach((key) => {
-          const record = result[key];
+          const record = get(result as never, key);
           const totalSize = getNumber(record, 'totalSize');
           if (!!totalSize && totalSize > (typeLengths.get(key) ?? 0)) {
             typeLengths.set(key, totalSize);

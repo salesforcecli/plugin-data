@@ -29,7 +29,9 @@ export interface Field {
  */
 export type SoqlQueryResult = {
   query: string;
-  result: QueryResult<BasicRecord>;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore jsforce v2 types are too strict for running general queries
+  result: QueryResult<unknown>;
   columns: Field[];
 };
 
@@ -37,7 +39,7 @@ export type BasicRecord = {
   [index: string]: { records: BasicRecord[] } | unknown;
   attributes: {
     type: string;
-    url?: string;
+    url: string;
   };
 };
 

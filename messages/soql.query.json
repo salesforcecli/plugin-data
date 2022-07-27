@@ -11,10 +11,13 @@
   "queryNoResults": "Your query returned no results.",
   "queryRunningMessage": "Querying Data",
   "queryMoreUpdateMessage": "Result size is %d, current count is %d",
+  "soqlqueryfile": "A SOQL query stored in a file",
   "examples": [
-    "sfdx force:data:soql:query -q \"SELECT Id, Name, Account.Name FROM Contact\"",
-    "sfdx force:data:soql:query -q \"SELECT Id, Name FROM Account WHERE ShippingState IN ('CA', 'NY')\"",
-    "sfdx force:data:soql:query -q \"SELECT Id, Name FROM Account WHERE ShippingState IN ('CA', 'NY')\" --perflog --json",
-    "sfdx force:data:soql:query -q \"SELECT Name FROM ApexTrigger\" -t"
+    "$ sfdx force:data:soql:query -q \"SELECT Id, Name, Account.Name FROM Contact\"",
+    "$ sfdx force:data:soql:query -q \"SELECT Id, Name FROM Account WHERE ShippingState IN ('CA', 'NY')\"",
+    "$ sfdx force:data:soql:query -q \"SELECT Id, Name FROM Account WHERE ShippingState IN ('CA', 'NY')\" --perflog --json",
+    "$ sfdx force:data:soql:query -q \"SELECT Name FROM ApexTrigger\" -t",
+    "$ sfdx force:data:soql:query --soqlqueryfile query.txt",
+    "$ sfdx force:data:soql:query --soqlqueryfile query.txt -t"
   ]
 }

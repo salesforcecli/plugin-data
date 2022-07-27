@@ -5,9 +5,11 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import * as path from 'path';
+import * as fs from 'fs';
+import * as shell from 'shelljs';
+import { AnyJson, Dictionary, ensureString, getString, isArray } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-import { Dictionary, getString } from '@salesforce/ts-types';
 
 export interface QueryResult {
   totalSize: number;
@@ -20,6 +22,7 @@ interface QueryOptions {
   ensureExitCode?: number;
   toolingApi?: boolean;
 }
+
 function verifyRecordFields(accountRecord: Dictionary, fields: string[]) {
   expect(accountRecord).to.have.all.keys(...fields);
 }
@@ -47,12 +50,14 @@ function runQuery(query: string, options: QueryOptions = { json: true, ensureExi
 
 describe('data:soql:query command', () => {
   let testSession: TestSession;
+  let hubOrgUsername: string;
 
   before(async () => {
     testSession = await TestSession.create({
       setupCommands: [
         'sfdx force:org:create -f config/project-scratch-def.json --setdefaultusername --wait 10 --durationdays 1',
         'sfdx force:source:push',
+        'sfdx config:get defaultdevhubusername --json',
       ],
       project: { sourceDir: path.join('test', 'test-files', 'data-project') },
     });
@@ -60,15 +65,63 @@ describe('data:soql:query command', () => {
     execCmd(`force:data:tree:import --plan ${path.join('.', 'data', 'accounts-contacts-plan.json')}`, {
       ensureExitCode: 0,
     });
+
+    // get default devhub username
+    if (isArray<AnyJson>(testSession.setup)) {
+      hubOrgUsername = ensureString(
+        (testSession.setup[2] as { result: [{ key: string; value: string }] }).result.find(
+          (config) => config.key === 'defaultdevhubusername'
+        )?.value
+      );
+    }
   });
 
   after(async () => {
     await testSession?.clean();
   });
 
+  describe('data:soql:query respects maxQueryLimit config', () => {
+    it('should return 1 account record', () => {
+      // set maxQueryLimit to 1 globally
+      shell.exec('sfdx config:set maxQueryLimit=1 -g', { silent: true });
+
+      const result = runQuery('SELECT Id, Name, Phone FROM Account', { json: true }) as QueryResult;
+
+      expect(result.records.length).to.equal(1);
+      verifyRecordFields(result?.records[0], ['Id', 'Name', 'Phone', 'attributes']);
+    });
+
+    it('should return 3756 ScratchOrgInfo records', () => {
+      //
+      // set maxQueryLimit to 3756 globally
+      shell.exec('sfdx config:set maxQueryLimit=3756 -g', { silent: true });
+
+      const soqlQuery = 'SELECT Id FROM ScratchOrgInfo';
+      const queryCmd = `force:data:soql:query --query "${soqlQuery}" --json --targetusername ${hubOrgUsername}`;
+      const results = execCmd<QueryResult>(queryCmd, { ensureExitCode: 0 });
+
+      const queryResult: QueryResult = results.jsonOutput?.result ?? { done: false, records: [], totalSize: 0 };
+      expect(queryResult).to.have.property('totalSize').to.be.greaterThan(0);
+      expect(queryResult).to.have.property('done', true);
+      expect(queryResult).to.have.property('records').to.not.have.lengthOf(0);
+      expect(queryResult.records.length).to.equal(3756);
+      verifyRecordFields(queryResult?.records[0], ['Id', 'attributes']);
+    });
+  });
+
   describe('data:soql:query verify query errors', () => {
     it('should error with invalid soql', () => {
       const result = runQuery('SELECT', { ensureExitCode: 1, json: false }) as string;
+      const stdError = result?.toLowerCase();
+      expect(stdError).to.include('unexpected token');
+    });
+
+    it('should produce correct error when invalid soql provided', () => {
+      const filepath = path.join(testSession.dir, 'soql.txt');
+      fs.writeFileSync(filepath, 'SELECT');
+
+      const result = execCmd(`force:data:soql:query --soqlqueryfile ${filepath}`, { ensureExitCode: 1 }).shellOutput
+        .stderr;
       const stdError = result?.toLowerCase();
       expect(stdError).to.include('unexpected token');
     });
@@ -124,15 +177,22 @@ describe('data:soql:query command', () => {
   describe('data:soql:query verify human results', () => {
     it('should return Lead.owner.name (multi-level relationships)', () => {
       execCmd('force:data:record:create -s Lead -v "Company=Salesforce LastName=Astro"', { ensureExitCode: 0 });
-      const query = 'SELECT owner.Profile.Name FROM lead LIMIT 1';
+
+      const profileId = (runQuery("SELECT ID FROM Profile WHERE Name='System Administrator'") as QueryResult).records[0]
+        .Id;
+      const query = 'SELECT owner.Profile.Name, owner.Profile.Id, Title, Name FROM lead LIMIT 1';
 
       const queryResult = runQuery(query, { ensureExitCode: 0 });
       expect(queryResult).to.not.include('[object Object]');
       expect(queryResult).to.include('System Administrator');
+      expect(queryResult).to.include(profileId);
 
       const queryResultCSV = runQuery(query + '" --resultformat "csv', { ensureExitCode: 0 });
       expect(queryResultCSV).to.not.include('[object Object]');
       expect(queryResultCSV).to.include('System Administrator');
+      expect(queryResultCSV).to.include(profileId);
+      // Title is null and represented as ,, (empty) in csv
+      expect(queryResultCSV).to.include(',,');
     });
 
     it('should return account records', () => {
@@ -144,16 +204,31 @@ describe('data:soql:query command', () => {
       expect(queryResult).to.match(/ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY/g);
       expect(queryResult).to.match(/Total number of records retrieved: 1\./g);
     });
+
+    it('should return account records, from --soqlqueryfile', () => {
+      const query =
+        "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry FROM Account WHERE Name LIKE 'SampleAccount%' limit 1";
+      const filepath = path.join(testSession.dir, 'soql.txt');
+      fs.writeFileSync(filepath, query);
+
+      const queryResult = execCmd(`force:data:soql:query --soqlqueryfile ${filepath}`, { ensureExitCode: 0 })
+        .shellOutput.stdout;
+
+      expect(queryResult).to.match(/ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY/g);
+      expect(queryResult).to.match(/Total number of records retrieved: 1\./g);
+    });
+
     it('should return account records with nested contacts', () => {
       const query =
-        "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry, (SELECT Lastname, Title, Email FROM Contacts) FROM Account  WHERE Name LIKE 'SampleAccount%' limit 1";
+        "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry, (SELECT Lastname, Title, Email FROM Contacts) FROM Account  WHERE Name LIKE 'SampleAccount%'";
 
       const queryResult = runQuery(query, { ensureExitCode: 0, json: false }) as string;
 
       expect(queryResult).to.match(
         /ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY\s+?CONTACTS.LASTNAME\s+?CONTACTS.TITLE\s+?CONTACTS.EMAIL/g
       );
-      expect(queryResult).to.match(/Total number of records retrieved: 1\./g);
+      expect(queryResult).to.match(/\sSmith/g);
+      expect(queryResult).to.match(/Total number of records retrieved: 2\./g);
     });
     it('should handle count()', () => {
       const queryResult = execCmd('force:data:soql:query -q "SELECT Count() from User"', {

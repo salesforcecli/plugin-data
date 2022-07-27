@@ -4,11 +4,11 @@
   "values": "the <fieldName>=<value> pairs you’re creating",
   "useToolingApi": "create the record with tooling api",
   "examples": [
-    "sfdx force:data:record:create -s Account -v \"Name=Acme\"",
-    "sfdx force:data:record:create -s Account -v \"Name='Universal Containers'\"",
-    "sfdx force:data:record:create -s Account -v \"Name='Universal Containers' Website=www.example.com\"",
-    "sfdx force:data:record:create -t -s TraceFlag -v \"DebugLevelId=7dl170000008U36AAE StartDate=2017-12-01T00:26:04.000+0000 ExpirationDate=2017-12-01T00:56:04.000+0000 LogType=CLASS_TRACING TracedEntityId=01p17000000R6bLAAS\"",
-    "sfdx force:data:record:create -s Account -v \"Name=Acme\" --perflog --json"
+    "$ sfdx force:data:record:create -s Account -v \"Name=Acme\"",
+    "$ sfdx force:data:record:create -s Account -v \"Name='Universal Containers'\"",
+    "$ sfdx force:data:record:create -s Account -v \"Name='Universal Containers' Website=www.example.com\"",
+    "$ sfdx force:data:record:create -t -s TraceFlag -v \"DebugLevelId=7dl170000008U36AAE StartDate=2017-12-01T00:26:04.000+0000 ExpirationDate=2017-12-01T00:56:04.000+0000 LogType=CLASS_TRACING TracedEntityId=01p17000000R6bLAAS\"",
+    "$ sfdx force:data:record:create -s Account -v \"Name=Acme\" --perflog --json"
   ],
   "createSuccess": "Successfully created record: %s.",
   "createFailure": "Failed to create record. %s"

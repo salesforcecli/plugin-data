@@ -5,9 +5,9 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
+import * as fs from 'fs';
 import { expect, test } from '@salesforce/command/lib/test';
-import { ensureJsonMap, ensureString, isString, AnyJson } from '@salesforce/ts-types';
-import { fs as fsCore } from '@salesforce/core';
+import { AnyJson, ensureJsonMap, ensureString, isString } from '@salesforce/ts-types';
 
 const query = 'SELECT Id, Name from Account';
 
@@ -53,7 +53,7 @@ interface ExportResult {
 
 describe('force:data:tree:export', () => {
   test
-    .stub(fsCore, 'writeFileSync', () => null)
+    .stub(fs, 'writeFileSync', () => null)
     .withOrg({ username: 'test@org.com' }, true)
     .withConnectionRequest((request) => {
       if (isString(request) && request.includes('sobjects/Account/describe')) {

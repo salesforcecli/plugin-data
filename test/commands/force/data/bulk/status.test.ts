@@ -7,7 +7,6 @@
 import { $$, expect, test } from '@salesforce/command/lib/test';
 import { stubMethod } from '@salesforce/ts-sinon';
 import { Org } from '@salesforce/core';
-import { Batcher } from '../../../../../src/batcher';
 
 interface StatusResult {
   status: number;
@@ -18,6 +17,9 @@ describe('force:data:bulk:status', () => {
   test
     .do(() => {
       const Job = {
+        getAuthInfoFields: () => {
+          return { orgId: '123' };
+        },
         bulk: {
           job: () => {
             return {
@@ -69,6 +71,9 @@ describe('force:data:bulk:status', () => {
   test
     .do(() => {
       const Job = {
+        getAuthInfoFields: () => {
+          return { orgId: '123' };
+        },
         bulk: {
           job: () => {
             return {
@@ -130,41 +135,5 @@ describe('force:data:bulk:status', () => {
         ],
         status: 0,
       });
-    });
-
-  const expected = {
-    id: '75054000006yv68AAA',
-    operation: 'delete',
-    object: 'ApexClass',
-    createdById: '00554000006MBtTAAW',
-    createdDate: '2020-11-30T16:14:21.000Z',
-    systemModstamp: '2020-11-30T16:14:21.000Z',
-    state: 'Closed',
-    concurrencyMode: 'Parallel',
-    contentType: 'CSV',
-    numberBatchesQueued: '0',
-    numberBatchesInProgress: '0',
-    numberBatchesCompleted: '1',
-    numberBatchesFailed: '0',
-    numberBatchesTotal: '1',
-    numberRecordsProcessed: '1',
-    numberRetries: '0',
-    apiVersion: '50.0',
-    numberRecordsFailed: '1',
-    totalProcessingTime: '185',
-    apiActiveProcessingTime: '55',
-    apexProcessingTime: '0',
-  };
-
-  test
-    .do(() => {
-      stubMethod($$.SANDBOX, Batcher.prototype, 'fetchAndDisplayJobStatus').returns(expected);
-    })
-    .withOrg({ username: 'test@org.com' }, true)
-    .stdout()
-    .command(['force:data:bulk:status', '--targetusername', 'test@org.com', '--jobid', '75054000006ybyHAAQ', '--json'])
-    .it('will call Batcher to find jobid', (ctx) => {
-      const result = JSON.parse(ctx.stdout) as never;
-      expect(result).to.deep.equal({ status: 0, result: expected });
     });
 });

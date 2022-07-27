@@ -8,9 +8,9 @@
 import * as os from 'os';
 
 import { flags, FlagsConfig } from '@salesforce/command';
-import { Messages, SfdxError } from '@salesforce/core';
+import { Messages, SfError } from '@salesforce/core';
 import { Record } from 'jsforce';
-import { AnyJson, toAnyJson } from '@salesforce/ts-types';
+import { toAnyJson } from '@salesforce/ts-types';
 import { DataCommand } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -48,7 +48,7 @@ export default class Get extends DataCommand {
     }),
   };
 
-  public async run(): Promise<Record<AnyJson>> {
+  public async run(): Promise<Record> {
     this.validateIdXorWhereFlags();
 
     this.ux.startSpinner('Getting Record');
@@ -58,10 +58,10 @@ export default class Get extends DataCommand {
       const result = await sobject.retrieve(sObjectId);
       if (!this.flags.json) this.logNestedObject(result as never);
       this.ux.stopSpinner();
-      return toAnyJson(result) as Record<AnyJson>;
+      return toAnyJson(result) as Record;
     } catch (err) {
       this.ux.stopSpinner('failed');
-      throw new SfdxError((err as Error).name, (err as Error).message);
+      throw new SfError((err as Error).name, (err as Error).message);
     }
   }
 }

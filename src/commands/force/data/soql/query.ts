@@ -6,21 +6,24 @@
  */
 
 import * as os from 'os';
+import * as fs from 'fs';
 import { flags, FlagsConfig } from '@salesforce/command';
-import { Connection, Logger, Messages } from '@salesforce/core';
+import { CliUx } from '@oclif/core';
+import { Connection, Logger, Messages, SfdxConfigAggregator } from '@salesforce/core';
+import { QueryOptions, QueryResult, Record } from 'jsforce';
 import {
   AnyJson,
   ensureJsonArray,
   ensureJsonMap,
   ensureString,
   getArray,
+  getNumber,
   isJsonArray,
   JsonArray,
   toJsonMap,
 } from '@salesforce/ts-types';
-import { Tooling } from '@salesforce/core/lib/connection';
 import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../../../reporters';
-import { BasicRecord, Field, FieldType, SoqlQueryResult } from '../../../../dataSoqlQueryTypes';
+import { Field, FieldType, SoqlQueryResult } from '../../../../dataSoqlQueryTypes';
 import { DataCommand } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -33,26 +36,57 @@ const commonMessages = Messages.loadMessages('@salesforce/plugin-data', 'message
  * Will collect all records and the column metadata of the query
  */
 export class SoqlQuery {
-  public async runSoqlQuery(connection: Connection | Tooling, query: string, logger: Logger): Promise<SoqlQueryResult> {
-    let columns: Field[] = [];
+  public async runSoqlQuery(
+    connection: Connection,
+    query: string,
+    logger: Logger,
+    configAgg: SfdxConfigAggregator
+  ): Promise<SoqlQueryResult> {
     logger.debug('running query');
 
-    const result = await connection.autoFetchQuery<BasicRecord>(query, { autoFetch: true, maxFetch: 50000 });
-    logger.debug(`Query complete with ${result.totalSize} records returned`);
-    if (result.totalSize) {
-      logger.debug('fetching columns for query');
-      columns = await this.retrieveColumns(connection, query);
+    // take the limit from the config, then default 50,000
+    const queryOpts: Partial<QueryOptions> = {
+      autoFetch: true,
+      maxFetch: (configAgg.getInfo('maxQueryLimit').value as number) ?? 50000,
+    };
+
+    const result: QueryResult<Record> = await new Promise((resolve, reject) => {
+      const records: Record[] = [];
+      const res = connection
+        .query(query)
+        .on('record', (rec) => records.push(rec))
+        .on('error', (err) => reject(err))
+        .on('end', () => {
+          resolve({
+            done: true,
+            totalSize: getNumber(res, 'totalSize', 0),
+            records,
+          });
+        })
+        .run(queryOpts);
+    });
+
+    if (result.records.length && result.totalSize > result.records.length) {
+      CliUx.ux.warn(
+        `The query result is missing ${result.totalSize - result.records.length} records due to a ${
+          queryOpts.maxFetch
+        } record limit. Increase the number of records returned by setting the config value "maxQueryLimit" or the environment variable "SFDX_MAX_QUERY_LIMIT" to ${
+          result.totalSize
+        } or greater than ${queryOpts.maxFetch}.`
+      );
     }
 
-    // remove nextRecordsUrl and force done to true
-    delete result.nextRecordsUrl;
-    result.done = true;
+    logger.debug(`Query complete with ${result.totalSize} records returned`);
+
+    const columns = result.totalSize ? await this.retrieveColumns(connection, query, logger) : [];
+
     return {
       query,
       columns,
       result,
     };
   }
+
   /**
    * Utility to fetch the columns involved in a soql query.
    *
@@ -63,10 +97,11 @@ export class SoqlQuery {
    * @param query
    */
 
-  public async retrieveColumns(connection: Connection | Tooling, query: string): Promise<Field[]> {
+  public async retrieveColumns(connection: Connection, query: string, logger?: Logger): Promise<Field[]> {
+    logger?.debug('fetching columns for query');
     // eslint-disable-next-line no-underscore-dangle
     const columnUrl = `${connection._baseUrl()}/query?q=${encodeURIComponent(query)}&columns=true`;
-    const results = toJsonMap(await connection.request(columnUrl));
+    const results = toJsonMap(await connection.request<Record>(columnUrl));
 
     return this.recursivelyFindColumns(ensureJsonArray(results.columnMetadata));
   }
@@ -99,12 +134,13 @@ export class SoqlQuery {
           columns.push(field);
         } else {
           for (const subcolumn of column.joinColumns) {
-            const allSubFieldNames = this.searchSubColumns(subcolumn);
-            const f: Field = {
-              fieldType: FieldType.field,
-              name: `${name}.${allSubFieldNames}`,
-            };
-            columns.push(f);
+            const allSubFieldNames = this.searchSubColumnsRecursively(subcolumn);
+            for (const subFields of allSubFieldNames) {
+              columns.push({
+                fieldType: FieldType.field,
+                name: `${name}.${subFields}`,
+              });
+            }
           }
         }
       } else if (column.aggregate) {
@@ -124,17 +160,19 @@ export class SoqlQuery {
     return columns;
   }
 
-  private searchSubColumns(parent: AnyJson): string {
+  private searchSubColumnsRecursively(parent: AnyJson): string[] {
     const column = ensureJsonMap(parent);
     const name = ensureString(column.columnName);
 
-    const names = [name];
+    let names = [name];
     const child = getArray(parent, 'joinColumns') as AnyJson[];
     if (child.length) {
+      // if we're recursively searching, reset the 'parent' - it gets added back below
+      names = [];
       // recursively search for related column names
-      child.map((c) => names.push(this.searchSubColumns(c)));
+      child.map((c) => names.push(`${name}.${this.searchSubColumnsRecursively(c).join('.')}`));
     }
-    return names.join('.');
+    return names;
   }
 }
 
@@ -145,8 +183,15 @@ export class DataSoqlQueryCommand extends DataCommand {
   public static readonly flagsConfig: FlagsConfig = {
     query: flags.string({
       char: 'q',
-      required: true,
       description: messages.getMessage('queryToExecute'),
+      exclusive: ['soqlqueryfile'],
+      exactlyOne: ['query', 'soqlqueryfile'],
+    }),
+    soqlqueryfile: flags.filepath({
+      char: 'f',
+      description: messages.getMessage('soqlqueryfile'),
+      exclusive: ['query'],
+      exactlyOne: ['query', 'soqlqueryfile'],
     }),
     usetoolingapi: flags.boolean({
       char: 't',
@@ -182,8 +227,14 @@ export class DataSoqlQueryCommand extends DataCommand {
     try {
       if (this.flags.resultformat !== 'json') this.ux.startSpinner(messages.getMessage('queryRunningMessage'));
       const query = new SoqlQuery();
-      const conn = this.getConnection() as Connection | Tooling;
-      const queryResult: SoqlQueryResult = await query.runSoqlQuery(conn, this.flags.query as string, this.logger);
+      const conn = this.getConnection();
+      const queryString = (this.flags.query as string) ?? fs.readFileSync(this.flags.soqlqueryfile, 'utf8');
+      const queryResult: SoqlQueryResult = await query.runSoqlQuery(
+        conn as Connection,
+        queryString,
+        this.logger,
+        this.configAggregator
+      );
       const results = {
         ...queryResult,
       };

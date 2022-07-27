@@ -5,14 +5,15 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import * as os from 'os';
-import stream = require('stream');
 import { ReadStream } from 'fs';
+import stream = require('stream');
 import { UX } from '@salesforce/command';
 import { spyMethod, stubMethod } from '@salesforce/ts-sinon';
 import { $$ } from '@salesforce/command/lib/test';
 import { expect } from 'chai';
-import { Connection, SfdxError } from '@salesforce/core';
-import { Batch, JobInfo, BatchInfo, Job } from 'jsforce';
+import { Connection, SfError } from '@salesforce/core';
+import { Batch, BatchInfo } from 'jsforce/batch';
+import { Job, JobInfo } from 'jsforce/job';
 import { Batcher, Batches } from '../../src/batcher';
 
 let styledHeaderSpy: sinon.SinonStub;
@@ -45,13 +46,13 @@ describe('batcher', () => {
     });
 
     it('will correctly call to print the expected messages 3 log, 2 styledHeader', async () => {
-      batcher.bulkStatus(summary, [{ errors: ['error1', 'error2'], id: '123' }]);
+      batcher.bulkStatus(summary, [{ errors: ['error1', 'error2'], success: false, id: '123' }]);
       expect(styledHeaderSpy.callCount).to.equal(2);
       expect(logSpy.callCount).to.equal(3);
     });
 
     it('will correctly call to print the expected messages 3 log, 3 styledHeader', async () => {
-      batcher.bulkStatus(summary, [{ errors: ['error1', 'error2'], id: '123' }], 123, true);
+      batcher.bulkStatus(summary, [{ errors: ['error1', 'error2'], success: false, id: '123' }], 123, true);
       expect(styledHeaderSpy.callCount).to.equal(3);
       expect(logSpy.callCount).to.equal(3);
     });
@@ -62,7 +63,7 @@ describe('batcher', () => {
     let exitSpy: sinon.SinonSpy;
 
     beforeEach(() => {
-      exitSpy = spyMethod($$.SANDBOX, SfdxError, 'wrap');
+      exitSpy = spyMethod($$.SANDBOX, SfError, 'wrap');
       inStream = new stream.Readable({
         read() {},
       });
@@ -188,8 +189,6 @@ describe('batcher', () => {
     let creationSpy: sinon.SinonSpy;
     let exitSpy: sinon.SinonSpy;
     let waitForCompletionSpy: sinon.SinonStub;
-    // let listenerSpy: sinon.SinonSpy;
-    // let closeJobSpy: sinon.SinonSpy;
 
     let createdBatches: Batch[];
     const job = {
@@ -239,7 +238,7 @@ describe('batcher', () => {
         createdBatches.push(batch);
         return batch;
       });
-      exitSpy = spyMethod($$.SANDBOX, SfdxError, 'wrap');
+      exitSpy = spyMethod($$.SANDBOX, SfError, 'wrap');
       waitForCompletionSpy = stubMethod($$.SANDBOX, Batcher.prototype, 'waitForCompletion');
     });
 

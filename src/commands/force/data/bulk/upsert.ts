@@ -5,10 +5,11 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import * as os from 'os';
+import * as fs from 'fs';
 import { ReadStream } from 'fs';
 import { flags, FlagsConfig } from '@salesforce/command';
-import { Connection, fs, Messages } from '@salesforce/core';
-import { JobInfo } from 'jsforce';
+import { Connection, Messages } from '@salesforce/core';
+import { Job, JobInfo } from 'jsforce/job';
 import { Batcher, BulkResult } from '../../../../batcher';
 import { DataCommand } from '../../../../dataCommand';
 
@@ -51,16 +52,16 @@ export default class Upsert extends DataCommand {
     const conn: Connection = this.ensureOrg().getConnection();
     this.ux.startSpinner('Bulk Upsert');
 
-    await this.throwIfFileDoesntExist(this.flags.csvfile as string);
+    await this.throwIfPathDoesntExist(this.flags.csvfile as string);
 
     const batcher: Batcher = new Batcher(conn, this.ux);
     const csvStream: ReadStream = fs.createReadStream(this.flags.csvfile as string, { encoding: 'utf-8' });
 
     const concurrencyMode = this.flags.serial ? 'Serial' : 'Parallel';
-    const job = conn.bulk.createJob(this.flags.sobjecttype as string, 'upsert', {
+    const job: Job = conn.bulk.createJob(this.flags.sobjecttype, 'upsert', {
       extIdField: this.flags.externalid as string,
       concurrencyMode,
-    });
+    }) as unknown as Job;
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
     return new Promise(async (resolve, reject) => {

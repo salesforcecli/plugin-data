@@ -5,12 +5,13 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { ReadStream } from 'fs';
-import { Connection, Messages, SfdxError } from '@salesforce/core';
-import parse = require('csv-parse');
-import { Batch, BatchInfo, BatchResultInfo, JobInfo } from 'jsforce';
+import { Connection, Messages, SfError } from '@salesforce/core';
 import { UX } from '@salesforce/command';
-import { Job } from 'jsforce/job';
+import { Job, JobInfo } from 'jsforce/job';
+import { BulkIngestBatchResult } from 'jsforce/lib/api/bulk';
+import { Batch, BatchInfo } from 'jsforce/batch';
 import { stringify } from 'csv-stringify/sync';
+import parse = require('csv-parse');
 
 // max rows per file in Bulk 1.0
 const BATCH_RECORDS_LIMIT = 10000;
@@ -59,7 +60,7 @@ export class Batcher {
     jobId: string,
     doneCallback?: (...args: [{ job: JobInfo }]) => void
   ): Promise<JobInfo> {
-    const job: Job = this.conn.bulk.job(jobId);
+    const job = this.conn.bulk.job(jobId);
     const jobInfo: JobInfo = await job.check();
 
     this.bulkStatus(jobInfo, undefined, undefined, true);
@@ -73,7 +74,7 @@ export class Batcher {
 
   public bulkStatus(
     summary: JobInfo | BatchInfo,
-    results?: BatchResultInfo[],
+    results?: BulkIngestBatchResult,
     batchNum?: number,
     isJob?: boolean
   ): JobInfo | BatchInfo {
@@ -83,7 +84,7 @@ export class Batcher {
     }
     if (results) {
       const errorMessages: string[] = [];
-      results.forEach((result: BatchResultInfo): void => {
+      results.forEach((result): void => {
         if (result.errors) {
           result.errors.forEach((errMsg) => {
             errorMessages.push(errMsg);
@@ -130,7 +131,7 @@ export class Batcher {
    * @param wait {number}
    */
   public async createAndExecuteBatches(
-    job: Job,
+    job: Job & { id?: string },
     records: ReadStream,
     sobjectType: string,
     wait?: number
@@ -161,7 +162,7 @@ export class Batcher {
                 // using the reject method for all of the promises wasn't handling errors properly
                 // so emit a 'error' on the job.
 
-                job.emit('error', new SfdxError(err.message, 'Time Out', [], 69));
+                job.emit('error', new SfError(err.message, 'Time Out', [], 69));
               }
 
               this.ux.stopSpinner('Error');
@@ -176,12 +177,8 @@ export class Batcher {
                   /* jsforce clears out the id after close, but you should be able to close a job
               after the queue, so add it back so future batch.check don't fail.*/
 
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore
-                  const id = job.id as string;
+                  const id = job.id;
                   await job.close();
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore
                   job.id = id;
                 }
               }
@@ -194,7 +191,7 @@ export class Batcher {
                 // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 async (batchInfo: BatchInfo): Promise<void> => {
                   this.ux.log(messages.getMessage('CheckStatusCommand', [i + 1, batchInfo.jobId, batchInfo.id]));
-                  const result: BatchInfo = await newBatch.check();
+                  const result = await newBatch.check();
                   if (result.state === 'Failed') {
                     reject(result.stateMessage);
                   } else {
@@ -263,7 +260,7 @@ export class Batcher {
         // we're using an async method on an event listener which doesn't fit the .on method parameter types
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         async (batchInfo: BatchInfo): Promise<void> => {
-          const result: BatchInfo = await newBatch.check();
+          const result = await newBatch.check();
           if (result.state === 'Failed') {
             reject(result.stateMessage);
           } else {
@@ -278,7 +275,7 @@ export class Batcher {
       );
       // we're using an async method on an event listener which doesn't fit the .on method parameter types
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      newBatch.on('response', async (results: BatchResultInfo[]) => {
+      newBatch.on('response', async (results: BulkIngestBatchResult) => {
         const summary: BatchInfo = await newBatch.check();
         this.bulkStatus(summary, results, batchNum);
         batchesCompleted++;
@@ -337,7 +334,7 @@ export class Batcher {
 
       parser.on('error', (err) => {
         readStream.destroy();
-        reject(SfdxError.wrap(err));
+        reject(SfError.wrap(err));
       });
 
       parser.on('end', () => {

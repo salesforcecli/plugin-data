@@ -5,9 +5,10 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import * as os from 'os';
-import { Job, JobInfo, BatchInfo } from 'jsforce';
+import { BatchInfo } from 'jsforce/lib/api/bulk';
+import { JobInfo } from 'jsforce/job';
 import { flags, FlagsConfig } from '@salesforce/command';
-import { Connection, Messages, SfdxError } from '@salesforce/core';
+import { Connection, Messages, SfError } from '@salesforce/core';
 import { Batcher } from '../../../../batcher';
 import { DataCommand } from '../../../../dataCommand';
 
@@ -36,7 +37,7 @@ export default class Status extends DataCommand {
     const batcher = new Batcher(conn, this.ux);
     if (this.flags.jobid && this.flags.batchid) {
       // view batch status
-      const job: Job = conn.bulk.job(this.flags.jobid as string);
+      const job = conn.bulk.job(this.flags.jobid);
       let found = false;
 
       const batches: BatchInfo[] = await job.list();
@@ -47,10 +48,7 @@ export default class Status extends DataCommand {
         }
       });
       if (!found) {
-        throw SfdxError.create('@salesforce/plugin-data', 'bulk.status', 'NoBatchFound', [
-          this.flags.batchid,
-          this.flags.jobid,
-        ]);
+        throw new SfError(messages.getMessage('NoBatchFound', [this.flags.batchid, this.flags.jobid]), 'NoBatchFound');
       }
 
       this.ux.stopSpinner();

@@ -83,7 +83,7 @@ sfdx plugins
 - [`sfdx force:data:record:delete -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatarecorddelete--s-string--i-id---w-string--t---perflog---json--u-string---apiversion-string---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 - [`sfdx force:data:record:get -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatarecordget--s-string--i-id---w-string--t---perflog---json--u-string---apiversion-string---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 - [`sfdx force:data:record:update -s <string> -v <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatarecordupdate--s-string--v-string--i-id---w-string--t---perflog---json--u-string---apiversion-string---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
-- [`sfdx force:data:soql:query -q <string> [-t] [-r human|csv|json] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatasoqlquery--q-string--t--r-humancsvjson---perflog---json--u-string---apiversion-string---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
+- [`sfdx force:data:soql:query [-q <string> | -f <filepath>] [-t] [-r human|csv|json] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatasoqlquery--q-string---f-filepath--t--r-humancsvjson---perflog---json--u-string---apiversion-string---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 - [`sfdx force:data:tree:export -q <string> [-p] [-x <string>] [-d <directory>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatatreeexport--q-string--p--x-string--d-directory--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 - [`sfdx force:data:tree:import [-f <array> | -p <filepath>] [--confighelp] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatatreeimport--f-array---p-filepath---confighelp--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 
@@ -94,42 +94,41 @@ bulk delete records from a csv file
 ```
 USAGE
   $ sfdx force:data:bulk:delete -f <filepath> -s <string> [-w <minutes>] [-u <string>] [--apiversion <string>] [--json]
-  [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
+    [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 
-OPTIONS
-  -f, --csvfile=csvfile                                                             (required) the path to the CSV file
+FLAGS
+  -f, --csvfile=<value>                                                             (required) the path to the CSV file
                                                                                     containing the ids of the records to
                                                                                     delete
-
-  -s, --sobjecttype=sobjecttype                                                     (required) the sObject type of the
+  -s, --sobjecttype=<value>                                                         (required) the sObject type of the
                                                                                     records you’re deleting
-
-  -u, --targetusername=targetusername                                               username or alias for the target
+  -u, --targetusername=<value>                                                      username or alias for the target
                                                                                     org; overrides default target org
-
-  -w, --wait=wait                                                                   the number of minutes to wait for
+  -w, --wait=<value>                                                                the number of minutes to wait for
                                                                                     the command to complete before
                                                                                     displaying the results
-
-  --apiversion=apiversion                                                           override the api version used for
+  --apiversion=<value>                                                              override the api version used for
                                                                                     api requests made by this command
-
   --json                                                                            format output as json
-
   --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)  [default: warn] logging level for
                                                                                     this command invocation
 
 DESCRIPTION
+  bulk delete records from a csv file
+
   The file must be a CSV file with only one column: "Id".
+
   One job can contain many batches, depending on the length of the CSV file.
+
   Returns a job ID and a batch ID. Use these IDs to check job status with data:bulk:status.
 
 EXAMPLES
-  sfdx force:data:bulk:delete -s Account -f ./path/to/file.csv
-  sfdx force:data:bulk:delete -s MyObject__c -f ./path/to/file.csv
+  $ sfdx force:data:bulk:delete -s Account -f ./path/to/file.csv
+
+  $ sfdx force:data:bulk:delete -s MyObject__c -f ./path/to/file.csv
 ```
 
-_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.12/src/commands/force/data/bulk/delete.ts)_
+_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/v2.0.4/src/commands/force/data/bulk/delete.ts)_
 
 ## `sfdx force:data:bulk:status -i <string> [-b <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -138,37 +137,35 @@ view the status of a bulk data load job or batch
 ```
 USAGE
   $ sfdx force:data:bulk:status -i <string> [-b <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel
-  trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
+    trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 
-OPTIONS
-  -b, --batchid=batchid                                                             the ID of the batch whose status you
+FLAGS
+  -b, --batchid=<value>                                                             the ID of the batch whose status you
                                                                                     want to view
-
-  -i, --jobid=jobid                                                                 (required) the ID of the job you
+  -i, --jobid=<value>                                                               (required) the ID of the job you
                                                                                     want to view or of the job whose
                                                                                     batch you want to view
-
-  -u, --targetusername=targetusername                                               username or alias for the target
+  -u, --targetusername=<value>                                                      username or alias for the target
                                                                                     org; overrides default target org
-
-  --apiversion=apiversion                                                           override the api version used for
+  --apiversion=<value>                                                              override the api version used for
                                                                                     api requests made by this command
-
   --json                                                                            format output as json
-
   --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)  [default: warn] logging level for
                                                                                     this command invocation
 
 DESCRIPTION
+  view the status of a bulk data load job or batch
+
   Run this command using the job ID or batch ID returned from the force:data:bulk:delete or force:data:bulk:upsert
   commands.
 
 EXAMPLES
-  sfdx force:data:bulk:status -i 750xx000000005sAAA
-  sfdx force:data:bulk:status -i 750xx000000005sAAA -b 751xx000000005nAAA
+  $ sfdx force:data:bulk:status -i 750xx000000005sAAA
+
+  $ sfdx force:data:bulk:status -i 750xx000000005sAAA -b 751xx000000005nAAA
 ```
 
-_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.12/src/commands/force/data/bulk/status.ts)_
+_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/v2.0.4/src/commands/force/data/bulk/status.ts)_
 
 ## `sfdx force:data:bulk:upsert -i <string> -f <filepath> -s <string> [-w <minutes>] [-r] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -177,39 +174,34 @@ bulk upsert records from a CSV file
 ```
 USAGE
   $ sfdx force:data:bulk:upsert -i <string> -f <filepath> -s <string> [-w <minutes>] [-r] [-u <string>] [--apiversion
-  <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
+    <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 
-OPTIONS
-  -f, --csvfile=csvfile                                                             (required) the path to the CSV file
+FLAGS
+  -f, --csvfile=<value>                                                             (required) the path to the CSV file
                                                                                     that defines the records to upsert
-
-  -i, --externalid=externalid                                                       (required) the column name of the
+  -i, --externalid=<value>                                                          (required) the column name of the
                                                                                     external ID
-
   -r, --serial                                                                      run batches in serial mode
-
-  -s, --sobjecttype=sobjecttype                                                     (required) the sObject type of the
+  -s, --sobjecttype=<value>                                                         (required) the sObject type of the
                                                                                     records you want to upsert
-
-  -u, --targetusername=targetusername                                               username or alias for the target
+  -u, --targetusername=<value>                                                      username or alias for the target
                                                                                     org; overrides default target org
-
-  -w, --wait=wait                                                                   the number of minutes to wait for
+  -w, --wait=<value>                                                                the number of minutes to wait for
                                                                                     the command to complete before
                                                                                     displaying the results
-
-  --apiversion=apiversion                                                           override the api version used for
+  --apiversion=<value>                                                              override the api version used for
                                                                                     api requests made by this command
-
   --json                                                                            format output as json
-
   --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)  [default: warn] logging level for
                                                                                     this command invocation
 
 DESCRIPTION
+  bulk upsert records from a CSV file
+
   Inserts or updates records from a CSV file.
 
   One job can contain many batches, depending on the length of the CSV file.
+
   Returns a job ID and a batch ID. Use these IDs to check job status with data:bulk:status.
 
   For information about formatting your CSV file, see "Prepare CSV Files" in the Bulk API Developer Guide.
@@ -217,11 +209,12 @@ DESCRIPTION
   By default, the job runs the batches in parallel. Specify --serial to run them serially.
 
 EXAMPLES
-  sfdx force:data:bulk:upsert -s MyObject__c -f ./path/to/file.csv -i MyField__c
-  sfdx force:data:bulk:upsert -s MyObject__c -f ./path/to/file.csv -i Id -w 2
+  $ sfdx force:data:bulk:upsert -s MyObject__c -f ./path/to/file.csv -i MyField__c
+
+  $ sfdx force:data:bulk:upsert -s MyObject__c -f ./path/to/file.csv -i Id -w 2
 ```
 
-_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.12/src/commands/force/data/bulk/upsert.ts)_
+_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/v2.0.4/src/commands/force/data/bulk/upsert.ts)_
 
 ## `sfdx force:data:record:create -s <string> -v <string> [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -230,48 +223,47 @@ creates and inserts a record
 ```
 USAGE
   $ sfdx force:data:record:create -s <string> -v <string> [-t] [--perflog --json] [-u <string>] [--apiversion <string>]
-  [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
+    [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 
-OPTIONS
-  -s, --sobjecttype=sobjecttype                                                     (required) the type of the record
+FLAGS
+  -s, --sobjecttype=<value>                                                         (required) the type of the record
                                                                                     you’re creating
-
   -t, --usetoolingapi                                                               create the record with tooling api
-
-  -u, --targetusername=targetusername                                               username or alias for the target
+  -u, --targetusername=<value>                                                      username or alias for the target
                                                                                     org; overrides default target org
-
-  -v, --values=values                                                               (required) the <fieldName>=<value>
+  -v, --values=<value>                                                              (required) the <fieldName>=<value>
                                                                                     pairs you’re creating
-
-  --apiversion=apiversion                                                           override the api version used for
+  --apiversion=<value>                                                              override the api version used for
                                                                                     api requests made by this command
-
   --json                                                                            format output as json
-
   --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)  [default: warn] logging level for
                                                                                     this command invocation
-
   --perflog                                                                         get API performance data
 
 DESCRIPTION
+  creates and inserts a record
+
   The format of a field-value pair is <fieldName>=<value>.
+
   Enclose all field-value pairs in one set of double quotation marks, delimited by spaces.
+
   Enclose values that contain spaces in single quotes.
 
   To get data on API performance metrics, specify both --perflog and --json.
 
 EXAMPLES
-  sfdx force:data:record:create -s Account -v "Name=Acme"
-  sfdx force:data:record:create -s Account -v "Name='Universal Containers'"
-  sfdx force:data:record:create -s Account -v "Name='Universal Containers' Website=www.example.com"
-  sfdx force:data:record:create -t -s TraceFlag -v "DebugLevelId=7dl170000008U36AAE
-  StartDate=2017-12-01T00:26:04.000+0000 ExpirationDate=2017-12-01T00:56:04.000+0000 LogType=CLASS_TRACING
-  TracedEntityId=01p17000000R6bLAAS"
-  sfdx force:data:record:create -s Account -v "Name=Acme" --perflog --json
+  $ sfdx force:data:record:create -s Account -v "Name=Acme"
+
+  $ sfdx force:data:record:create -s Account -v "Name='Universal Containers'"
+
+  $ sfdx force:data:record:create -s Account -v "Name='Universal Containers' Website=www.example.com"
+
+  $ sfdx force:data:record:create -t -s TraceFlag -v "DebugLevelId=7dl170000008U36AAE StartDate=2017-12-01T00:26:04.000+0000 ExpirationDate=2017-12-01T00:56:04.000+0000 LogType=CLASS_TRACING TracedEntityId=01p17000000R6bLAAS"
+
+  $ sfdx force:data:record:create -s Account -v "Name=Acme" --perflog --json
 ```
 
-_See code: [src/commands/force/data/record/create.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.12/src/commands/force/data/record/create.ts)_
+_See code: [src/commands/force/data/record/create.ts](https://github.com/salesforcecli/plugin-data/blob/v2.0.4/src/commands/force/data/record/create.ts)_
 
 ## `sfdx force:data:record:delete -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -279,50 +271,51 @@ deletes a single record
 
 ```
 USAGE
-  $ sfdx force:data:record:delete -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>]
-  [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
+  $ sfdx force:data:record:delete -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion
+    <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 
-OPTIONS
-  -i, --sobjectid=sobjectid                                                         the ID of the record you’re deleting
-
-  -s, --sobjecttype=sobjecttype                                                     (required) the type of the record
+FLAGS
+  -i, --sobjectid=<value>                                                           the ID of the record you’re deleting
+  -s, --sobjecttype=<value>                                                         (required) the type of the record
                                                                                     you’re deleting
-
   -t, --usetoolingapi                                                               delete the record with Tooling API
-
-  -u, --targetusername=targetusername                                               username or alias for the target
+  -u, --targetusername=<value>                                                      username or alias for the target
                                                                                     org; overrides default target org
-
-  -w, --where=where                                                                 a list of <fieldName>=<value> pairs
+  -w, --where=<value>                                                               a list of <fieldName>=<value> pairs
                                                                                     to search for
-
-  --apiversion=apiversion                                                           override the api version used for
+  --apiversion=<value>                                                              override the api version used for
                                                                                     api requests made by this command
-
   --json                                                                            format output as json
-
   --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)  [default: warn] logging level for
                                                                                     this command invocation
-
   --perflog                                                                         get API performance data
 
 DESCRIPTION
+  deletes a single record
+
   Specify an sObject type and either an ID or a list of <fieldName>=<value> pairs.
+
   The format of a field-value pair is <fieldName>=<value>.
+
   Enclose all field-value pairs in one set of double quotation marks, delimited by spaces.
+
   Enclose values that contain spaces in single quotes.
 
   To get data on API performance metrics, specify both --perflog and --json.
 
 EXAMPLES
-  sfdx force:data:record:delete -s Account -i 001D000000Kv3dl
-  sfdx force:data:record:delete -s Account -w "Name=Acme"
-  sfdx force:data:record:delete -s Account -w "Name='Universal Containers'"
-  sfdx force:data:record:delete -s Account -w "Name='Universal Containers' Phone='(123) 456-7890'"
-  sfdx force:data:record:delete -t -s TraceFlag -i 7tf170000009cU6AAI --perflog --json
+  $ sfdx force:data:record:delete -s Account -i 001D000000Kv3dl
+
+  $ sfdx force:data:record:delete -s Account -w "Name=Acme"
+
+  $ sfdx force:data:record:delete -s Account -w "Name='Universal Containers'"
+
+  $ sfdx force:data:record:delete -s Account -w "Name='Universal Containers' Phone='(123) 456-7890'"
+
+  $ sfdx force:data:record:delete -t -s TraceFlag -i 7tf170000009cU6AAI --perflog --json
 ```
 
-_See code: [src/commands/force/data/record/delete.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.12/src/commands/force/data/record/delete.ts)_
+_See code: [src/commands/force/data/record/delete.ts](https://github.com/salesforcecli/plugin-data/blob/v2.0.4/src/commands/force/data/record/delete.ts)_
 
 ## `sfdx force:data:record:get -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -331,50 +324,51 @@ displays a single record
 ```
 USAGE
   $ sfdx force:data:record:get -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion
-  <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
+    <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 
-OPTIONS
-  -i, --sobjectid=sobjectid                                                         the ID of the record you’re
+FLAGS
+  -i, --sobjectid=<value>                                                           the ID of the record you’re
                                                                                     retrieving
-
-  -s, --sobjecttype=sobjecttype                                                     (required) the type of the record
+  -s, --sobjecttype=<value>                                                         (required) the type of the record
                                                                                     you’re retrieving
-
   -t, --usetoolingapi                                                               retrieve the record with Tooling API
-
-  -u, --targetusername=targetusername                                               username or alias for the target
+  -u, --targetusername=<value>                                                      username or alias for the target
                                                                                     org; overrides default target org
-
-  -w, --where=where                                                                 a list of <fieldName>=<value> pairs
+  -w, --where=<value>                                                               a list of <fieldName>=<value> pairs
                                                                                     to search for
-
-  --apiversion=apiversion                                                           override the api version used for
+  --apiversion=<value>                                                              override the api version used for
                                                                                     api requests made by this command
-
   --json                                                                            format output as json
-
   --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)  [default: warn] logging level for
                                                                                     this command invocation
-
   --perflog                                                                         get API performance data
 
 DESCRIPTION
+  displays a single record
+
   Specify an sObject type and either an ID or a list of <fieldName>=<value> pairs.
+
   The format of a field-value pair is <fieldName>=<value>.
+
   Enclose all field-value pairs in one set of double quotation marks, delimited by spaces.
+
   Enclose values that contain spaces in single quotes.
 
   To get data on API performance metrics, specify both --perflog and --json.
 
 EXAMPLES
-  sfdx force:data:record:get -s Account -i 001D000000Kv3dl
-  sfdx force:data:record:get -s Account -w "Name=Acme"
-  sfdx force:data:record:get -s Account -w "Name='Universal Containers'"
-  sfdx force:data:record:get -s Account -w "Name='Universal Containers' Phone='(123) 456-7890'"
-  sfdx force:data:record:get -t -s TraceFlag -i 7tf170000009cUBAAY --perflog --json
+  $ sfdx force:data:record:get -s Account -i 001D000000Kv3dl
+
+  $ sfdx force:data:record:get -s Account -w "Name=Acme"
+
+  $ sfdx force:data:record:get -s Account -w "Name='Universal Containers'"
+
+  $ sfdx force:data:record:get -s Account -w "Name='Universal Containers' Phone='(123) 456-7890'"
+
+  $ sfdx force:data:record:get -t -s TraceFlag -i 7tf170000009cUBAAY --perflog --json
 ```
 
-_See code: [src/commands/force/data/record/get.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.12/src/commands/force/data/record/get.ts)_
+_See code: [src/commands/force/data/record/get.ts](https://github.com/salesforcecli/plugin-data/blob/v2.0.4/src/commands/force/data/record/get.ts)_
 
 ## `sfdx force:data:record:update -s <string> -v <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -383,96 +377,98 @@ updates a single record
 ```
 USAGE
   $ sfdx force:data:record:update -s <string> -v <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>]
-  [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
+    [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 
-OPTIONS
-  -i, --sobjectid=sobjectid                                                         the ID of the record you’re updating
-
-  -s, --sobjecttype=sobjecttype                                                     (required) the sObject type of the
+FLAGS
+  -i, --sobjectid=<value>                                                           the ID of the record you’re updating
+  -s, --sobjecttype=<value>                                                         (required) the sObject type of the
                                                                                     record you’re updating
-
   -t, --usetoolingapi                                                               update the record with Tooling API
-
-  -u, --targetusername=targetusername                                               username or alias for the target
+  -u, --targetusername=<value>                                                      username or alias for the target
                                                                                     org; overrides default target org
-
-  -v, --values=values                                                               (required) the <fieldName>=<value>
+  -v, --values=<value>                                                              (required) the <fieldName>=<value>
                                                                                     pairs you’re updating
-
-  -w, --where=where                                                                 a list of <fieldName>=<value> pairs
+  -w, --where=<value>                                                               a list of <fieldName>=<value> pairs
                                                                                     to search for
-
-  --apiversion=apiversion                                                           override the api version used for
+  --apiversion=<value>                                                              override the api version used for
                                                                                     api requests made by this command
-
   --json                                                                            format output as json
-
   --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)  [default: warn] logging level for
                                                                                     this command invocation
-
   --perflog                                                                         get API performance data
 
 DESCRIPTION
+  updates a single record
+
   The format of a field-value pair is <fieldName>=<value>.
+
   Enclose all field-value pairs in one set of double quotation marks, delimited by spaces.
+
   Enclose values that contain spaces in single quotes.
 
   To get data on API performance metrics, specify both --perflog and --json.
 
 EXAMPLES
-  sfdx force:data:record:update -s Account -i 001D000000Kv3dl -v "Name=NewAcme"
-  sfdx force:data:record:update -s Account -w "Name='Old Acme'" -v "Name='New Acme'"
-  sfdx force:data:record:update -s Account -i 001D000000Kv3dl -v "Name='Acme III' Website=www.example.com"
-  sfdx force:data:record:update -t -s TraceFlag -i 7tf170000009cUBAAY -v "ExpirationDate=2017-12-01T00:58:04.000+0000"
-  sfdx force:data:record:update -s Account -i 001D000000Kv3dl -v "Name=NewAcme" --perflog --json
+  $ sfdx force:data:record:update -s Account -i 001D000000Kv3dl -v "Name=NewAcme"
+
+  $ sfdx force:data:record:update -s Account -w "Name='Old Acme'" -v "Name='New Acme'"
+
+  $ sfdx force:data:record:update -s Account -i 001D000000Kv3dl -v "Name='Acme III' Website=www.example.com"
+
+  $ sfdx force:data:record:update -t -s TraceFlag -i 7tf170000009cUBAAY -v "ExpirationDate=2017-12-01T00:58:04.000+0000"
+
+  $sfdx force:data:record:update -s Account -i 001D000000Kv3dl -v "Name=NewAcme" --perflog --json
 ```
 
-_See code: [src/commands/force/data/record/update.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.12/src/commands/force/data/record/update.ts)_
+_See code: [src/commands/force/data/record/update.ts](https://github.com/salesforcecli/plugin-data/blob/v2.0.4/src/commands/force/data/record/update.ts)_
 
-## `sfdx force:data:soql:query -q <string> [-t] [-r human|csv|json] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
+## `sfdx force:data:soql:query [-q <string> | -f <filepath>] [-t] [-r human|csv|json] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
 execute a SOQL query
 
 ```
 USAGE
-  $ sfdx force:data:soql:query -q <string> [-t] [-r human|csv|json] [--perflog --json] [-u <string>] [--apiversion
-  <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
+  $ sfdx force:data:soql:query [-q <string> | -f <filepath>] [-t] [-r human|csv|json] [--perflog --json] [-u <string>]
+    [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 
-OPTIONS
-  -q, --query=query                                                                 (required) SOQL query to execute
-
+FLAGS
+  -f, --soqlqueryfile=<value>                                                       A SOQL query stored in a file
+  -q, --query=<value>                                                               SOQL query to execute
   -r, --resultformat=(human|csv|json)                                               [default: human] result format
                                                                                     emitted to stdout; --json flag
                                                                                     overrides this parameter
-
   -t, --usetoolingapi                                                               execute query with Tooling API
-
-  -u, --targetusername=targetusername                                               username or alias for the target
+  -u, --targetusername=<value>                                                      username or alias for the target
                                                                                     org; overrides default target org
-
-  --apiversion=apiversion                                                           override the api version used for
+  --apiversion=<value>                                                              override the api version used for
                                                                                     api requests made by this command
-
   --json                                                                            format output as json
-
   --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)  [default: warn] logging level for
                                                                                     this command invocation
-
   --perflog                                                                         get API performance data
 
 DESCRIPTION
+  execute a SOQL query
+
   When you execute this command in a project, it executes the query against the data in your default scratch org.
 
   To get data on API performance metrics, specify both --perflog and --json.
 
 EXAMPLES
-  sfdx force:data:soql:query -q "SELECT Id, Name, Account.Name FROM Contact"
-  sfdx force:data:soql:query -q "SELECT Id, Name FROM Account WHERE ShippingState IN ('CA', 'NY')"
-  sfdx force:data:soql:query -q "SELECT Id, Name FROM Account WHERE ShippingState IN ('CA', 'NY')" --perflog --json
-  sfdx force:data:soql:query -q "SELECT Name FROM ApexTrigger" -t
+  $ sfdx force:data:soql:query -q "SELECT Id, Name, Account.Name FROM Contact"
+
+  $ sfdx force:data:soql:query -q "SELECT Id, Name FROM Account WHERE ShippingState IN ('CA', 'NY')"
+
+  $ sfdx force:data:soql:query -q "SELECT Id, Name FROM Account WHERE ShippingState IN ('CA', 'NY')" --perflog --json
+
+  $ sfdx force:data:soql:query -q "SELECT Name FROM ApexTrigger" -t
+
+  $ sfdx force:data:soql:query --soqlqueryfile query.txt
+
+  $ sfdx force:data:soql:query --soqlqueryfile query.txt -t
 ```
 
-_See code: [src/commands/force/data/soql/query.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.12/src/commands/force/data/soql/query.ts)_
+_See code: [src/commands/force/data/soql/query.ts](https://github.com/salesforcecli/plugin-data/blob/v2.0.4/src/commands/force/data/soql/query.ts)_
 
 ## `sfdx force:data:tree:export -q <string> [-p] [-x <string>] [-d <directory>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -481,43 +477,40 @@ export data from an org
 ```
 USAGE
   $ sfdx force:data:tree:export -q <string> [-p] [-x <string>] [-d <directory>] [-u <string>] [--apiversion <string>]
-  [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
+    [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 
-OPTIONS
-  -d, --outputdir=outputdir                                                         directory to store files'
-
+FLAGS
+  -d, --outputdir=<value>                                                           directory to store files'
   -p, --plan                                                                        generate mulitple sobject tree files
                                                                                     and a plan definition file for
                                                                                     aggregated import
-
-  -q, --query=query                                                                 (required) soql query, or filepath
+  -q, --query=<value>                                                               (required) soql query, or filepath
                                                                                     of file containing a soql query, to
                                                                                     retrieve records
-
-  -u, --targetusername=targetusername                                               username or alias for the target
+  -u, --targetusername=<value>                                                      username or alias for the target
                                                                                     org; overrides default target org
-
-  -x, --prefix=prefix                                                               prefix of generated files
-
-  --apiversion=apiversion                                                           override the api version used for
+  -x, --prefix=<value>                                                              prefix of generated files
+  --apiversion=<value>                                                              override the api version used for
                                                                                     api requests made by this command
-
   --json                                                                            format output as json
-
   --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)  [default: warn] logging level for
                                                                                     this command invocation
 
 DESCRIPTION
+  export data from an org
+
   Exports data from an org into sObject tree format for use with the force:data:tree:import command.
+
   The query for export can return a maximum of 2,000 records. For more information, see the REST API Developer Guide:
   https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobject_tree.htm
 
 EXAMPLES
-  sfdx force:data:tree:export -q "SELECT Id, Name, (SELECT Name, Address__c FROM Properties__r) FROM Broker__c"
-  sfdx force:data:tree:export -q <path to file containing soql query> -x export-demo -d /tmp/sfdx-out -p
+  $ sfdx force:data:tree:export -q "SELECT Id, Name, (SELECT Name, Address__c FROM Properties__r) FROM Broker__c"
+
+  $ sfdx force:data:tree:export -q <path to file containing soql query> -x export-demo -d /tmp/sfdx-out -p
 ```
 
-_See code: [src/commands/force/data/tree/export.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.12/src/commands/force/data/tree/export.ts)_
+_See code: [src/commands/force/data/tree/export.ts](https://github.com/salesforcecli/plugin-data/blob/v2.0.4/src/commands/force/data/tree/export.ts)_
 
 ## `sfdx force:data:tree:import [-f <array> | -p <filepath>] [--confighelp] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -525,49 +518,48 @@ import data into an org
 
 ```
 USAGE
-  $ sfdx force:data:tree:import [-f <array> | -p <filepath>] [--confighelp] [-u <string>] [--apiversion <string>]
-  [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
+  $ sfdx force:data:tree:import [-f <array> | -p <filepath>] [--confighelp] [-u <string>] [--apiversion <string>] [--json]
+    [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 
-OPTIONS
-  -f, --sobjecttreefiles=sobjecttreefiles                                           comma-delimited, ordered paths of
+FLAGS
+  -f, --sobjecttreefiles=<value>                                                    comma-delimited, ordered paths of
                                                                                     json files containing collection of
                                                                                     record trees to insert
-
-  -p, --plan=plan                                                                   path to plan to insert multiple data
+  -p, --plan=<value>                                                                path to plan to insert multiple data
                                                                                     files that have master-detail
                                                                                     relationships
-
-  -u, --targetusername=targetusername                                               username or alias for the target
+  -u, --targetusername=<value>                                                      username or alias for the target
                                                                                     org; overrides default target org
-
-  --apiversion=apiversion                                                           override the api version used for
+  --apiversion=<value>                                                              override the api version used for
                                                                                     api requests made by this command
-
   --confighelp                                                                      display schema information for the
                                                                                     --plan configuration file to stdout;
                                                                                     if you use this option, all other
                                                                                     options except --json are ignored
-
   --json                                                                            format output as json
-
   --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)  [default: warn] logging level for
                                                                                     this command invocation
 
 DESCRIPTION
+  import data into an org
+
   IMPORTANT: Where possible, we changed noninclusive terms to align with our company value of Equality. We maintained
   certain terms to avoid any effect on customer implementations.
 
   Imports data into an org using the SObject Tree Save API.  This data can include master-detail relationships.
+
   To generate JSON files for use with force:data:tree:import, run "sfdx force:data:tree:export".
+
   The SObject Tree API supports requests that contain up to 200 records. For more information, see the REST API
   Developer Guide:
   https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobject_tree.htm
 
 EXAMPLES
-  sfdx force:data:tree:import -f Contact.json,Account.json -u me@my.org
-  sfdx force:data:tree:import -p Account-Contact-plan.json -u me@my.org
+  $ sfdx force:data:tree:import -f Contact.json,Account.json -u me@my.org
+
+  $ sfdx force:data:tree:import -p Account-Contact-plan.json -u me@my.org
 ```
 
-_See code: [src/commands/force/data/tree/import.ts](https://github.com/salesforcecli/plugin-data/blob/v0.6.12/src/commands/force/data/tree/import.ts)_
+_See code: [src/commands/force/data/tree/import.ts](https://github.com/salesforcecli/plugin-data/blob/v2.0.4/src/commands/force/data/tree/import.ts)_
 
 <!-- commandsstop -->

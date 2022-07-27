@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/salesforcecli/plugin-data/compare/v2.0.4...v2.1.0) (2022-07-26)
+
+### Features
+
+- add a soqlqueryfile parameter to allow longer queries ([#327](https://github.com/salesforcecli/plugin-data/issues/327)) ([966096d](https://github.com/salesforcecli/plugin-data/commit/966096ddd8338c1a92c02d706cbad46ba5e122ad))
+
+### [2.0.4](https://github.com/salesforcecli/plugin-data/compare/v2.0.3...v2.0.4) (2022-06-16)
+
+### Bug Fixes
+
+- wait until all records are emitted ([#316](https://github.com/salesforcecli/plugin-data/issues/316)) ([4269d08](https://github.com/salesforcecli/plugin-data/commit/4269d089f716d58ae37e1e416f2ad9eed33b5fb2))
+
+### [2.0.3](https://github.com/salesforcecli/plugin-data/compare/v2.0.2...v2.0.3) (2022-06-03)
+
+### Bug Fixes
+
+- human output no longer displaying undefined ([#307](https://github.com/salesforcecli/plugin-data/issues/307)) ([d989fad](https://github.com/salesforcecli/plugin-data/commit/d989fad3f7a5b6b0fe4e5da2f24d654b21b76038))
+
+### [2.0.2](https://github.com/salesforcecli/plugin-data/compare/v2.0.1...v2.0.2) (2022-05-26)
+
+### Bug Fixes
+
+- respect maxQueryLimit config ([#306](https://github.com/salesforcecli/plugin-data/issues/306)) ([e9bf141](https://github.com/salesforcecli/plugin-data/commit/e9bf141f9e175c2def51896844ab876b08baa57a))
+
+### [2.0.1](https://github.com/salesforcecli/plugin-data/compare/v2.0.0...v2.0.1) (2022-05-20)
+
+## [2.0.0](https://github.com/salesforcecli/plugin-data/compare/v0.6.15...v2.0.0) (2022-05-11)
+
+### [0.6.15](https://github.com/salesforcecli/plugin-data/compare/v0.6.14...v0.6.15) (2022-05-04)
+
+### [0.6.14](https://github.com/salesforcecli/plugin-data/compare/v0.6.13...v0.6.14) (2022-04-26)
+
+### Bug Fixes
+
+- update schema to support AJV ([6fe5f21](https://github.com/salesforcecli/plugin-data/commit/6fe5f2188ceed5b1fa1773634cf1684bc75aa9e1))
+
 ### [0.6.13](https://github.com/salesforcecli/plugin-data/compare/v0.6.12...v0.6.13) (2022-04-14)
 
 ### Bug Fixes

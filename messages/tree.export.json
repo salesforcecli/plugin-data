@@ -5,7 +5,7 @@
   "prefix": "prefix of generated files",
   "outputdir": "directory to store files'",
   "examples": [
-    "sfdx force:data:tree:export -q \"SELECT Id, Name, (SELECT Name, Address__c FROM Properties__r) FROM Broker__c\"",
-    "sfdx force:data:tree:export -q <path to file containing soql query> -x export-demo -d /tmp/sfdx-out -p"
+    "$ sfdx force:data:tree:export -q \"SELECT Id, Name, (SELECT Name, Address__c FROM Properties__r) FROM Broker__c\"",
+    "$ sfdx force:data:tree:export -q <path to file containing soql query> -x export-demo -d /tmp/sfdx-out -p"
   ]
 }
