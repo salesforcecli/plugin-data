@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.1](https://github.com/salesforcecli/plugin-data/compare/v2.1.0...v2.1.1) (2022-07-27)
+
+### Bug Fixes
+
+- correct test error ([eac62b1](https://github.com/salesforcecli/plugin-data/commit/eac62b1c6ea087aea116f0bbea6c1a6381d8034f))
+- stop lowercasing executed query string ([#330](https://github.com/salesforcecli/plugin-data/issues/330)) ([cfb06b7](https://github.com/salesforcecli/plugin-data/commit/cfb06b7a02f279889f5e94f0b0b546268cb94ca0))
+
 ## [2.1.0](https://github.com/salesforcecli/plugin-data/compare/v2.0.4...v2.1.0) (2022-07-26)
 
 ### Features
