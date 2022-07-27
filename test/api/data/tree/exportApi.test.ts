@@ -288,7 +288,7 @@ describe('Export API', () => {
     } catch (err) {
       const error = err as Error;
       expect(writeStub.called).to.be.false;
-      expect(error.name).to.equal('soqlInvalid');
+      expect(error.name).to.equal('SoqlInvalidError');
       expect(error.message).to.equal(messages.getMessage('soqlInvalid', [query]));
     }
   });
