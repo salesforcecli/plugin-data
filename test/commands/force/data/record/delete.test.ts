@@ -75,7 +75,7 @@ describe('force:data:record:delete', () => {
   test
     .withOrg({ username: 'test@org.com' }, true)
     .withConnectionRequest(() => {
-      return Promise.resolve({});
+      return Promise.resolve({ totalSize: 0, records: [] });
     })
     .stdout()
     .command([

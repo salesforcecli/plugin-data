@@ -10,7 +10,6 @@ import * as fs from 'fs';
 import { Logger, Messages, Org, SfError } from '@salesforce/core';
 import { UX } from '@salesforce/command';
 import { DescribeSObjectResult, QueryResult } from 'jsforce';
-import { ensureDir } from 'fs-extra';
 import {
   BasicRecord,
   DataPlanPart,
@@ -74,7 +73,7 @@ export class ExportApi {
     const { outputDir, plan, query } = this.config;
 
     if (outputDir) {
-      await ensureDir(outputDir);
+      await fs.promises.mkdir(outputDir, { recursive: true });
     }
 
     let queryResults: QueryResult<BasicRecord>;
@@ -124,8 +123,7 @@ export class ExportApi {
       }
     }
 
-    config.query = config.query.toLowerCase().trim();
-    if (!config.query.startsWith('select')) {
+    if (!config.query.toLowerCase().trim().startsWith('select')) {
       throw new SfError(messages.getMessage('soqlInvalid', [config.query]), 'soqlInvalid');
     }
 

@@ -5,7 +5,6 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import * as fs from 'fs';
-import * as fse from 'fs-extra';
 import { $$, expect, test } from '@salesforce/command/lib/test';
 import { stubMethod } from '@salesforce/ts-sinon';
 import { SfError } from '@salesforce/core';
@@ -19,7 +18,7 @@ interface UpsertResult {
 describe('force:data:bulk:upsert', () => {
   test
     .do(() => {
-      stubMethod($$.SANDBOX, fse, 'pathExists').resolves(true);
+      stubMethod($$.SANDBOX, fs.promises, 'access').resolves(undefined);
       stubMethod($$.SANDBOX, fs, 'createReadStream').throws(new SfError('Error'));
     })
     .withOrg({ username: 'test@org.com' }, true)
