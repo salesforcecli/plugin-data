@@ -60,7 +60,7 @@ describe('force:data:tree:export', () => {
         return Promise.resolve(ACCOUNT_META);
       } else {
         const requestMap = ensureJsonMap(request);
-        if (ensureString(requestMap.url).includes('query?q=select')) {
+        if (ensureString(requestMap.url).includes('query?q=SELECT')) {
           return Promise.resolve(queryResponse);
         }
       }
