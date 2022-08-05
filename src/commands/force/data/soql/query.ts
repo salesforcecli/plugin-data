@@ -6,7 +6,9 @@
  */
 
 import * as os from 'os';
+import * as fs from 'fs';
 import { flags, FlagsConfig, UX } from '@salesforce/command';
+
 import { CliUx } from '@oclif/core';
 import { Connection, Logger, Messages, SfdxConfigAggregator, SfError } from '@salesforce/core';
 import { QueryOptions, QueryResult, Record } from 'jsforce';
@@ -237,8 +239,15 @@ export class DataSoqlQueryCommand extends DataCommand {
   public static readonly flagsConfig: FlagsConfig = {
     query: flags.string({
       char: 'q',
-      required: true,
       description: messages.getMessage('queryToExecute'),
+      exclusive: ['soqlqueryfile'],
+      exactlyOne: ['query', 'soqlqueryfile'],
+    }),
+    soqlqueryfile: flags.filepath({
+      char: 'f',
+      description: messages.getMessage('soqlqueryfile'),
+      exclusive: ['query'],
+      exactlyOne: ['query', 'soqlqueryfile'],
     }),
     usetoolingapi: flags.boolean({
       char: 't',
@@ -284,16 +293,21 @@ export class DataSoqlQueryCommand extends DataCommand {
   public async run(): Promise<unknown> {
     try {
       if (this.flags.resultformat !== 'json') this.ux.startSpinner(messages.getMessage('queryRunningMessage'));
-      const query = this.flags.query as string;
+      const queryString = (this.flags.query as string) ?? fs.readFileSync(this.flags.soqlqueryfile, 'utf8');
       let queryResult: SoqlQueryResult;
       const soqlQuery = new SoqlQuery();
 
       if (this.flags.bulk) {
-        queryResult = await soqlQuery.runBulkSoqlQuery(this.org!.getConnection(), query, this.flags.wait, this.ux);
+        queryResult = await soqlQuery.runBulkSoqlQuery(
+          this.org!.getConnection(),
+          queryString,
+          this.flags.wait,
+          this.ux
+        );
       } else {
         queryResult = await soqlQuery.runSoqlQuery(
           this.getConnection() as Connection,
-          query,
+          queryString,
           this.logger,
           this.configAggregator
         );

@@ -5,6 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import * as path from 'path';
+import * as fs from 'fs';
 import * as shell from 'shelljs';
 import { AnyJson, Dictionary, ensureString, getString, isArray } from '@salesforce/ts-types';
 import { expect } from 'chai';
@@ -124,6 +125,16 @@ describe('data:soql:query command', () => {
       expect(stdError).to.include('unexpected token');
     });
 
+    it('should produce correct error when invalid soql provided', () => {
+      const filepath = path.join(testSession.dir, 'soql.txt');
+      fs.writeFileSync(filepath, 'SELECT');
+
+      const result = execCmd(`force:data:soql:query --soqlqueryfile ${filepath}`, { ensureExitCode: 1 }).shellOutput
+        .stderr;
+      const stdError = result?.toLowerCase();
+      expect(stdError).to.include('unexpected token');
+    });
+
     it('should error with no such column', () => {
       // querying ApexClass including SymbolTable column w/o using tooling api will cause "no such column" error
       const result = runQuery('SELECT Id, Name, SymbolTable from ApexClass', {
@@ -202,6 +213,20 @@ describe('data:soql:query command', () => {
       expect(queryResult).to.match(/ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY/g);
       expect(queryResult).to.match(/Total number of records retrieved: 1\./g);
     });
+
+    it('should return account records, from --soqlqueryfile', () => {
+      const query =
+        "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry FROM Account WHERE Name LIKE 'SampleAccount%' limit 1";
+      const filepath = path.join(testSession.dir, 'soql.txt');
+      fs.writeFileSync(filepath, query);
+
+      const queryResult = execCmd(`force:data:soql:query --soqlqueryfile ${filepath}`, { ensureExitCode: 0 })
+        .shellOutput.stdout;
+
+      expect(queryResult).to.match(/ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY/g);
+      expect(queryResult).to.match(/Total number of records retrieved: 1\./g);
+    });
+
     it('should return account records with nested contacts', () => {
       const query =
         "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry, (SELECT Lastname, Title, Email FROM Contacts) FROM Account  WHERE Name LIKE 'SampleAccount%'";

@@ -1,6 +1,6 @@
 {
   "name": "@salesforce/plugin-data",
-  "version": "2.0.4",
+  "version": "2.1.1",
   "description": "Plugin for salesforce data commands",
   "author": "Salesforce",
   "main": "lib/index.js",
@@ -105,7 +105,7 @@
     "@oclif/plugin-command-snapshot": "^3.1.3",
     "@salesforce/cli-plugins-testkit": "^1.4.24",
     "@salesforce/dev-config": "^3.0.1",
-    "@salesforce/dev-scripts": "2.0.3",
+    "@salesforce/dev-scripts": "2.0.4",
     "@salesforce/plugin-command-reference": "^1.3.0",
     "@salesforce/prettier-config": "^0.0.2",
     "@salesforce/ts-sinon": "^1.3.15",

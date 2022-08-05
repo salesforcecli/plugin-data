@@ -14,10 +14,13 @@
   "bulkDescription": "use the bulk 2.0 API to query data",
   "waitDescription": "wait time for command to finish in minutes",
   "bulkQueryTimeout": "Query ID: %s\nQuery is in progress. \n\nRun sfdx force:data:soql:bulk:report -i %s -u %s to get the latest status/results",
+  "soqlqueryfile": "A SOQL query stored in a file",
   "examples": [
     "$ sfdx force:data:soql:query -q \"SELECT Id, Name, Account.Name FROM Contact\"",
     "$ sfdx force:data:soql:query -q \"SELECT Id, Name FROM Account WHERE ShippingState IN ('CA', 'NY')\"",
     "$ sfdx force:data:soql:query -q \"SELECT Id, Name FROM Account WHERE ShippingState IN ('CA', 'NY')\" --perflog --json",
-    "$ sfdx force:data:soql:query -q \"SELECT Name FROM ApexTrigger\" -t"
+    "$ sfdx force:data:soql:query -q \"SELECT Name FROM ApexTrigger\" -t",
+    "$ sfdx force:data:soql:query --soqlqueryfile query.txt",
+    "$ sfdx force:data:soql:query --soqlqueryfile query.txt -t"
   ]
 }
