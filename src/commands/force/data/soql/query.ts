@@ -52,10 +52,10 @@ export class SoqlQuery {
     timeout: Duration = Duration.seconds(10),
     ux: UX
   ): Promise<SoqlQueryResult> {
-    connection.bulk.v2.pollTimeout = timeout.milliseconds ?? Duration.minutes(5).milliseconds;
+    connection.bulk2.pollTimeout = timeout.milliseconds ?? Duration.minutes(5).milliseconds;
     let res: Record[];
     try {
-      res = (await connection.bulk.v2.query(query)) ?? [];
+      res = (await connection.bulk2.query(query)) ?? [];
       return this.transformBulkResults(res, query);
     } catch (e) {
       const err = e as Error & { jobId: string };
