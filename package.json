@@ -83,14 +83,14 @@
     "prepare": "sf-install",
     "pretest": "sf-compile-test",
     "test": "sf-test",
-    "test:command-reference": "./bin/run commandreference:generate --erroronwarnings",
-    "test:deprecation-policy": "./bin/run snapshot:compare",
+    "test:command-reference": "./bin/dev commandreference:generate --erroronwarnings",
+    "test:deprecation-policy": "./bin/dev snapshot:compare",
     "test:nuts": "nyc mocha \"./test/**/*.nut.ts\" --slow 4500 --timeout 600000 --parallel",
     "version": "oclif readme"
   },
   "dependencies": {
-    "@oclif/core": "^1.6.4",
-    "@salesforce/command": "^5.2.2",
+    "@oclif/core": "^1.13.10",
+    "@salesforce/command": "^5.2.4",
     "@salesforce/core": "^3.26.1",
     "@salesforce/ts-types": "^1.5.20",
     "@types/fs-extra": "^9.0.13",
