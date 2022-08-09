@@ -7,7 +7,8 @@
 import * as path from 'path';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-// TODO: come back and fix NUTs/types once jsforce PR merged
+import { QueryResult } from 'jsforce';
+
 describe('data:soql:bulk:report command', () => {
   let testSession: TestSession;
 
@@ -20,9 +21,9 @@ describe('data:soql:bulk:report command', () => {
       project: { sourceDir: path.join('test', 'test-files', 'data-project') },
     });
     // Import data to the default org.
-    // execCmd(`force:data:tree:import --plan ${path.join('.', 'data', 'accounts-contacts-plan.json')}`, {
-    //   ensureExitCode: 0,
-    // });
+    execCmd(`force:data:tree:import --plan ${path.join('.', 'data', 'accounts-contacts-plan.json')}`, {
+      ensureExitCode: 0,
+    });
   });
 
   after(async () => {
@@ -32,9 +33,9 @@ describe('data:soql:bulk:report command', () => {
   describe('data:soql:bulk:report', () => {
     it('should return Lead.owner.name (multi-level relationships)', () => {
       execCmd('force:data:record:create -s Lead -v "Company=Salesforce LastName=Astro"', { ensureExitCode: 0 });
-      const profileId = execCmd<{ Id: string }>(
+      const profileId = execCmd<QueryResult<{ Id: string }>>(
         'force:data:soql:query -q "SELECT ID FROM Profile WHERE Name=\'System Administrator\'" --json'
-      ).jsonOutput?.result?.Id;
+      ).jsonOutput?.result.records[0].Id;
       const bulkQueryId = execCmd<{ id: string }>(
         'force:data:soql:query -q "SELECT owner.Profile.Name, owner.Profile.Id, Title, Name FROM lead LIMIT 1" --bulk --json --wait 0',
         {
@@ -44,6 +45,7 @@ describe('data:soql:bulk:report command', () => {
       const result = execCmd(`force:data:soql:bulk:report -i ${bulkQueryId}`, { ensureExitCode: 0 }).shellOutput.stdout;
       expect(result).to.not.include('[object Object]');
       expect(result).to.include('System Administrator');
+      expect(result).to.include('Astro');
       expect(result).to.include(profileId);
 
       const queryResultCSV = execCmd(`force:data:soql:bulk:report -i ${bulkQueryId} -r csv`, { ensureExitCode: 0 })
@@ -62,11 +64,8 @@ describe('data:soql:bulk:report command', () => {
           ensureExitCode: 0,
         }
       ).jsonOutput?.result?.id;
-      // eslint-disable-next-line no-console
-      console.log('bulkqueryid', bulkQueryId);
+
       const result = execCmd(`force:data:soql:bulk:report -i ${bulkQueryId}`, { ensureExitCode: 0 }).shellOutput.stdout;
-      // eslint-disable-next-line no-console
-      console.log('accounts', result);
       expect(result).to.match(/ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY/g);
       expect(result).to.match(/Total number of records retrieved: 1\./g);
     });
@@ -78,33 +77,10 @@ describe('data:soql:bulk:report command', () => {
           ensureExitCode: 0,
         }
       ).jsonOutput?.result?.id;
-      const result = execCmd(`force:data:soql:bulk:report -i ${bulkQueryId}`, { ensureExitCode: 0 }).shellOutput.stdout;
 
+      const result = execCmd(`force:data:soql:bulk:report -i ${bulkQueryId}`, { ensureExitCode: 0 }).shellOutput.stdout;
       expect(result).to.match(/Total number of records retrieved: \d/g);
       expect(result).to.include('ID');
-    });
-
-    it('should print JSON (--json) output correctly', () => {
-      const bulkQueryId = execCmd<{ id: string }>(
-        'force:data:soql:query -q "SELECT id, Name FROM User" --bulk --json --wait 0',
-        {
-          ensureExitCode: 0,
-        }
-      ).jsonOutput?.result?.id;
-      const result = execCmd<{ records: Array<{ Id: string; Name: string }> }>(
-        `force:data:soql:bulk:report -i ${bulkQueryId} --json`,
-        { ensureExitCode: 0 }
-      ).jsonOutput?.result.records;
-      // eslint-disable-next-line no-console
-      console.log('--json', result);
-      expect(result).to.not.include('[object Object]');
-      // the Metadata object parsed correctly
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      expect(result[0]).to.have.key('id');
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      expect(result[0]).to.have.key('Name');
     });
 
     it('should print JSON (-r json) output correctly', () => {
@@ -116,11 +92,8 @@ describe('data:soql:bulk:report command', () => {
       ).jsonOutput?.result?.id;
       const result = execCmd(`force:data:soql:bulk:report -i ${bulkQueryId} -r json`, { ensureExitCode: 0 }).shellOutput
         .stdout;
-      // eslint-disable-next-line no-console
-      console.log('-r json', result);
-      expect(result).to.not.include('[object Object]');
       // the Metadata object parsed correctly
-      expect(result).to.include('ID');
+      expect(result).to.include('Id');
       expect(result).to.include('Name');
     });
   });

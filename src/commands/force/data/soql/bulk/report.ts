@@ -8,7 +8,6 @@ import * as os from 'os';
 import { flags, FlagsConfig } from '@salesforce/command';
 import { Messages } from '@salesforce/core';
 import { QueryJobV2 } from 'jsforce/lib/api/bulk';
-import { QueryResult } from 'jsforce';
 import { DataSoqlQueryCommand, SoqlQuery } from '../query';
 
 Messages.importMessagesDirectory(__dirname);
@@ -27,10 +26,7 @@ export class BulkQueryReport extends DataSoqlQueryCommand {
     resultformat: DataSoqlQueryCommand.flagsConfig.resultformat,
   };
 
-  // TODO: investigate if this can be removed once jsforce published, complaining about incompatible types
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  public async run(): Promise<QueryResult<unknown>> {
+  public async run(): Promise<unknown> {
     const job = new QueryJobV2({
       operation: 'query',
       pollingOptions: { pollTimeout: 0, pollInterval: 0 },

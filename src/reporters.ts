@@ -253,9 +253,14 @@ export class CsvReporter extends QueryReporter {
         .join(SEPARATOR)
     );
 
-    this.data.result.records.forEach((row) => {
+    // explained why we need this below - foreach does not allow types
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    this.data.result.records.forEach((row: Record<string, unknown>) => {
       const values = attributeNames.map((name) => {
-        const value = get(row, name);
+        // try get(row, name) first, then if it fails, default to row[name]. The default will happen in bulk cases.
+        // the standard case returns {field:{nested: 'value'}}, while the bulk will return {field.nested: 'value'}
+        const value = get(row, name, row[name]);
         if (isString(value)) {
           return this.escape(value);
           // if value is null, then typeof value === 'object' so check before typeof to avoid illegal csv
