@@ -6,6 +6,8 @@
  */
 import { expect, test } from '@salesforce/command/lib/test';
 import { ensureJsonMap, ensureString } from '@salesforce/ts-types';
+import { testSetup } from '@salesforce/core/lib/testSetup';
+import Delete from '../../../../../src/commands/force/data/record/delete';
 
 const sObjectId = '0011100001zhhyUAAQ';
 
@@ -74,8 +76,15 @@ describe('force:data:record:delete', () => {
 
   test
     .withOrg({ username: 'test@org.com' }, true)
-    .withConnectionRequest(() => {
-      return Promise.resolve({});
+    .do(() => {
+      const $$ = testSetup();
+      $$.SANDBOX.stub(Delete.prototype, 'getConnection').returns({
+        sobject: () => ({
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore enable any typing here
+          find: () => [],
+        }),
+      });
     })
     .stdout()
     .command([
@@ -91,6 +100,6 @@ describe('force:data:record:delete', () => {
     .it('should throw an error if the where flag returns nothing', (ctx) => {
       const result = JSON.parse(ctx.stdout) as DeleteResult;
       expect(result.status).to.equal(1);
-      // expect(result.name).to.equal('DataRecordGetNoRecord');
+      expect(result.name).to.equal('DataRecordGetNoRecord');
     });
 });
