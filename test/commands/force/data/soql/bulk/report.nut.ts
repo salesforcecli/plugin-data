@@ -43,7 +43,7 @@ describe('data:soql:bulk:report command', () => {
           ensureExitCode: 0,
         }
       ).jsonOutput?.result?.id;
-      await sleep(1000);
+      await sleep(2000);
       const result = execCmd(`force:data:soql:bulk:report -i ${bulkQueryId}`, { ensureExitCode: 0 }).shellOutput.stdout;
       expect(result).to.not.include('[object Object]');
       expect(result).to.include('System Administrator');
@@ -66,7 +66,7 @@ describe('data:soql:bulk:report command', () => {
           ensureExitCode: 0,
         }
       ).jsonOutput?.result?.id;
-      await sleep(1000);
+      await sleep(2000);
 
       const result = execCmd(`force:data:soql:bulk:report -i ${bulkQueryId}`, { ensureExitCode: 0 }).shellOutput.stdout;
       expect(result).to.match(/ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY/g);
@@ -80,7 +80,7 @@ describe('data:soql:bulk:report command', () => {
           ensureExitCode: 0,
         }
       ).jsonOutput?.result?.id;
-      await sleep(1000);
+      await sleep(2000);
 
       const result = execCmd(`force:data:soql:bulk:report -i ${bulkQueryId}`, { ensureExitCode: 0 }).shellOutput.stdout;
       expect(result).to.match(/Total number of records retrieved: \d/g);
@@ -94,7 +94,7 @@ describe('data:soql:bulk:report command', () => {
           ensureExitCode: 0,
         }
       ).jsonOutput?.result?.id;
-      await sleep(1000);
+      await sleep(2000);
       const result = execCmd(`force:data:soql:bulk:report -i ${bulkQueryId} -r json`, { ensureExitCode: 0 }).shellOutput
         .stdout;
       // the Metadata object parsed correctly
