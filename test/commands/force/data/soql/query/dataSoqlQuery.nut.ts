@@ -295,55 +295,31 @@ describe('data:soql:query command', () => {
       const query =
         "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry FROM Account WHERE Name LIKE 'SampleAccount%' limit 1";
 
-      const queryResult = runQuery(query, { ensureExitCode: 0, json: false, bulk: true }) as string;
+      const queryResult = runQuery(query, { ensureExitCode: 0, json: false, bulk: true });
 
       expect(queryResult).to.match(/ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY/g);
       expect(queryResult).to.match(/Total number of records retrieved: 1\./g);
-    });
-    it('should return account records with nested contacts', () => {
-      const query =
-        "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry, (SELECT Lastname, Title, Email FROM Contacts) FROM Account  WHERE Name LIKE 'SampleAccount%'";
-
-      const queryResult = runQuery(query, { ensureExitCode: 0, json: false, bulk: true }) as string;
-
-      expect(queryResult).to.match(
-        /ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY\s+?CONTACTS.LASTNAME\s+?CONTACTS.TITLE\s+?CONTACTS.EMAIL/g
-      );
-      expect(queryResult).to.match(/\sSmith/g);
-      expect(queryResult).to.match(/Total number of records retrieved: 2\./g);
     });
 
     it('should handle count() error correctly', () => {
       const queryResult = execCmd('force:data:soql:query -q "SELECT Count() from User" --bulk', {
         ensureExitCode: 1,
-      }).shellOutput as string;
+      }).shellOutput.stderr;
 
       expect(queryResult).to.match(/COUNT not supported in Bulk Query/g);
     });
 
     it('should emit suggestion to use query:report', () => {
-      const queryResult = execCmd('force:data:soql:query -q "SELECT Count() from User" --bulk --wait 0', {
-        ensureExitCode: 0,
-      }).shellOutput as string;
+      const queryResult = execCmd(
+        'force:data:soql:query -q "SELECT ID FROM Profile WHERE Name=\'System Administrator\'" --bulk --wait 0',
+        {
+          ensureExitCode: 0,
+        }
+      ).shellOutput.stdout;
 
       expect(queryResult).to.match(
         /Run sfdx force:data:soql:bulk:report -i .* -u .* to get the latest status\/results/g
       );
-    });
-
-    it('should print JSON output correctly', () => {
-      const result = runQuery('select id, isActive, Metadata from RemoteProxy', {
-        bulk: true,
-        ensureExitCode: 0,
-        json: false,
-      });
-      expect(result).to.not.include('[object Object]');
-      // the Metadata object parsed correctly
-      expect(result).to.include('disableProtocolSecurity');
-      expect(result).to.include('isActive');
-      expect(result).to.include('url');
-      expect(result).to.include('urls');
-      expect(result).to.include('description');
     });
   });
 });
