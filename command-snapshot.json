@@ -83,10 +83,17 @@
     "alias": []
   },
   {
+    "command": "force:data:soql:bulk:report",
+    "plugin": "@salesforce/plugin-data",
+    "flags": ["apiversion", "bulkqueryid", "json", "loglevel", "resultformat", "targetusername"],
+    "alias": []
+  },
+  {
     "command": "force:data:soql:query",
     "plugin": "@salesforce/plugin-data",
     "flags": [
       "apiversion",
+      "bulk",
       "json",
       "loglevel",
       "perflog",
@@ -94,7 +101,8 @@
       "resultformat",
       "soqlqueryfile",
       "targetusername",
-      "usetoolingapi"
+      "usetoolingapi",
+      "wait"
     ],
     "alias": []
   },

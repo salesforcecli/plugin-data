@@ -20,6 +20,7 @@ export interface QueryResult {
 interface QueryOptions {
   json?: boolean;
   ensureExitCode?: number;
+  bulk?: boolean;
   toolingApi?: boolean;
 }
 
@@ -27,10 +28,18 @@ function verifyRecordFields(accountRecord: Dictionary, fields: string[]) {
   expect(accountRecord).to.have.all.keys(...fields);
 }
 
-function runQuery(query: string, options: QueryOptions = { json: true, ensureExitCode: 0, toolingApi: false }) {
-  const queryCmd = `force:data:soql:query --query "${query}" ${options.toolingApi ? '-t' : ''} ${
-    options.json ? '--json' : ''
-  }`.trim();
+function runQuery(
+  query: string,
+  options: QueryOptions = {
+    json: true,
+    ensureExitCode: 0,
+    toolingApi: false,
+    bulk: false,
+  }
+) {
+  const queryCmd = `force:data:soql:query --query "${query}" ${options.bulk ? '-b' : ''} ${
+    options.toolingApi ? '-t' : ''
+  } ${options.json ? '--json' : ''}`.trim();
   const results = execCmd<QueryResult>(queryCmd, {
     ensureExitCode: options.ensureExitCode,
   });
@@ -259,6 +268,58 @@ describe('data:soql:query command', () => {
       expect(result).to.include('url');
       expect(result).to.include('urls');
       expect(result).to.include('description');
+    });
+  });
+  describe('data:soql:query --bulk', () => {
+    it('should return Lead.owner.name (multi-level relationships)', () => {
+      execCmd('force:data:record:create -s Lead -v "Company=Salesforce LastName=Astro"', { ensureExitCode: 0 });
+
+      const profileId = (runQuery("SELECT ID FROM Profile WHERE Name='System Administrator'") as QueryResult).records[0]
+        .Id;
+      const query = 'SELECT owner.Profile.Name, owner.Profile.Id, Title, Name FROM lead LIMIT 1';
+
+      const queryResult = runQuery(query, { ensureExitCode: 0, bulk: true });
+      expect(queryResult).to.not.include('[object Object]');
+      expect(queryResult).to.include('System Administrator');
+      expect(queryResult).to.include(profileId);
+
+      const queryResultCSV = runQuery(query + '" --resultformat "csv', { ensureExitCode: 0, bulk: true });
+      expect(queryResultCSV).to.not.include('[object Object]');
+      expect(queryResultCSV).to.include('System Administrator');
+      expect(queryResultCSV).to.include(profileId);
+      // Title is null and represented as ,, (empty) in csv
+      expect(queryResultCSV).to.include(',,');
+    });
+
+    it('should return account records', () => {
+      const query =
+        "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry FROM Account WHERE Name LIKE 'SampleAccount%' limit 1";
+
+      const queryResult = runQuery(query, { ensureExitCode: 0, json: false, bulk: true });
+
+      expect(queryResult).to.match(/ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY/g);
+      expect(queryResult).to.match(/Total number of records retrieved: 1\./g);
+    });
+
+    it('should handle count() error correctly', () => {
+      const queryResult = execCmd('force:data:soql:query -q "SELECT Count() from User" --bulk', {
+        ensureExitCode: 1,
+      }).shellOutput.stderr;
+
+      expect(queryResult).to.match(/COUNT not supported in Bulk Query/g);
+    });
+
+    it('should emit suggestion to use query:report', () => {
+      const queryResult = execCmd(
+        'force:data:soql:query -q "SELECT ID FROM Profile WHERE Name=\'System Administrator\'" --bulk --wait 0',
+        {
+          ensureExitCode: 0,
+        }
+      ).shellOutput.stdout;
+
+      expect(queryResult).to.match(
+        /Run sfdx force:data:soql:bulk:report -i .* -u .* to get the latest status\/results/g
+      );
     });
   });
 });

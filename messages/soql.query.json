@@ -11,6 +11,9 @@
   "queryNoResults": "Your query returned no results.",
   "queryRunningMessage": "Querying Data",
   "queryMoreUpdateMessage": "Result size is %d, current count is %d",
+  "bulkDescription": "use the bulk 2.0 API to query data",
+  "waitDescription": "wait time for command to finish in minutes",
+  "bulkQueryTimeout": "Query ID: %s\nQuery is in progress. \n\nRun sfdx force:data:soql:bulk:report -i %s -u %s to get the latest status/results",
   "soqlqueryfile": "A SOQL query stored in a file",
   "examples": [
     "$ sfdx force:data:soql:query -q \"SELECT Id, Name, Account.Name FROM Contact\"",
