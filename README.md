@@ -83,7 +83,8 @@ sfdx plugins
 - [`sfdx force:data:record:delete -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatarecorddelete--s-string--i-id---w-string--t---perflog---json--u-string---apiversion-string---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 - [`sfdx force:data:record:get -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatarecordget--s-string--i-id---w-string--t---perflog---json--u-string---apiversion-string---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 - [`sfdx force:data:record:update -s <string> -v <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatarecordupdate--s-string--v-string--i-id---w-string--t---perflog---json--u-string---apiversion-string---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
-- [`sfdx force:data:soql:query [-q <string> | -f <filepath>] [-t] [-r human|csv|json] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatasoqlquery--q-string---f-filepath--t--r-humancsvjson---perflog---json--u-string---apiversion-string---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
+- [`sfdx force:data:soql:bulk:report -i <string> [-r human|csv|json] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatasoqlbulkreport--i-string--r-humancsvjson--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
+- [`sfdx force:data:soql:query [-q <string> | -f <filepath>] [-w <minutes> [-b | -t]] [-r human|csv|json] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatasoqlquery--q-string---f-filepath--w-minutes--b---t--r-humancsvjson---perflog---json--u-string---apiversion-string---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 - [`sfdx force:data:tree:export -q <string> [-p] [-x <string>] [-d <directory>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatatreeexport--q-string--p--x-string--d-directory--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 - [`sfdx force:data:tree:import [-f <array> | -p <filepath>] [--confighelp] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-forcedatatreeimport--f-array---p-filepath---confighelp--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 
@@ -128,7 +129,7 @@ EXAMPLES
   $ sfdx force:data:bulk:delete -s MyObject__c -f ./path/to/file.csv
 ```
 
-_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.0/src/commands/force/data/bulk/delete.ts)_
+_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.1/src/commands/force/data/bulk/delete.ts)_
 
 ## `sfdx force:data:bulk:status -i <string> [-b <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -165,7 +166,7 @@ EXAMPLES
   $ sfdx force:data:bulk:status -i 750xx000000005sAAA -b 751xx000000005nAAA
 ```
 
-_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.0/src/commands/force/data/bulk/status.ts)_
+_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.1/src/commands/force/data/bulk/status.ts)_
 
 ## `sfdx force:data:bulk:upsert -i <string> -f <filepath> -s <string> [-w <minutes>] [-r] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -214,7 +215,7 @@ EXAMPLES
   $ sfdx force:data:bulk:upsert -s MyObject__c -f ./path/to/file.csv -i Id -w 2
 ```
 
-_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.0/src/commands/force/data/bulk/upsert.ts)_
+_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.1/src/commands/force/data/bulk/upsert.ts)_
 
 ## `sfdx force:data:record:create -s <string> -v <string> [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -263,7 +264,7 @@ EXAMPLES
   $ sfdx force:data:record:create -s Account -v "Name=Acme" --perflog --json
 ```
 
-_See code: [src/commands/force/data/record/create.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.0/src/commands/force/data/record/create.ts)_
+_See code: [src/commands/force/data/record/create.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.1/src/commands/force/data/record/create.ts)_
 
 ## `sfdx force:data:record:delete -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -315,7 +316,7 @@ EXAMPLES
   $ sfdx force:data:record:delete -t -s TraceFlag -i 7tf170000009cU6AAI --perflog --json
 ```
 
-_See code: [src/commands/force/data/record/delete.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.0/src/commands/force/data/record/delete.ts)_
+_See code: [src/commands/force/data/record/delete.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.1/src/commands/force/data/record/delete.ts)_
 
 ## `sfdx force:data:record:get -s <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -368,7 +369,7 @@ EXAMPLES
   $ sfdx force:data:record:get -t -s TraceFlag -i 7tf170000009cUBAAY --perflog --json
 ```
 
-_See code: [src/commands/force/data/record/get.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.0/src/commands/force/data/record/get.ts)_
+_See code: [src/commands/force/data/record/get.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.1/src/commands/force/data/record/get.ts)_
 
 ## `sfdx force:data:record:update -s <string> -v <string> [-i <id> | -w <string>] [-t] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -420,18 +421,54 @@ EXAMPLES
   $sfdx force:data:record:update -s Account -i 001D000000Kv3dl -v "Name=NewAcme" --perflog --json
 ```
 
-_See code: [src/commands/force/data/record/update.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.0/src/commands/force/data/record/update.ts)_
+_See code: [src/commands/force/data/record/update.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.1/src/commands/force/data/record/update.ts)_
 
-## `sfdx force:data:soql:query [-q <string> | -f <filepath>] [-t] [-r human|csv|json] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
+## `sfdx force:data:soql:bulk:report -i <string> [-r human|csv|json] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
+
+view the status of a bulk query
+
+```
+USAGE
+  $ sfdx force:data:soql:bulk:report -i <string> [-r human|csv|json] [-u <string>] [--apiversion <string>] [--json] [--loglevel
+    trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
+
+FLAGS
+  -i, --bulkqueryid=<value>                                                         (required) the job ID of the bulk
+                                                                                    query
+  -r, --resultformat=(human|csv|json)                                               [default: human] result format
+                                                                                    emitted to stdout; --json flag
+                                                                                    overrides this parameter
+  -u, --targetusername=<value>                                                      username or alias for the target
+                                                                                    org; overrides default target org
+  --apiversion=<value>                                                              override the api version used for
+                                                                                    api requests made by this command
+  --json                                                                            format output as json
+  --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)  [default: warn] logging level for
+                                                                                    this command invocation
+
+DESCRIPTION
+  view the status of a bulk query
+
+  Run this command using the job ID returned from the force:data:soql:query --bulk command.
+
+EXAMPLES
+  $ sfdx force:data:soql:bulk:report -i 7500x000005BdFzXXX
+```
+
+_See code: [src/commands/force/data/soql/bulk/report.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.1/src/commands/force/data/soql/bulk/report.ts)_
+
+## `sfdx force:data:soql:query [-q <string> | -f <filepath>] [-w <minutes> [-b | -t]] [-r human|csv|json] [--perflog --json] [-u <string>] [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
 execute a SOQL query
 
 ```
 USAGE
-  $ sfdx force:data:soql:query [-q <string> | -f <filepath>] [-t] [-r human|csv|json] [--perflog --json] [-u <string>]
-    [--apiversion <string>] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
+  $ sfdx force:data:soql:query [-q <string> | -f <filepath>] [-w <minutes> [-b | -t]] [-r human|csv|json] [--perflog
+    --json] [-u <string>] [--apiversion <string>] [--loglevel
+    trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 
 FLAGS
+  -b, --bulk                                                                        use the bulk 2.0 API to query data
   -f, --soqlqueryfile=<value>                                                       A SOQL query stored in a file
   -q, --query=<value>                                                               SOQL query to execute
   -r, --resultformat=(human|csv|json)                                               [default: human] result format
@@ -440,6 +477,8 @@ FLAGS
   -t, --usetoolingapi                                                               execute query with Tooling API
   -u, --targetusername=<value>                                                      username or alias for the target
                                                                                     org; overrides default target org
+  -w, --wait=<value>                                                                wait time for command to finish in
+                                                                                    minutes
   --apiversion=<value>                                                              override the api version used for
                                                                                     api requests made by this command
   --json                                                                            format output as json
@@ -468,7 +507,7 @@ EXAMPLES
   $ sfdx force:data:soql:query --soqlqueryfile query.txt -t
 ```
 
-_See code: [src/commands/force/data/soql/query.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.0/src/commands/force/data/soql/query.ts)_
+_See code: [src/commands/force/data/soql/query.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.1/src/commands/force/data/soql/query.ts)_
 
 ## `sfdx force:data:tree:export -q <string> [-p] [-x <string>] [-d <directory>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -510,7 +549,7 @@ EXAMPLES
   $ sfdx force:data:tree:export -q <path to file containing soql query> -x export-demo -d /tmp/sfdx-out -p
 ```
 
-_See code: [src/commands/force/data/tree/export.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.0/src/commands/force/data/tree/export.ts)_
+_See code: [src/commands/force/data/tree/export.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.1/src/commands/force/data/tree/export.ts)_
 
 ## `sfdx force:data:tree:import [-f <array> | -p <filepath>] [--confighelp] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -560,6 +599,6 @@ EXAMPLES
   $ sfdx force:data:tree:import -p Account-Contact-plan.json -u me@my.org
 ```
 
-_See code: [src/commands/force/data/tree/import.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.0/src/commands/force/data/tree/import.ts)_
+_See code: [src/commands/force/data/tree/import.ts](https://github.com/salesforcecli/plugin-data/blob/v2.1.1/src/commands/force/data/tree/import.ts)_
 
 <!-- commandsstop -->
