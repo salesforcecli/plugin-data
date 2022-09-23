@@ -92,7 +92,7 @@
     "@oclif/core": "^1.13.10",
     "@salesforce/command": "^5.2.4",
     "@salesforce/core": "^3.30.3",
-    "@salesforce/ts-types": "^1.5.20",
+    "@salesforce/ts-types": "^1.5.21",
     "@types/fs-extra": "^9.0.13",
     "chalk": "^4.1.0",
     "jsforce": "beta",
