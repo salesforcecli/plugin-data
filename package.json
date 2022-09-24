@@ -91,7 +91,7 @@
   "dependencies": {
     "@oclif/core": "^1.13.10",
     "@salesforce/command": "^5.2.4",
-    "@salesforce/core": "^3.30.3",
+    "@salesforce/core": "^3.30.8",
     "@salesforce/ts-types": "^1.5.21",
     "@types/fs-extra": "^9.0.13",
     "chalk": "^4.1.0",
