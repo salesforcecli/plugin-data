@@ -64,14 +64,10 @@ export type SObjectTreeFileContents = {
   records: SObjectTreeInput[];
 };
 
-export const hasNestedRecords = <T>(element: { records: T[] } | unknown): element is { records: T[] } => {
-  return Array.isArray((element as { records: T[] })?.records);
-};
+export const hasNestedRecords = <T>(element: { records: T[] } | unknown): element is { records: T[] } => Array.isArray((element as { records: T[] })?.records);
 
 export const isAttributesElement = (
   element: SObjectTreeInput['attributes'] | unknown
-): element is SObjectTreeInput['attributes'] => {
-  return (
+): element is SObjectTreeInput['attributes'] => (
     !!(element as SObjectTreeInput['attributes']).referenceId && !!(element as SObjectTreeInput['attributes']).type
   );
-};
