@@ -23,7 +23,7 @@ interface QueryResult {
   result: { totalSize: number; records: [] };
 }
 
-describe('Execute a SOQL statement', function (): void {
+describe('Execute a SOQL statement', (): void => {
   let sandbox: SinonSandbox;
   beforeEach(() => {
     sandbox = sinon.createSandbox();
