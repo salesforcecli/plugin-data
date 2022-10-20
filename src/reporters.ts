@@ -14,7 +14,7 @@ import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes';
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
 
-export class Reporter {
+class Reporter {
   protected logger: Logger;
 
   public constructor() {
@@ -22,7 +22,7 @@ export class Reporter {
   }
 }
 
-export class QueryReporter extends Reporter {
+class QueryReporter extends Reporter {
   protected columns: Field[] = [];
   protected data: SoqlQueryResult;
 

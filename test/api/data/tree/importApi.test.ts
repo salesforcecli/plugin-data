@@ -278,16 +278,14 @@ describe('ImportApi', () => {
         },
       };
       const filepath = path.join(__dirname, 'test-files', 'contacts-only-2.sdx');
-      // @ts-ignore
-      const rv = ImportApi.prototype.getSObjectTreeFileMeta(filepath, 'json');
+      const rv = getSObjectTreeFileMeta(filepath, 'json');
       expect(rv).to.eql(expectedMeta);
     });
 
     it('should throw an InvalidDataImport error with invalid path to data file', () => {
       const filepath = path.join(__dirname, 'test-files', 'invalid-data-file.json');
       try {
-        // @ts-ignore
-        const rv = ImportApi.prototype.getSObjectTreeFileMeta(filepath);
+        const rv = getSObjectTreeFileMeta(filepath);
         // this should never execute but if it does it will cause the test to fail
         expect(rv).to.throw('InvalidDataImport');
       } catch (err) {
@@ -300,8 +298,7 @@ describe('ImportApi', () => {
     it('should throw an InvalidDataImport error with unknown data file extention and no content-type', () => {
       const filepath = path.join(__dirname, 'test-files', 'contacts-only-2.sdx');
       try {
-        // @ts-ignore
-        const rv = ImportApi.prototype.getSObjectTreeFileMeta(filepath);
+        const rv = getSObjectTreeFileMeta(filepath);
         // this should never execute but if it does it will cause the test to fail
         expect(rv).to.throw('InvalidDataImport');
       } catch (err) {
@@ -314,8 +311,7 @@ describe('ImportApi', () => {
     it('should throw an InvalidDataImport error with unknown data file extension and unsupported content-type', () => {
       const filepath = path.join(__dirname, 'test-files', 'contacts-only-2.sdx');
       try {
-        // @ts-ignore
-        const rv = ImportApi.prototype.getSObjectTreeFileMeta(filepath, 'txt');
+        const rv = getSObjectTreeFileMeta(filepath, 'txt');
         // this should never execute but if it does it will cause the test to fail
         expect(rv).to.throw('InvalidDataImport');
       } catch (err) {

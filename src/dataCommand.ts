@@ -5,18 +5,13 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { AnyJson, get, Nullable } from '@salesforce/ts-types';
+import { get, Nullable } from '@salesforce/ts-types';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { Record as jsforceRecord, SaveResult } from 'jsforce';
 
 import { CliUx } from '@oclif/core';
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
-
-export interface Metric {
-  requestPath: string;
-  perfMetrics: AnyJson;
-}
 
 export const logNestedObject = (obj: never, indentation = 0): void => {
   const space = ' '.repeat(indentation);

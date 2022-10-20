@@ -22,9 +22,9 @@ Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'batcher');
 
 type BatchEntry = Record<string, string>;
-export type Batches = BatchEntry[][];
+type Batches = BatchEntry[][];
 
-export type BulkResult = {
+type BulkResult = {
   $: {
     xmlns: string;
   };
