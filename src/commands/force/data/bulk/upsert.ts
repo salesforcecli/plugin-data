@@ -7,61 +7,68 @@
 import * as os from 'os';
 import * as fs from 'fs';
 import { ReadStream } from 'fs';
-import { flags, FlagsConfig } from '@salesforce/command';
-import { Connection, Messages } from '@salesforce/core';
-import { Job, JobInfo } from 'jsforce/job';
+import { Messages } from '@salesforce/core';
+import { JobInfo } from 'jsforce/api/bulk';
+import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
+import { Duration } from '@salesforce/kit';
 import { Batcher, BulkResult } from '../../../../batcher';
-import { DataCommand } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.upsert');
 
-export default class Upsert extends DataCommand {
+export default class Upsert extends SfCommand<JobInfo[] | BulkResult[]> {
+  public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessage('examples').split(os.EOL);
-  public static readonly requiresUsername = true;
-  public static readonly flagsConfig: FlagsConfig = {
-    externalid: flags.string({
+  public static flags = {
+    targetusername: Flags.requiredOrg({
+      required: true,
+      char: 'u',
+      summary: messages.getMessage('flags.targetusername'),
+    }),
+    externalid: Flags.string({
       char: 'i',
-      description: messages.getMessage('flags.externalid'),
+      summary: messages.getMessage('flags.externalid'),
       required: true,
     }),
-    csvfile: flags.filepath({
+    csvfile: Flags.file({
+      exists: true,
       char: 'f',
-      description: messages.getMessage('flags.csvfile'),
+      summary: messages.getMessage('flags.csvfile'),
       required: true,
     }),
-    sobjecttype: flags.string({
+    sobjecttype: Flags.string({
       char: 's',
-      description: messages.getMessage('flags.sobjecttype'),
+      summary: messages.getMessage('flags.sobjecttype'),
       required: true,
     }),
-    wait: flags.minutes({
+    wait: Flags.duration({
       char: 'w',
-      description: messages.getMessage('flags.wait'),
+      unit: 'minutes',
+      summary: messages.getMessage('flags.wait'),
       min: 0,
+      default: Duration.minutes(0),
     }),
-    serial: flags.boolean({
+    serial: Flags.boolean({
       char: 'r',
-      description: messages.getMessage('flags.serial'),
+      summary: messages.getMessage('flags.serial'),
       default: false,
     }),
   };
 
   public async run(): Promise<JobInfo[] | BulkResult[]> {
-    const conn: Connection = this.ensureOrg().getConnection();
-    this.ux.startSpinner('Bulk Upsert');
+    const { flags } = await this.parse(Upsert);
+    const conn = flags.targetusername.getConnection();
+    this.spinner.start('Bulk Upsert');
 
-    await this.throwIfPathDoesntExist(this.flags.csvfile as string);
+    const batcher: Batcher = new Batcher(conn, new Ux(this.jsonEnabled()));
+    const csvStream: ReadStream = fs.createReadStream(flags.csvfile, { encoding: 'utf-8' });
 
-    const batcher: Batcher = new Batcher(conn, this.ux);
-    const csvStream: ReadStream = fs.createReadStream(this.flags.csvfile as string, { encoding: 'utf-8' });
-
-    const concurrencyMode = this.flags.serial ? 'Serial' : 'Parallel';
-    const job: Job = conn.bulk.createJob(this.flags.sobjecttype, 'upsert', {
-      extIdField: this.flags.externalid as string,
+    const concurrencyMode = flags.serial ? 'Serial' : 'Parallel';
+    const job = conn.bulk.createJob(flags.sobjecttype, 'upsert', {
+      extIdField: flags.externalid,
       concurrencyMode,
-    }) as unknown as Job;
+    });
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
     return new Promise(async (resolve, reject) => {
@@ -70,17 +77,10 @@ export default class Upsert extends DataCommand {
       });
 
       try {
-        resolve(
-          await batcher.createAndExecuteBatches(
-            job,
-            csvStream,
-            this.flags.sobjecttype as string,
-            this.flags.wait as number
-          )
-        );
-        this.ux.stopSpinner();
+        resolve(await batcher.createAndExecuteBatches(job, csvStream, flags.sobjecttype, flags.wait?.minutes));
+        this.spinner.stop();
       } catch (e) {
-        this.ux.stopSpinner('error');
+        this.spinner.stop('error');
         reject(e);
       }
     });

@@ -5,15 +5,12 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import * as fse from 'fs-extra';
-import { SfdxCommand } from '@salesforce/command';
-import { AnyJson, Dictionary, get, Nullable } from '@salesforce/ts-types';
-import { Connection, Messages, Org, SfError } from '@salesforce/core';
-import { Record as jsforceRecord, SaveResult, SObject } from 'jsforce';
+import { AnyJson, get, Nullable } from '@salesforce/ts-types';
+import { Connection, Messages, SfError } from '@salesforce/core';
+import { Record as jsforceRecord, SaveResult } from 'jsforce';
+import { ensureArray } from '@salesforce/kit';
 
-import { HttpApi } from 'jsforce/lib/http-api';
-import { Tooling } from '@salesforce/core/lib/org';
-
+import { CliUx } from '@oclif/core';
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
@@ -22,248 +19,134 @@ export interface Metric {
   perfMetrics: AnyJson;
 }
 
-interface Result {
-  status: number;
-  result: AnyJson;
-  perfMetrics?: Metric[];
-}
-
-interface Response {
-  headers: AnyJson & { perfmetrics?: string };
-  req: { path: string };
-}
-
-type ConnectionInternals = { _callOptions?: { perfOption?: string } };
-
-// eslint-disable-next-line @typescript-eslint/unbound-method
-const originalRequestMethod = HttpApi.prototype.request;
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-HttpApi.prototype.request = function (req, ...args: unknown[]): unknown {
-  this.once('response', (response: Response) => {
-    const metrics = response.headers.perfmetrics;
-    if (metrics) {
-      DataCommand.addMetric({
-        requestPath: `/services${req?.url?.split('/services')[1]}`,
-        perfMetrics: JSON.parse(metrics) as AnyJson,
-      });
+export const logNestedObject = (obj: never, indentation = 0): void => {
+  const space = ' '.repeat(indentation);
+  Object.keys(obj).forEach((key) => {
+    const value = get(obj, key, null) as Nullable<string | never>;
+    if (!!value && typeof value === 'object') {
+      CliUx.ux.log(`${space}${key}:`);
+      logNestedObject(value, indentation + 2);
+    } else {
+      CliUx.ux.log(`${space}${key}: ${value as string}`);
     }
   });
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  return originalRequestMethod.call(this, req, ...args);
+};
+/**
+ * Takes a sequence of key=value string pairs and produces an object out of them.
+ * If you repeat the key, it replaces the value with the subsequent value.
+ *
+ * @param [keyValuePairs] - The list of key=value pair strings.
+ */
+const transformKeyValueSequence = (
+  keyValuePairs: string[]
+): Record<string, string | boolean | Record<string, unknown>> => {
+  const constructedObject: Record<string, string | boolean | Record<string, unknown>> = {};
+
+  keyValuePairs.forEach((pair) => {
+    // Look for the *first* '=' and splits there, ignores any subsequent '=' for this pair
+    const eqPosition = pair.indexOf('=');
+    if (eqPosition === -1) {
+      throw new Error(messages.getMessage('TextUtilMalformedKeyValuePair', [pair]));
+    } else {
+      const key = pair.substr(0, eqPosition);
+      if (pair.includes('{') && pair.includes('}')) {
+        try {
+          constructedObject[key] = JSON.parse(pair.substr(eqPosition + 1)) as Record<string, unknown>;
+        } catch {
+          // the data contained { and }, but wasn't valid JSON, default to parsing as-is
+          constructedObject[key] = convertToBooleanIfApplicable(pair.substr(eqPosition + 1));
+        }
+      } else {
+        constructedObject[key] = convertToBooleanIfApplicable(pair.substr(eqPosition + 1));
+      }
+    }
+  });
+
+  return constructedObject;
 };
 
-/* eslint-enable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call*/
+const convertToBooleanIfApplicable = (input: string): boolean | string => {
+  if (input.trim().toLowerCase() === 'false') return false;
+  if (input.trim().toLowerCase() === 'true') return true;
+  return input;
+};
 
-export abstract class DataCommand extends SfdxCommand {
-  private static metrics: Metric[] = [];
+/**
+ * Splits a sequence of 'key=value key="leftValue rightValue"   key=value'
+ * into a list of key=value pairs, paying attention to quoted whitespace.
+ *
+ * This is NOT a full push down-automaton so do NOT expect full error handling/recovery.
+ *
+ * @param {string} text - The sequence to split
+ */
+const parseKeyValueSequence = (text: string): string[] => {
+  const separator = /\s/;
 
-  public static addMetric(metric: Metric): void {
-    DataCommand.metrics.push(metric);
-  }
+  let inSingleQuote = false;
+  let inDoubleQuote = false;
+  let currentToken: string[] = [];
+  const keyValuePairs: string[] = [];
 
-  public static getMetrics(): Metric[] {
-    return DataCommand.metrics;
-  }
+  const trimmedText = text.trim();
+  for (const currentChar of trimmedText) {
+    const isSeparator = separator.exec(currentChar);
 
-  public validateIdXorWhereFlags(): void {
-    if (!this.flags.where && !this.flags.sobjectid) {
-      throw new SfError(messages.getMessage('NeitherSobjectidNorWhereError'), 'NeitherSobjectidNorWhereError', [
-        messages.getMessage('NeitherSobjectidNorWhereErrorActions'),
-      ]);
+    if (currentChar === "'" && !inDoubleQuote) {
+      inSingleQuote = !inSingleQuote;
+      continue;
+    } else if (currentChar === '"' && !inSingleQuote) {
+      inDoubleQuote = !inDoubleQuote;
+      continue;
     }
-  }
 
-  public collectErrorMessages(result: SaveResult): string {
-    let errors = '';
-    if (result.errors) {
-      errors = '\nErrors:\n';
-      result.errors.map((err) => {
-        errors += '  ' + err?.message + '\n';
-      });
-    }
-    return errors;
-  }
-
-  public async throwIfPathDoesntExist(path: string): Promise<void> {
-    if (!(await fse.pathExists(path))) {
-      throw new SfError(messages.getMessage('PathDoesNotExist', [path]), 'PathDoesNotExist');
-    }
-  }
-
-  public getJsonResultObject(result = this.result.data, status = process.exitCode || 0): Result {
-    const final: Result = { status, result };
-    const perfMetrics = DataCommand.getMetrics();
-    if (perfMetrics.length) final.perfMetrics = perfMetrics;
-    return final;
-  }
-
-  /**
-   * Necessary where plugin commands are extending a base class that extends SfdxCommand
-   *
-   * @returns Org
-   */
-  public ensureOrg(): Org {
-    if (!this.org) {
-      throw new SfError(
-        'This command requires a username. Specify it with the -u parameter or with the "sfdx config:set defaultusername=<username>" command.'
-      );
-    }
-    return this.org;
-  }
-
-  public getConnection(): (Tooling | Connection) & ConnectionInternals {
-    const safeOrg = this.ensureOrg();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const connection: (Tooling | Connection) & ConnectionInternals = this.flags.usetoolingapi
-      ? safeOrg.getConnection().tooling
-      : safeOrg.getConnection();
-
-    if (this.flags.perflog) {
-      // eslint-disable-next-line no-underscore-dangle
-      if (!connection._callOptions) {
-        // eslint-disable-next-line no-underscore-dangle
-        connection._callOptions = {};
+    if (!inSingleQuote && !inDoubleQuote && isSeparator) {
+      if (currentToken.length > 0) {
+        keyValuePairs.push(currentToken.join(''));
+        currentToken = [];
       }
-      // eslint-disable-next-line no-underscore-dangle
-      connection._callOptions.perfOption = 'MINIMUM';
+    } else {
+      currentToken.push(currentChar);
     }
-    return connection;
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore enable any typing here
-  public async query(sobject: SObject<unknown>, where: string): Promise<jsforceRecord> {
-    const queryObject = this.stringToDictionary(where);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-    const records = await sobject.find(queryObject, 'id');
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (!records || records.length === 0) {
-      throw new SfError('DataRecordGetNoRecord', messages.getMessage('DataRecordGetNoRecord'));
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (records.length > 1) {
-      throw new SfError(
-        'DataRecordGetMultipleRecords',
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        messages.getMessage('DataRecordGetMultipleRecords', [where, this.flags.sobjecttype, records.length])
-      );
-    }
-
-    return this.normalize<jsforceRecord>(records);
+  // For the case of only one key=value pair with no separator
+  if (currentToken.length > 0) {
+    keyValuePairs.push(currentToken.join(''));
   }
 
-  protected stringToDictionary(str: string): Dictionary<string | boolean | Record<string, unknown>> {
-    const keyValuePairs = this.parseKeyValueSequence(str);
-    return this.transformKeyValueSequence(keyValuePairs);
-  }
+  return keyValuePairs;
+};
 
-  protected normalize<T>(results: T | T[]): T {
-    // jsforce returns SaveResult | SaveResult[]
-    // but we're only ever dealing with a single sobject we are guaranteed to
-    // get back a single SaveResult. Nevertheless, we ensure that it's a
-    // single SaveResult to make Typescript happy
-    return Array.isArray(results) ? results[0] : results;
-  }
+export const stringToDictionary = (str: string): Record<string, string | boolean | Record<string, unknown>> => {
+  const keyValuePairs = parseKeyValueSequence(str);
+  return transformKeyValueSequence(keyValuePairs);
+};
 
-  protected logNestedObject(obj: never, indentation = 0): void {
-    const space = ' '.repeat(indentation);
-    Object.keys(obj).forEach((key) => {
-      const value = get(obj, key, null) as Nullable<string | never>;
-      if (!!value && typeof value === 'object') {
-        this.ux.log(`${space}${key}:`);
-        this.logNestedObject(value, indentation + 2);
-      } else {
-        this.ux.log(`${space}${key}: ${value as string}`);
-      }
+export const collectErrorMessages = (result: SaveResult): string => {
+  let errors = '';
+  if (result.errors) {
+    errors = '\nErrors:\n';
+    result.errors.map((err) => {
+      errors += '  ' + err?.message + '\n';
     });
   }
+  return errors;
+};
 
-  /**
-   * Takes a sequence of key=value string pairs and produces an object out of them.
-   * If you repeat the key, it replaces the value with the subsequent value.
-   *
-   * @param [keyValuePairs] - The list of key=value pair strings.
-   */
-  private transformKeyValueSequence(keyValuePairs: string[]): Dictionary<string | boolean | Record<string, unknown>> {
-    const constructedObject: Dictionary<string | boolean | Record<string, unknown>> = {};
-
-    keyValuePairs.forEach((pair) => {
-      // Look for the *first* '=' and splits there, ignores any subsequent '=' for this pair
-      const eqPosition = pair.indexOf('=');
-      if (eqPosition === -1) {
-        throw new Error(messages.getMessage('TextUtilMalformedKeyValuePair', [pair]));
-      } else {
-        const key = pair.substr(0, eqPosition);
-        if (pair.includes('{') && pair.includes('}')) {
-          try {
-            constructedObject[key] = JSON.parse(pair.substr(eqPosition + 1)) as Record<string, unknown>;
-          } catch {
-            // the data contained { and }, but wasn't valid JSON, default to parsing as-is
-            constructedObject[key] = this.convertToBooleanIfApplicable(pair.substr(eqPosition + 1));
-          }
-        } else {
-          constructedObject[key] = this.convertToBooleanIfApplicable(pair.substr(eqPosition + 1));
-        }
-      }
-    });
-
-    return constructedObject;
+export const query = async (conn: Connection, objectType: string, where: string): Promise<jsforceRecord> => {
+  const queryObject = stringToDictionary(where);
+  const sobject = conn.sobject(objectType);
+  const records = await sobject.find(queryObject, 'id');
+  if (!records || records.length === 0) {
+    throw new SfError('DataRecordGetNoRecord', messages.getMessage('DataRecordGetNoRecord'));
   }
 
-  private convertToBooleanIfApplicable(input: string): boolean | string {
-    if (input.trim().toLowerCase() === 'false') return false;
-    if (input.trim().toLowerCase() === 'true') return true;
-    return input;
+  if (records.length > 1) {
+    throw new SfError(
+      'DataRecordGetMultipleRecords',
+      messages.getMessage('DataRecordGetMultipleRecords', [where, objectType, records.length])
+    );
   }
 
-  /**
-   * Splits a sequence of 'key=value key="leftValue rightValue"   key=value'
-   * into a list of key=value pairs, paying attention to quoted whitespace.
-   *
-   * This is NOT a full push down-automaton so do NOT expect full error handling/recovery.
-   *
-   * @param {string} text - The sequence to split
-   */
-  private parseKeyValueSequence(text: string): string[] {
-    const separator = /\s/;
-
-    let inSingleQuote = false;
-    let inDoubleQuote = false;
-    let currentToken: string[] = [];
-    const keyValuePairs: string[] = [];
-
-    const trimmedText = text.trim();
-    for (const currentChar of trimmedText) {
-      const isSeparator = separator.exec(currentChar);
-
-      if (currentChar === "'" && !inDoubleQuote) {
-        inSingleQuote = !inSingleQuote;
-        continue;
-      } else if (currentChar === '"' && !inSingleQuote) {
-        inDoubleQuote = !inDoubleQuote;
-        continue;
-      }
-
-      if (!inSingleQuote && !inDoubleQuote && isSeparator) {
-        if (currentToken.length > 0) {
-          keyValuePairs.push(currentToken.join(''));
-          currentToken = [];
-        }
-      } else {
-        currentToken.push(currentChar);
-      }
-    }
-
-    // For the case of only one key=value pair with no separator
-    if (currentToken.length > 0) {
-      keyValuePairs.push(currentToken.join(''));
-    }
-
-    return keyValuePairs;
-  }
-}
+  return ensureArray<jsforceRecord>(records);
+};

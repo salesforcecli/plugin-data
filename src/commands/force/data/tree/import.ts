@@ -7,89 +7,89 @@
 
 import * as os from 'os';
 
-import { flags, FlagsConfig, SfdxCommand, SfdxResult } from '@salesforce/command';
-import { Messages, Org, SchemaPrinter } from '@salesforce/core';
+import { Logger, Messages, SchemaPrinter } from '@salesforce/core';
 import { getString, JsonMap } from '@salesforce/ts-types';
+import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { ImportApi, ImportConfig } from '../../../../api/data/tree/importApi';
+import { stringArrayFlag } from '../../../../flags';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.import');
 
-interface ImportResult {
+type ImportResult = {
   refId: string;
   type: string;
   id: string;
-}
+};
 
 /**
  * Command that provides data import capability via the SObject Tree Save API.
  */
-export default class Import extends SfdxCommand {
+export default class Import extends SfCommand<ImportResult[] | JsonMap> {
+  public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessage('examples').split(os.EOL);
-  public static readonly requiresUsername = true;
-  public static readonly flagsConfig: FlagsConfig = {
-    sobjecttreefiles: flags.array({
+  public static flags = {
+    targetusername: Flags.requiredOrg({
+      required: true,
+      char: 'u',
+      summary: messages.getMessage('flags.targetusername'),
+    }),
+    sobjecttreefiles: stringArrayFlag({
       char: 'f',
-      description: messages.getMessage('sobjecttreefiles'),
+      summary: messages.getMessage('sobjecttreefiles'),
       exclusive: ['plan'],
     }),
-    plan: flags.filepath({
+    plan: Flags.file({
       char: 'p',
-      description: messages.getMessage('plan'),
+      summary: messages.getMessage('plan'),
+      exists: true,
     }),
-    contenttype: flags.string({
+    contenttype: Flags.string({
       char: 'c',
-      description: messages.getMessage('contenttype'),
+      summary: messages.getMessage('contenttype'),
       hidden: true,
     }),
     // displays the schema for a data import plan
-    confighelp: flags.boolean({
-      description: messages.getMessage('confighelp'),
+    confighelp: Flags.boolean({
+      summary: messages.getMessage('confighelp'),
     }),
   };
 
-  public static result: SfdxResult = {
-    tableColumnData: {
-      refId: { header: 'Reference ID' },
-      type: { header: 'Type' },
-      id: { header: 'ID' },
-    },
-  };
-
   public async run(): Promise<ImportResult[] | JsonMap> {
-    const importApi = new ImportApi(this.org as Org);
+    const { flags } = await this.parse(Import);
+    const logger = await Logger.child('Import');
+    const importApi = new ImportApi(flags.targetusername);
 
-    if (this.flags.confighelp) {
+    if (flags.confighelp) {
       // Display config help and return
       const schema = importApi.getSchema();
-      if (!this.flags.json) {
-        const schemaLines = new SchemaPrinter(this.logger, schema).getLines();
-        schemaLines.forEach((line) => this.ux.log(line));
-        // turn off table output
-        this.result.tableColumnData = undefined;
+      if (!this.jsonEnabled()) {
+        new SchemaPrinter(logger, schema).getLines().forEach((line) => this.log(line));
       }
 
       return schema;
     }
 
     const importConfig: ImportConfig = {
-      sobjectTreeFiles: this.flags.sobjecttreefiles as string[],
-      contentType: this.flags.contenttype as string,
-      plan: this.flags.plan as string,
+      sobjectTreeFiles: flags.sobjecttreefiles,
+      contentType: flags.contenttype,
+      plan: flags.plan,
     };
 
     const importResults = await importApi.import(importConfig);
 
-    let processedResult: ImportResult[] = [];
-    if (importResults.responseRefs?.length) {
-      processedResult = importResults.responseRefs.map((ref) => {
-        const type = getString(importResults.sobjectTypes, ref.referenceId, 'Unknown');
-        return { refId: ref.referenceId, type, id: ref.id } as ImportResult;
-      });
-    }
-    this.ux.styledHeader('Import Results');
+    const processedResult: ImportResult[] = (importResults.responseRefs ?? []).map((ref) => {
+      const type = getString(importResults.sobjectTypes, ref.referenceId, 'Unknown');
+      return { refId: ref.referenceId, type, id: ref.id };
+    });
 
+    this.styledHeader('Import Results');
+    this.table(processedResult, {
+      refId: { header: 'Reference ID' },
+      type: { header: 'Type' },
+      id: { header: 'ID' },
+    });
     return processedResult;
   }
 }

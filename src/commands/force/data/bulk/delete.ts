@@ -8,62 +8,74 @@ import * as os from 'os';
 import * as fs from 'fs';
 import { ReadStream } from 'fs';
 import { Connection, Messages, SfError } from '@salesforce/core';
-import { flags, FlagsConfig } from '@salesforce/command';
-import { Job, JobInfo } from 'jsforce/job';
+import { JobInfo } from 'jsforce/api/bulk';
+import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
+import { Duration } from '@salesforce/kit';
 import { Batcher, BulkResult } from '../../../../batcher';
-import { DataCommand } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.delete');
+const messages = Messages.load('@salesforce/plugin-data', 'bulk.delete', [
+  'examples',
+  'summary',
+  'description',
+  'flags.targetusername',
+  'flags.csvfile',
+  'flags.sobjecttype',
+  'flags.wait',
+]);
 
-export default class Delete extends DataCommand {
-  public static readonly description = messages.getMessage('description');
+export default class Delete extends SfCommand<BulkResult[] | JobInfo[]> {
   public static readonly examples = messages.getMessage('examples').split(os.EOL);
-  public static readonly requiresUsername = true;
-  public static readonly flagsConfig: FlagsConfig = {
-    csvfile: flags.filepath({
+  public static readonly summary = messages.getMessage('summary');
+  public static flags = {
+    targetusername: Flags.requiredOrg({
+      required: true,
+      char: 'u',
+      summary: messages.getMessage('flags.targetusername'),
+    }),
+    csvfile: Flags.file({
       char: 'f',
-      description: messages.getMessage('flags.csvfile'),
+      summary: messages.getMessage('flags.csvfile'),
       required: true,
+      exists: true,
     }),
-    sobjecttype: flags.string({
+    sobjecttype: Flags.string({
       char: 's',
-      description: messages.getMessage('flags.sobjecttype'),
+      summary: messages.getMessage('flags.sobjecttype'),
       required: true,
     }),
-    wait: flags.minutes({
+    wait: Flags.duration({
       char: 'w',
-      description: messages.getMessage('flags.wait'),
+      unit: 'minutes',
+      summary: messages.getMessage('flags.wait'),
       min: 0,
+      default: Duration.minutes(0),
     }),
   };
 
   public async run(): Promise<BulkResult[] | JobInfo[]> {
+    const { flags } = await this.parse(Delete);
     let result: BulkResult[] | JobInfo[];
 
     try {
-      await this.throwIfPathDoesntExist(this.flags.csvfile as string);
+      const conn: Connection = flags.targetusername.getConnection();
+      this.spinner.start('Bulk Delete');
 
-      const conn: Connection = this.ensureOrg().getConnection();
-      this.ux.startSpinner('Bulk Delete');
+      const csvRecords: ReadStream = fs.createReadStream(flags.csvfile, { encoding: 'utf-8' });
+      const job = conn.bulk.createJob<'delete'>(flags.sobjecttype, 'delete');
 
-      const csvRecords: ReadStream = fs.createReadStream(this.flags.csvfile as string, { encoding: 'utf-8' });
-      const job: Job = conn.bulk.createJob(this.flags.sobjecttype, 'delete') as unknown as Job;
+      const batcher: Batcher = new Batcher(conn, new Ux(this.jsonEnabled()));
 
-      const batcher: Batcher = new Batcher(conn, this.ux);
+      result = await batcher.createAndExecuteBatches(job, csvRecords, flags.sobjecttype, flags.wait?.minutes);
 
-      result = await batcher.createAndExecuteBatches(
-        job,
-        csvRecords,
-        this.flags.sobjecttype as string,
-        this.flags.wait as number
-      );
-
-      this.ux.stopSpinner();
+      this.spinner.stop();
       return result;
     } catch (e) {
-      this.ux.stopSpinner('error');
-      throw SfError.wrap(e as Error);
+      this.spinner.stop('error');
+      if (!(e instanceof Error)) {
+        throw e;
+      }
+      throw SfError.wrap(e);
     }
   }
 }

@@ -11,8 +11,9 @@ import * as chaiAsPromised from 'chai-as-promised';
 import { SinonSandbox } from 'sinon';
 import { describe } from 'mocha';
 import sinon = require('sinon');
-import { SoqlQuery } from '../../../../../../src/commands/force/data/soql/query';
+import * as query from '../../../../../../src/commands/force/data/soql/query';
 import { soqlQueryExemplars } from '../../../../../test-files/soqlQuery.exemplars';
+import { SoqlQueryResult } from '../../../../../../src/dataSoqlQueryTypes';
 
 chai.use(chaiAsPromised);
 
@@ -32,9 +33,7 @@ describe('Execute a SOQL statement', (): void => {
     let soqlQuerySpy: sinon.SinonSpy;
     describe('handle empty results', () => {
       beforeEach(() => {
-        soqlQuerySpy = sandbox
-          .stub(SoqlQuery.prototype, 'runSoqlQuery')
-          .resolves(soqlQueryExemplars.emptyQuery.soqlQueryResult);
+        soqlQuerySpy = sandbox.stub(query, 'runSoqlQuery').resolves(soqlQueryExemplars.emptyQuery.soqlQueryResult);
       });
       afterEach(() => {
         sandbox.restore();
@@ -64,7 +63,7 @@ describe('Execute a SOQL statement', (): void => {
     describe('reporters produce the correct results for subquery', () => {
       beforeEach(() => {
         soqlQuerySpy = sandbox
-          .stub(SoqlQuery.prototype, 'runSoqlQuery')
+          .stub(query, 'runSoqlQuery')
           .callsFake(() => Promise.resolve(soqlQueryExemplars.subqueryAccountsAndContacts.soqlQueryResult));
       });
       afterEach(() => {
@@ -109,9 +108,7 @@ describe('Execute a SOQL statement', (): void => {
 
     describe('human readable output for complex subqueries', () => {
       beforeEach(() => {
-        soqlQuerySpy = sandbox
-          .stub(SoqlQuery.prototype, 'runSoqlQuery')
-          .resolves(soqlQueryExemplars.complexSubQuery.soqlQueryResult);
+        soqlQuerySpy = sandbox.stub(query, 'runSoqlQuery').resolves(soqlQueryExemplars.complexSubQuery.soqlQueryResult);
       });
 
       afterEach(() => {
@@ -168,8 +165,9 @@ describe('Execute a SOQL statement', (): void => {
     describe('reporters produce the correct aggregate query', () => {
       beforeEach(() => {
         soqlQuerySpy = sandbox
-          .stub(SoqlQuery.prototype, 'runSoqlQuery')
-          .resolves(soqlQueryExemplars.queryWithAgregates.soqlQueryResult);
+          .stub(query, 'runSoqlQuery')
+          // aggregate query types are wrong in jsforce
+          .resolves(soqlQueryExemplars.queryWithAggregates.soqlQueryResult as unknown as SoqlQueryResult);
       });
       afterEach(() => {
         sandbox.restore();

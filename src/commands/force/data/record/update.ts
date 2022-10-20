@@ -6,76 +6,80 @@
  */
 
 import * as os from 'os';
-import { flags, FlagsConfig } from '@salesforce/command';
 import { Messages, SfError } from '@salesforce/core';
 import { SaveResult } from 'jsforce';
-import { DataCommand } from '../../../../dataCommand';
+import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
+import { collectErrorMessages, query, stringToDictionary } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'record.update');
 const commonMessages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
-export default class Update extends DataCommand {
+export default class Update extends SfCommand<SaveResult> {
+  public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessage('examples').split(os.EOL);
-  public static readonly requiresUsername = true;
 
-  public static readonly flagsConfig: FlagsConfig = {
-    sobjecttype: flags.string({
+  public static flags = {
+    targetusername: Flags.requiredOrg({
+      required: true,
+      char: 'u',
+      summary: messages.getMessage('targetusername'),
+    }),
+    sobjecttype: Flags.string({
       char: 's',
       required: true,
-      description: messages.getMessage('sObjectType'),
+      summary: messages.getMessage('sObjectType'),
     }),
-    sobjectid: flags.id({
+    sobjectid: Flags.salesforceId({
       char: 'i',
-      description: messages.getMessage('sObjectId'),
-      exclusive: ['where'],
+      summary: messages.getMessage('sObjectId'),
+      exactlyOne: ['where', 'sobjectid'],
     }),
-    where: flags.string({
+    where: Flags.string({
       char: 'w',
-      description: messages.getMessage('where'),
-      exclusive: ['sobjectid'],
+      summary: messages.getMessage('where'),
+      exactlyOne: ['where', 'sobjectid'],
     }),
-    values: flags.string({
+    values: Flags.string({
       char: 'v',
       required: true,
-      description: messages.getMessage('values'),
+      summary: messages.getMessage('values'),
     }),
-    usetoolingapi: flags.boolean({
+    usetoolingapi: Flags.boolean({
       char: 't',
-      description: messages.getMessage('useToolingApi'),
+      summary: messages.getMessage('useToolingApi'),
     }),
-    perflog: flags.boolean({
-      description: commonMessages.getMessage('perfLogLevelOption'),
-      dependsOn: ['json'],
+    perflog: Flags.boolean({
+      summary: commonMessages.getMessage('perfLogLevelOption'),
+      hidden: true,
+      deprecated: {
+        version: '57',
+      },
     }),
   };
 
   public async run(): Promise<SaveResult> {
-    this.validateIdXorWhereFlags();
-
-    this.ux.startSpinner('Updating Record');
+    const { flags } = await this.parse(Update);
+    this.spinner.start('Updating Record');
 
     let status = 'Success';
-    const sobject = this.getConnection().sobject(this.flags.sobjecttype as string);
-    const sObjectId = (this.flags.sobjectid || (await this.query(sobject, this.flags.where as string)).Id) as string;
+    const conn = flags.targetusername.getConnection();
+    const sObjectId = (flags.sobjectid ?? (await query(conn, flags.sobjecttype, flags.where as string)).Id) as string;
     try {
-      const updateObject = this.stringToDictionary(this.flags.values as string);
-      updateObject.Id = sObjectId;
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const result = await sobject.update(updateObject);
+      const updateObject = { ...stringToDictionary(flags.values), Id: sObjectId };
+      const result = await conn.sobject(flags.sobjecttype).update(updateObject);
       if (result.success) {
-        this.ux.log(messages.getMessage('updateSuccess', [sObjectId]));
+        this.log(messages.getMessage('updateSuccess', [sObjectId]));
       } else {
-        const errors = this.collectErrorMessages(result);
-        this.ux.error(messages.getMessage('updateFailure', [errors]));
+        const errors = collectErrorMessages(result);
+        this.error(messages.getMessage('updateFailure', [errors]));
       }
-      this.ux.stopSpinner(status);
+      this.spinner.stop(status);
       return result;
     } catch (err) {
       status = 'Failed';
-      this.ux.stopSpinner(status);
+      this.spinner.stop(status);
       const error = err as Error;
       if (Reflect.has(error, 'errorCode') && Reflect.has(error, 'fields')) {
         throw new SfError(

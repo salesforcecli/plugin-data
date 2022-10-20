@@ -16,11 +16,21 @@ describe('data:tree commands', () => {
 
   before(async () => {
     testSession = await TestSession.create({
-      setupCommands: [
-        'sfdx force:org:create -f config/project-scratch-def.json --setdefaultusername --wait 10 --durationdays 1',
-        'sfdx force:org:create -f config/project-scratch-def.json --setalias importOrg --wait 10 --durationdays 1',
+      scratchOrgs: [
+        {
+          executable: 'sfdx',
+          config: 'config/project-scratch-def.json',
+          setDefault: true,
+        },
+        {
+          executable: 'sfdx',
+          config: 'config/project-scratch-def.json',
+          setDefault: false,
+          alias: 'importOrg',
+        },
       ],
       project: { sourceDir: path.join('test', 'test-files', 'data-project') },
+      devhubAuthStrategy: 'AUTO',
     });
   });
 

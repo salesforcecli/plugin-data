@@ -7,54 +7,63 @@
 
 import * as os from 'os';
 
-import { flags, FlagsConfig } from '@salesforce/command';
 import { Messages } from '@salesforce/core';
 import { SaveResult } from 'jsforce';
-import { DataCommand } from '../../../../dataCommand';
+import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
+import { stringToDictionary, collectErrorMessages } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'record.create');
 const commonMessages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
-export default class Create extends DataCommand {
+export default class Create extends SfCommand<SaveResult> {
+  public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessage('examples').split(os.EOL);
-  public static readonly requiresUsername = true;
 
-  public static readonly flagsConfig: FlagsConfig = {
-    sobjecttype: flags.string({
+  public static flags = {
+    targetusername: Flags.requiredOrg({
+      required: true,
+      char: 'u',
+      summary: messages.getMessage('targetusername'),
+    }),
+    sobjecttype: Flags.string({
       char: 's',
       required: true,
-      description: messages.getMessage('sObjectType'),
+      summary: messages.getMessage('sObjectType'),
     }),
-    values: flags.string({
+    values: Flags.string({
       char: 'v',
       required: true,
-      description: messages.getMessage('values'),
+      summary: messages.getMessage('values'),
     }),
-    usetoolingapi: flags.boolean({
+    usetoolingapi: Flags.boolean({
       char: 't',
-      description: messages.getMessage('useToolingApi'),
+      summary: messages.getMessage('useToolingApi'),
     }),
-    perflog: flags.boolean({
-      description: commonMessages.getMessage('perfLogLevelOption'),
-      dependsOn: ['json'],
+    perflog: Flags.boolean({
+      summary: commonMessages.getMessage('perfLogLevelOption'),
+      hidden: true,
+      deprecated: {
+        version: '57',
+      },
     }),
   };
 
   public async run(): Promise<SaveResult> {
-    this.ux.startSpinner(`Creating record for ${this.flags.sobjecttype as string}`);
+    const { flags } = await this.parse(Create);
+    this.spinner.start(`Creating record for ${flags.sobjecttype}`);
 
-    const sobject = this.getConnection().sobject(this.flags.sobjecttype);
-    const values = this.stringToDictionary(this.flags.values);
-    const result = this.normalize<SaveResult>(await sobject.insert(values));
+    const sobject = flags.targetusername.getConnection().sobject(flags.sobjecttype);
+    const values = stringToDictionary(flags.values);
+    const result = await sobject.insert(values);
     if (result.success) {
-      this.ux.log(messages.getMessage('createSuccess', [result.id || 'unknown id']));
-      this.ux.stopSpinner();
+      this.log(messages.getMessage('createSuccess', [result.id || 'unknown id']));
+      this.spinner.stop();
     } else {
-      const errors = this.collectErrorMessages(result);
-      this.ux.error(messages.getMessage('createFailure', [errors]));
-      this.ux.stopSpinner('failed');
+      const errors = collectErrorMessages(result);
+      this.spinner.stop('failed');
+      this.error(messages.getMessage('createFailure', [errors]));
     }
     return result;
   }

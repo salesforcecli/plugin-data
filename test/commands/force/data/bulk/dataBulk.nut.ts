@@ -83,10 +83,15 @@ function queryAccountRecords() {
 describe('data:bulk commands', () => {
   before(async () => {
     testSession = await TestSession.create({
-      setupCommands: [
-        'sfdx force:org:create -f config/project-scratch-def.json --setdefaultusername --wait 10 --durationdays 1',
+      scratchOrgs: [
+        {
+          executable: 'sfdx',
+          config: 'config/project-scratch-def.json',
+          setDefault: true,
+        },
       ],
       project: { sourceDir: path.join('test', 'test-files', 'data-project') },
+      devhubAuthStrategy: 'AUTO',
     });
   });
 

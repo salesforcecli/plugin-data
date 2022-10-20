@@ -7,69 +7,77 @@
 
 import * as os from 'os';
 
-import { flags, FlagsConfig } from '@salesforce/command';
 import { Messages, SfError } from '@salesforce/core';
 import { SaveResult } from 'jsforce';
-import { DataCommand } from '../../../../dataCommand';
+import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
+import { collectErrorMessages, query } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'record.delete');
 const commonMessages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
-export default class Delete extends DataCommand {
+export default class Delete extends SfCommand<SaveResult> {
+  public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessage('examples').split(os.EOL);
-  public static readonly requiresUsername = true;
 
-  public static readonly flagsConfig: FlagsConfig = {
-    sobjecttype: flags.string({
+  public static flags = {
+    targetusername: Flags.requiredOrg({
+      required: true,
+      char: 'u',
+      summary: messages.getMessage('targetusername'),
+    }),
+    sobjecttype: Flags.string({
       char: 's',
       required: true,
-      description: messages.getMessage('sObjectType'),
+      summary: messages.getMessage('sObjectType'),
     }),
-    sobjectid: flags.id({
+    sobjectid: Flags.salesforceId({
       char: 'i',
-      description: messages.getMessage('sObjectId'),
-      exclusive: ['where'],
+      summary: messages.getMessage('sObjectId'),
+      exactlyOne: ['where', 'sobjectid'],
     }),
-    where: flags.string({
+    where: Flags.string({
       char: 'w',
-      description: messages.getMessage('where'),
-      exclusive: ['sobjectid'],
+      summary: messages.getMessage('where'),
+      exactlyOne: ['where', 'sobjectid'],
     }),
-    usetoolingapi: flags.boolean({
+    usetoolingapi: Flags.boolean({
       char: 't',
-      description: messages.getMessage('useToolingApi'),
+      summary: messages.getMessage('useToolingApi'),
     }),
-    perflog: flags.boolean({
-      description: commonMessages.getMessage('perfLogLevelOption'),
-      dependsOn: ['json'],
+    perflog: Flags.boolean({
+      summary: commonMessages.getMessage('perfLogLevelOption'),
+      hidden: true,
+      deprecated: {
+        version: '57',
+      },
     }),
   };
 
   public async run(): Promise<SaveResult> {
-    this.validateIdXorWhereFlags();
-
-    this.ux.startSpinner('Deleting Record');
+    const { flags } = await this.parse(Delete);
+    this.spinner.start('Deleting Record');
     let status = 'Success';
 
     try {
-      const sobject = this.getConnection().sobject(this.flags.sobjecttype);
-      const sObjectId = (this.flags.sobjectid || (await this.query(sobject, this.flags.where)).Id) as string;
-      const result = this.normalize<SaveResult>(await sobject.destroy(sObjectId));
+      const conn = flags.targetusername.getConnection();
+      // "where flag" will be defined if sobjectId is not
+      const sObjectId = (flags.sobjectid as string) ?? (await query(conn, flags.sobjecttype, flags.where as string)).Id;
+      const result = await conn.sobject(flags.sobjecttype).destroy(sObjectId);
 
       if (result.success) {
-        this.ux.log(messages.getMessage('deleteSuccess', [sObjectId]));
+        this.log(messages.getMessage('deleteSuccess', [sObjectId]));
       } else {
         status = 'Failed';
-        const errors = this.collectErrorMessages(result);
-        this.ux.error(messages.getMessage('deleteFailure', [errors]));
+        const errors = collectErrorMessages(result);
+        this.error(messages.getMessage('deleteFailure', [errors]));
       }
-      this.ux.stopSpinner(status);
+      this.spinner.stop(status);
       return result;
     } catch (err) {
       status = 'Failed';
-      this.ux.stopSpinner(status);
+      this.spinner.stop(status);
       throw new SfError((err as Error).name, (err as Error).message);
     }
   }

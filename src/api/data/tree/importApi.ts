@@ -123,6 +123,7 @@ export class ImportApi {
             contentType,
           })
         )) {
+          // eslint-disable-next-line no-await-in-loop
           await promise;
         }
       }
@@ -199,6 +200,7 @@ export class ImportApi {
           filepath,
           contentType,
         };
+        // eslint-disable-next-line no-await-in-loop
         await this.importSObjectTreeFile(importConfig);
       }
     }
@@ -276,54 +278,6 @@ export class ImportApi {
         getTypes(contentJson.records);
       }
     }
-  }
-
-  // Does some basic validation on the filepath and returns some file metadata such as
-  // isJson, refRegex, and headers.
-  private getSObjectTreeFileMeta(filepath: string, contentType?: string): RequestMeta {
-    const meta: RequestMeta = {
-      isJson: false,
-      headers: {} as Dictionary,
-      refRegex: new RegExp(/./),
-    };
-    let tmpContentType;
-
-    // explicitly validate filepath so, if not found, we can return friendly error message
-    try {
-      fs.statSync(filepath);
-    } catch (e) {
-      throw new SfError(messages.getMessage('dataFileNotFound', [filepath]), INVALID_DATA_IMPORT_ERR_NAME);
-    }
-
-    // determine content type
-    if (filepath.endsWith('.json')) {
-      tmpContentType = jsonContentType;
-      meta.isJson = true;
-      meta.refRegex = jsonRefRegex;
-    } else if (filepath.endsWith('.xml')) {
-      tmpContentType = xmlContentType;
-      meta.refRegex = xmlRefRegex;
-    }
-
-    // unable to determine content type from extension, was a global content type provided?
-    if (!tmpContentType) {
-      if (!contentType) {
-        throw new SfError(messages.getMessage('unknownContentType', [filepath]), INVALID_DATA_IMPORT_ERR_NAME);
-      } else if (contentType.toUpperCase() === 'JSON') {
-        tmpContentType = jsonContentType;
-        meta.isJson = true;
-        meta.refRegex = jsonRefRegex;
-      } else if (contentType.toUpperCase() === 'XML') {
-        tmpContentType = xmlContentType;
-        meta.refRegex = xmlRefRegex;
-      } else {
-        throw new SfError(messages.getMessage('dataFileUnsupported', [contentType]), INVALID_DATA_IMPORT_ERR_NAME);
-      }
-    }
-
-    meta.headers['content-type'] = tmpContentType;
-
-    return meta;
   }
 
   // Parse the SObject tree file, resolving any saved refs if specified.
@@ -461,7 +415,7 @@ export class ImportApi {
   // Imports the SObjectTree from the provided files/plan by making a POST request to the server.
   private async importSObjectTreeFile(components: DataImportComponents): Promise<void> {
     // Get some file metadata
-    const { isJson, refRegex, headers } = this.getSObjectTreeFileMeta(components.filepath, components.contentType);
+    const { isJson, refRegex, headers } = getSObjectTreeFileMeta(components.filepath, components.contentType);
 
     this.logger.debug(`Importing SObject Tree data from file ${components.filepath}`);
     try {
@@ -484,3 +438,51 @@ export class ImportApi {
     }
   }
 }
+
+// Does some basic validation on the filepath and returns some file metadata such as
+// isJson, refRegex, and headers.
+const getSObjectTreeFileMeta = (filepath: string, contentType?: string): RequestMeta => {
+  const meta: RequestMeta = {
+    isJson: false,
+    headers: {} as Dictionary,
+    refRegex: new RegExp(/./),
+  };
+  let tmpContentType;
+
+  // explicitly validate filepath so, if not found, we can return friendly error message
+  try {
+    fs.statSync(filepath);
+  } catch (e) {
+    throw new SfError(messages.getMessage('dataFileNotFound', [filepath]), INVALID_DATA_IMPORT_ERR_NAME);
+  }
+
+  // determine content type
+  if (filepath.endsWith('.json')) {
+    tmpContentType = jsonContentType;
+    meta.isJson = true;
+    meta.refRegex = jsonRefRegex;
+  } else if (filepath.endsWith('.xml')) {
+    tmpContentType = xmlContentType;
+    meta.refRegex = xmlRefRegex;
+  }
+
+  // unable to determine content type from extension, was a global content type provided?
+  if (!tmpContentType) {
+    if (!contentType) {
+      throw new SfError(messages.getMessage('unknownContentType', [filepath]), INVALID_DATA_IMPORT_ERR_NAME);
+    } else if (contentType.toUpperCase() === 'JSON') {
+      tmpContentType = jsonContentType;
+      meta.isJson = true;
+      meta.refRegex = jsonRefRegex;
+    } else if (contentType.toUpperCase() === 'XML') {
+      tmpContentType = xmlContentType;
+      meta.refRegex = xmlRefRegex;
+    } else {
+      throw new SfError(messages.getMessage('dataFileUnsupported', [contentType]), INVALID_DATA_IMPORT_ERR_NAME);
+    }
+  }
+
+  meta.headers['content-type'] = tmpContentType;
+
+  return meta;
+};

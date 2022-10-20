@@ -7,10 +7,9 @@
 
 import * as path from 'path';
 import * as fs from 'fs';
-import { Logger, Messages, Org, SfError } from '@salesforce/core';
-import { UX } from '@salesforce/command';
+import { Logger, Messages, Org, SfError, Lifecycle } from '@salesforce/core';
+import { CliUx } from '@oclif/core';
 import { DescribeSObjectResult, QueryResult } from 'jsforce';
-import { ensureDir } from 'fs-extra';
 import {
   BasicRecord,
   DataPlanPart,
@@ -43,7 +42,6 @@ interface ParentRef {
  */
 export class ExportApi {
   private logger: Logger;
-
   private objectTypeRegistry: Record<
     string,
     {
@@ -58,7 +56,7 @@ export class ExportApi {
 
   private config!: ExportConfig;
 
-  public constructor(private readonly org: Org, private readonly ux: UX) {
+  public constructor(private readonly org: Org, private readonly jsonEnabled = false) {
     this.logger = Logger.childFromRoot(this.constructor.name);
   }
 
@@ -69,12 +67,12 @@ export class ExportApi {
    * @param config
    */
   public async export(config: ExportConfig): Promise<SObjectTreeFileContents | DataPlanPart[]> {
-    this.config = this.validate(config);
+    this.config = validate(config);
 
     const { outputDir, plan, query } = this.config;
 
     if (outputDir) {
-      await ensureDir(outputDir);
+      await fs.promises.mkdir(outputDir, { recursive: true });
     }
 
     let queryResults: QueryResult<BasicRecord>;
@@ -103,35 +101,6 @@ export class ExportApi {
 
   //   P R I V A T E   M E T H O D S
 
-  /**
-   * Ensures a valid query is defined in the export configuration,
-   * which can be either a soql query or a path to a file containing
-   * a soql query.
-   *
-   * @param config - The export configuration.
-   */
-  private validate(config: ExportConfig): ExportConfig {
-    if (!config.query) {
-      throw new SfError(messages.getMessage('queryNotProvided'), 'queryNotProvided');
-    }
-
-    const filepath = path.resolve(process.cwd(), config.query);
-    if (fs.existsSync(filepath)) {
-      config.query = fs.readFileSync(filepath, 'utf8');
-
-      if (!config.query) {
-        throw messages.createError('queryNotProvided');
-      }
-    }
-
-    config.query = config.query.trim();
-    if (!config.query.toLowerCase().startsWith('select')) {
-      throw messages.createError('soqlInvalid', [config.query]);
-    }
-
-    return config;
-  }
-
   // Process query results generating SObject Tree format
   private async processQueryResults(recordList: QueryResult<BasicRecord>): Promise<SObjectTreeFileContents> {
     await this.recordObjectTypes(recordList);
@@ -141,7 +110,10 @@ export class ExportApi {
     const recordCount = processedRecordList.records.length ?? 0;
     this.logger.debug(messages.getMessage('dataExportRecordCount', [recordCount, this.config.query]));
     if (recordCount > 200 && !this.config.plan) {
-      this.ux.warn(messages.getMessage('dataExportRecordCountWarning', [recordCount, this.config.query]));
+      // use lifecycle so warnings show up in stdout and in the json
+      await Lifecycle.getInstance().emitWarning(
+        messages.getMessage('dataExportRecordCountWarning', [recordCount, this.config.query])
+      );
     }
     return this.finalApplyRefs(processedRecordList.records);
   }
@@ -154,7 +126,9 @@ export class ExportApi {
 
     if (!records.length) {
       // TODO: should be on the command
-      this.ux.log('Query returned no results');
+      if (this.jsonEnabled) {
+        CliUx.ux.log('Query returned no results');
+      }
       return recordList;
     }
 
@@ -198,6 +172,7 @@ export class ExportApi {
     const sobjectTree = { records: [] };
 
     for (const record of recordList.records) {
+      // eslint-disable-next-line no-await-in-loop
       await this.processRecords(record, sobjectTree, parentRef);
     }
     this.logger.debug(JSON.stringify(sobjectTree, null, 4));
@@ -268,7 +243,7 @@ export class ExportApi {
     }
     const metadata = await this.loadMetadata(record.attributes.type);
 
-    if (this.isQueryResult(metadata, key)) {
+    if (isQueryResult(metadata, key)) {
       const field = record[key];
 
       // handle child records
@@ -282,13 +257,13 @@ export class ExportApi {
         const childMetadata = await this.loadMetadata(field.records[0].attributes.type);
         treeRecord[key] = await this.queryResultsToTree(field, {
           id: `@${objRefId}`,
-          fieldName: this.getRelationshipFieldName(childMetadata, record.attributes.type),
+          fieldName: getRelationshipFieldName(childMetadata, record.attributes.type),
         });
         return;
       }
     }
-    if (this.config.plan && this.isRelationshipWithMetadata(metadata, key)) {
-      const relTo = this.getRelatedToWithMetadata(metadata, key);
+    if (this.config.plan && isRelationshipWithMetadata(metadata, key)) {
+      const relTo = getRelatedToWithMetadata(metadata, key);
       // find reference in record result
       if (this.objectTypeRegistry[relTo]) {
         // add ref to replace the value
@@ -306,7 +281,7 @@ export class ExportApi {
       return;
     }
     // not a relationship field, simple key/value
-    if (!this.isRelationshipWithMetadata(metadata, key)) {
+    if (!isRelationshipWithMetadata(metadata, key)) {
       treeRecord[key] = record[key];
     }
   }
@@ -315,55 +290,6 @@ export class ExportApi {
   private async loadMetadata(objectName: string): Promise<DescribeSObjectResult> {
     describe[objectName] ??= await this.org.getConnection().sobject(objectName).describe();
     return describe[objectName];
-  }
-
-  private isQueryResult(metadata: DescribeSObjectResult, fieldName: string): boolean {
-    return metadata.childRelationships.some((cr) => cr.relationshipName === fieldName);
-  }
-
-  private isSpecificTypeWithMetadata(metadata: DescribeSObjectResult, fieldName: string, fieldType: string): boolean {
-    return metadata.fields.some(
-      (f) => f.name.toLowerCase() === fieldName.toLowerCase() && f.type.toLowerCase() === fieldType.toLowerCase()
-    );
-  }
-
-  private getRelationshipFieldName(metadata: DescribeSObjectResult, parentName: string): string {
-    const result = metadata.fields.find(
-      (field) => field.type === 'reference' && field.referenceTo?.includes(parentName)
-    );
-
-    if (!result) {
-      throw new SfError(`Unable to find relationship field name for ${metadata.name}`);
-    }
-
-    return result.name;
-  }
-
-  private isRelationship(objectName: string, fieldName: string): boolean {
-    if (!describe[objectName]) {
-      throw new SfError(`Metadata not found for ${objectName}`);
-    }
-    return this.isRelationshipWithMetadata(describe[objectName], fieldName);
-  }
-
-  private isRelationshipWithMetadata(metadata: DescribeSObjectResult, fieldName: string): boolean {
-    return this.isSpecificTypeWithMetadata(metadata, fieldName, 'reference');
-  }
-
-  private getRelatedTo(objectName: string, fieldName: string): string {
-    if (!describe[objectName]) {
-      throw new SfError(`Metadata not found for ${objectName}`);
-    }
-    return this.getRelatedToWithMetadata(describe[objectName], fieldName);
-  }
-
-  private getRelatedToWithMetadata(metadata: DescribeSObjectResult, fieldName: string): string {
-    const result = metadata.fields.find((field) => field.name === fieldName && field.referenceTo?.length);
-    if (!result || !result.referenceTo) {
-      throw new SfError(`Unable to find relation for ${metadata.name}`);
-    }
-
-    return result.referenceTo[0];
   }
 
   /**
@@ -478,11 +404,11 @@ export class ExportApi {
         } else {
           const objType = record.attributes.type;
 
-          if (this.isRelationship(objType, field)) {
+          if (isRelationship(objType, field)) {
             if (typeof value === 'string' && !value.startsWith('@')) {
               // it's still just an ID, so we need to resolve it
               const id = value;
-              const refTo = this.getRelatedTo(objType, field);
+              const refTo = getRelatedTo(objType, field);
               const ref = this.refFromIdByType.get(refTo)?.get(id);
 
               if (!ref) {
@@ -536,8 +462,83 @@ export class ExportApi {
     fs.writeFileSync(finalFilename, JSON.stringify(jsonObject, null, 4));
 
     // TODO: move this to the command
-    this.ux.log(`Wrote ${recordCount} records to ${finalFilename}`);
+    if (!this.jsonEnabled) {
+      CliUx.ux.log(`Wrote ${recordCount} records to ${finalFilename}`);
+    }
 
     return jsonObject;
   }
 }
+
+/**
+ * Ensures a valid query is defined in the export configuration,
+ * which can be either a soql query or a path to a file containing
+ * a soql query.
+ *
+ * @param config - The export configuration.
+ */
+const validate = (config: ExportConfig): ExportConfig => {
+  if (!config.query) {
+    throw new SfError(messages.getMessage('queryNotProvided'), 'queryNotProvided');
+  }
+
+  const filepath = path.resolve(process.cwd(), config.query);
+  if (fs.existsSync(filepath)) {
+    config.query = fs.readFileSync(filepath, 'utf8');
+
+    if (!config.query) {
+      throw messages.createError('queryNotProvided');
+    }
+  }
+
+  config.query = config.query.trim();
+  if (!config.query.toLowerCase().startsWith('select')) {
+    throw messages.createError('soqlInvalid', [config.query]);
+  }
+
+  return config;
+};
+
+const isQueryResult = (metadata: DescribeSObjectResult, fieldName: string): boolean =>
+  metadata.childRelationships.some((cr) => cr.relationshipName === fieldName);
+
+const isSpecificTypeWithMetadata = (metadata: DescribeSObjectResult, fieldName: string, fieldType: string): boolean =>
+  metadata.fields.some(
+    (f) => f.name.toLowerCase() === fieldName.toLowerCase() && f.type.toLowerCase() === fieldType.toLowerCase()
+  );
+
+const getRelationshipFieldName = (metadata: DescribeSObjectResult, parentName: string): string => {
+  const result = metadata.fields.find((field) => field.type === 'reference' && field.referenceTo?.includes(parentName));
+
+  if (!result) {
+    throw new SfError(`Unable to find relationship field name for ${metadata.name}`);
+  }
+
+  return result.name;
+};
+
+const isRelationshipWithMetadata = (metadata: DescribeSObjectResult, fieldName: string): boolean =>
+  isSpecificTypeWithMetadata(metadata, fieldName, 'reference');
+
+const getRelatedToWithMetadata = (metadata: DescribeSObjectResult, fieldName: string): string => {
+  const result = metadata.fields.find((field) => field.name === fieldName && field.referenceTo?.length);
+  if (!result || !result.referenceTo) {
+    throw new SfError(`Unable to find relation for ${metadata.name}`);
+  }
+
+  return result.referenceTo[0];
+};
+
+const isRelationship = (objectName: string, fieldName: string): boolean => {
+  if (!describe[objectName]) {
+    throw new SfError(`Metadata not found for ${objectName}`);
+  }
+  return isRelationshipWithMetadata(describe[objectName], fieldName);
+};
+
+const getRelatedTo = (objectName: string, fieldName: string): string => {
+  if (!describe[objectName]) {
+    throw new SfError(`Metadata not found for ${objectName}`);
+  }
+  return getRelatedToWithMetadata(describe[objectName], fieldName);
+};

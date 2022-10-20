@@ -7,60 +7,69 @@
 
 import * as os from 'os';
 
-import { flags, FlagsConfig } from '@salesforce/command';
 import { Messages, SfError } from '@salesforce/core';
 import { Record } from 'jsforce';
 import { toAnyJson } from '@salesforce/ts-types';
-import { DataCommand } from '../../../../dataCommand';
+import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
+import { query, logNestedObject } from '../../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'record.get');
 const commonMessages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
-export default class Get extends DataCommand {
+export default class Get extends SfCommand<Record> {
+  public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessage('examples').split(os.EOL);
-  public static readonly requiresUsername = true;
 
-  public static readonly flagsConfig: FlagsConfig = {
-    sobjecttype: flags.string({
+  public static flags = {
+    targetusername: Flags.requiredOrg({
+      required: true,
+      char: 'u',
+      summary: messages.getMessage('targetusername'),
+    }),
+    sobjecttype: Flags.string({
       char: 's',
       required: true,
-      description: messages.getMessage('sObjectType'),
+      summary: messages.getMessage('sObjectType'),
     }),
-    sobjectid: flags.id({
+    sobjectid: Flags.salesforceId({
       char: 'i',
-      description: messages.getMessage('sObjectId'),
-      exclusive: ['where'],
+      summary: messages.getMessage('sObjectId'),
+      exactlyOne: ['where', 'sobjectid'],
     }),
-    where: flags.string({
+    where: Flags.string({
       char: 'w',
-      description: messages.getMessage('where'),
-      exclusive: ['sobjectid'],
+      summary: messages.getMessage('where'),
+      exactlyOne: ['where', 'sobjectid'],
     }),
-    usetoolingapi: flags.boolean({
+    usetoolingapi: Flags.boolean({
       char: 't',
-      description: messages.getMessage('useToolingApi'),
+      summary: messages.getMessage('useToolingApi'),
     }),
-    perflog: flags.boolean({
-      description: commonMessages.getMessage('perfLogLevelOption'),
-      dependsOn: ['json'],
+    perflog: Flags.boolean({
+      summary: commonMessages.getMessage('perfLogLevelOption'),
+      hidden: true,
+      deprecated: {
+        version: '57',
+      },
     }),
   };
 
   public async run(): Promise<Record> {
-    this.validateIdXorWhereFlags();
-
-    this.ux.startSpinner('Getting Record');
-    const sobject = this.getConnection().sobject(this.flags.sobjecttype as string);
+    const { flags } = await this.parse(Get);
+    this.spinner.start('Getting Record');
+    const conn = flags.targetusername.getConnection();
     try {
-      const sObjectId = (this.flags.sobjectid || (await this.query(sobject, this.flags.where as string)).Id) as string;
-      const result = await sobject.retrieve(sObjectId);
-      if (!this.flags.json) this.logNestedObject(result as never);
-      this.ux.stopSpinner();
+      const sObjectId = (flags.sobjectid ?? (await query(conn, flags.sobjecttype, flags.where as string)).Id) as string;
+      const result = await conn.sobject(flags.sobjecttype).retrieve(sObjectId);
+      if (!this.jsonEnabled) {
+        logNestedObject(result as never);
+      }
+      this.spinner.stop();
       return toAnyJson(result) as Record;
     } catch (err) {
-      this.ux.stopSpinner('failed');
+      this.spinner.stop('failed');
       throw new SfError((err as Error).name, (err as Error).message);
     }
   }

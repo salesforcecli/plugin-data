@@ -7,7 +7,7 @@
 import { expect, test } from '@salesforce/command/lib/test';
 import { ensureJsonMap, ensureString } from '@salesforce/ts-types';
 import { testSetup } from '@salesforce/core/lib/testSetup';
-import Delete from '../../../../../src/commands/force/data/record/delete';
+import { Org } from '@salesforce/core';
 
 const sObjectId = '0011100001zhhyUAAQ';
 
@@ -78,7 +78,7 @@ describe('force:data:record:delete', () => {
     .withOrg({ username: 'test@org.com' }, true)
     .do(() => {
       const $$ = testSetup();
-      $$.SANDBOX.stub(Delete.prototype, 'getConnection').returns({
+      $$.SANDBOX.stub(Org.prototype, 'getConnection').returns({
         sobject: () => ({
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore enable any typing here

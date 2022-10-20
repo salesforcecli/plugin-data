@@ -7,47 +7,51 @@
 
 import * as os from 'os';
 
-import { SfdxCommand } from '@salesforce/command';
-import { flags, FlagsConfig } from '@salesforce/command';
-import { Messages, Org } from '@salesforce/core';
+import { Messages } from '@salesforce/core';
+import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { ExportApi, ExportConfig } from '../../../../api/data/tree/exportApi';
 import { DataPlanPart, SObjectTreeFileContents } from '../../../../dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.export');
 
-export default class Export extends SfdxCommand {
+export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileContents> {
+  public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessage('examples').split(os.EOL);
-  public static readonly requiresUsername = true;
-  public static readonly flagsConfig: FlagsConfig = {
-    query: flags.string({
+  public static flags = {
+    targetusername: Flags.requiredOrg({
+      required: true,
+      char: 'u',
+      summary: messages.getMessage('targetusername'),
+    }),
+    query: Flags.string({
       char: 'q',
-      description: messages.getMessage('query'),
+      summary: messages.getMessage('query'),
       required: true,
     }),
-    plan: flags.boolean({
+    plan: Flags.boolean({
       char: 'p',
-      description: messages.getMessage('plan'),
+      summary: messages.getMessage('plan'),
     }),
-    prefix: flags.string({
+    prefix: Flags.string({
       char: 'x',
-      description: messages.getMessage('prefix'),
+      summary: messages.getMessage('prefix'),
     }),
-    outputdir: flags.directory({
+    outputdir: Flags.directory({
       char: 'd',
-      description: messages.getMessage('outputdir'),
+      summary: messages.getMessage('outputdir'),
     }),
   };
 
   public async run(): Promise<DataPlanPart[] | SObjectTreeFileContents> {
-    const { query, plan, prefix, outputdir: outputDir } = this.flags;
-    const exportApi = new ExportApi(this.org as Org, this.ux);
+    const { flags } = await this.parse(Export);
+    const exportApi = new ExportApi(flags.targetusername, this.jsonEnabled());
     const exportConfig: ExportConfig = {
-      outputDir: outputDir as string,
-      plan: plan as boolean,
-      prefix: prefix as string,
-      query: query as string,
+      outputDir: flags.outputdir,
+      plan: flags.plan,
+      prefix: flags.prefix,
+      query: flags.query,
     };
     return exportApi.export(exportConfig);
   }

@@ -15,12 +15,21 @@ describe('data:soql:bulk:report command', () => {
 
   before(async () => {
     testSession = await TestSession.create({
-      setupCommands: [
-        'sfdx force:org:create -f config/project-scratch-def.json --setdefaultusername --wait 10 --durationdays 1',
-        'sfdx force:source:push',
+      scratchOrgs: [
+        {
+          executable: 'sfdx',
+          config: 'config/project-scratch-def.json',
+          setDefault: true,
+        },
       ],
       project: { sourceDir: path.join('test', 'test-files', 'data-project') },
+      devhubAuthStrategy: 'AUTO',
     });
+    execCmd('force:source:push', {
+      ensureExitCode: 0,
+      cli: 'sfdx',
+    });
+
     // Import data to the default org.
     execCmd(`force:data:tree:import --plan ${path.join('.', 'data', 'accounts-contacts-plan.json')}`, {
       ensureExitCode: 0,

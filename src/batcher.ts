@@ -6,10 +6,9 @@
  */
 import { ReadStream } from 'fs';
 import { Connection, Messages, SfError } from '@salesforce/core';
-import { UX } from '@salesforce/command';
-import { Job, JobInfo } from 'jsforce/job';
-import { BulkIngestBatchResult } from 'jsforce/lib/api/bulk';
-import { Batch, BatchInfo } from 'jsforce/batch';
+import { Ux } from '@salesforce/sf-plugins-core';
+import { BulkIngestBatchResult, Job, JobInfo, Batch, BatchInfo, BulkOperation } from 'jsforce/api/bulk';
+import { Schema } from 'jsforce';
 import { stringify } from 'csv-stringify/sync';
 import parse = require('csv-parse');
 
@@ -42,13 +41,7 @@ export type BulkResult = {
 };
 
 export class Batcher {
-  private conn: Connection;
-  private ux: UX;
-
-  public constructor(conn: Connection, ux: UX) {
-    this.conn = conn;
-    this.ux = ux;
-  }
+  public constructor(private readonly conn: Connection, private readonly ux: Ux) {}
 
   /**
    * get and display the job status; close the job if completed
@@ -82,43 +75,22 @@ export class Batcher {
     if (batchNum) {
       this.ux.styledHeader(messages.getMessage('BulkBatch', [batchNum]));
     }
-    if (results) {
-      const errorMessages: string[] = [];
-      results.forEach((result): void => {
-        if (result.errors) {
-          result.errors.forEach((errMsg) => {
-            errorMessages.push(errMsg);
-          });
-        }
+    const errorMessages = (results ?? []).flatMap((result) => result.errors);
+    if (errorMessages.length > 0) {
+      this.ux.styledHeader(messages.getMessage('BulkError'));
+      errorMessages.forEach((errorMessage) => {
+        this.ux.log(errorMessage);
       });
-      if (errorMessages.length > 0) {
-        this.ux.styledHeader(messages.getMessage('BulkError'));
-        errorMessages.forEach((errorMessage) => {
-          this.ux.log(errorMessage);
-        });
-      }
     }
 
-    const formatOutput: string[] = [];
-    for (const field in summary) {
-      if (Object.prototype.hasOwnProperty.call(summary, field)) {
-        formatOutput.push(field);
-      }
-    }
-    formatOutput.splice(0, 1);
+    this.ux.styledHeader(isJob ? messages.getMessage('BulkJobStatus') : messages.getMessage('BatchStatus'));
 
-    if (isJob) {
-      // remove url field
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      delete summary['$'];
-      this.ux.styledHeader(messages.getMessage('BulkJobStatus'));
-    } else {
-      this.ux.styledHeader(messages.getMessage('BatchStatus'));
-    }
-    this.ux.styledObject(summary, formatOutput);
+    // remove url field (present if isJob)
+    // Object.entries loses type info, but will match the original type
+    const output = Object.fromEntries(Object.entries(summary).filter(([key]) => key !== '$')) as typeof summary;
+    this.ux.styledObject(output);
 
-    return summary;
+    return output;
   }
 
   /**
@@ -130,8 +102,8 @@ export class Batcher {
    * @param sobjectType {string}
    * @param wait {number}
    */
-  public async createAndExecuteBatches(
-    job: Job & { id?: string },
+  public async createAndExecuteBatches<J extends Schema, T extends BulkOperation>(
+    job: Job<J, T>,
     records: ReadStream,
     sobjectType: string,
     wait?: number
@@ -140,7 +112,7 @@ export class Batcher {
     let batchesQueued = 0;
     const overallInfo = false;
 
-    const batches = await this.splitIntoBatches(records);
+    const batches = await splitIntoBatches(records);
 
     // The error handling for this gets quite tricky when there are multiple batches
     // Currently, we bail out early by calling an Error.exit
@@ -151,6 +123,7 @@ export class Batcher {
           const newBatch = job.createBatch();
 
           return new Promise((resolve, reject) => {
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             newBatch.on('error', (err: Error) => {
               // reword no external id error message to direct it to org user rather than api user
               if (err.message.startsWith('External ID was blank')) {
@@ -164,11 +137,10 @@ export class Batcher {
 
                 job.emit('error', new SfError(err.message, 'Time Out', [], 69));
               }
-
-              this.ux.stopSpinner('Error');
+              this.ux.spinner.stop('Error');
             });
 
-            newBatch.on(
+            void newBatch.on(
               'queue',
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
               async (): Promise<void> => {
@@ -185,6 +157,7 @@ export class Batcher {
             );
 
             if (!wait) {
+              // eslint-disable-next-line @typescript-eslint/no-floating-promises
               newBatch.on(
                 'queue',
                 // we're using an async method on an event listener which doesn't fit the .on method parameter types
@@ -203,11 +176,7 @@ export class Batcher {
               resolve(this.waitForCompletion(newBatch, batchesCompleted, overallInfo, i + 1, batches.length, wait));
             }
 
-            newBatch.execute(batch, (err) => {
-              if (err) {
-                reject(err);
-              }
-            });
+            void newBatch.execute(batch);
           });
         }
       )
@@ -246,8 +215,8 @@ export class Batcher {
    * @param totalNumBatches
    * @param waitMins
    */
-  private async waitForCompletion(
-    newBatch: Batch,
+  private async waitForCompletion<J extends Schema, T extends BulkOperation>(
+    newBatch: Batch<J, T>,
     batchesCompleted: number,
     overallInfo: boolean,
     batchNum: number,
@@ -255,7 +224,7 @@ export class Batcher {
     waitMins: number
   ): Promise<JobInfo> {
     return new Promise((resolve, reject) => {
-      newBatch.on(
+      void newBatch.on(
         'queue',
         // we're using an async method on an event listener which doesn't fit the .on method parameter types
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -264,16 +233,16 @@ export class Batcher {
           if (result.state === 'Failed') {
             reject(result.stateMessage);
           } else if (!overallInfo) {
-              this.ux.log(messages.getMessage('PollingInfo', [POLL_FREQUENCY_MS / 1000, batchInfo.jobId]));
-              overallInfo = true;
-            }
+            this.ux.log(messages.getMessage('PollingInfo', [POLL_FREQUENCY_MS / 1000, batchInfo.jobId]));
+            overallInfo = true;
+          }
           this.ux.log(messages.getMessage('BatchQueued', [batchNum, batchInfo.id]));
           newBatch.poll(POLL_FREQUENCY_MS, waitMins * 60000);
         }
       );
       // we're using an async method on an event listener which doesn't fit the .on method parameter types
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      newBatch.on('response', async (results: BulkIngestBatchResult) => {
+      void newBatch.on('response', async (results: BulkIngestBatchResult): Promise<void> => {
         const summary: BatchInfo = await newBatch.check();
         this.bulkStatus(summary, results, batchNum);
         batchesCompleted++;
@@ -283,62 +252,62 @@ export class Batcher {
       });
     });
   }
-
-  /**
-   * registers the listener in charge of distributing all csv records into batches
-   *
-   * @param readStream - the read stream
-   * @returns {Promise<Batches>}
-   */
-  private async splitIntoBatches(readStream: ReadStream): Promise<Batches> {
-    // split all records into batches
-    const batches: Batches = [];
-    let batchIndex = 0;
-    let batchBytes = 0;
-    let batchHeaderBytes = 0;
-    batches[batchIndex] = [];
-
-    return new Promise((resolve, reject) => {
-      const parser = parse({
-        columns: true,
-        // library option is snakecase
-        // eslint-disable-next-line camelcase
-        skip_empty_lines: true,
-        bom: true,
-      });
-
-      readStream.pipe(parser);
-
-      parser.on('data', (element: BatchEntry) => {
-        if (!batchHeaderBytes) {
-          // capture header byte length
-          batchHeaderBytes = Buffer.byteLength(stringify([Object.keys(element)]) + '\n', 'utf8');
-          batchBytes = batchHeaderBytes;
-        }
-        // capture row byte length
-        const rowBytes = Buffer.byteLength(stringify([Object.values(element)]) + '\n', 'utf8');
-        if (batches[batchIndex].length === BATCH_RECORDS_LIMIT || rowBytes + batchBytes > BATCH_BYTES_LIMIT) {
-          // TODO: we can start processing this batch here
-          // we need event listeners to remove all of the `await new Promise`
-          // next batch
-          batchIndex++;
-          batches[batchIndex] = [];
-          // reset file size to just the headers
-          batchBytes = batchHeaderBytes;
-        }
-        batchBytes += rowBytes;
-        batches[batchIndex].push(element);
-      });
-
-      parser.on('error', (err) => {
-        readStream.destroy();
-        reject(SfError.wrap(err));
-      });
-
-      parser.on('end', () => {
-        readStream.destroy();
-        resolve(batches);
-      });
-    });
-  }
 }
+
+/**
+ * registers the listener in charge of distributing all csv records into batches
+ *
+ * @param readStream - the read stream
+ * @returns {Promise<Batches>}
+ */
+export const splitIntoBatches = async (readStream: ReadStream): Promise<Batches> => {
+  // split all records into batches
+  const batches: Batches = [];
+  let batchIndex = 0;
+  let batchBytes = 0;
+  let batchHeaderBytes = 0;
+  batches[batchIndex] = [];
+
+  return new Promise((resolve, reject) => {
+    const parser = parse({
+      columns: true,
+      // library option is snakecase
+      // eslint-disable-next-line camelcase
+      skip_empty_lines: true,
+      bom: true,
+    });
+
+    readStream.pipe(parser);
+
+    parser.on('data', (element: BatchEntry) => {
+      if (!batchHeaderBytes) {
+        // capture header byte length
+        batchHeaderBytes = Buffer.byteLength(stringify([Object.keys(element)]) + '\n', 'utf8');
+        batchBytes = batchHeaderBytes;
+      }
+      // capture row byte length
+      const rowBytes = Buffer.byteLength(stringify([Object.values(element)]) + '\n', 'utf8');
+      if (batches[batchIndex].length === BATCH_RECORDS_LIMIT || rowBytes + batchBytes > BATCH_BYTES_LIMIT) {
+        // TODO: we can start processing this batch here
+        // we need event listeners to remove all of the `await new Promise`
+        // next batch
+        batchIndex++;
+        batches[batchIndex] = [];
+        // reset file size to just the headers
+        batchBytes = batchHeaderBytes;
+      }
+      batchBytes += rowBytes;
+      batches[batchIndex].push(element);
+    });
+
+    parser.on('error', (err) => {
+      readStream.destroy();
+      reject(SfError.wrap(err));
+    });
+
+    parser.on('end', () => {
+      readStream.destroy();
+      resolve(batches);
+    });
+  });
+};

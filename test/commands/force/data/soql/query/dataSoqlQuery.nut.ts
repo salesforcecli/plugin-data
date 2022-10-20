@@ -6,8 +6,7 @@
  */
 import * as path from 'path';
 import * as fs from 'fs';
-import * as shell from 'shelljs';
-import { AnyJson, Dictionary, ensureString, getString, isArray } from '@salesforce/ts-types';
+import { Dictionary, getString } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 
@@ -59,30 +58,37 @@ function runQuery(
 
 describe('data:soql:query command', () => {
   let testSession: TestSession;
-  let hubOrgUsername: string;
+  let hubOrgUsername: string | undefined;
 
   before(async () => {
     testSession = await TestSession.create({
-      setupCommands: [
-        'sfdx force:org:create -f config/project-scratch-def.json --setdefaultusername --wait 10 --durationdays 1',
-        'sfdx force:source:push',
-        'sfdx config:get defaultdevhubusername --json',
+      scratchOrgs: [
+        {
+          executable: 'sfdx',
+          config: 'config/project-scratch-def.json',
+          setDefault: true,
+        },
       ],
       project: { sourceDir: path.join('test', 'test-files', 'data-project') },
+      devhubAuthStrategy: 'AUTO',
     });
+    // get default devhub username
+    hubOrgUsername = execCmd<[{ key: string; value: string }]>('config:get defaultdevhubusername --json', {
+      ensureExitCode: 0,
+      cli: 'sfdx',
+    }).jsonOutput?.result.find((config) => config.key === 'defaultdevhubusername')?.value;
+    if (!hubOrgUsername) {
+      throw new Error('No default devhub username found');
+    }
+    execCmd('force:source:push', {
+      ensureExitCode: 0,
+      cli: 'sfdx',
+    });
+
     // Import data to the default org.
     execCmd(`force:data:tree:import --plan ${path.join('.', 'data', 'accounts-contacts-plan.json')}`, {
       ensureExitCode: 0,
     });
-
-    // get default devhub username
-    if (isArray<AnyJson>(testSession.setup)) {
-      hubOrgUsername = ensureString(
-        (testSession.setup[2] as { result: [{ key: string; value: string }] }).result.find(
-          (config) => config.key === 'defaultdevhubusername'
-        )?.value
-      );
-    }
   });
 
   after(async () => {
@@ -92,7 +98,7 @@ describe('data:soql:query command', () => {
   describe('data:soql:query respects maxQueryLimit config', () => {
     it('should return 1 account record', () => {
       // set maxQueryLimit to 1 globally
-      shell.exec('sfdx config:set maxQueryLimit=1 -g', { silent: true });
+      execCmd('config:set maxQueryLimit=1 --global', { ensureExitCode: 0, cli: 'sfdx' });
 
       const result = runQuery('SELECT Id, Name, Phone FROM Account', { json: true }) as QueryResult;
 
@@ -103,10 +109,10 @@ describe('data:soql:query command', () => {
     it('should return 3756 ScratchOrgInfo records', () => {
       //
       // set maxQueryLimit to 3756 globally
-      shell.exec('sfdx config:set maxQueryLimit=3756 -g', { silent: true });
+      execCmd('config:set maxQueryLimit=3756 --global', { ensureExitCode: 0, cli: 'sfdx' });
 
       const soqlQuery = 'SELECT Id FROM ScratchOrgInfo';
-      const queryCmd = `force:data:soql:query --query "${soqlQuery}" --json --targetusername ${hubOrgUsername}`;
+      const queryCmd = `force:data:soql:query --query "${soqlQuery}" --json --target-org ${hubOrgUsername}`;
       const results = execCmd<QueryResult>(queryCmd, { ensureExitCode: 0 });
 
       const queryResult: QueryResult = results.jsonOutput?.result ?? { done: false, records: [], totalSize: 0 };
@@ -243,7 +249,6 @@ describe('data:soql:query command', () => {
       const queryResult = execCmd('force:data:soql:query -q "SELECT Count() from User"', {
         ensureExitCode: 0,
       }).shellOutput as string;
-
       expect(queryResult).to.match(/Total number of records retrieved: [1-9]\d*\./g);
     });
 
@@ -261,6 +266,7 @@ describe('data:soql:query command', () => {
         json: false,
         toolingApi: true,
       });
+
       expect(result).to.not.include('[object Object]');
       // the Metadata object parsed correctly
       expect(result).to.include('disableProtocolSecurity');

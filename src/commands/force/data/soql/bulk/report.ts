@@ -5,40 +5,44 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import * as os from 'os';
-import { flags, FlagsConfig } from '@salesforce/command';
 import { Messages } from '@salesforce/core';
 import { QueryJobV2 } from 'jsforce/lib/api/bulk';
-import { DataSoqlQueryCommand, SoqlQuery } from '../query';
+import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
+import { DataSoqlQueryCommand, displayResults, transformBulkResults } from '../query';
+import { FormatTypes } from '../../../../../reporters';
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.report');
+const reportMessages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.report');
+// needed by the flags loaded from the other command
+Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
 
-export class BulkQueryReport extends DataSoqlQueryCommand {
-  public static readonly description = messages.getMessage('description');
-  public static readonly requiresUsername = true;
-  public static readonly examples = messages.getMessage('examples').split(os.EOL);
-  public static readonly flagsConfig: FlagsConfig = {
-    bulkqueryid: flags.string({
+export class BulkQueryReport extends SfCommand<unknown> {
+  public static readonly summary = reportMessages.getMessage('summary');
+  public static readonly description = reportMessages.getMessage('description');
+  public static readonly examples = reportMessages.getMessage('examples').split(os.EOL);
+  public static flags = {
+    'target-org': DataSoqlQueryCommand.flags['target-org'],
+    resultformat: DataSoqlQueryCommand.flags.resultformat,
+    bulkqueryid: Flags.salesforceId({
       char: 'i',
       required: true,
-      description: messages.getMessage('bulkQueryIdDescription'),
+      summary: reportMessages.getMessage('bulkQueryIdDescription'),
     }),
-    resultformat: DataSoqlQueryCommand.flagsConfig.resultformat,
   };
 
   public async run(): Promise<unknown> {
+    const { flags } = await this.parse(BulkQueryReport);
     const job = new QueryJobV2({
       operation: 'query',
       pollingOptions: { pollTimeout: 0, pollInterval: 0 },
       query: '',
-      connection: this.org!.getConnection(),
+      connection: flags['target-org'].getConnection(),
     });
-    job.jobInfo = { id: this.flags.bulkqueryid as string };
+    job.jobInfo = { id: flags.bulkqueryid };
     const results = await job.getResults();
-    const soqlQuery = new SoqlQuery();
-    const queryResult = soqlQuery.transformBulkResults(results, '');
+    const queryResult = transformBulkResults(results, '');
 
-    this.displayResults({ ...queryResult });
+    displayResults({ ...queryResult }, flags.resultformat as keyof typeof FormatTypes);
     return queryResult.result;
   }
 }

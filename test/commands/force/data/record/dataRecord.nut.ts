@@ -51,12 +51,23 @@ describe('data:record commands', () => {
 
   before(async () => {
     testSession = await TestSession.create({
-      setupCommands: [
-        'sfdx force:org:create -f config/project-scratch-def.json --setdefaultusername --wait 10 --durationdays 1',
-        'sfdx force:source:push',
-        'sfdx force:user:permset:assign -n TestPerm',
+      scratchOrgs: [
+        {
+          executable: 'sfdx',
+          config: 'config/project-scratch-def.json',
+          setDefault: true,
+        },
       ],
       project: { sourceDir: path.join('test', 'test-files', 'data-project') },
+      devhubAuthStrategy: 'AUTO',
+    });
+    execCmd('force:source:push', {
+      ensureExitCode: 0,
+      cli: 'sfdx',
+    });
+    execCmd('force:user:permset:assign -n TestPerm', {
+      ensureExitCode: 0,
+      cli: 'sfdx',
     });
   });
 

@@ -12,7 +12,7 @@ import * as chaiAsPromised from 'chai-as-promised';
 import { Logger, SfdxConfigAggregator } from '@salesforce/core';
 import { QueryResult } from 'jsforce';
 import sinon = require('sinon');
-import { SoqlQuery } from '../src/commands/force/data/soql/query';
+import { runSoqlQuery } from '../src/commands/force/data/soql/query';
 import * as TestUtil from './testUtil';
 import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars';
 import { queryFieldsExemplars } from './test-files/queryFields.exemplars';
@@ -37,8 +37,7 @@ describe('soqlQuery tests', () => {
     querySpy = sandbox
       .stub(fakeConnection, 'query')
       .resolves(soqlQueryExemplars.simpleQuery.queryResult as unknown as QueryResult<any>);
-    const soqlQuery = new SoqlQuery();
-    const results = await soqlQuery.runSoqlQuery(fakeConnection, 'SELECT id, name FROM Contact', logger, configAgg);
+    const results = await runSoqlQuery(fakeConnection, 'SELECT id, name FROM Contact', logger, configAgg);
     sinon.assert.calledOnce(querySpy);
     expect(results).to.be.deep.equal(soqlQueryExemplars.simpleQuery.soqlQueryResult);
   });
@@ -48,8 +47,7 @@ describe('soqlQuery tests', () => {
     querySpy = sandbox
       .stub(fakeConnection, 'query')
       .resolves(soqlQueryExemplars.subQuery.queryResult as unknown as QueryResult<any>);
-    const soqlQuery = new SoqlQuery();
-    const results = await soqlQuery.runSoqlQuery(
+    const results = await runSoqlQuery(
       fakeConnection,
       'SELECT Name, ( SELECT LastName FROM Contacts ) FROM Account',
       logger,
@@ -62,8 +60,7 @@ describe('soqlQuery tests', () => {
     const configAgg = await SfdxConfigAggregator.create();
     requestSpy = sandbox.stub(fakeConnection, 'request');
     querySpy = sandbox.stub(fakeConnection, 'query').resolves(soqlQueryExemplars.emptyQuery.queryResult);
-    const soqlQuery = new SoqlQuery();
-    const results = await soqlQuery.runSoqlQuery(
+    const results = await runSoqlQuery(
       fakeConnection,
       "SELECT Name FROM Contact where name = 'some nonexistent name'",
       logger,

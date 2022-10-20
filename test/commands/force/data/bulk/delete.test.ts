@@ -29,7 +29,7 @@ describe('force:data:bulk:delete', () => {
     .it("should throw an error if the file doesn't exist", (ctx) => {
       const result = JSON.parse(ctx.stdout) as DeleteResult;
       expect(result.status).to.equal(1);
-      expect(result.name).to.equal('PathDoesNotExist');
-      expect(result.message).to.equal('The specified path [nonexistant.csv] does not exist');
+      expect(result.name).to.equal('Error');
+      expect(result.message).to.equal('No file found at nonexistant.csv');
     });
 });
