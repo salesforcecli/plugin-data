@@ -5,15 +5,11 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import * as path from 'path';
+import { strict as assert } from 'node:assert/strict';
 import { expect } from 'chai';
 import { execCmd, genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { Dictionary } from '@salesforce/ts-types';
-
-interface RecordCrudResult {
-  id: string;
-  success: boolean;
-  errors: [];
-}
+import { SaveResult } from 'jsforce';
 
 interface AccountRecord {
   Id: string;
@@ -28,22 +24,10 @@ interface ApexClassRecord {
   SymbolTable: Dictionary;
 }
 
-interface ShellString {
-  code: number;
-  stdout: string;
-  stderr: string;
-}
-
-const validateAccount = (
-  accountRecord: string,
-  recordId: string,
-  accountName: string,
-  phoneNumber: string
-): boolean => {
-  const id = new RegExp(`Id:.*?${recordId}`, 'g');
-  const name = new RegExp(`Name:.*?${accountName}`, 'g');
-  const phone = new RegExp(`Phone:.*?${phoneNumber}`, 'g');
-  return id.test(accountRecord) && name.test(accountRecord) && phone.test(accountRecord);
+const validateAccount = (output: string, recordId: string, accountName: string, phoneNumber: string): void => {
+  assert.match(output, new RegExp(`Id:.*?${recordId}`, 'g'), 'Id should be present in output');
+  assert.match(output, new RegExp(`Name:.*?${accountName}`, 'g'), 'Name should be present in output');
+  assert.match(output, new RegExp(`Phone:.*?${phoneNumber}`, 'g'), 'Phone should be present in output');
 };
 
 describe('data:record commands', () => {
@@ -76,146 +60,157 @@ describe('data:record commands', () => {
   });
 
   describe('verify json results', () => {
-    it('should create, get, update, and delete a data record', () => {
+    describe('should create, get, update, and delete a data record', () => {
       const uniqueString = genUniqueString();
       const accountNameBefore = `MyIntTest${uniqueString}`;
       const accountNameAfter = `MyIntTestUpdated${uniqueString}`;
       const phoneNumber = '1231231234';
       const updatedPhoneNumber = '0987654321';
+      let createdRecordId: string;
 
-      // Create a record
-      let createRecordResponse = execCmd<RecordCrudResult>(
-        `force:data:record:create --sobjecttype Account --values "name=${accountNameBefore} phone=${phoneNumber}" --json`,
-        { ensureExitCode: 0 }
-      ).jsonOutput;
-      expect(createRecordResponse?.result).to.have.property('success', true);
-      expect(createRecordResponse?.result).to.have.property('id');
+      it('creates a record', () => {
+        const createRecordResponse = execCmd<SaveResult>(
+          `force:data:record:create --sobjecttype Account --values "name=${accountNameBefore} phone=${phoneNumber}" --json`,
+          { ensureExitCode: 0 }
+        ).jsonOutput;
+        assert(createRecordResponse?.result?.id);
+        expect(createRecordResponse?.result).to.have.property('success', true);
+        createdRecordId = createRecordResponse?.result?.id;
+      });
+      it('get the created record by ID', () => {
+        const getRecordResponse = execCmd<AccountRecord>(
+          `force:data:record:get --sobjecttype Account --sobjectid ${createdRecordId} --json`,
+          { ensureExitCode: 0 }
+        ).jsonOutput;
+        expect(getRecordResponse?.result).to.have.property('Id', createdRecordId);
+        expect(getRecordResponse?.result).to.have.property('Name', accountNameBefore);
+        expect(getRecordResponse?.result).to.have.property('Phone', phoneNumber);
+      });
 
-      // Get a record
-      let getRecordResponse = execCmd<AccountRecord>(
-        `force:data:record:get --sobjecttype Account --sobjectid ${createRecordResponse?.result.id} --json`,
-        { ensureExitCode: 0 }
-      ).jsonOutput;
-      expect(getRecordResponse?.result).to.have.property('Id', createRecordResponse?.result.id);
-      expect(getRecordResponse?.result).to.have.property('Name', accountNameBefore);
-      expect(getRecordResponse?.result).to.have.property('Phone', phoneNumber);
+      it('get the created record by where', () => {
+        const getRecordResponse = execCmd<AccountRecord>(
+          `force:data:record:get --sobjecttype Account --where "Name='${accountNameBefore}' Phone='${phoneNumber}'" --json`,
+          { ensureExitCode: 0 }
+        ).jsonOutput;
+        expect(getRecordResponse?.result).to.have.property('Id', createdRecordId);
+        expect(getRecordResponse?.result).to.have.property('Name', accountNameBefore);
+        expect(getRecordResponse?.result).to.have.property('Phone', phoneNumber);
+      });
 
-      // Get a record using where
-      getRecordResponse = execCmd<AccountRecord>(
-        `force:data:record:get --sobjecttype Account --where "Name='${accountNameBefore}' Phone='${phoneNumber}'" --json`,
-        { ensureExitCode: 0 }
-      ).jsonOutput;
-      expect(getRecordResponse?.result).to.have.property('Id', createRecordResponse?.result.id);
-      expect(getRecordResponse?.result).to.have.property('Name', accountNameBefore);
-      expect(getRecordResponse?.result).to.have.property('Phone', phoneNumber);
+      it('updates the record by Id', () => {
+        execCmd<SaveResult>(
+          `force:data:record:update --sobjectid ${createdRecordId} --sobjecttype Account --values "name=${accountNameAfter} phone=${updatedPhoneNumber}" --json`,
+          { ensureExitCode: 0 }
+        );
+      });
 
-      // Update a record
-      execCmd<RecordCrudResult>(
-        `force:data:record:update --sobjectid ${createRecordResponse?.result.id} --sobjecttype Account --values "name=${accountNameAfter} phone=${updatedPhoneNumber}" --json`,
-        { ensureExitCode: 0 }
-      );
+      it('gets the updated record by ID', () => {
+        const getRecordResponse = execCmd<AccountRecord>(
+          `force:data:record:get --sobjecttype Account --sobjectid ${createdRecordId} --json --perflog`,
+          { ensureExitCode: 0 }
+        ).jsonOutput;
+        expect(getRecordResponse?.result).to.have.property('Id', createdRecordId);
+        expect(getRecordResponse?.result).to.have.property('Name', accountNameAfter);
+        expect(getRecordResponse?.result).to.have.property('Phone', updatedPhoneNumber);
+      });
 
-      // Get a record
-      getRecordResponse = execCmd<AccountRecord>(
-        `force:data:record:get --sobjecttype Account --sobjectid ${createRecordResponse?.result.id} --json --perflog`,
-        { ensureExitCode: 0 }
-      ).jsonOutput;
-      expect(getRecordResponse?.result).to.have.property('Id', createRecordResponse?.result.id);
-      expect(getRecordResponse?.result).to.have.property('Name', accountNameAfter);
-      expect(getRecordResponse?.result).to.have.property('Phone', updatedPhoneNumber);
+      it('gets the updated record by where', () => {
+        execCmd<SaveResult>(
+          `force:data:record:update --where "Name='${accountNameAfter}'" --sobjecttype Account --values "name='${accountNameBefore}'" --json`,
+          { ensureExitCode: 0 }
+        );
+      });
 
-      // Update a record
-      execCmd<RecordCrudResult>(
-        `force:data:record:update --where "Name='${accountNameAfter}'" --sobjecttype Account --values "name='${accountNameBefore}'" --json`,
-        { ensureExitCode: 0 }
-      );
+      it('gets the updated record ', () => {
+        const getRecordResponse = execCmd<AccountRecord>(
+          `force:data:record:get --sobjecttype Account --sobjectid ${createdRecordId} --json `,
+          { ensureExitCode: 0 }
+        ).jsonOutput;
+        expect(getRecordResponse?.result).to.have.property('Id', createdRecordId);
+        expect(getRecordResponse?.result).to.have.property('Name', accountNameBefore);
+        expect(getRecordResponse?.result).to.have.property('Phone', updatedPhoneNumber);
+      });
 
-      // Get a record
-      getRecordResponse = execCmd<AccountRecord>(
-        `force:data:record:get --sobjecttype Account --sobjectid ${createRecordResponse?.result.id} --json `,
-        { ensureExitCode: 0 }
-      ).jsonOutput;
-      expect(getRecordResponse?.result).to.have.property('Id', createRecordResponse?.result.id);
-      expect(getRecordResponse?.result).to.have.property('Name', accountNameBefore);
-      expect(getRecordResponse?.result).to.have.property('Phone', updatedPhoneNumber);
+      it('deletes the record ', () => {
+        const deleteRecordResponse = execCmd<SaveResult>(
+          `force:data:record:delete --sobjecttype Account --sobjectid ${createdRecordId} --json`,
+          { ensureExitCode: 0 }
+        ).jsonOutput;
+        expect(deleteRecordResponse?.result).to.have.property('id', createdRecordId);
+        expect(deleteRecordResponse?.result).to.have.property('success', true);
+      });
 
-      // Delete a record
-      let deleteRecordResponse = execCmd<RecordCrudResult>(
-        `force:data:record:delete --sobjecttype Account --sobjectid ${createRecordResponse?.result.id} --json`,
-        { ensureExitCode: 0 }
-      ).jsonOutput;
-      expect(deleteRecordResponse?.result).to.have.property('id', createRecordResponse?.result.id);
-      expect(deleteRecordResponse?.result).to.have.property('success', true);
+      it('creates a new record with the original name', () => {
+        const createRecordResponse = execCmd<SaveResult>(
+          `force:data:record:create --sobjecttype Account --values "name=${accountNameBefore} phone=${phoneNumber}" --json`,
+          { ensureExitCode: 0 }
+        ).jsonOutput;
+        assert(createRecordResponse?.result?.id);
+        expect(createRecordResponse?.result).to.have.property('success', true);
+        expect(createRecordResponse?.result).to.have.property('id');
+        createdRecordId = createRecordResponse?.result?.id;
+      });
 
-      // Create a record
-      createRecordResponse = execCmd<RecordCrudResult>(
-        `force:data:record:create --sobjecttype Account --values "name=${accountNameBefore} phone=${phoneNumber}" --json`,
-        { ensureExitCode: 0 }
-      ).jsonOutput;
-      expect(createRecordResponse?.result).to.have.property('success', true);
-      expect(createRecordResponse?.result).to.have.property('id');
-
-      // Delete a record
-      deleteRecordResponse = execCmd<RecordCrudResult>(
-        `force:data:record:delete --sobjecttype Account --where "name='${accountNameBefore}' phone='${phoneNumber}'" --json`,
-        { ensureExitCode: 0 }
-      ).jsonOutput;
-      expect(deleteRecordResponse?.result).to.have.property('id', createRecordResponse?.result.id);
-      expect(deleteRecordResponse?.result).to.have.property('success', true);
+      it('deletes the record via "where"', () => {
+        const deleteRecordResponse = execCmd<SaveResult>(
+          `force:data:record:delete --sobjecttype Account --where "name='${accountNameBefore}' phone='${phoneNumber}'" --json`,
+          { ensureExitCode: 0 }
+        ).jsonOutput;
+        expect(deleteRecordResponse?.result).to.have.property('id', createdRecordId);
+        expect(deleteRecordResponse?.result).to.have.property('success', true);
+      });
     });
   });
+
   describe('verify human results', () => {
-    it('should create, update, and delete a data record', () => {
+    describe('should create, update, and delete a data record', () => {
       const uniqueString = genUniqueString();
       const accountNameBefore = `MyIntTest${uniqueString}`;
       const accountNameAfter = `MyIntTestUpdated${uniqueString}`;
       const phoneNumber = '1231231234';
       const updatedPhoneNumber = '0987654321';
+      let recordId: string;
 
-      // Create a record
-      const createRecordResponse = (
-        execCmd(
+      it('create a record', () => {
+        const createRecordResponse = execCmd(
           `force:data:record:create --sobjecttype Account --values "name=${accountNameBefore} phone=${phoneNumber}"`,
           { ensureExitCode: 0 }
-        ).shellOutput as ShellString
-      ).stdout;
-      const m = new RegExp('Successfully created record: (001.{15})\\.');
-      const match = m.exec(createRecordResponse);
-      expect(match).to.have.lengthOf(2, `could not locate success message in results: "${createRecordResponse}`);
-      const recordId = match ? match[1] : 'shouldnoteverybethisvalue';
+        ).shellOutput.stdout;
+        const m = new RegExp('Successfully created record: (001.{15})\\.');
+        const match = m.exec(createRecordResponse);
+        expect(match).to.have.lengthOf(2, `could not locate success message in results: "${createRecordResponse}`);
+        recordId = match ? match[1] : 'shouldnoteverybethisvalue';
+      });
 
-      // Get a record
-      let getRecordResponse = (
-        execCmd(`force:data:record:get --sobjecttype Account --sobjectid ${recordId}`, {
+      it('get the created record', () => {
+        const getRecordResponse = execCmd(`force:data:record:get --sobjecttype Account --sobjectid ${recordId}`, {
           ensureExitCode: 0,
-        }).shellOutput as ShellString
-      ).stdout;
-      expect(validateAccount(getRecordResponse, recordId, accountNameBefore, phoneNumber)).to.be.true;
+        }).shellOutput.stdout;
+        validateAccount(getRecordResponse, recordId, accountNameBefore, phoneNumber);
+        validateAccount(getRecordResponse, recordId, accountNameBefore, phoneNumber);
+      });
 
-      // Update a record
-      const updateRecordResponse = (
-        execCmd(
+      it('update the created record', () => {
+        const updateRecordResponse = execCmd(
           `force:data:record:update --sobjectid ${recordId} --sobjecttype Account --values "name=${accountNameAfter} phone=${updatedPhoneNumber}"`,
           { ensureExitCode: 0 }
-        ).shellOutput as ShellString
-      ).stdout;
-      expect(updateRecordResponse).to.include('Successfully updated record: 001');
+        ).shellOutput.stdout;
+        expect(updateRecordResponse).to.include('Successfully updated record: 001');
+      });
 
-      // Get a record
-      getRecordResponse = (
-        execCmd(`force:data:record:get --sobjecttype Account --sobjectid ${recordId}`, {
+      it('get the updated record', () => {
+        const getRecordResponse = execCmd(`force:data:record:get --sobjecttype Account --sobjectid ${recordId}`, {
           ensureExitCode: 0,
-        }).shellOutput as ShellString
-      ).stdout;
-      expect(validateAccount(getRecordResponse, recordId, accountNameAfter, updatedPhoneNumber)).to.be.true;
+        }).shellOutput.stdout;
+        validateAccount(getRecordResponse, recordId, accountNameAfter, updatedPhoneNumber);
+      });
 
-      // Delete a record
-      const deleteRecordResponse = (
-        execCmd(`force:data:record:delete --sobjecttype Account --sobjectid ${recordId}`, {
+      it('delete the record', () => {
+        const deleteRecordResponse = execCmd(`force:data:record:delete --sobjecttype Account --sobjectid ${recordId}`, {
           ensureExitCode: 0,
-        }).shellOutput as ShellString
-      ).stdout;
-      expect(deleteRecordResponse).to.include('Successfully deleted record: 001');
+        }).shellOutput.stdout;
+        expect(deleteRecordResponse).to.include('Successfully deleted record: 001');
+      });
     });
   });
   describe('verify tooling api record commands', () => {
@@ -259,35 +254,42 @@ describe('data:record commands', () => {
     });
   });
 
-  it('will parse JSON correctly for update', () => {
-    const result = execCmd('force:data:soql:query -q "SELECT Id FROM RemoteProxy LIMIT 1" -t --json', {
-      ensureExitCode: 0,
-    }).jsonOutput?.result as { records: Array<{ Id: string }> };
+  describe('json parsing', () => {
+    it('will parse JSON correctly for update', () => {
+      const result = execCmd<{ records: Array<{ Id: string }> }>(
+        'force:data:soql:query -q "SELECT Id FROM RemoteProxy LIMIT 1" -t --json',
+        {
+          ensureExitCode: 0,
+        }
+      ).jsonOutput?.result;
+      assert(result?.records.length);
 
-    const update = execCmd(
-      'force:data:record:update ' +
-        '--sobjecttype RemoteProxy ' +
-        `--sobjectid ${result.records[0].Id} ` +
-        '--usetoolingapi ' +
-        '--values "Metadata=\'{\\"disableProtocolSecurity\\": false,\\"isActive\\": true,\\"url\\": \\"https://www.example.com\\",\\"urls\\": null,\\"description\\": null}\'"',
-      { ensureExitCode: 0 }
-    );
-    expect(update).to.be.ok;
-  });
+      const update = execCmd(
+        'force:data:record:update ' +
+          '--sobjecttype RemoteProxy ' +
+          `--sobjectid ${result.records[0].Id} ` +
+          '--usetoolingapi ' +
+          '--values "Metadata=\'{\\"disableProtocolSecurity\\": false,\\"isActive\\": true,\\"url\\": \\"https://www.example.com\\",\\"urls\\": null,\\"description\\": null}\'"',
+        { ensureExitCode: 0 }
+      );
+      expect(update).to.be.ok;
+    });
 
-  it('will parse invalid JSON data, but that contains {}', () => {
-    const result = execCmd('force:data:record:create -s Account -v "Name=Test" --json', {
-      ensureExitCode: 0,
-    }).jsonOutput?.result as { id: string };
+    it('will parse invalid JSON data, but that contains {}', () => {
+      const result = execCmd<{ id: string }>('force:data:record:create -s Account -v "Name=Test" --json', {
+        ensureExitCode: 0,
+      }).jsonOutput?.result;
 
-    const update = execCmd(
-      'force:data:record:update ' +
-        '--sobjecttype Account ' +
-        `--sobjectid ${result.id} ` +
-        '--values "Description=\'my new description { with invalid } JSON\'"',
-      { ensureExitCode: 0 }
-    );
+      assert(result?.id);
+      const update = execCmd(
+        'force:data:record:update ' +
+          '--sobjecttype Account ' +
+          `--sobjectid ${result.id} ` +
+          '--values "Description=\'my new description { with invalid } JSON\'"',
+        { ensureExitCode: 0 }
+      );
 
-    expect(update).to.be.ok;
+      expect(update).to.be.ok;
+    });
   });
 });

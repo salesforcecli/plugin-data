@@ -6,6 +6,7 @@
  */
 import * as path from 'path';
 import * as fs from 'fs';
+import { strict as assert } from 'assert';
 import { Dictionary, getString } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
@@ -44,7 +45,8 @@ function runQuery(
   });
 
   if (options.json) {
-    const queryResult: QueryResult = results.jsonOutput?.result ?? { done: false, records: [], totalSize: 0 };
+    assert(results.jsonOutput?.result, 'missing query data');
+    const queryResult: QueryResult = results.jsonOutput.result;
     expect(queryResult).to.have.property('totalSize').to.be.greaterThan(0);
     expect(queryResult).to.have.property('done', true);
     expect(queryResult).to.have.property('records').to.not.have.lengthOf(0);
@@ -107,7 +109,6 @@ describe('data:soql:query command', () => {
     });
 
     it('should return 3756 ScratchOrgInfo records', () => {
-      //
       // set maxQueryLimit to 3756 globally
       execCmd('config:set maxQueryLimit=3756 --global', { ensureExitCode: 0, cli: 'sfdx' });
 
@@ -117,8 +118,7 @@ describe('data:soql:query command', () => {
 
       const queryResult: QueryResult = results.jsonOutput?.result ?? { done: false, records: [], totalSize: 0 };
       expect(queryResult).to.have.property('totalSize').to.be.greaterThan(0);
-      expect(queryResult).to.have.property('done', true);
-      expect(queryResult).to.have.property('records').to.not.have.lengthOf(0);
+      expect(queryResult).to.have.property('done', false);
       expect(queryResult.records.length).to.equal(3756);
       verifyRecordFields(queryResult?.records[0], ['Id', 'attributes']);
     });

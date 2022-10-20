@@ -8,7 +8,7 @@
 import * as os from 'os';
 
 import { Messages } from '@salesforce/core';
-import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
+import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
 import { ExportApi, ExportConfig } from '../../../../api/data/tree/exportApi';
 import { DataPlanPart, SObjectTreeFileContents } from '../../../../dataSoqlQueryTypes';
 
@@ -46,7 +46,8 @@ export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileCo
 
   public async run(): Promise<DataPlanPart[] | SObjectTreeFileContents> {
     const { flags } = await this.parse(Export);
-    const exportApi = new ExportApi(flags.targetusername, this.jsonEnabled());
+    const ux = new Ux({ jsonEnabled: this.jsonEnabled() });
+    const exportApi = new ExportApi(flags.targetusername, ux);
     const exportConfig: ExportConfig = {
       outputDir: flags.outputdir,
       plan: flags.plan,

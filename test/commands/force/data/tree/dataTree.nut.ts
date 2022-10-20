@@ -7,7 +7,6 @@
 import * as path from 'path';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-import { SfdxResult } from '@salesforce/command';
 import { Dictionary, get, getString } from '@salesforce/ts-types';
 import { QueryResult } from '../soql/query/dataSoqlQuery.nut';
 
@@ -52,14 +51,11 @@ describe('data:tree commands', () => {
       "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry, (SELECT Lastname, Title, Email FROM Contacts) FROM Account  WHERE Name LIKE 'SampleAccount%'";
 
     // Import data to the default org.
-    execCmd<SfdxResult>(
-      `force:data:tree:import --plan ${path.join('.', 'data', 'accounts-contacts-plan.json')} --json`,
-      {
-        ensureExitCode: 0,
-      }
-    );
+    execCmd(`force:data:tree:import --plan ${path.join('.', 'data', 'accounts-contacts-plan.json')} --json`, {
+      ensureExitCode: 0,
+    });
 
-    execCmd<SfdxResult>(
+    execCmd(
       `force:data:tree:export --query "${query}" --prefix INT --outputdir ${path.join(
         '.',
         'export_data'
@@ -68,7 +64,7 @@ describe('data:tree commands', () => {
     );
 
     // Import data to the default org.
-    execCmd<SfdxResult>(
+    execCmd(
       `force:data:tree:import --targetusername importOrg --plan ${path.join(
         '.',
         'export_data',

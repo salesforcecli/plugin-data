@@ -5,8 +5,8 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { expect } from '@salesforce/command/lib/test';
-import * as chai from 'chai';
+import { expect, use as chaiUse } from 'chai';
+
 import * as chaiAsPromised from 'chai-as-promised';
 import { get, getPlainObject } from '@salesforce/ts-types';
 import { createSandbox } from 'sinon';
@@ -15,7 +15,7 @@ import { Field, SoqlQueryResult } from '../src/dataSoqlQueryTypes';
 import { CsvReporter, HumanReporter, escape } from '../src/reporters';
 import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars';
 
-chai.use(chaiAsPromised);
+chaiUse(chaiAsPromised);
 
 describe('reporter tests', () => {
   describe('human reporter tests', () => {
@@ -23,7 +23,7 @@ describe('reporter tests', () => {
     let queryData: SoqlQueryResult;
     beforeEach(async () => {
       // jsforce has records/attributes/url as a non-optional property.  It may not be!
-      queryData = soqlQueryExemplars.queryWithAggregates.soqlQueryResult as SoqlQueryResult;
+      queryData = soqlQueryExemplars.queryWithAggregates.soqlQueryResult as unknown as SoqlQueryResult;
       const dataSoqlQueryResult: SoqlQueryResult = {
         columns: queryData.columns,
         query: queryData.query,

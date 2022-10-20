@@ -8,10 +8,9 @@ import * as os from 'os';
 import * as fs from 'fs';
 import { ReadStream } from 'fs';
 import { Connection, Messages, SfError } from '@salesforce/core';
-import { JobInfo } from 'jsforce/api/bulk';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
-import { Batcher, BulkResult } from '../../../../batcher';
+import { Batcher, BatcherReturnType } from '../../../../batcher';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.load('@salesforce/plugin-data', 'bulk.delete', [
@@ -24,7 +23,7 @@ const messages = Messages.load('@salesforce/plugin-data', 'bulk.delete', [
   'flags.wait',
 ]);
 
-export default class Delete extends SfCommand<BulkResult[] | JobInfo[]> {
+export default class Delete extends SfCommand<BatcherReturnType> {
   public static readonly examples = messages.getMessage('examples').split(os.EOL);
   public static readonly summary = messages.getMessage('summary');
   public static flags = {
@@ -53,9 +52,9 @@ export default class Delete extends SfCommand<BulkResult[] | JobInfo[]> {
     }),
   };
 
-  public async run(): Promise<BulkResult[] | JobInfo[]> {
+  public async run(): Promise<BatcherReturnType> {
     const { flags } = await this.parse(Delete);
-    let result: BulkResult[] | JobInfo[];
+    let result: BatcherReturnType;
 
     try {
       const conn: Connection = flags.targetusername.getConnection();
@@ -64,7 +63,7 @@ export default class Delete extends SfCommand<BulkResult[] | JobInfo[]> {
       const csvRecords: ReadStream = fs.createReadStream(flags.csvfile, { encoding: 'utf-8' });
       const job = conn.bulk.createJob<'delete'>(flags.sobjecttype, 'delete');
 
-      const batcher: Batcher = new Batcher(conn, new Ux(this.jsonEnabled()));
+      const batcher: Batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
 
       result = await batcher.createAndExecuteBatches(job, csvRecords, flags.sobjecttype, flags.wait?.minutes);
 

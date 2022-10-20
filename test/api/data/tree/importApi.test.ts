@@ -18,7 +18,7 @@ import * as fs from 'fs';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { Messages, Org } from '@salesforce/core';
-import { ImportApi, ImportConfig } from '../../../../src/api/data/tree/importApi';
+import { ImportApi, ImportConfig, getSObjectTreeFileMeta } from '../../../../src/api/data/tree/importApi';
 
 // Json files
 const dataImportPlanSchema = require('../../../../schema/dataImportPlanSchema.json');
@@ -265,8 +265,7 @@ describe('ImportApi', () => {
         },
       };
       const filepath = path.join(__dirname, 'test-files', 'contacts-only-2.json');
-      // @ts-ignore
-      const rv = ImportApi.prototype.getSObjectTreeFileMeta(filepath);
+      const rv = getSObjectTreeFileMeta(filepath);
       expect(rv).to.eql(expectedMeta);
     });
 

@@ -8,8 +8,8 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import { Logger, Messages, Org, SfError, Lifecycle } from '@salesforce/core';
-import { CliUx } from '@oclif/core';
 import { DescribeSObjectResult, QueryResult } from 'jsforce';
+import { Ux } from '@salesforce/sf-plugins-core';
 import {
   BasicRecord,
   DataPlanPart,
@@ -56,7 +56,7 @@ export class ExportApi {
 
   private config!: ExportConfig;
 
-  public constructor(private readonly org: Org, private readonly jsonEnabled = false) {
+  public constructor(private readonly org: Org, private readonly ux: Ux) {
     this.logger = Logger.childFromRoot(this.constructor.name);
   }
 
@@ -125,10 +125,7 @@ export class ExportApi {
     const records = recordList.records;
 
     if (!records.length) {
-      // TODO: should be on the command
-      if (this.jsonEnabled) {
-        CliUx.ux.log('Query returned no results');
-      }
+      this.ux.log('Query returned no results');
       return recordList;
     }
 
@@ -461,10 +458,7 @@ export class ExportApi {
 
     fs.writeFileSync(finalFilename, JSON.stringify(jsonObject, null, 4));
 
-    // TODO: move this to the command
-    if (!this.jsonEnabled) {
-      CliUx.ux.log(`Wrote ${recordCount} records to ${finalFilename}`);
-    }
+    this.ux.log(`Wrote ${recordCount} records to ${finalFilename}`);
 
     return jsonObject;
   }

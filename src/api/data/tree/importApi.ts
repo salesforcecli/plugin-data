@@ -441,7 +441,7 @@ export class ImportApi {
 
 // Does some basic validation on the filepath and returns some file metadata such as
 // isJson, refRegex, and headers.
-const getSObjectTreeFileMeta = (filepath: string, contentType?: string): RequestMeta => {
+export const getSObjectTreeFileMeta = (filepath: string, contentType?: string): RequestMeta => {
   const meta: RequestMeta = {
     isJson: false,
     headers: {} as Dictionary,

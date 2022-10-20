@@ -54,7 +54,9 @@ export default class Create extends SfCommand<SaveResult> {
     const { flags } = await this.parse(Create);
     this.spinner.start(`Creating record for ${flags.sobjecttype}`);
 
-    const sobject = flags.targetusername.getConnection().sobject(flags.sobjecttype);
+    const sobject = (
+      flags.usetoolingapi ? flags.targetusername.getConnection().tooling : flags.targetusername.getConnection()
+    ).sobject(flags.sobjecttype);
     const values = stringToDictionary(flags.values);
     const result = await sobject.insert(values);
     if (result.success) {

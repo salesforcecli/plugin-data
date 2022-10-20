@@ -6,27 +6,18 @@
  */
 import * as path from 'path';
 import fs = require('fs');
+import { strict as assert } from 'node:assert/strict';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { getNumber, getString } from '@salesforce/ts-types';
 import { QueryResult } from '../soql/query/dataSoqlQuery.nut';
+import { BatcherReturnType } from '../../../../../src/batcher';
 
 let testSession: TestSession;
-
-interface BulkUpsertDelete {
-  id: string;
-  jobId: string;
-}
 
 interface BulkStatus {
   state: string;
   totalProcessingTime: number;
-}
-
-interface ShellString {
-  code: number;
-  stdout: string;
-  stderr: string;
 }
 
 /* Check the status of the bulk upsert job using json output to determine progress
@@ -56,11 +47,9 @@ const checkBulkStatusHumanResponse = (statusCommand: string): void => {
   let totalProcessingTime = 0;
   let jobState: string;
   do {
-    const statusResponse = (
-      execCmd<BulkStatus[]>(statusCommand.replace(/^sfdx /, ''), {
-        ensureExitCode: 0,
-      }).shellOutput as ShellString
-    ).stdout.split('\n');
+    const statusResponse = execCmd<BulkStatus[]>(statusCommand.replace(/^sfdx /, ''), {
+      ensureExitCode: 0,
+    }).shellOutput.stdout.split('\n');
     jobState = statusResponse.find((line) => line.startsWith('state:')) ?? 'InProgress';
     const totalProcessingTimeLine =
       statusResponse.find((line) => line.startsWith('totalProcessingTime:')) ?? 'totalProcessingTime: 0';
@@ -103,18 +92,18 @@ describe('data:bulk commands', () => {
     describe('data:bulk:upsert then data:bulk:status then soql:query and data:bulk:delete', () => {
       it('should upsert, query, and delete 10 accounts', () => {
         // Bulk upsert 10 accounts
-        const response = execCmd<BulkUpsertDelete[]>(
+        const response = execCmd<BatcherReturnType>(
           `force:data:bulk:upsert --sobjecttype Account --csvfile ${path.join(
             '.',
             'data',
             'bulkUpsert.csv'
           )} --externalid Id --json`,
           { ensureExitCode: 0 }
-        ).jsonOutput?.result ?? [{ id: '', jobId: '' }];
-        expect(response).to.be.an('array').with.lengthOf(1);
+        ).jsonOutput?.result;
+        assert.equal(response?.length, 1);
         const bulkUpsertResult = response[0];
-        expect(bulkUpsertResult).to.have.property('jobId');
-        expect(bulkUpsertResult).to.have.property('id');
+        assert(bulkUpsertResult.id);
+        assert('jobId' in bulkUpsertResult);
 
         checkBulkStatusJsonResponse(bulkUpsertResult.jobId, bulkUpsertResult.id);
 
@@ -125,16 +114,16 @@ describe('data:bulk commands', () => {
         fs.writeFileSync(idsFile, `Id\n${accountIds.join('\n')}\n`);
 
         // Run bulk delete
-        const deleteResponse = execCmd<BulkUpsertDelete[]>(
+        const deleteResponse = execCmd<BatcherReturnType>(
           `force:data:bulk:delete --sobjecttype Account --csvfile ${idsFile} --json`,
           {
             ensureExitCode: 0,
           }
-        ).jsonOutput?.result ?? [{ id: '', jobId: '' }];
-        expect(deleteResponse).to.be.an('array').with.lengthOf(1);
+        ).jsonOutput?.result;
+        assert.equal(deleteResponse?.length, 1);
         const bulkDeleteResult = deleteResponse[0];
-        expect(bulkDeleteResult).to.have.property('jobId');
-        expect(bulkDeleteResult).to.have.property('id');
+        assert(bulkDeleteResult.id);
+        assert('jobId' in bulkDeleteResult);
 
         // Query for the status of the bulk delete job and make sure it completed
         checkBulkStatusJsonResponse(bulkUpsertResult.jobId, bulkUpsertResult.id);
@@ -142,18 +131,19 @@ describe('data:bulk commands', () => {
 
       it('should upsert, query, and delete 10 accounts all serially', () => {
         // Bulk upsert 10 accounts
-        const response = execCmd<BulkUpsertDelete[]>(
+        const response = execCmd<BatcherReturnType>(
           `force:data:bulk:upsert --sobjecttype Account --csvfile ${path.join(
             '.',
             'data',
             'bulkUpsert.csv'
           )} --externalid Id --serial --json`,
           { ensureExitCode: 0 }
-        ).jsonOutput?.result ?? [{ id: '', jobId: '' }];
-        expect(response).to.be.an('array').with.lengthOf(1);
+        ).jsonOutput?.result;
+
+        assert.equal(response?.length, 1);
         const bulkUpsertResult = response[0];
-        expect(bulkUpsertResult).to.have.property('jobId');
-        expect(bulkUpsertResult).to.have.property('id');
+        assert(bulkUpsertResult.id);
+        assert('jobId' in bulkUpsertResult);
 
         checkBulkStatusJsonResponse(bulkUpsertResult.jobId, bulkUpsertResult.id);
 
@@ -164,13 +154,14 @@ describe('data:bulk commands', () => {
         fs.writeFileSync(idsFile, `Id\n${accountIds.join('\n')}\n`);
 
         // Run bulk delete
-        const deleteResponse = execCmd<BulkUpsertDelete[]>(
+        const deleteResponse = execCmd<BatcherReturnType>(
           `force:data:bulk:delete --sobjecttype Account --csvfile ${idsFile} --json`,
           {
             ensureExitCode: 0,
           }
-        ).jsonOutput?.result ?? [{ id: '', jobId: '' }];
-        expect(deleteResponse).to.be.an('array').with.lengthOf(1);
+        ).jsonOutput?.result;
+
+        assert.equal(deleteResponse?.length, 1);
         const bulkDeleteResult = deleteResponse[0];
         expect(bulkDeleteResult).to.have.property('jobId');
         expect(bulkDeleteResult).to.have.property('id');
@@ -184,16 +175,14 @@ describe('data:bulk commands', () => {
     describe('data:bulk:upsert then data:bulk:status then soql:query and data:bulk:delete', () => {
       it('should upsert, query, and delete 10 accounts', () => {
         // Bulk upsert 10 accounts
-        const response = (
-          execCmd<BulkUpsertDelete[]>(
-            `force:data:bulk:upsert --sobjecttype Account --csvfile ${path.join(
-              '.',
-              'data',
-              'bulkUpsert.csv'
-            )} --externalid Id`,
-            { ensureExitCode: 0 }
-          ).shellOutput as ShellString
-        ).stdout;
+        const response = execCmd<BatcherReturnType>(
+          `force:data:bulk:upsert --sobjecttype Account --csvfile ${path.join(
+            '.',
+            'data',
+            'bulkUpsert.csv'
+          )} --externalid Id`,
+          { ensureExitCode: 0 }
+        ).shellOutput.stdout;
         expect(response).to.match(/Check batch.*?status with the command:/g);
         let statusCheckCommand =
           response.split('\n').find((line) => line.startsWith('sfdx force:data:bulk:status')) ?? '';
@@ -208,11 +197,12 @@ describe('data:bulk commands', () => {
         fs.writeFileSync(idsFile, `Id\n${accountIds.join('\n')}\n`);
 
         // Run bulk delete
-        const deleteResponse = (
-          execCmd<BulkUpsertDelete[]>(`force:data:bulk:delete --sobjecttype Account --csvfile ${idsFile}`, {
+        const deleteResponse = execCmd<BatcherReturnType>(
+          `force:data:bulk:delete --sobjecttype Account --csvfile ${idsFile}`,
+          {
             ensureExitCode: 0,
-          }).shellOutput as ShellString
-        ).stdout;
+          }
+        ).shellOutput.stdout;
         expect(response).to.match(/Check batch.*?status with the command:/g);
         statusCheckCommand =
           deleteResponse.split('\n').find((line) => line.startsWith('sfdx force:data:bulk:status')) ?? '';
@@ -222,16 +212,14 @@ describe('data:bulk commands', () => {
 
       it('should upsert serially, query, and delete 10 accounts', () => {
         // Bulk upsert 10 accounts
-        const response = (
-          execCmd<BulkUpsertDelete[]>(
-            `force:data:bulk:upsert --sobjecttype Account --csvfile ${path.join(
-              '.',
-              'data',
-              'bulkUpsert.csv'
-            )} --externalid Id --serial`,
-            { ensureExitCode: 0 }
-          ).shellOutput as ShellString
-        ).stdout;
+        const response = execCmd<BatcherReturnType>(
+          `force:data:bulk:upsert --sobjecttype Account --csvfile ${path.join(
+            '.',
+            'data',
+            'bulkUpsert.csv'
+          )} --externalid Id --serial`,
+          { ensureExitCode: 0 }
+        ).shellOutput.stdout;
         expect(response).to.match(/Check batch.*?status with the command:/g);
         let statusCheckCommand =
           response.split('\n').find((line) => line.startsWith('sfdx force:data:bulk:status')) ?? '';
@@ -246,11 +234,12 @@ describe('data:bulk commands', () => {
         fs.writeFileSync(idsFile, `Id\n${accountIds.join('\n')}\n`);
 
         // Run bulk delete
-        const deleteResponse = (
-          execCmd<BulkUpsertDelete[]>(`force:data:bulk:delete --sobjecttype Account --csvfile ${idsFile}`, {
+        const deleteResponse = execCmd<BatcherReturnType>(
+          `force:data:bulk:delete --sobjecttype Account --csvfile ${idsFile}`,
+          {
             ensureExitCode: 0,
-          }).shellOutput as ShellString
-        ).stdout;
+          }
+        ).shellOutput.stdout;
         expect(response).to.match(/Check batch.*?status with the command:/g);
         statusCheckCommand =
           deleteResponse.split('\n').find((line) => line.startsWith('sfdx force:data:bulk:status')) ?? '';

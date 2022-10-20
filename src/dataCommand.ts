@@ -8,7 +8,6 @@
 import { AnyJson, get, Nullable } from '@salesforce/ts-types';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { Record as jsforceRecord, SaveResult } from 'jsforce';
-import { ensureArray } from '@salesforce/kit';
 
 import { CliUx } from '@oclif/core';
 Messages.importMessagesDirectory(__dirname);
@@ -133,7 +132,11 @@ export const collectErrorMessages = (result: SaveResult): string => {
   return errors;
 };
 
-export const query = async (conn: Connection, objectType: string, where: string): Promise<jsforceRecord> => {
+export const query = async (
+  conn: Connection | Connection['tooling'],
+  objectType: string,
+  where: string
+): Promise<jsforceRecord> => {
   const queryObject = stringToDictionary(where);
   const sobject = conn.sobject(objectType);
   const records = await sobject.find(queryObject, 'id');
@@ -147,6 +150,5 @@ export const query = async (conn: Connection, objectType: string, where: string)
       messages.getMessage('DataRecordGetMultipleRecords', [where, objectType, records.length])
     );
   }
-
-  return ensureArray<jsforceRecord>(records);
+  return records[0];
 };

@@ -64,7 +64,9 @@ export default class Update extends SfCommand<SaveResult> {
     this.spinner.start('Updating Record');
 
     let status = 'Success';
-    const conn = flags.targetusername.getConnection();
+    const conn = flags.usetoolingapi
+      ? flags.targetusername.getConnection().tooling
+      : flags.targetusername.getConnection();
     const sObjectId = (flags.sobjectid ?? (await query(conn, flags.sobjecttype, flags.where as string)).Id) as string;
     try {
       const updateObject = { ...stringToDictionary(flags.values), Id: sObjectId };

@@ -109,7 +109,7 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const queryString = flags.query ?? fs.readFileSync(flags.soqlqueryfile!, 'utf8');
       const conn = flags['target-org'].getConnection();
-      const ux = new Ux(!this.jsonEnabled());
+      const ux = new Ux({ jsonEnabled: this.jsonEnabled() });
       if (flags.resultformat !== 'json') this.spinner.start(messages.getMessage('queryRunningMessage'));
       const queryResult = flags.bulk
         ? await runBulkSoqlQuery(conn, queryString, flags.wait, ux)

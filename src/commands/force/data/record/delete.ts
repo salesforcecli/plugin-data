@@ -61,7 +61,9 @@ export default class Delete extends SfCommand<SaveResult> {
     let status = 'Success';
 
     try {
-      const conn = flags.targetusername.getConnection();
+      const conn = flags.usetoolingapi
+        ? flags.targetusername.getConnection().tooling
+        : flags.targetusername.getConnection();
       // "where flag" will be defined if sobjectId is not
       const sObjectId = (flags.sobjectid as string) ?? (await query(conn, flags.sobjecttype, flags.where as string)).Id;
       const result = await conn.sobject(flags.sobjecttype).destroy(sObjectId);

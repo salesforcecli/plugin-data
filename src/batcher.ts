@@ -40,6 +40,8 @@ export type BulkResult = {
   apexProcessingTime: string;
 };
 
+export type BatcherReturnType = Awaited<ReturnType<Batcher['createAndExecuteBatches']>>;
+
 export class Batcher {
   public constructor(private readonly conn: Connection, private readonly ux: Ux) {}
 

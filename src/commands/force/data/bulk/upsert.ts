@@ -8,15 +8,14 @@ import * as os from 'os';
 import * as fs from 'fs';
 import { ReadStream } from 'fs';
 import { Messages } from '@salesforce/core';
-import { JobInfo } from 'jsforce/api/bulk';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
-import { Batcher, BulkResult } from '../../../../batcher';
+import { Batcher, BatcherReturnType } from '../../../../batcher';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.upsert');
 
-export default class Upsert extends SfCommand<JobInfo[] | BulkResult[]> {
+export default class Upsert extends SfCommand<BatcherReturnType> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessage('examples').split(os.EOL);
@@ -56,12 +55,12 @@ export default class Upsert extends SfCommand<JobInfo[] | BulkResult[]> {
     }),
   };
 
-  public async run(): Promise<JobInfo[] | BulkResult[]> {
+  public async run(): Promise<BatcherReturnType> {
     const { flags } = await this.parse(Upsert);
     const conn = flags.targetusername.getConnection();
     this.spinner.start('Bulk Upsert');
 
-    const batcher: Batcher = new Batcher(conn, new Ux(this.jsonEnabled()));
+    const batcher: Batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
     const csvStream: ReadStream = fs.createReadStream(flags.csvfile, { encoding: 'utf-8' });
 
     const concurrencyMode = flags.serial ? 'Serial' : 'Parallel';
