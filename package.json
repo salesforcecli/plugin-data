@@ -89,7 +89,7 @@
     "version": "oclif readme"
   },
   "dependencies": {
-    "@oclif/core": "^1.13.10",
+    "@oclif/core": "^1.19.2",
     "@salesforce/command": "^5.2.16",
     "@salesforce/core": "^3.31.17",
     "@salesforce/ts-types": "^1.5.21",
