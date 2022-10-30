@@ -289,8 +289,7 @@ describe('batcher', () => {
 
       const newBatch = job.createBatch();
       // @ts-ignore
-      newBatch.check = (): BatchInfo => {
-        return {
+      newBatch.check = (): BatchInfo => ({
           id: 'INCORRECT BATCH',
           jobId: '',
           state: 'Failed',
@@ -298,8 +297,7 @@ describe('batcher', () => {
           numberRecordsFailed: '1',
           numberRecordsProcessed: '2',
           totalProcessingTime: '100',
-        } as BatchInfo;
-      };
+        } as BatchInfo);
       stubMethod($$.SANDBOX, Batcher.prototype, 'splitIntoBatches').resolves(batches);
       waitForCompletionSpy.throws('Invalid Batch');
       try {
