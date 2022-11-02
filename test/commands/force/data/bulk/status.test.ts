@@ -10,39 +10,25 @@ import { SfError } from '@salesforce/core';
 import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup';
 import { Config } from '@oclif/core';
 import { expect } from 'chai';
-import { AnyJson } from '@salesforce/ts-types';
+import Bulk from 'jsforce/lib/api/bulk';
 import Status from '../../../../../src/commands/force/data/bulk/status';
-
-// interface StatusResult {
-//   status: number;
-//   message: string;
-// }
 
 describe('force:data:bulk:status', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
-  let config: Config;
-
-  before(async () => {
-    config = new Config({ root: path.resolve(__dirname, '../../../../..') });
-    await config.load();
-  });
+  const config = new Config({ root: path.resolve(__dirname, '../../../../..') });
 
   beforeEach(async () => {
     await $$.stubAuths(testOrg);
-    $$.fakeConnectionRequest = (request: AnyJson & { url: string }): Promise<AnyJson> => {
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify(request));
-      if (request.url.includes('job')) {
-        return Promise.resolve({
-          id: '75054000006yv68AAA',
-          state: 'Open',
-          options: {},
-          type: null,
-          operation: null,
-        });
-      } else if (request.url.includes('list')) {
-        return Promise.resolve([
+    await config.load();
+    $$.SANDBOXES.CONNECTION.stub(Bulk.prototype, 'job').resolves({
+      id: '75054000006yv68AAA',
+      state: 'Open',
+      options: {},
+      type: null,
+      operation: null,
+      list: async () =>
+        Promise.resolve([
           {
             id: '751540000070aNsAAI',
             jobId: '75054000006yv68AAA',
@@ -55,11 +41,12 @@ describe('force:data:bulk:status', () => {
             apiActiveProcessingTime: '55',
             apexProcessingTime: '0',
           },
-        ]);
-      } else {
-        return Promise.reject(new SfError(`Unexpected request: ${request?.url}`));
-      }
-    };
+        ]),
+    });
+  });
+
+  afterEach(async () => {
+    $$.restore();
   });
 
   it('will fail with the correct error message for not found', async () => {
@@ -79,9 +66,9 @@ describe('force:data:bulk:status', () => {
     try {
       await shouldThrow(cmd.run());
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log(err);
       if (!(err instanceof SfError)) {
+        // eslint-disable-next-line no-console
+        console.log(err);
         expect.fail('Expected SfError to be thrown');
       }
       expect(err.message).to.equal('Unable to find batch 751540000070Q4RAAU for job 75054000006ybyHAAQ.');

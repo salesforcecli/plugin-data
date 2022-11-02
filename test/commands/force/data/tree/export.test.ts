@@ -4,10 +4,13 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-
 import * as fs from 'fs';
-import { expect, test } from '@salesforce/command/lib/test';
+import { resolve } from 'path';
 import { AnyJson, ensureJsonMap, ensureString, isString } from '@salesforce/ts-types';
+import { expect } from 'chai';
+import { TestContext, MockTestOrgData } from '@salesforce/core/lib/testSetup';
+import { Config } from '@oclif/test';
+import Export from '../../../../../src/commands/force/data/tree/export';
 
 const query = 'SELECT Id, Name from Account';
 
@@ -52,10 +55,23 @@ interface ExportResult {
 }
 
 describe('force:data:tree:export', () => {
-  test
-    .stub(fs, 'writeFileSync', () => null)
-    .withOrg({ username: 'test@org.com' }, true)
-    .withConnectionRequest((request) => {
+  const $$ = new TestContext();
+  const testOrg = new MockTestOrgData();
+  const config = new Config({ root: resolve(__dirname, '../../../package.json') });
+  config.topicSeparator = ' ';
+
+  beforeEach(async () => {
+    await $$.stubAuths(testOrg);
+    await config.load();
+  });
+
+  afterEach(async () => {
+    $$.restore();
+  });
+
+  it('returns Account record', async () => {
+    $$.SANDBOX.stub(fs, 'writeFileSync').returns();
+    $$.fakeConnectionRequest = (request: AnyJson): Promise<AnyJson> => {
       if (isString(request) && request.includes('sobjects/Account/describe')) {
         return Promise.resolve(ACCOUNT_META);
       } else {
@@ -65,32 +81,20 @@ describe('force:data:tree:export', () => {
         }
       }
       return Promise.resolve({});
-    })
-    .stdout()
-    .command(['force:data:tree:export', '--targetusername', 'test@org.com', '--query', query, '--json'])
-    .it('returns Account record', (ctx) => {
-      const result = JSON.parse(ctx.stdout) as ExportResult;
-      expect(result.status).to.equal(0);
-      expect(result.result).to.deep.equal({
-        records: [
-          {
-            attributes: {
-              type: 'Account',
-              referenceId: 'AccountRef1',
-            },
-            Name: 'Sample Account for Entitlements',
-          },
-        ],
-      });
-    });
+    };
+    const cmd = new Export(['--targetusername', 'test@org.com', '--query', query, '--json'], config);
 
-  test
-    .withOrg({ username: 'test@org.com' }, true)
-    .stdout()
-    .command(['force:data:tree:export', '--targetusername', 'test@org.com', '--json'])
-    .it('should throw an error if --query is not provided', (ctx) => {
-      const result = JSON.parse(ctx.stdout) as ExportResult;
-      expect(result.status).to.equal(1);
-      expect(result.message).to.include('Missing required flag');
+    const result = (await cmd.run()) as unknown as ExportResult;
+    expect(result).to.deep.equal({
+      records: [
+        {
+          attributes: {
+            type: 'Account',
+            referenceId: 'AccountRef1',
+          },
+          Name: 'Sample Account for Entitlements',
+        },
+      ],
     });
+  });
 });

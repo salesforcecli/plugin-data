@@ -7,7 +7,7 @@
 
 import * as os from 'os';
 import { Messages, SfError } from '@salesforce/core';
-import { SaveResult } from 'jsforce';
+import { SaveError, SaveResult } from 'jsforce';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { collectErrorMessages, query, stringToDictionary } from '../../../../dataCommand';
 
@@ -67,7 +67,7 @@ export default class Update extends SfCommand<SaveResult> {
     const conn = flags.usetoolingapi
       ? flags.targetusername.getConnection().tooling
       : flags.targetusername.getConnection();
-    const sObjectId = (flags.sobjectid ?? (await query(conn, flags.sobjecttype, flags.where as string)).Id) as string;
+    const sObjectId = flags.sobjectid ?? (await query(conn, flags.sobjecttype, flags.where)).Id;
     try {
       const updateObject = { ...stringToDictionary(flags.values), Id: sObjectId };
       const result = await conn.sobject(flags.sobjecttype).update(updateObject);
@@ -82,14 +82,9 @@ export default class Update extends SfCommand<SaveResult> {
     } catch (err) {
       status = 'Failed';
       this.spinner.stop(status);
-      const error = err as Error;
-      if (Reflect.has(error, 'errorCode') && Reflect.has(error, 'fields')) {
+      if (isSaveResult(err)) {
         throw new SfError(
-          messages.getMessage('updateFailureWithFields', [
-            Reflect.get(error, 'errorCode'),
-            Reflect.get(error, 'message'),
-            Reflect.get(error, 'fields'),
-          ])
+          messages.getMessage('updateFailureWithFields', [err.errorCode, err.message, err.fields.join(',')])
         );
       } else {
         throw err;
@@ -97,3 +92,8 @@ export default class Update extends SfCommand<SaveResult> {
     }
   }
 }
+
+const isSaveResult = (error: SaveError | Error | unknown): error is SaveError => {
+  const se = error as SaveError;
+  return Boolean(se.fields && se.errorCode && se.message);
+};

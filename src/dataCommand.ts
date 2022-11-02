@@ -5,7 +5,6 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { get, Nullable } from '@salesforce/ts-types';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { Record as jsforceRecord, SaveResult } from 'jsforce';
 
@@ -13,13 +12,12 @@ import { CliUx } from '@oclif/core';
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
-export const logNestedObject = (obj: never, indentation = 0): void => {
+export const logNestedObject = (obj: Record<string, unknown>, indentation = 0): void => {
   const space = ' '.repeat(indentation);
-  Object.keys(obj).forEach((key) => {
-    const value = get(obj, key, null) as Nullable<string | never>;
+  Object.entries(obj).forEach(([key, value]) => {
     if (!!value && typeof value === 'object') {
       CliUx.ux.log(`${space}${key}:`);
-      logNestedObject(value, indentation + 2);
+      logNestedObject(value as Record<string, unknown>, indentation + 2);
     } else {
       CliUx.ux.log(`${space}${key}: ${value as string}`);
     }
@@ -116,16 +114,8 @@ export const stringToDictionary = (str: string): Record<string, string | boolean
   return transformKeyValueSequence(keyValuePairs);
 };
 
-export const collectErrorMessages = (result: SaveResult): string => {
-  let errors = '';
-  if (result.errors) {
-    errors = '\nErrors:\n';
-    result.errors.map((err) => {
-      errors += '  ' + err?.message + '\n';
-    });
-  }
-  return errors;
-};
+export const collectErrorMessages = (result: SaveResult): string =>
+  result.success === false ? ['\nErrors:', ...result.errors.map((err) => `  ${err.message}`)].join('\n') : '';
 
 export const query = async (
   conn: Connection | Connection['tooling'],

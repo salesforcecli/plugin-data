@@ -30,6 +30,10 @@ describe('force:data:bulk:upsert', () => {
     stubMethod($$.SANDBOX, fs.promises, 'stat').resolves({ isFile: () => true });
   });
 
+  afterEach(async () => {
+    $$.SANDBOX.restore();
+  });
+
   it('should fail correctly with error message', async () => {
     const cmd = new Upsert(
       [

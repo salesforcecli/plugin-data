@@ -338,7 +338,7 @@ export const FormatTypes = {
 const prepColumns = (columns: Array<Optional<string>>): CliUx.Table.table.Columns<Record<string, unknown>> => {
   const formattedColumns: CliUx.Table.table.Columns<Record<string, unknown>> = {};
   columns
-    .map((field: Optional<string>) => field as string)
+    .map((field: Optional<string>) => field)
     .filter((field): string => field)
     .map(
       (field: string) =>

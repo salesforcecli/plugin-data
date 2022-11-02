@@ -63,7 +63,7 @@ export default class Get extends SfCommand<Record> {
       ? flags.targetusername.getConnection().tooling
       : flags.targetusername.getConnection();
     try {
-      const sObjectId = (flags.sobjectid ?? (await query(conn, flags.sobjecttype, flags.where as string)).Id) as string;
+      const sObjectId = flags.sobjectid ?? (await query(conn, flags.sobjecttype, flags.where)).Id;
       const result = await conn.sobject(flags.sobjecttype).retrieve(sObjectId);
       if (!this.jsonEnabled()) {
         logNestedObject(result as never);

@@ -6,7 +6,6 @@
  */
 import * as os from 'os';
 import * as fs from 'fs';
-import { ReadStream } from 'fs';
 import { Messages } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
@@ -60,8 +59,8 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
     const conn = flags.targetusername.getConnection();
     this.spinner.start('Bulk Upsert');
 
-    const batcher: Batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
-    const csvStream: ReadStream = fs.createReadStream(flags.csvfile, { encoding: 'utf-8' });
+    const batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
+    const csvStream = fs.createReadStream(flags.csvfile, { encoding: 'utf-8' });
 
     const concurrencyMode = flags.serial ? 'Serial' : 'Parallel';
     const job = conn.bulk.createJob(flags.sobjecttype, 'upsert', {

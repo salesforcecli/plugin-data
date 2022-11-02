@@ -4,10 +4,16 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { expect, test } from '@salesforce/command/lib/test';
-import { ensureJsonMap, ensureString } from '@salesforce/ts-types';
-import { testSetup } from '@salesforce/core/lib/testSetup';
+import { resolve } from 'path';
+import { strict as assert } from 'assert';
+import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup';
+
+import { ensureJsonMap, ensureString, AnyJson } from '@salesforce/ts-types';
 import { Org } from '@salesforce/core';
+import { expect } from 'chai';
+import { Config } from '@oclif/test';
+
+import Delete from '../../../../../src/commands/force/data/record/delete';
 
 const sObjectId = '0011100001zhhyUAAQ';
 
@@ -18,9 +24,15 @@ interface DeleteResult {
 }
 
 describe('force:data:record:delete', () => {
-  test
-    .withOrg({ username: 'test@org.com' }, true)
-    .withConnectionRequest((request) => {
+  const $$ = new TestContext();
+  const testOrg = new MockTestOrgData();
+  const config = new Config({ root: resolve(__dirname, '../../../package.json') });
+  config.topicSeparator = ' ';
+
+  beforeEach(async () => {
+    await $$.stubAuths(testOrg);
+    await config.load();
+    $$.fakeConnectionRequest = (request: AnyJson): Promise<AnyJson> => {
       const requestMap = ensureJsonMap(request);
       if (ensureString(requestMap.url).includes('Account')) {
         return Promise.resolve({
@@ -33,73 +45,65 @@ describe('force:data:record:delete', () => {
         });
       }
       return Promise.resolve({});
-    })
-    .stdout()
-    .command([
-      'force:data:record:delete',
-      '--targetusername',
-      'test@org.com',
-      '--sobjecttype',
-      'Account',
-      '--sobjectid',
-      sObjectId,
-      '--json',
-    ])
-    .it('should delete the sobject by sobjectid', (ctx) => {
-      const result = JSON.parse(ctx.stdout) as DeleteResult;
-      expect(result.status).to.equal(0);
-      expect(result.result?.Id).to.equal('0011100001zhhyUAAQ');
-      expect(result.result?.IsDeleted).to.equal(true);
+    };
+  });
+
+  afterEach(async () => {
+    $$.restore();
+  });
+
+  it('should delete the sobject by sobjectid', async () => {
+    const cmd = new Delete(
+      ['--targetusername', 'test@org.com', '--sobjecttype', 'Account', '--sobjectid', sObjectId, '--json'],
+      config
+    );
+    const result = (await cmd.run()) as unknown as DeleteResult['result'];
+    expect(result?.Id).to.equal('0011100001zhhyUAAQ');
+    expect(result?.IsDeleted).to.equal(true);
+  });
+
+  it('should throw an error if both --where and --sobjectid are provided', async () => {
+    const cmd = new Delete(
+      [
+        '--targetusername',
+        'test@org.com',
+        '--sobjecttype',
+        'Account',
+        '--sobjectid',
+        sObjectId,
+        '--where',
+        '"Name=Acme"',
+        '-v',
+        '"Name=NewName"',
+        '--json',
+      ],
+      config
+    );
+    try {
+      await shouldThrow(cmd.run());
+    } catch (e) {
+      // expected an error
+    }
+  });
+
+  it('should throw an error if the where flag returns nothing', async () => {
+    $$.SANDBOX.stub(Org.prototype, 'getConnection').returns({
+      sobject: () => ({
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore enable any typing here
+        find: () => [],
+      }),
     });
 
-  test
-    .withOrg({ username: 'test@org.com' }, true)
-    .stdout()
-    .command([
-      'force:data:record:delete',
-      '--targetusername',
-      'test@org.com',
-      '--sobjecttype',
-      'Account',
-      '--sobjectid',
-      sObjectId,
-      '--where',
-      '"Name=Acme"',
-      '-v',
-      '"Name=NewName"',
-      '--json',
-    ])
-    .it('should throw an error if both --where and --sobjectid are provided', (ctx) => {
-      const result = JSON.parse(ctx.stdout) as DeleteResult;
-      expect(result.status).to.equal(1);
-    });
-
-  test
-    .withOrg({ username: 'test@org.com' }, true)
-    .do(() => {
-      const $$ = testSetup();
-      $$.SANDBOX.stub(Org.prototype, 'getConnection').returns({
-        sobject: () => ({
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore enable any typing here
-          find: () => [],
-        }),
-      });
-    })
-    .stdout()
-    .command([
-      'force:data:record:delete',
-      '--targetusername',
-      'test@org.com',
-      '--sobjecttype',
-      'Account',
-      '--where',
-      '"Name=Acme"',
-      '--json',
-    ])
-    .it('should throw an error if the where flag returns nothing', (ctx) => {
-      const result = JSON.parse(ctx.stdout) as DeleteResult;
-      expect(result.status).to.equal(1);
-      expect(result.name).to.equal('DataRecordGetNoRecord');
-    });
+    const cmd = new Delete(
+      ['--targetusername', 'test@org.com', '--sobjecttype', 'Account', '--where', '"Name=Acme"', '--json'],
+      config
+    );
+    try {
+      await cmd.run();
+    } catch (e) {
+      assert(e instanceof Error);
+      expect(e.name).to.equal('DataRecordGetNoRecord');
+    }
+  });
 });

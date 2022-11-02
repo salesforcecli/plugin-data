@@ -56,7 +56,7 @@ export class Batcher {
     doneCallback?: (...args: [{ job: JobInfo }]) => void
   ): Promise<JobInfo> {
     const job = this.conn.bulk.job(jobId);
-    const jobInfo: JobInfo = await job.check();
+    const jobInfo = await job.check();
 
     this.bulkStatus(jobInfo, undefined, undefined, true);
 
@@ -67,6 +67,10 @@ export class Batcher {
     return jobInfo;
   }
 
+  /**
+   *
+   * Handles ux output and massaging the data by filtering out the $ from the response
+   */
   public bulkStatus(
     summary: JobInfo | BatchInfo,
     results?: BulkIngestBatchResult,

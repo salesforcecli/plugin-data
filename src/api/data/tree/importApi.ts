@@ -131,11 +131,13 @@ export class ImportApi {
       importResults.responseRefs = this.responseRefs;
       importResults.sobjectTypes = this.sobjectTypes;
     } catch (err) {
+      if (!(err instanceof SfError)) {
+        throw err;
+      }
       const error = err as Error;
       if (getString(error, 'errorCode') === 'ERROR_HTTP_400' && error.message != null) {
-        let msg;
         try {
-          msg = JSON.parse(error.message) as { hasErrors?: boolean; results?: [] };
+          const msg = JSON.parse(error.message) as { hasErrors?: boolean; results?: [] };
           if (msg.hasErrors && msg.results && msg.results.length > 0) {
             importResults.errors = msg.results;
           }
@@ -152,6 +154,55 @@ export class ImportApi {
 
   public getSchema(): JsonMap {
     return this.schemaValidator.loadSync();
+  }
+
+  // Does some basic validation on the filepath and returns some file metadata such as
+  // isJson, refRegex, and headers.
+  // eslint-disable-next-line class-methods-use-this
+  public getSObjectTreeFileMeta(filepath: string, contentType?: string): RequestMeta {
+    const meta: RequestMeta = {
+      isJson: false,
+      headers: {} as Dictionary,
+      refRegex: new RegExp(/./),
+    };
+    let tmpContentType;
+
+    // explicitly validate filepath so, if not found, we can return friendly error message
+    try {
+      fs.statSync(filepath);
+    } catch (e) {
+      throw new SfError(messages.getMessage('dataFileNotFound', [filepath]), INVALID_DATA_IMPORT_ERR_NAME);
+    }
+
+    // determine content type
+    if (filepath.endsWith('.json')) {
+      tmpContentType = jsonContentType;
+      meta.isJson = true;
+      meta.refRegex = jsonRefRegex;
+    } else if (filepath.endsWith('.xml')) {
+      tmpContentType = xmlContentType;
+      meta.refRegex = xmlRefRegex;
+    }
+
+    // unable to determine content type from extension, was a global content type provided?
+    if (!tmpContentType) {
+      if (!contentType) {
+        throw new SfError(messages.getMessage('unknownContentType', [filepath]), INVALID_DATA_IMPORT_ERR_NAME);
+      } else if (contentType.toUpperCase() === 'JSON') {
+        tmpContentType = jsonContentType;
+        meta.isJson = true;
+        meta.refRegex = jsonRefRegex;
+      } else if (contentType.toUpperCase() === 'XML') {
+        tmpContentType = xmlContentType;
+        meta.refRegex = xmlRefRegex;
+      } else {
+        throw new SfError(messages.getMessage('dataFileUnsupported', [contentType]), INVALID_DATA_IMPORT_ERR_NAME);
+      }
+    }
+
+    meta.headers['content-type'] = tmpContentType;
+
+    return meta;
   }
 
   private async getPlanPromises({
@@ -171,7 +222,7 @@ export class ImportApi {
       const globalSaveRefs = sobjectConfig.saveRefs != null ? sobjectConfig.saveRefs : false;
       const globalResolveRefs = sobjectConfig.resolveRefs != null ? sobjectConfig.resolveRefs : false;
       for (const fileDef of sobjectConfig.files) {
-        let filepath;
+        let filepath: string;
         let saveRefs = globalSaveRefs;
         let resolveRefs = globalResolveRefs;
 
@@ -258,8 +309,6 @@ export class ImportApi {
    * @param isJson
    */
   private createSObjectTypeMap(content: string, isJson: boolean): void {
-    let contentJson;
-
     const getTypes = (records: SObjectTreeInput[]): void => {
       records.forEach((record) => {
         Object.entries(record).forEach(([key, val]) => {
@@ -273,7 +322,7 @@ export class ImportApi {
     };
 
     if (isJson) {
-      contentJson = JSON.parse(content) as { records: SObjectTreeInput[] };
+      const contentJson = JSON.parse(content) as { records: SObjectTreeInput[] };
       if (Array.isArray(contentJson.records)) {
         getTypes(contentJson.records);
       }
@@ -290,8 +339,7 @@ export class ImportApi {
     refMap?: Map<string, string>
   ): Promise<{ contentStr: string; sobject: string }> {
     let contentStr: string;
-    let contentJson;
-    let match;
+    let match: RegExpExecArray | null;
     let sobject = '';
     const foundRefs = new Set<string>();
 
@@ -306,7 +354,7 @@ export class ImportApi {
     if (isJson) {
       // is valid json?  (save round-trip to server)
       try {
-        contentJson = JSON.parse(contentStr) as { records: SObjectTreeInput[] };
+        const contentJson = JSON.parse(contentStr) as { records: SObjectTreeInput[] };
 
         // All top level records should be of the same sObject type so just grab the first one
         sobject = contentJson.records[0].attributes.type.toLowerCase();
@@ -385,7 +433,7 @@ export class ImportApi {
     if (isJson) {
       this.logger.debug(`SObject Tree API results:  ${JSON.stringify(response, null, 4)}`);
 
-      if (response.hasErrors) {
+      if (response.hasErrors === true) {
         throw messages.createError('dataImportFailed', [filepath, JSON.stringify(response.results, null, 4)]);
       }
 
@@ -396,13 +444,10 @@ export class ImportApi {
 
         // if enabled, save references to map to be used to replace references
         // prior to subsequent saves
-        if (saveRefs) {
-          for (let i = 0, len = response.results.length, ref; i < len; i++) {
-            ref = response.results[i] as { referenceId: string; id: string };
-            if (refMap) {
-              refMap.set(ref.referenceId.toLowerCase(), ref.id);
-            }
-          }
+        if (saveRefs && refMap) {
+          response.results.forEach((result) => {
+            refMap.set(result.referenceId.toLowerCase(), result.id);
+          });
         }
       }
     } else {
@@ -415,7 +460,7 @@ export class ImportApi {
   // Imports the SObjectTree from the provided files/plan by making a POST request to the server.
   private async importSObjectTreeFile(components: DataImportComponents): Promise<void> {
     // Get some file metadata
-    const { isJson, refRegex, headers } = getSObjectTreeFileMeta(components.filepath, components.contentType);
+    const { isJson, refRegex, headers } = this.getSObjectTreeFileMeta(components.filepath, components.contentType);
 
     this.logger.debug(`Importing SObject Tree data from file ${components.filepath}`);
     try {
@@ -438,51 +483,3 @@ export class ImportApi {
     }
   }
 }
-
-// Does some basic validation on the filepath and returns some file metadata such as
-// isJson, refRegex, and headers.
-export const getSObjectTreeFileMeta = (filepath: string, contentType?: string): RequestMeta => {
-  const meta: RequestMeta = {
-    isJson: false,
-    headers: {} as Dictionary,
-    refRegex: new RegExp(/./),
-  };
-  let tmpContentType;
-
-  // explicitly validate filepath so, if not found, we can return friendly error message
-  try {
-    fs.statSync(filepath);
-  } catch (e) {
-    throw new SfError(messages.getMessage('dataFileNotFound', [filepath]), INVALID_DATA_IMPORT_ERR_NAME);
-  }
-
-  // determine content type
-  if (filepath.endsWith('.json')) {
-    tmpContentType = jsonContentType;
-    meta.isJson = true;
-    meta.refRegex = jsonRefRegex;
-  } else if (filepath.endsWith('.xml')) {
-    tmpContentType = xmlContentType;
-    meta.refRegex = xmlRefRegex;
-  }
-
-  // unable to determine content type from extension, was a global content type provided?
-  if (!tmpContentType) {
-    if (!contentType) {
-      throw new SfError(messages.getMessage('unknownContentType', [filepath]), INVALID_DATA_IMPORT_ERR_NAME);
-    } else if (contentType.toUpperCase() === 'JSON') {
-      tmpContentType = jsonContentType;
-      meta.isJson = true;
-      meta.refRegex = jsonRefRegex;
-    } else if (contentType.toUpperCase() === 'XML') {
-      tmpContentType = xmlContentType;
-      meta.refRegex = xmlRefRegex;
-    } else {
-      throw new SfError(messages.getMessage('dataFileUnsupported', [contentType]), INVALID_DATA_IMPORT_ERR_NAME);
-    }
-  }
-
-  meta.headers['content-type'] = tmpContentType;
-
-  return meta;
-};

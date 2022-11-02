@@ -7,5 +7,5 @@
 import { Flags } from '@oclif/core';
 
 export const stringArrayFlag = Flags.custom<string[]>({
-  parse: async (input, _ctx, opts) => Promise.resolve(input.split(',').map((s) => s.trim())),
+  parse: async (input) => Promise.resolve(input.split(',').map((s) => s.trim())),
 });

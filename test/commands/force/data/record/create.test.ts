@@ -4,22 +4,31 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { expect, test } from '@salesforce/command/lib/test';
-import { ensureJsonMap, ensureString } from '@salesforce/ts-types';
+import { resolve } from 'path';
+import { Config } from '@oclif/test';
+import { expect } from 'chai';
+import { TestContext, MockTestOrgData } from '@salesforce/core/lib/testSetup';
+import { AnyJson, ensureJsonMap, ensureString } from '@salesforce/ts-types';
+import Create from '../../../../../src/commands/force/data/record/create';
 
 const sObjectId = '0011100001zhhyUAAQ';
 
 interface CreateResult {
-  status: number;
   result: { Id: string; Name: string };
 }
 
 describe('force:data:record:create', () => {
-  test
-    .withOrg({ username: 'test@org.com' }, true)
-    .withConnectionRequest((request) => {
-      const requestMap = ensureJsonMap(request);
-      if (ensureString(requestMap.url).includes('Account')) {
+  const $$ = new TestContext();
+  const testOrg = new MockTestOrgData();
+  const config = new Config({ root: resolve(__dirname, '../../../package.json') });
+  config.topicSeparator = ' ';
+
+  beforeEach(async () => {
+    await $$.stubAuths(testOrg);
+    await config.load();
+    $$.fakeConnectionRequest = (request: AnyJson): Promise<AnyJson> => {
+      const requestWithUrl = ensureJsonMap(request);
+      if (request && ensureString(requestWithUrl.url).includes('Account')) {
         return Promise.resolve({
           attributes: {
             type: 'Account',
@@ -38,24 +47,20 @@ describe('force:data:record:create', () => {
           LastViewedDate: '2020-11-17T21:47:42.000+0000',
           LastReferencedDate: '2020-11-17T21:47:42.000+0000',
         });
+      } else {
+        return Promise.resolve({});
       }
-      return Promise.resolve({});
-    })
-    .stdout()
-    .command([
-      'force:data:record:create',
-      '--targetusername',
-      'test@org.com',
-      '--sobjecttype',
-      'Account',
-      '-v',
-      '"Name=Acme"',
-      '--json',
-    ])
-    .it('should create a new sobject', (ctx) => {
-      const result = JSON.parse(ctx.stdout) as CreateResult;
-      expect(result.status).to.equal(0);
-      expect(result.result.Id).to.equal('0011100001zhhyUAAQ');
-      expect(result.result.Name).to.equal('Acme');
-    });
+    };
+  });
+
+  it('should create a new sobject', async () => {
+    const cmd = new Create(
+      ['--targetusername', 'test@org.com', '--sobjecttype', 'Account', '-v', '"Name=Acme"', '--json'],
+      config
+    );
+
+    const result = (await cmd.run()) as unknown as CreateResult['result'];
+    expect(result.Id).to.equal(sObjectId);
+    expect(result.Name).to.equal('Acme');
+  });
 });
