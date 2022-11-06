@@ -7,9 +7,7 @@
 
 import { Field, FieldType } from '../../src/dataSoqlQueryTypes';
 
-export const makeSubfield = (name: string, fields: Field[]): Field => {
-  return { fields, name, fieldType: FieldType.subqueryField };
-};
+export const makeSubfield = (name: string, fields: Field[]): Field => ({ fields, name, fieldType: FieldType.subqueryField });
 
 export const queryFieldsExemplars = {
   simpleQuery: {
