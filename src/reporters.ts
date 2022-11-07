@@ -101,18 +101,22 @@ export class HumanReporter extends QueryReporter {
   }
 
   public prepNullValues(records: unknown[]): void {
-    records.forEach((record): void => {
-      const recordAsObject = record as never;
-      Reflect.ownKeys(recordAsObject).forEach((propertyKey) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const value = Reflect.get(recordAsObject, propertyKey);
-        if (value === null) {
-          Reflect.set(recordAsObject, propertyKey, chalk.bold('null'));
-        } else if (typeof value === 'object') {
-          this.prepNullValues([value]);
+    records
+      .filter((record) => record)
+      .forEach((record): void => {
+        if (record) {
+          const recordAsObject = record as never;
+          Reflect.ownKeys(recordAsObject).forEach((propertyKey) => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const value = Reflect.get(recordAsObject, propertyKey);
+            if (value === null) {
+              Reflect.set(recordAsObject, propertyKey, chalk.bold('null'));
+            } else if (typeof value === 'object') {
+              this.prepNullValues([value]);
+            }
+          });
         }
       });
-    });
   }
 
   public prepColumns(columns: Array<Optional<string>>): CliUx.Table.table.Columns<Record<string, unknown>> {
