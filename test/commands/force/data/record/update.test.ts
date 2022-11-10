@@ -11,14 +11,10 @@ import { expect } from 'chai';
 import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup';
 import { Config } from '@oclif/test';
 import { SfError } from '@salesforce/core';
+import { SaveResult } from 'jsforce';
 import Update from '../../../../../src/commands/force/data/record/update';
 
 const sObjectId = '0011100001zhhyUAAQ';
-
-interface UpdateResult {
-  status: number;
-  result: { Id: string; Name: string };
-}
 
 describe('force:data:record:update', () => {
   const $$ = new TestContext();
@@ -37,24 +33,22 @@ describe('force:data:record:update', () => {
   it('should update the sobject with the provided values', async () => {
     $$.fakeConnectionRequest = (request: AnyJson): Promise<AnyJson> => {
       const requestMap = ensureJsonMap(request);
+      if (ensureString(requestMap.url).includes('query')) {
+        return Promise.resolve({
+          records: ensureString(requestMap.url).includes('Account')
+            ? [
+                {
+                  Id: sObjectId,
+                },
+              ]
+            : [],
+        });
+      }
       if (ensureString(requestMap.url).includes('Account')) {
         return Promise.resolve({
-          attributes: {
-            type: 'Account',
-            url: `/services/data/v50.0/sobjects/Account/${sObjectId}`,
-          },
-          Id: sObjectId,
-          IsDeleted: false,
-          Name: 'NewName',
-          PhotoUrl: `/services/images/photo/0011100001zhhyUAAQ${sObjectId}`,
-          OwnerId: '00511000009LARJAA4',
-          CreatedDate: '2020-11-17T21:47:42.000+0000',
-          CreatedById: '00511000009LARJAA4',
-          LastModifiedDate: '2020-11-17T21:47:42.000+0000',
-          LastModifiedById: '00511000009LARJAA4',
-          SystemModstamp: '2020-11-17T21:47:42.000+0000',
-          LastViewedDate: '2020-11-17T21:47:42.000+0000',
-          LastReferencedDate: '2020-11-17T21:47:42.000+0000',
+          id: sObjectId,
+          success: true,
+          errors: [],
         });
       }
       return Promise.resolve({});
@@ -73,9 +67,8 @@ describe('force:data:record:update', () => {
       ],
       config
     );
-    const result = (await cmd.run()) as unknown as UpdateResult['result'];
-    expect(result.Id).to.equal('0011100001zhhyUAAQ');
-    expect(result.Name).to.equal('NewName');
+    const result = (await cmd.run()) as unknown as SaveResult;
+    expect(result.id).to.equal('0011100001zhhyUAAQ');
   });
 
   it('should print the error message with reasons why the record could not be updated', async () => {

@@ -9,13 +9,10 @@ import { Config } from '@oclif/test';
 import { expect } from 'chai';
 import { TestContext, MockTestOrgData } from '@salesforce/core/lib/testSetup';
 import { AnyJson, ensureJsonMap, ensureString } from '@salesforce/ts-types';
+import { SaveResult } from 'jsforce';
 import Create from '../../../../../src/commands/force/data/record/create';
 
 const sObjectId = '0011100001zhhyUAAQ';
-
-interface CreateResult {
-  result: { Id: string; Name: string };
-}
 
 describe('force:data:record:create', () => {
   const $$ = new TestContext();
@@ -26,29 +23,14 @@ describe('force:data:record:create', () => {
   beforeEach(async () => {
     await $$.stubAuths(testOrg);
     await config.load();
-    $$.fakeConnectionRequest = (request: AnyJson): Promise<AnyJson> => {
+    $$.fakeConnectionRequest = (request: AnyJson): Promise<SaveResult> => {
       const requestWithUrl = ensureJsonMap(request);
       if (request && ensureString(requestWithUrl.url).includes('Account')) {
         return Promise.resolve({
-          attributes: {
-            type: 'Account',
-            url: `/services/data/v50.0/sobjects/Account/${sObjectId}`,
-          },
-          Id: sObjectId,
-          IsDeleted: false,
-          Name: 'Acme',
-          PhotoUrl: `/services/images/photo/0011100001zhhyUAAQ${sObjectId}`,
-          OwnerId: '00511000009LARJAA4',
-          CreatedDate: '2020-11-17T21:47:42.000+0000',
-          CreatedById: '00511000009LARJAA4',
-          LastModifiedDate: '2020-11-17T21:47:42.000+0000',
-          LastModifiedById: '00511000009LARJAA4',
-          SystemModstamp: '2020-11-17T21:47:42.000+0000',
-          LastViewedDate: '2020-11-17T21:47:42.000+0000',
-          LastReferencedDate: '2020-11-17T21:47:42.000+0000',
+          id: sObjectId,
+          success: true,
+          errors: undefined,
         });
-      } else {
-        return Promise.resolve({});
       }
     };
   });
@@ -59,8 +41,7 @@ describe('force:data:record:create', () => {
       config
     );
 
-    const result = (await cmd.run()) as unknown as CreateResult['result'];
-    expect(result.Id).to.equal(sObjectId);
-    expect(result.Name).to.equal('Acme');
+    const result = (await cmd.run()) as unknown as SaveResult;
+    expect(result.id).to.equal(sObjectId);
   });
 });

@@ -18,18 +18,24 @@ let styledHeaderSpy: sinon.SinonStub;
 let logSpy: sinon.SinonStub;
 let batcher: Batcher;
 let ux: Ux;
+// let conn: sinon.SinonStub;
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
 describe('batcher', () => {
+  const $$ = sinon.createSandbox();
   describe('bulkBatchStatus', () => {
     const summary: JobInfo = { id: '123', operation: 'upsert', state: 'Closed', object: 'Account' };
-    const conn = sinon.stub(Connection.prototype);
     beforeEach(() => {
+      const conn = $$.stub(Connection.prototype);
       ux = new Ux();
-      styledHeaderSpy = sinon.stub(ux, 'styledHeader');
-      logSpy = sinon.stub(ux, 'log');
+      styledHeaderSpy = $$.stub(ux, 'styledHeader');
+      logSpy = $$.stub(ux, 'log');
 
       batcher = new Batcher(conn, ux);
+    });
+
+    afterEach(() => {
+      $$.restore();
     });
 
     it('will correctly call to print the expected messages 1 log, 1 styledHeader', () => {
@@ -61,10 +67,12 @@ describe('batcher', () => {
     let inStream: ReadStream;
     let exitSpy: sinon.SinonSpy;
     beforeEach(() => {
-      sinon.restore();
-      exitSpy = sinon.stub(SfError, 'wrap');
+      exitSpy = $$.stub(SfError, 'wrap');
       // I couldn't figure out how to construct a ReadStream, but this is a close cousin
       inStream = Readable.from([]) as ReadStream;
+    });
+    afterEach(() => {
+      $$.restore();
     });
     it('Should create objects with the correct field names', async () => {
       inStream.push(`name,field1,field2${os.EOL}`);

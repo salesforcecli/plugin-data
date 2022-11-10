@@ -9,19 +9,13 @@ import { strict as assert } from 'assert';
 import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup';
 
 import { ensureJsonMap, ensureString, AnyJson } from '@salesforce/ts-types';
-import { Org } from '@salesforce/core';
 import { expect } from 'chai';
 import { Config } from '@oclif/test';
 
+import { SaveResult } from 'jsforce';
 import Delete from '../../../../../src/commands/force/data/record/delete';
 
 const sObjectId = '0011100001zhhyUAAQ';
-
-interface DeleteResult {
-  status: number;
-  name?: string;
-  result?: { Id: string; IsDeleted: boolean };
-}
 
 describe('force:data:record:delete', () => {
   const $$ = new TestContext();
@@ -34,17 +28,24 @@ describe('force:data:record:delete', () => {
     await config.load();
     $$.fakeConnectionRequest = (request: AnyJson): Promise<AnyJson> => {
       const requestMap = ensureJsonMap(request);
-      if (ensureString(requestMap.url).includes('Account')) {
+      if (ensureString(requestMap.url).includes('Account') && requestMap.method === 'DELETE') {
         return Promise.resolve({
-          attributes: {
-            type: 'Account',
-            url: `/services/data/v50.0/sobjects/Account/${sObjectId}`,
-          },
-          Id: sObjectId,
-          IsDeleted: true,
+          id: sObjectId,
+          success: true,
+          errors: [],
         });
       }
-      return Promise.resolve({});
+      if (ensureString(requestMap.url).includes('query')) {
+        return Promise.resolve({
+          records: ensureString(requestMap.url).includes('Account')
+            ? [
+                {
+                  Id: sObjectId,
+                },
+              ]
+            : [],
+        });
+      }
     };
   });
 
@@ -57,9 +58,8 @@ describe('force:data:record:delete', () => {
       ['--targetusername', 'test@org.com', '--sobjecttype', 'Account', '--sobjectid', sObjectId, '--json'],
       config
     );
-    const result = (await cmd.run()) as unknown as DeleteResult['result'];
-    expect(result?.Id).to.equal('0011100001zhhyUAAQ');
-    expect(result?.IsDeleted).to.equal(true);
+    const result = (await cmd.run()) as unknown as SaveResult;
+    expect(result?.id).to.equal('0011100001zhhyUAAQ');
   });
 
   it('should throw an error if both --where and --sobjectid are provided', async () => {
@@ -87,16 +87,8 @@ describe('force:data:record:delete', () => {
   });
 
   it('should throw an error if the where flag returns nothing', async () => {
-    $$.SANDBOX.stub(Org.prototype, 'getConnection').returns({
-      sobject: () => ({
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore enable any typing here
-        find: () => [],
-      }),
-    });
-
     const cmd = new Delete(
-      ['--targetusername', 'test@org.com', '--sobjecttype', 'Account', '--where', '"Name=Acme"', '--json'],
+      ['--targetusername', 'test@org.com', '--sobjecttype', 'Contact', '--where', '"Name=Acme"', '--json'],
       config
     );
     try {

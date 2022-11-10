@@ -67,7 +67,6 @@ export default class Delete extends SfCommand<SaveResult> {
       // "where flag" will be defined if sobjectId is not
       const sObjectId = flags.sobjectid ?? (await query(conn, flags.sobjecttype, flags.where)).Id;
       const result = await conn.sobject(flags.sobjecttype).destroy(sObjectId);
-
       if (result.success) {
         this.log(messages.getMessage('deleteSuccess', [sObjectId]));
       } else {
@@ -80,7 +79,10 @@ export default class Delete extends SfCommand<SaveResult> {
     } catch (err) {
       status = 'Failed';
       this.spinner.stop(status);
-      throw new SfError((err as Error).name, (err as Error).message);
+      if (!(err instanceof Error)) {
+        throw err;
+      }
+      throw new SfError(err.name, err.message);
     }
   }
 }

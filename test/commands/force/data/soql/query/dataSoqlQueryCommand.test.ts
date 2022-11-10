@@ -9,6 +9,10 @@
 import { resolve } from 'path';
 import * as chai from 'chai';
 import { Config } from '@oclif/test';
+import {
+  OrgConfigProperties,
+  // ConfigAggregator
+} from '@salesforce/core';
 // import { AnyJson, ensureJsonMap, ensureString } from '@salesforce/ts-types';
 import {
   TestContext,
@@ -24,6 +28,7 @@ import * as query from '../../../../../../src/commands/force/data/soql/query';
 import { soqlQueryExemplars } from '../../../../../test-files/soqlQuery.exemplars';
 // import { SoqlQueryResult } from '../../../../../../src/dataSoqlQueryTypes';
 import { DataSoqlQueryCommand } from '../../../../../../src/commands/force/data/soql/query';
+import { SoqlQueryResult } from '../../../../../../src/dataSoqlQueryTypes';
 
 chai.use(chaiAsPromised);
 
@@ -42,6 +47,10 @@ describe('Execute a SOQL statement', (): void => {
 
   beforeEach(async () => {
     await $$.stubAuths(testOrg);
+    await $$.stubConfig({ [OrgConfigProperties.ORG_MAX_QUERY_LIMIT]: '2000' });
+    // $$.SANDBOX.stub(ConfigAggregator.prototype, 'getInfo')
+    //   .withArgs(OrgConfigProperties.ORG_MAX_QUERY_LIMIT)
+    //   .returns({ value: '2000', isGlobal: () => true, key: OrgConfigProperties.ORG_MAX_QUERY_LIMIT });
     await config.load();
   });
   afterEach(async () => {
@@ -50,164 +59,163 @@ describe('Execute a SOQL statement', (): void => {
 
   describe('handle query results', () => {
     let soqlQuerySpy: sinon.SinonSpy;
+    let stdoutSpy: sinon.SinonSpy;
     describe('handle empty results', () => {
       beforeEach(() => {
         soqlQuerySpy = $$.SANDBOX.stub(query, 'runSoqlQuery').resolves(soqlQueryExemplars.emptyQuery.soqlQueryResult);
+        stdoutSpy = $$.SANDBOX.stub(process.stdout, 'write');
+      });
+      afterEach(() => {
+        $$.SANDBOX.restore();
       });
 
       it('should have empty results', async () => {
         const cmd = new DataSoqlQueryCommand(['--targetusername', 'test@org.com', '--query', 'select '], config);
-        const result = await cmd.run();
+        // without cnd._run(), ConfigAggregator, project, etc are not set on the class
+        // eslint-disable-next-line no-underscore-dangle
+        const result = await cmd._run();
         sinon.assert.calledOnce(soqlQuerySpy);
-        expect(result).to.include('records retrieved: 0');
+        expect((result as SoqlQueryResult['result']).totalSize).to.equal(0);
+        expect((result as SoqlQueryResult['result']).records.length).to.equal(0);
+        expect(stdoutSpy.args.flat().join('')).to.include('Total number of records retrieved: 0');
       });
-      // test
-      //   .withOrg({ username: 'test@org.com' }, true)
-      //   .stdout()
-      //   .stderr()
-      //   .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'json'])
-      //   .it('should have 0 totalSize and 0 records for empty result with json reporter', (ctx) => {
-      //     sinon.assert.calledOnce(soqlQuerySpy);
-      //     const jsonResults = JSON.parse(ctx.stdout) as QueryResult;
-      //     expect(jsonResults).to.have.property('status', 0);
-      //     expect(jsonResults.result).to.have.property('totalSize', 0);
-      //     expect(jsonResults.result.records.length).to.be.equal(jsonResults.result.totalSize);
-      //   });
     });
-    // describe('reporters produce the correct results for subquery', () => {
-    //   beforeEach(() => {
-    //     soqlQuerySpy = sandbox
-    //       .stub(query, 'runSoqlQuery')
-    //       .callsFake(() => Promise.resolve(soqlQueryExemplars.subqueryAccountsAndContacts.soqlQueryResult));
-    //   });
-    //   afterEach(() => {
-    //     sandbox.restore();
-    //   });
-    //   test
-    //     .withOrg({ username: 'test@org.com' }, true)
-    //     .stdout()
-    //     .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'csv'])
-    //     .it('should have csv results', (ctx) => {
-    //       sinon.assert.calledOnce(soqlQuerySpy);
-    //       // test for expected snippet in output
-    //       expect(ctx.stdout).to.include(
-    //         'Contacts.totalSize,Contacts.records.3.LastName\n"Cisco Systems, Inc.",,,,,,,,\nASSMANN Electronic GmbH,,,,,,,,\n'
-    //       );
-    //     });
-    //   test
-    //     .withOrg({ username: 'test@org.com' }, true)
-    //     .stdout()
-    //     .stderr()
-    //     .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'json'])
-    //     .it('should have json results', (ctx) => {
-    //       sinon.assert.calledOnce(soqlQuerySpy);
-    //       const jsonResults = JSON.parse(ctx.stdout) as QueryResult;
-    //       expect(jsonResults).to.have.property('status', 0);
-    //       expect(jsonResults.result).to.have.property('totalSize', 50);
-    //       expect(jsonResults.result.records.length).to.be.equal(jsonResults.result.totalSize);
-    //     });
-    //   test
-    //     .withOrg({ username: 'test@org.com' }, true)
-    //     .stdout()
-    //     .stderr()
-    //     .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'human'])
-    //     .it('should have human results', (ctx) => {
-    //       sinon.assert.calledOnce(soqlQuerySpy);
-    //       // test for expected snippet in output
-    //       const stdout = ctx.stdout;
-    //       expect(/.*?United Oil & Gas, UK.*?James.*?/.test(stdout)).to.be.true;
-    //       expect(ctx.stdout).to.include('records retrieved: 50');
-    //     });
-    // });
+    describe('reporters produce the correct results for subquery', () => {
+      beforeEach(() => {
+        soqlQuerySpy = $$.SANDBOX.stub(query, 'runSoqlQuery').callsFake(() =>
+          Promise.resolve(soqlQueryExemplars.subqueryAccountsAndContacts.soqlQueryResult)
+        );
+        stdoutSpy = $$.SANDBOX.stub(process.stdout, 'write');
+      });
+      afterEach(() => {
+        $$.SANDBOX.restore();
+      });
 
-    // describe('human readable output for complex subqueries', () => {
-    //   beforeEach(() => {
-    //     soqlQuerySpy = sandbox.stub(query, 'runSoqlQuery').resolves(soqlQueryExemplars.complexSubQuery.soqlQueryResult);
-    //   });
+      it('should have csv results', async () => {
+        const cmd = new DataSoqlQueryCommand(
+          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'csv'],
+          config
+        );
+        // eslint-disable-next-line no-underscore-dangle
+        await cmd._run();
+        sinon.assert.calledOnce(soqlQuerySpy);
+        // test for expected snippet in output
+        expect(stdoutSpy.args.flat().join('')).to.include(
+          'Contacts.totalSize,Contacts.records.3.LastName\n"Cisco Systems, Inc.",,,,,,,,\nASSMANN Electronic GmbH,,,,,,,,\n'
+        );
+      });
+      it('should have json results', async () => {
+        const cmd = new DataSoqlQueryCommand(
+          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'json'],
+          config
+        );
+        // eslint-disable-next-line no-underscore-dangle
+        const result = await cmd._run();
+        sinon.assert.calledOnce(soqlQuerySpy);
+        expect(result as SoqlQueryResult['result']).to.have.property('totalSize', 50);
+        expect((result as SoqlQueryResult['result']).records.length).to.be.equal(
+          (result as SoqlQueryResult['result']).totalSize
+        );
+      });
 
-    //   afterEach(() => {
-    //     sandbox.restore();
-    //   });
+      it('should have human results', async () => {
+        const cmd = new DataSoqlQueryCommand(
+          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'human'],
+          config
+        );
+        // eslint-disable-next-line no-underscore-dangle
+        await cmd._run();
+        sinon.assert.calledOnce(soqlQuerySpy);
+        // test for expected snippet in output
+        const stdout = stdoutSpy.args.flat().join('');
+        expect(/.*?United Oil & Gas, UK.*?James.*?/.test(stdout)).to.be.true;
+        expect(stdout).to.include('records retrieved: 50');
+      });
+    });
 
-    //   test
-    //     .withOrg({ username: 'test@org.com' }, true)
-    //     .stdout()
-    //     .stderr()
-    //     .command([
-    //       QUERY_COMMAND,
-    //       '--targetusername',
-    //       'test@org.com',
-    //       '--query',
-    //       'SELECT Amount, Id, Name,StageName, CloseDate, (SELECT Id,  ListPrice, PriceBookEntry.UnitPrice, PricebookEntry.Name, PricebookEntry.Id, PricebookEntry.product2.Family FROM OpportunityLineItems) FROM Opportunity',
-    //     ])
-    //     .it('should have human results for a complex subquery', (ctx) => {
-    //       sinon.assert.calledOnce(soqlQuerySpy);
-    //       // test for expected snippet in output
-    //       const stdout = ctx.stdout;
-    //       // properly expanded columns from query
-    //       expect(
-    //         /.*?AMOUNT.*?ID.*?OPPORTUNITYLINEITEMS.ID.*?OPPORTUNITYLINEITEMS.PRICEBOOKENTRY.PRODUCT2.FAMILY.*?/.test(
-    //           stdout
-    //         )
-    //       ).to.be.true;
-    //       // was able to parse the data for each column
-    //       expect(
-    //         /.*?1300.*?0063F00000RdvMKQAZ.*?My Opportunity.*?00k3F000007kBoDQAU.*?MyProduct.*?01u3F00000AwCfuQAF.*?/.test(
-    //           stdout
-    //         )
-    //       ).to.be.true;
-    //       expect(ctx.stdout).to.include('records retrieved: 1');
-    //     });
-    // });
-    // describe('flag validation between --query and --soqlqueryfile', () => {
-    //   test
-    //     .withOrg({ username: 'test@org.com' }, true)
-    //     .stderr()
-    //     .command([
-    //       QUERY_COMMAND,
-    //       '--targetusername',
-    //       'test@org.com',
-    //       '--query',
-    //       'SELECT Amount, Id, Name,StageName, CloseDate, (SELECT Id,  ListPrice, PriceBookEntry.UnitPrice, PricebookEntry.Name, PricebookEntry.Id, PricebookEntry.product2.Family FROM OpportunityLineItems) FROM Opportunity',
-    //       '--soqlqueryfile',
-    //       'soql.txt',
-    //     ])
-    //     .it('should throw an error when both query (inline/file query) flags are specified', (ctx) => {
-    //       expect(ctx.stderr).to.include('--soqlqueryfile= cannot also be provided when using --query=');
-    //     });
-    // });
-    // describe('reporters produce the correct aggregate query', () => {
-    //   beforeEach(() => {
-    //     soqlQuerySpy = sandbox
-    //       .stub(query, 'runSoqlQuery')
-    //       // aggregate query types are wrong in jsforce
-    //       .resolves(soqlQueryExemplars.queryWithAggregates.soqlQueryResult as unknown as SoqlQueryResult);
-    //   });
-    //   afterEach(() => {
-    //     sandbox.restore();
-    //   });
-    //   test
-    //     .withOrg({ username: 'test@org.com' }, true)
-    //     .stdout()
-    //     .stderr()
-    //     .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'json'])
-    //     .it('should have json results', (ctx) => {
-    //       sinon.assert.calledOnce(soqlQuerySpy);
-    //       const jsonResults = JSON.parse(ctx.stdout) as QueryResult;
-    //       expect(jsonResults).to.have.property('status', 0);
-    //       expect(jsonResults.result).to.have.property('totalSize', 16);
-    //       expect(jsonResults.result.records.length).to.be.equal(jsonResults.result.totalSize);
-    //     });
-    //   test
-    //     .withOrg({ username: 'test@org.com' }, true)
-    //     .stdout()
-    //     .stderr()
-    //     .command([QUERY_COMMAND, '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'human'])
-    //     .it('should have human results', (ctx) => {
-    //       sinon.assert.calledOnce(soqlQuerySpy);
-    //       expect(/.*?United Oil & Gas Corp..*?5600000000.*/.test(ctx.stdout)).to.be.true;
-    //       expect(ctx.stdout).to.include('records retrieved: 16');
-    //     });
-    // });
+    describe('human readable output for complex subqueries', () => {
+      beforeEach(() => {
+        soqlQuerySpy = $$.SANDBOX.stub(query, 'runSoqlQuery').resolves(
+          soqlQueryExemplars.complexSubQuery.soqlQueryResult
+        );
+        stdoutSpy = $$.SANDBOX.stub(process.stdout, 'write');
+      });
+
+      afterEach(() => {
+        $$.SANDBOX.restore();
+      });
+
+      it('should have human results for a complex subquery', async () => {
+        const cmd = new DataSoqlQueryCommand(
+          [
+            '--targetusername',
+            'test@org.com',
+            '--query',
+            'SELECT Amount, Id, Name,StageName, CloseDate, (SELECT Id,  ListPrice, PriceBookEntry.UnitPrice, PricebookEntry.Name, PricebookEntry.Id, PricebookEntry.product2.Family FROM OpportunityLineItems) FROM Opportunity',
+          ],
+          config
+        );
+        // eslint-disable-next-line no-underscore-dangle
+        await cmd._run();
+        sinon.assert.calledOnce(soqlQuerySpy);
+        const stdout = stdoutSpy.args.flat().join('');
+
+        // properly expanded columns from query
+        expect(
+          /.*?AMOUNT.*?ID.*?OPPORTUNITYLINEITEMS.ID.*?OPPORTUNITYLINEITEMS.PRICEBOOKENTRY.PRODUCT2.FAMILY.*?/.test(
+            stdout
+          )
+        ).to.be.true;
+        // was able to parse the data for each column
+        expect(
+          /.*?1300.*?0063F00000RdvMKQAZ.*?My Opportunity.*?00k3F000007kBoDQAU.*?MyProduct.*?01u3F00000AwCfuQAF.*?/.test(
+            stdout
+          ),
+          stdout
+        ).to.be.true;
+        expect(stdout).to.include('records retrieved: 1');
+      });
+    });
+
+    describe('reporters produce the correct aggregate query', () => {
+      beforeEach(() => {
+        soqlQuerySpy = $$.SANDBOX.stub(query, 'runSoqlQuery')
+          // aggregate query types are wrong in jsforce
+          .resolves(soqlQueryExemplars.queryWithAggregates.soqlQueryResult as unknown as SoqlQueryResult);
+        stdoutSpy = $$.SANDBOX.stub(process.stdout, 'write');
+      });
+      afterEach(() => {
+        $$.SANDBOX.restore();
+      });
+      //
+      //     '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'json'])
+      it('should have json results', async () => {
+        const cmd = new DataSoqlQueryCommand(
+          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'json'],
+          config
+        );
+        // eslint-disable-next-line no-underscore-dangle
+        const result = await cmd._run();
+        sinon.assert.calledOnce(soqlQuerySpy);
+        expect(result as SoqlQueryResult['result']).to.have.property('totalSize', 16);
+        expect((result as SoqlQueryResult['result']).records.length).to.be.equal(
+          (result as SoqlQueryResult['result']).totalSize
+        );
+      });
+
+      it('should have human results', async () => {
+        const cmd = new DataSoqlQueryCommand(
+          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'human'],
+          config
+        );
+        // eslint-disable-next-line no-underscore-dangle
+        await cmd._run();
+        sinon.assert.calledOnce(soqlQuerySpy);
+        const stdout = stdoutSpy.args.flat().join('');
+
+        expect(/.*?United Oil & Gas Corp..*?5600000000.*/.test(stdout)).to.be.true;
+        expect(stdout).to.include('records retrieved: 16');
+      });
+    });
   });
 });
