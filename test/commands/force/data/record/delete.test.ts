@@ -10,7 +10,7 @@ import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/
 
 import { ensureJsonMap, ensureString, AnyJson } from '@salesforce/ts-types';
 import { expect } from 'chai';
-import { Config } from '@oclif/test';
+import { Config } from '@oclif/core';
 
 import { SaveResult } from 'jsforce';
 import Delete from '../../../../../src/commands/force/data/record/delete';
@@ -21,7 +21,6 @@ describe('force:data:record:delete', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   const config = new Config({ root: resolve(__dirname, '../../../package.json') });
-  config.topicSeparator = ' ';
 
   beforeEach(async () => {
     await $$.stubAuths(testOrg);

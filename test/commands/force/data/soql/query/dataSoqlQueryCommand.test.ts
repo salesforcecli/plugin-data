@@ -8,7 +8,7 @@
 // import { strict as assert } from 'assert';
 import { resolve } from 'path';
 import * as chai from 'chai';
-import { Config } from '@oclif/test';
+import { Config } from '@oclif/core';
 import {
   OrgConfigProperties,
   // ConfigAggregator
@@ -43,7 +43,6 @@ describe('Execute a SOQL statement', (): void => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   const config = new Config({ root: resolve(__dirname, '../../../package.json') });
-  config.topicSeparator = ' ';
 
   beforeEach(async () => {
     await $$.stubAuths(testOrg);

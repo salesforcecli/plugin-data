@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { resolve } from 'path';
-import { Config } from '@oclif/test';
+import { Config } from '@oclif/core';
 import { expect } from 'chai';
 import { TestContext, MockTestOrgData } from '@salesforce/core/lib/testSetup';
 import { AnyJson, ensureJsonMap, ensureString } from '@salesforce/ts-types';
@@ -18,7 +18,6 @@ describe('force:data:record:create', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   const config = new Config({ root: resolve(__dirname, '../../../package.json') });
-  config.topicSeparator = ' ';
 
   beforeEach(async () => {
     await $$.stubAuths(testOrg);

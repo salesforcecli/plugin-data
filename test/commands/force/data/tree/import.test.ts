@@ -11,7 +11,7 @@ import { strict as assert } from 'assert';
 import { AnyJson, ensureJsonMap, ensureString } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup';
-import { Config } from '@oclif/test';
+import { Config } from '@oclif/core';
 import Import from '../../../../../src/commands/force/data/tree/import';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -40,17 +40,10 @@ const expectedImportResult = [
   },
 ];
 
-// interface ImportResult {
-//   status: string;
-//   message?: string;
-//   result: AnyJson;
-// }
-
 describe('force:data:tree:import', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   const config = new Config({ root: resolve(__dirname, '../../../package.json') });
-  config.topicSeparator = ' ';
 
   beforeEach(async () => {
     await $$.stubAuths(testOrg);

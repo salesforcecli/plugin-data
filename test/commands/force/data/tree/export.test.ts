@@ -9,7 +9,7 @@ import { resolve } from 'path';
 import { AnyJson, ensureJsonMap, ensureString, isString } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { TestContext, MockTestOrgData } from '@salesforce/core/lib/testSetup';
-import { Config } from '@oclif/test';
+import { Config } from '@oclif/core';
 import Export from '../../../../../src/commands/force/data/tree/export';
 
 const query = 'SELECT Id, Name from Account';
@@ -58,7 +58,6 @@ describe('force:data:tree:export', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   const config = new Config({ root: resolve(__dirname, '../../../package.json') });
-  config.topicSeparator = ' ';
 
   beforeEach(async () => {
     await $$.stubAuths(testOrg);

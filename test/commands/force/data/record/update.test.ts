@@ -9,7 +9,7 @@ import { strict as assert } from 'assert';
 import { AnyJson, ensureJsonMap, ensureString } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup';
-import { Config } from '@oclif/test';
+import { Config } from '@oclif/core';
 import { SfError } from '@salesforce/core';
 import { SaveResult } from 'jsforce';
 import Update from '../../../../../src/commands/force/data/record/update';
@@ -20,7 +20,6 @@ describe('force:data:record:update', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   const config = new Config({ root: resolve(__dirname, '../../../package.json') });
-  config.topicSeparator = ' ';
 
   beforeEach(async () => {
     await $$.stubAuths(testOrg);
