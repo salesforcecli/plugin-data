@@ -26,6 +26,7 @@ const messages = Messages.load('@salesforce/plugin-data', 'bulk.delete', [
 export default class Delete extends SfCommand<BatcherReturnType> {
   public static readonly examples = messages.getMessage('examples').split(os.EOL);
   public static readonly summary = messages.getMessage('summary');
+  public static readonly description = messages.getMessage('description');
   public static flags = {
     targetusername: Flags.requiredOrg({
       required: true,
