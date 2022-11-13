@@ -743,10 +743,10 @@
     is-wsl "^2.1.1"
     tslib "^2.3.1"
 
-"@oclif/core@^1.0.8", "@oclif/core@^1.19.1", "@oclif/core@^1.2.1", "@oclif/core@^1.20.0", "@oclif/core@^1.20.2", "@oclif/core@^1.3.4", "@oclif/core@^1.3.6", "@oclif/core@^1.6.4":
-  version "1.20.3"
-  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-1.20.3.tgz#e237b1f3d36b9fca4e8f3f91130d83ca1c12636e"
-  integrity sha512-sM2zQlzOUpHpcTBi7ETnHzK1KRF5BReKvERuF0jRlI2HgQ669arGccv1gkdouyMTG5prG92qy9P4ByhFVkLSQQ==
+"@oclif/core@^1.0.8", "@oclif/core@^1.19.1", "@oclif/core@^1.2.1", "@oclif/core@^1.20.0", "@oclif/core@^1.20.4", "@oclif/core@^1.3.4", "@oclif/core@^1.3.6", "@oclif/core@^1.6.4":
+  version "1.20.4"
+  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-1.20.4.tgz#7378b52e1f1b502e383ffb07f95dffc9fd8588ff"
+  integrity sha512-giug32M4YhSYNYKQwE1L57/+k5gp1+Bq3/0vKNQmzAY1tizFGhvBJc6GIRZasHjU+xtZLutQvrVrJo7chX3hxg==
   dependencies:
     "@oclif/linewrap" "^1.0.0"
     "@oclif/screen" "^3.0.3"
@@ -773,7 +773,7 @@
     strip-ansi "^6.0.1"
     supports-color "^8.1.1"
     supports-hyperlinks "^2.2.0"
-    tslib "^2.3.1"
+    tslib "^2.4.1"
     widest-line "^3.1.0"
     wrap-ansi "^7.0.0"
 
@@ -1042,16 +1042,16 @@
     strip-ansi "6.0.1"
     ts-retry-promise "^0.6.0"
 
-"@salesforce/command@^5.2.15", "@salesforce/command@^5.2.20":
-  version "5.2.20"
-  resolved "https://registry.yarnpkg.com/@salesforce/command/-/command-5.2.20.tgz#27b5f7837af3f8e4e263fb2d2ddd68cdee7ed9ee"
-  integrity sha512-AXusWyYc1IZeQtmOHO2Can7/Up+GxLmDrp13VMq+mQDDm+phZ1CkNMoBCFW9Y81vFb3nyu3xz+LekFIhJ/75AA==
+"@salesforce/command@^5.2.15", "@salesforce/command@^5.2.23":
+  version "5.2.23"
+  resolved "https://registry.yarnpkg.com/@salesforce/command/-/command-5.2.23.tgz#f52a766db075b93ce7394a1391833e7ceb754c6b"
+  integrity sha512-EmKWydXXlD9SF9ZJ/5iOiJTRmHj3f1NI24om3FQF3DAK44cYm0QYu3YcOV/nLt+lr/6P95qfVq7m4zp/2k/Iug==
   dependencies:
-    "@oclif/core" "^1.20.2"
+    "@oclif/core" "^1.20.4"
     "@oclif/test" "^2.2.4"
     "@salesforce/core" "^3.31.17"
-    "@salesforce/kit" "^1.7.1"
-    "@salesforce/ts-types" "^1.5.21"
+    "@salesforce/kit" "^1.8.0"
+    "@salesforce/ts-types" "^1.7.1"
     chalk "^2.4.2"
 
 "@salesforce/core@^2.24.0":
@@ -1146,12 +1146,12 @@
     typedoc-plugin-missing-exports "0.23.0"
     typescript "^4.1.3"
 
-"@salesforce/kit@^1.5.13", "@salesforce/kit@^1.5.17", "@salesforce/kit@^1.7.0", "@salesforce/kit@^1.7.1":
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/@salesforce/kit/-/kit-1.7.1.tgz#2337ae354409726f1822f1b03a3d7073e84cd249"
-  integrity sha512-XbLtEgMNBGZqtY/OldEru+LzASS3o37MZ6eNlSG19eAroGqFdlr4pzZUD/UaWSt6E0s0arj4IwAP5/hQLbrBZw==
+"@salesforce/kit@^1.5.13", "@salesforce/kit@^1.5.17", "@salesforce/kit@^1.7.0", "@salesforce/kit@^1.8.0":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/kit/-/kit-1.8.0.tgz#d5b8d83d5b0b866cb76840dc7a18e115589d86a0"
+  integrity sha512-Pr9CWAIzVYKZRWvM76lyhEtF3CPmVdIfgbqRD7KT/YZdbLstX3KHYBxCyx3TyWZr5qROv96n+jRIBiIFI9LGGw==
   dependencies:
-    "@salesforce/ts-types" "^1.7.0"
+    "@salesforce/ts-types" "^1.7.1"
     shx "^0.3.3"
     tslib "^2.2.0"
 
