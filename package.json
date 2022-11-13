@@ -115,7 +115,7 @@
     "@types/mkdirp": "^1.0.1",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
-    "chai": "^4.2.0",
+    "chai": "^4.3.7",
     "chai-as-promised": "^7.1.1",
     "cz-conventional-changelog": "^3.3.0",
     "eslint": "^7.27.0",
