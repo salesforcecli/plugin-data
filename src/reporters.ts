@@ -97,19 +97,23 @@ export class HumanReporter extends QueryReporter {
     CliUx.ux.log(chalk.bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
   }
 
-  public prepNullValues(records: Array<Record<string, unknown>>): void {
-    records.forEach((record): void => {
-      Reflect.ownKeys(record).forEach((propertyKey) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const value = Reflect.get(record, propertyKey);
-        if (value === null) {
-          Reflect.set(record, propertyKey, chalk.bold('null'));
-        } else if (typeof value === 'object') {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          this.prepNullValues([value]);
+  public prepNullValues(records: unknown[]): void {
+    records
+      .filter((record) => record)
+      .forEach((record): void => {
+        if (record) {
+          const recordAsObject = record as never;
+          Reflect.ownKeys(recordAsObject).forEach((propertyKey) => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const value = Reflect.get(recordAsObject, propertyKey);
+            if (value === null) {
+              Reflect.set(recordAsObject, propertyKey, chalk.bold('null'));
+            } else if (typeof value === 'object') {
+              this.prepNullValues([value]);
+            }
+          });
         }
       });
-    });
   }
 
   //  public massageRows(queryResults: BasicRecord[], children: string[], aggregates: Field[]): BasicRecord[] {
