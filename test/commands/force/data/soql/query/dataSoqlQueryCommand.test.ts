@@ -70,7 +70,7 @@ describe('Execute a SOQL statement', (): void => {
 
       it('should have empty results', async () => {
         const cmd = new DataSoqlQueryCommand(['--targetusername', 'test@org.com', '--query', 'select '], config);
-        // without cnd._run(), ConfigAggregator, project, etc are not set on the class
+        // without cmd._run(), ConfigAggregator, project, etc are not set on the class
         // eslint-disable-next-line no-underscore-dangle
         const result = await cmd._run();
         sinon.assert.calledOnce(soqlQuerySpy);
@@ -91,12 +91,10 @@ describe('Execute a SOQL statement', (): void => {
       });
 
       it('should have csv results', async () => {
-        const cmd = new DataSoqlQueryCommand(
+        await DataSoqlQueryCommand.run(
           ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'csv'],
           config
         );
-        // eslint-disable-next-line no-underscore-dangle
-        await cmd._run();
         sinon.assert.calledOnce(soqlQuerySpy);
         // test for expected snippet in output
         expect(stdoutSpy.args.flat().join('')).to.include(
@@ -118,12 +116,10 @@ describe('Execute a SOQL statement', (): void => {
       });
 
       it('should have human results', async () => {
-        const cmd = new DataSoqlQueryCommand(
+        await DataSoqlQueryCommand.run(
           ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'human'],
           config
         );
-        // eslint-disable-next-line no-underscore-dangle
-        await cmd._run();
         sinon.assert.calledOnce(soqlQuerySpy);
         // test for expected snippet in output
         const stdout = stdoutSpy.args.flat().join('');
@@ -145,7 +141,7 @@ describe('Execute a SOQL statement', (): void => {
       });
 
       it('should have human results for a complex subquery', async () => {
-        const cmd = new DataSoqlQueryCommand(
+        await DataSoqlQueryCommand.run(
           [
             '--targetusername',
             'test@org.com',
@@ -154,8 +150,6 @@ describe('Execute a SOQL statement', (): void => {
           ],
           config
         );
-        // eslint-disable-next-line no-underscore-dangle
-        await cmd._run();
         sinon.assert.calledOnce(soqlQuerySpy);
         const stdout = stdoutSpy.args.flat().join('');
 
@@ -203,12 +197,11 @@ describe('Execute a SOQL statement', (): void => {
       });
 
       it('should have human results', async () => {
-        const cmd = new DataSoqlQueryCommand(
+        await DataSoqlQueryCommand.run(
           ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'human'],
           config
         );
-        // eslint-disable-next-line no-underscore-dangle
-        await cmd._run();
+
         sinon.assert.calledOnce(soqlQuerySpy);
         const stdout = stdoutSpy.args.flat().join('');
 

@@ -137,7 +137,7 @@ describe('force:data:bulk:status', () => {
   });
 
   it('will fail with the correct error message for not found', async () => {
-    const cmd = new Status(
+    await Status.run(
       [
         '--targetusername',
         'test@org.com',
@@ -149,9 +149,6 @@ describe('force:data:bulk:status', () => {
       ],
       config
     );
-
-    // eslint-disable-next-line no-underscore-dangle
-    await cmd._run();
     const result = JSON.parse(stripAnsi(stdoutSpy.args.flat().join(''))) as {
       message: string;
       status: number;
