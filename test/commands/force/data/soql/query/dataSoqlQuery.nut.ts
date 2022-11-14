@@ -75,10 +75,7 @@ describe('data:soql:query command', () => {
       devhubAuthStrategy: 'AUTO',
     });
     // get default devhub username
-    hubOrgUsername = execCmd<[{ key: string; value: string }]>('config:get defaultdevhubusername --json', {
-      ensureExitCode: 0,
-      cli: 'sfdx',
-    }).jsonOutput?.result.find((config) => config.key === 'defaultdevhubusername')?.value;
+    hubOrgUsername = testSession.hubOrg.username;
     if (!hubOrgUsername) {
       throw new Error('No default devhub username found');
     }
