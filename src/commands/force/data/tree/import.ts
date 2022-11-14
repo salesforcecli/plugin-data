@@ -5,8 +5,6 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import * as os from 'os';
-
 import { Logger, Messages, SchemaPrinter } from '@salesforce/core';
 import { getString, JsonMap } from '@salesforce/ts-types';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
@@ -28,7 +26,7 @@ type ImportResult = {
 export default class Import extends SfCommand<ImportResult[] | JsonMap> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
-  public static readonly examples = messages.getMessage('examples').split(os.EOL);
+  public static readonly examples = messages.getMessages('examples');
   public static flags = {
     targetusername: Flags.requiredOrg({
       required: true,

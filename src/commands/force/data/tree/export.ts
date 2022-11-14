@@ -5,8 +5,6 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import * as os from 'os';
-
 import { Messages } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
 import { ExportApi, ExportConfig } from '../../../../api/data/tree/exportApi';
@@ -18,7 +16,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.export')
 export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileContents> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
-  public static readonly examples = messages.getMessage('examples').split(os.EOL);
+  public static readonly examples = messages.getMessages('examples');
   public static flags = {
     targetusername: Flags.requiredOrg({
       required: true,
