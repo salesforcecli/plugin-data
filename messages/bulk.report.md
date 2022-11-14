@@ -1,0 +1,16 @@
+# summary
+
+view the status of a bulk query
+
+# description
+
+view the status of a bulk query
+Run this command using the job ID returned from the force:data:soql:query --bulk command.
+
+# examples
+
+- $ sfdx force:data:soql:bulk:report -i 7500x000005BdFzXXX
+
+# bulkQueryIdDescription
+
+the job ID of the bulk query
