@@ -1,78 +1,220 @@
 [
   {
-    "command": "force:data:bulk:delete",
+    "command": "data:create:record",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["csvfile", "json", "sobjecttype", "targetusername", "wait"],
-    "alias": []
+    "flags": ["api-version", "json", "loglevel", "perflog", "sobject", "target-org", "use-tooling-api", "values"],
+    "alias": ["force:data:record:create"]
   },
   {
-    "command": "force:data:bulk:status",
+    "command": "data:delete:bulk",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["batchid", "jobid", "json", "targetusername"],
-    "alias": []
+    "flags": ["api-version", "file", "json", "loglevel", "sobject", "target-org", "wait"],
+    "alias": ["force:data:bulk:delete"]
+  },
+  {
+    "command": "data:delete:record",
+    "plugin": "@salesforce/plugin-data",
+    "flags": [
+      "api-version",
+      "json",
+      "loglevel",
+      "perflog",
+      "record-id",
+      "sobject",
+      "target-org",
+      "use-tooling-api",
+      "where"
+    ],
+    "alias": ["force:data:record:delete"]
+  },
+  {
+    "command": "data:export:tree",
+    "plugin": "@salesforce/plugin-data",
+    "flags": ["api-version", "json", "loglevel", "output-dir", "plan", "prefix", "query", "target-org"],
+    "alias": ["force:data:tree:export"]
+  },
+  {
+    "command": "data:get:record",
+    "plugin": "@salesforce/plugin-data",
+    "flags": [
+      "api-version",
+      "json",
+      "loglevel",
+      "perflog",
+      "record-id",
+      "sobject",
+      "target-org",
+      "use-tooling-api",
+      "where"
+    ],
+    "alias": ["force:data:record:get"]
+  },
+  {
+    "command": "data:import:tree",
+    "plugin": "@salesforce/plugin-data",
+    "flags": ["api-version", "config-help", "content-type", "files", "json", "loglevel", "plan", "target-org"],
+    "alias": ["force:data:tree:import"]
+  },
+  {
+    "command": "data:query",
+    "plugin": "@salesforce/plugin-data",
+    "flags": [
+      "api-version",
+      "async",
+      "file",
+      "json",
+      "loglevel",
+      "perflog",
+      "query",
+      "result-format",
+      "target-org",
+      "use-tooling-api",
+      "wait"
+    ],
+    "alias": ["force:data:soql:query"]
+  },
+  {
+    "command": "data:query:resume",
+    "plugin": "@salesforce/plugin-data",
+    "flags": ["api-version", "bulk-query-id", "json", "loglevel", "result-format", "target-org"],
+    "alias": ["force:data:soql:bulk:report"]
+  },
+  {
+    "command": "data:resume",
+    "plugin": "@salesforce/plugin-data",
+    "flags": ["api-version", "batch-id", "job-id", "json", "loglevel", "target-org"],
+    "alias": ["force:data:bulk:report"]
+  },
+  {
+    "command": "data:update:record",
+    "plugin": "@salesforce/plugin-data",
+    "flags": [
+      "api-version",
+      "json",
+      "loglevel",
+      "perflog",
+      "record-id",
+      "sobject",
+      "target-org",
+      "usetoolingapi",
+      "values",
+      "where"
+    ],
+    "alias": ["force:data:record:update"]
+  },
+  {
+    "command": "data:upsert:bulk",
+    "plugin": "@salesforce/plugin-data",
+    "flags": ["api-version", "external-id", "file", "json", "loglevel", "serial", "sobject", "target-org", "wait"],
+    "alias": ["force:data:bulk:upsert"]
+  },
+  {
+    "command": "force:data:bulk:delete",
+    "plugin": "@salesforce/plugin-data",
+    "flags": ["api-version", "file", "json", "loglevel", "sobject", "target-org", "wait"],
+    "alias": ["force:data:bulk:delete"]
+  },
+  {
+    "command": "force:data:bulk:report",
+    "plugin": "@salesforce/plugin-data",
+    "flags": ["api-version", "batch-id", "job-id", "json", "loglevel", "target-org"],
+    "alias": ["force:data:bulk:report"]
   },
   {
     "command": "force:data:bulk:upsert",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["csvfile", "externalid", "json", "serial", "sobjecttype", "targetusername", "wait"],
-    "alias": []
+    "flags": ["api-version", "external-id", "file", "json", "loglevel", "serial", "sobject", "target-org", "wait"],
+    "alias": ["force:data:bulk:upsert"]
   },
   {
     "command": "force:data:record:create",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["json", "perflog", "sobjecttype", "targetusername", "usetoolingapi", "values"],
-    "alias": []
+    "flags": ["api-version", "json", "loglevel", "perflog", "sobject", "target-org", "use-tooling-api", "values"],
+    "alias": ["force:data:record:create"]
   },
   {
     "command": "force:data:record:delete",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["json", "perflog", "sobjectid", "sobjecttype", "targetusername", "usetoolingapi", "where"],
-    "alias": []
+    "flags": [
+      "api-version",
+      "json",
+      "loglevel",
+      "perflog",
+      "record-id",
+      "sobject",
+      "target-org",
+      "use-tooling-api",
+      "where"
+    ],
+    "alias": ["force:data:record:delete"]
   },
   {
     "command": "force:data:record:get",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["json", "perflog", "sobjectid", "sobjecttype", "targetusername", "usetoolingapi", "where"],
-    "alias": []
+    "flags": [
+      "api-version",
+      "json",
+      "loglevel",
+      "perflog",
+      "record-id",
+      "sobject",
+      "target-org",
+      "use-tooling-api",
+      "where"
+    ],
+    "alias": ["force:data:record:get"]
   },
   {
     "command": "force:data:record:update",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["json", "perflog", "sobjectid", "sobjecttype", "targetusername", "usetoolingapi", "values", "where"],
-    "alias": []
+    "flags": [
+      "api-version",
+      "json",
+      "loglevel",
+      "perflog",
+      "record-id",
+      "sobject",
+      "target-org",
+      "usetoolingapi",
+      "values",
+      "where"
+    ],
+    "alias": ["force:data:record:update"]
   },
   {
     "command": "force:data:soql:bulk:report",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["bulkqueryid", "json", "resultformat", "target-org"],
-    "alias": []
+    "flags": ["api-version", "bulk-query-id", "json", "loglevel", "result-format", "target-org"],
+    "alias": ["force:data:soql:bulk:report"]
   },
   {
     "command": "force:data:soql:query",
     "plugin": "@salesforce/plugin-data",
     "flags": [
-      "bulk",
+      "api-version",
+      "async",
+      "file",
       "json",
+      "loglevel",
       "perflog",
       "query",
-      "resultformat",
-      "soqlqueryfile",
+      "result-format",
       "target-org",
-      "usetoolingapi",
+      "use-tooling-api",
       "wait"
     ],
-    "alias": []
+    "alias": ["force:data:soql:query"]
   },
   {
     "command": "force:data:tree:export",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["json", "outputdir", "plan", "prefix", "query", "targetusername"],
-    "alias": []
+    "flags": ["api-version", "json", "loglevel", "output-dir", "plan", "prefix", "query", "target-org"],
+    "alias": ["force:data:tree:export"]
   },
   {
     "command": "force:data:tree:import",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["confighelp", "contenttype", "json", "plan", "sobjecttreefiles", "targetusername"],
-    "alias": []
+    "flags": ["api-version", "config-help", "content-type", "files", "json", "loglevel", "plan", "target-org"],
+    "alias": ["force:data:tree:import"]
   }
 ]

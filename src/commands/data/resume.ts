@@ -22,14 +22,16 @@ export default class Status extends SfCommand<StatusResult> {
 
   public static flags = {
     ...orgFlags,
-    'batch-id': Flags.string({
+    'batch-id': Flags.salesforceId({
       char: 'b',
+      startsWith: '751',
       summary: messages.getMessage('flags.batchid'),
       aliases: ['batchid'],
       deprecateAliases: true,
     }),
-    'job-id': Flags.string({
+    'job-id': Flags.salesforceId({
       char: 'i',
+      startsWith: '750',
       summary: messages.getMessage('flags.jobid'),
       required: true,
       aliases: ['jobid'],

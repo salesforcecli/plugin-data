@@ -19,7 +19,7 @@ const messages = Messages.load('@salesforce/plugin-data', 'messages', [
   'perfLogLevelOptionLong',
 ]);
 
-export const targetOrgFlag = Flags.requiredOrg({
+const targetOrgFlag = Flags.requiredOrg({
   required: true,
   char: 'o',
   summary: messages.getMessage('flags.target-org'),
@@ -36,14 +36,22 @@ export const perflogFlag = Flags.boolean({
   },
 });
 
-export const apiVersionFlag = Flags.orgApiVersion({
+const apiVersionFlag = Flags.orgApiVersion({
   aliases: ['apiversion'],
   deprecateAliases: true,
+});
+
+const loglevel = Flags.string({
+  hidden: true,
+  deprecated: {
+    message: 'The loglevel flag is no longer in use.  You may use it without error, but it will be ignored.',
+  },
 });
 
 export const orgFlags = {
   'target-org': targetOrgFlag,
   'api-version': apiVersionFlag,
+  loglevel,
 };
 
 export const getVersionedConnection = (org: Org, apiVersion?: string): Connection => {

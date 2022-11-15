@@ -8,7 +8,7 @@ import * as os from 'os';
 import { Messages } from '@salesforce/core';
 import { QueryJobV2 } from 'jsforce/lib/api/bulk';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { getVersionedConnection, orgFlags } from 'src/flags';
+import { getVersionedConnection, orgFlags } from '../../../../src/flags';
 import { DataSoqlQueryCommand, displayResults, transformBulkResults } from '../query';
 import { FormatTypes } from '../../../reporters';
 
@@ -29,6 +29,7 @@ export class BulkQueryReport extends SfCommand<unknown> {
     'bulk-query-id': Flags.salesforceId({
       char: 'i',
       required: true,
+      startsWith: '750',
       summary: reportMessages.getMessage('flags.bulkQueryId'),
       aliases: ['bulkqueryid'],
       deprecateAliases: true,
