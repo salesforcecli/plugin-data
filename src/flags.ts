@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { Flags as oclifFlags } from '@oclif/core';
-import { Messages } from '@salesforce/core';
+import { Connection, Messages, Org } from '@salesforce/core';
 import { Flags } from '@salesforce/sf-plugins-core';
 
 export const stringArrayFlag = oclifFlags.custom<string[]>({
@@ -35,3 +35,21 @@ export const perflogFlag = Flags.boolean({
     version: '57',
   },
 });
+
+export const apiVersionFlag = Flags.orgApiVersion({
+  aliases: ['apiversion'],
+  deprecateAliases: true,
+});
+
+export const orgFlags = {
+  'target-org': targetOrgFlag,
+  'api-version': apiVersionFlag,
+};
+
+export const getVersionedConnection = (org: Org, apiVersion?: string): Connection => {
+  const conn = org.getConnection();
+  if (apiVersion) {
+    conn.setApiVersion(apiVersion);
+  }
+  return conn;
+};

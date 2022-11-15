@@ -7,7 +7,7 @@
 
 import { Messages } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
-import { targetOrgFlag } from '../../../../src/flags';
+import { orgFlags } from '../../../../src/flags';
 import { ExportApi, ExportConfig } from '../../../api/data/tree/exportApi';
 import { DataPlanPart, SObjectTreeFileContents } from '../../../dataSoqlQueryTypes';
 
@@ -21,7 +21,7 @@ export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileCo
   public static aliases = ['force:data:tree:export'];
 
   public static flags = {
-    'target-org': targetOrgFlag,
+    ...orgFlags,
     query: Flags.string({
       char: 'q',
       summary: messages.getMessage('flags.query'),

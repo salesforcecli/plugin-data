@@ -8,7 +8,7 @@
 import { Messages, SfError } from '@salesforce/core';
 import { SaveResult } from 'jsforce';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { perflogFlag, targetOrgFlag } from '../../../../src/flags';
+import { orgFlags, perflogFlag, getVersionedConnection } from '../../../../src/flags';
 import { collectErrorMessages, query } from '../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -21,7 +21,7 @@ export default class Delete extends SfCommand<SaveResult> {
   public static aliases = ['force:data:record:delete'];
 
   public static flags = {
-    'target-org': targetOrgFlag,
+    ...orgFlags,
     sobject: Flags.string({
       char: 's',
       required: true,
@@ -56,9 +56,9 @@ export default class Delete extends SfCommand<SaveResult> {
     let status = 'Success';
 
     try {
-      const conn = flags.usetoolingapi
-        ? flags['target-org'].getConnection().tooling
-        : flags['target-org'].getConnection();
+      const conn = flags['use-tooling-api']
+        ? getVersionedConnection(flags['target-org'], flags['api-version']).tooling
+        : getVersionedConnection(flags['target-org'], flags['api-version']);
       // "where flag" will be defined if sobjectId is not
       const sObjectId = flags['record-id'] ?? (await query(conn, flags.sobject, flags.where)).Id;
       const result = await conn.sobject(flags.sobject).destroy(sObjectId);

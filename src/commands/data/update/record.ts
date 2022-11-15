@@ -8,7 +8,7 @@
 import { Messages, SfError } from '@salesforce/core';
 import { SaveError, SaveResult } from 'jsforce';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { targetOrgFlag } from '../../../../src/flags';
+import { orgFlags, getVersionedConnection } from '../../../../src/flags';
 import { collectErrorMessages, query, stringToDictionary } from '../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -22,7 +22,7 @@ export default class Update extends SfCommand<SaveResult> {
   public static aliases = ['force:data:record:update'];
 
   public static flags = {
-    'target-org': targetOrgFlag,
+    ...orgFlags,
     sobject: Flags.string({
       char: 's',
       required: true,
@@ -65,9 +65,9 @@ export default class Update extends SfCommand<SaveResult> {
     this.spinner.start('Updating Record');
 
     let status = 'Success';
-    const conn = flags.usetoolingapi
-      ? flags['target-org'].getConnection().tooling
-      : flags['target-org'].getConnection();
+    const conn = flags['use-tooling-api']
+      ? getVersionedConnection(flags['target-org'], flags['api-version']).tooling
+      : getVersionedConnection(flags['target-org'], flags['api-version']);
     const sObjectId = flags['record-id'] ?? (await query(conn, flags.sobject, flags.where)).Id;
     try {
       const updateObject = { ...stringToDictionary(flags.values), Id: sObjectId };

@@ -20,7 +20,7 @@ import {
 } from '@salesforce/ts-types';
 import { Duration } from '@salesforce/kit';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
-import { perflogFlag, targetOrgFlag } from '../../../src/flags';
+import { getVersionedConnection, orgFlags, perflogFlag } from '../../../src/flags';
 import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../reporters';
 import { Field, FieldType, SoqlQueryResult } from '../../dataSoqlQueryTypes';
 
@@ -34,12 +34,12 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
   public static readonly aliases = ['force:data:soql:query'];
 
   public static flags = {
+    ...orgFlags,
     query: Flags.string({
       char: 'q',
       summary: messages.getMessage('flags.queryToExecute'),
       exactlyOne: ['query', 'file'],
     }),
-    'target-org': targetOrgFlag,
     file: Flags.file({
       char: 'f',
       exists: true,
@@ -106,7 +106,7 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
       // soqlqueryfile will be be present if flags.query isn't. Oclif exactlyOne isn't quite that clever
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const queryString = flags.query ?? fs.readFileSync(flags.file, 'utf8');
-      const conn = flags['target-org'].getConnection();
+      const conn = getVersionedConnection(flags['target-org'], flags['api-version']);
       const ux = new Ux({ jsonEnabled: this.jsonEnabled() });
       if (flags['result-format'] !== 'json') this.spinner.start(messages.getMessage('queryRunningMessage'));
       const queryResult = flags.async

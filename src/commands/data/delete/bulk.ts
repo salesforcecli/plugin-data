@@ -9,7 +9,7 @@ import { ReadStream } from 'fs';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
-import { targetOrgFlag } from '../../../../src/flags';
+import { getVersionedConnection, orgFlags } from '../../../../src/flags';
 import { Batcher, BatcherReturnType } from '../../../batcher';
 
 Messages.importMessagesDirectory(__dirname);
@@ -28,7 +28,7 @@ export default class Delete extends SfCommand<BatcherReturnType> {
   public static readonly description = messages.getMessage('description');
   public static readonly aliases = ['force:data:bulk:delete'];
   public static flags = {
-    'target-org': targetOrgFlag,
+    ...orgFlags,
     file: Flags.file({
       char: 'f',
       summary: messages.getMessage('flags.csvfile'),
@@ -58,7 +58,7 @@ export default class Delete extends SfCommand<BatcherReturnType> {
     let result: BatcherReturnType;
 
     try {
-      const conn: Connection = flags['target-org'].getConnection();
+      const conn: Connection = getVersionedConnection(flags['target-org'], flags['api-version']);
       this.spinner.start('Bulk Delete');
 
       const csvRecords: ReadStream = fs.createReadStream(flags.file, { encoding: 'utf-8' });

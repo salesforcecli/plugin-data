@@ -8,6 +8,7 @@ import * as os from 'os';
 import { Messages } from '@salesforce/core';
 import { QueryJobV2 } from 'jsforce/lib/api/bulk';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
+import { getVersionedConnection, orgFlags } from 'src/flags';
 import { DataSoqlQueryCommand, displayResults, transformBulkResults } from '../query';
 import { FormatTypes } from '../../../reporters';
 
@@ -23,7 +24,7 @@ export class BulkQueryReport extends SfCommand<unknown> {
   public static readonly aliases = ['force:data:soql:bulk:report'];
 
   public static flags = {
-    'target-org': DataSoqlQueryCommand.flags['target-org'],
+    ...orgFlags,
     'result-format': DataSoqlQueryCommand.flags['result-format'],
     'bulk-query-id': Flags.salesforceId({
       char: 'i',
@@ -40,7 +41,7 @@ export class BulkQueryReport extends SfCommand<unknown> {
       operation: 'query',
       pollingOptions: { pollTimeout: 0, pollInterval: 0 },
       query: '',
-      connection: flags['target-org'].getConnection(),
+      connection: getVersionedConnection(flags['target-org'], flags['api-version']),
     });
     job.jobInfo = { id: flags['bulk-query-id'] };
     const results = await job.getResults();

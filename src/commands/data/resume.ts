@@ -5,9 +5,9 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { BatchInfo, JobInfo } from 'jsforce/api/bulk';
-import { Connection, Messages, SfError } from '@salesforce/core';
+import { Messages, SfError } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
-import { targetOrgFlag } from '../../../src/flags';
+import { getVersionedConnection, orgFlags } from '../../../src/flags';
 import { Batcher } from '../../batcher';
 
 Messages.importMessagesDirectory(__dirname);
@@ -21,7 +21,7 @@ export default class Status extends SfCommand<StatusResult> {
   public static aliases = ['force:data:bulk:report'];
 
   public static flags = {
-    'target-org': targetOrgFlag,
+    ...orgFlags,
     'batch-id': Flags.string({
       char: 'b',
       summary: messages.getMessage('flags.batchid'),
@@ -40,7 +40,7 @@ export default class Status extends SfCommand<StatusResult> {
   public async run(): Promise<StatusResult> {
     const { flags } = await this.parse(Status);
     this.spinner.start('Getting Status');
-    const conn: Connection = flags['target-org'].getConnection();
+    const conn = getVersionedConnection(flags['target-org'], flags['api-version']);
     const batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
     if (flags['job-id'] && flags['batch-id']) {
       // view batch status
