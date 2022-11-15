@@ -19,7 +19,7 @@ describe('force:data:bulk:upsert', () => {
   let config: Config;
 
   before(async () => {
-    config = new Config({ root: path.resolve(__dirname, '../../../../..') });
+    config = new Config({ root: path.resolve(__dirname, '../../../..') });
     await config.load();
   });
 

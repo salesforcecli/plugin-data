@@ -26,30 +26,30 @@ export default class Update extends SfCommand<SaveResult> {
     sobject: Flags.string({
       char: 's',
       required: true,
-      summary: messages.getMessage('sObjectType'),
+      summary: messages.getMessage('flags.sobject'),
       aliases: ['sobjecttype'],
       deprecateAliases: true,
     }),
     'record-id': Flags.salesforceId({
       char: 'i',
-      summary: messages.getMessage('sObjectId'),
+      summary: messages.getMessage('flags.recordId'),
       exactlyOne: ['where', 'record-id'],
       aliases: ['sobjectid'],
       deprecateAliases: true,
     }),
     where: Flags.string({
       char: 'w',
-      summary: messages.getMessage('where'),
+      summary: messages.getMessage('flags.where'),
       exactlyOne: ['where', 'record-id'],
     }),
     values: Flags.string({
       char: 'v',
       required: true,
-      summary: messages.getMessage('values'),
+      summary: messages.getMessage('flags.values'),
     }),
     usetoolingapi: Flags.boolean({
       char: 't',
-      summary: messages.getMessage('useToolingApi'),
+      summary: messages.getMessage('flags.useToolingApi'),
     }),
     perflog: Flags.boolean({
       summary: commonMessages.getMessage('perfLogLevelOption'),

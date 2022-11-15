@@ -36,28 +36,28 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
   public static flags = {
     query: Flags.string({
       char: 'q',
-      summary: messages.getMessage('queryToExecute'),
+      summary: messages.getMessage('flags.queryToExecute'),
       exactlyOne: ['query', 'file'],
     }),
     'target-org': targetOrgFlag,
     file: Flags.file({
       char: 'f',
       exists: true,
-      summary: messages.getMessage('soqlqueryfile'),
+      summary: messages.getMessage('flags.file'),
       exactlyOne: ['query', 'file'],
       aliases: ['soqlqueryfile'],
       deprecateAliases: true,
     }),
     'use-tooling-api': Flags.boolean({
       char: 't',
-      summary: messages.getMessage('queryToolingDescription'),
+      summary: messages.getMessage('flags.useToolingApi'),
       aliases: ['usetoolingapi'],
       deprecateAliases: true,
     }),
     async: Flags.boolean({
       char: 'b',
       default: false,
-      summary: messages.getMessage('bulkDescription'),
+      summary: messages.getMessage('flags.async'),
       exclusive: ['use-tooling-api'],
       aliases: ['bulk'],
       deprecateAliases: true,
@@ -65,13 +65,14 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
     wait: Flags.duration({
       unit: 'minutes',
       char: 'w',
-      summary: messages.getMessage('waitDescription'),
+      summary: messages.getMessage('flags.wait'),
       dependsOn: ['async'],
     }),
     // TODO: use union type from
     'result-format': Flags.enum({
       char: 'r',
-      summary: messages.getMessage('resultFormatDescription'),
+      summary: messages.getMessage('flags.resultFormat'),
+      description: messages.getMessage('flags.resultFormat.description'),
       options: ['human', 'json', 'csv'],
       default: 'human',
       aliases: ['resultformat'],

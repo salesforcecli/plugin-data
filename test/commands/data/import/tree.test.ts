@@ -15,7 +15,7 @@ import { Config } from '@oclif/core';
 import Import from '../../../../src/commands/data/import/tree';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-const dataImportPlanSchema = require('../../../../../schema/dataImportPlanSchema.json');
+const dataImportPlanSchema = require('../../../../schema/dataImportPlanSchema.json');
 
 const expectedImportResult = [
   {
@@ -76,7 +76,7 @@ describe('force:data:tree:import', () => {
         '--targetusername',
         'test@org.com',
         '--files',
-        pathJoin(__dirname, '..', '..', '..', '..', 'api', 'data', 'tree', 'test-files', 'accounts-contacts-tree.json'),
+        pathJoin(__dirname, '..', '..', '..', 'api', 'data', 'tree', 'test-files', 'accounts-contacts-tree.json'),
         '--json',
       ],
       config
@@ -92,7 +92,7 @@ describe('force:data:tree:import', () => {
         '--targetusername',
         'test@org.com',
         '--plan',
-        pathJoin(__dirname, '..', '..', '..', '..', 'api', 'data', 'tree', 'test-files', 'accounts-contacts-plan.json'),
+        pathJoin(__dirname, '..', '..', '..', 'api', 'data', 'tree', 'test-files', 'accounts-contacts-plan.json'),
         '--json',
       ],
       config

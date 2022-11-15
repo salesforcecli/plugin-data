@@ -11,19 +11,19 @@ Imports data into an org using the SObject Tree Save API. This data can include 
 To generate JSON files for use with force:data:tree:import, run "sfdx force:data:tree:export".
 The SObject Tree API supports requests that contain up to 200 records. For more information, see the REST API Developer Guide: https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobject_tree.htm
 
-# sobjecttreefiles
+# flags.files
 
 comma-delimited, ordered paths of json files containing collection of record trees to insert
 
-# plan
+# flags.plan
 
 path to plan to insert multiple data files that have master-detail relationships
 
-# contenttype
+# flags.contenttype
 
 if data file extension is not .json, provide content type (applies to all files)
 
-# confighelp
+# flags.confighelp
 
 display schema information for the --plan configuration file to stdout; if you use this option, all other options except --json are ignored
 

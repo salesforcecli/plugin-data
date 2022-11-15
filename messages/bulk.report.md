@@ -11,6 +11,6 @@ Run this command using the job ID returned from the force:data:soql:query --bulk
 
 - $ sfdx force:data:soql:bulk:report -i 7500x000005BdFzXXX
 
-# bulkQueryIdDescription
+# flags.bulkQueryId
 
 the job ID of the bulk query

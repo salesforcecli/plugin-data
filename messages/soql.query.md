@@ -9,31 +9,45 @@ When you execute this command in a project, it executes the query against the da
 
 To get data on API performance metrics, specify both --perflog and --json.
 
-# noResults
+# examples
 
-Your query returned no results.
+- $ sfdx force:data:soql:query -q "SELECT Id, Name, Account.Name FROM Contact"
 
-# queryToExecute
+- $ sfdx force:data:soql:query -q "SELECT Id, Name FROM Account WHERE ShippingState IN ('CA', 'NY')"
+
+- $ sfdx force:data:soql:query -q "SELECT Id, Name FROM Account WHERE ShippingState IN ('CA', 'NY')" --perflog --json
+
+- $ sfdx force:data:soql:query -q "SELECT Name FROM ApexTrigger" -t
+
+- $ sfdx force:data:soql:query --soqlqueryfile query.txt
+
+- $ sfdx force:data:soql:query --soqlqueryfile query.txt -t
+
+# flags.queryToExecute
 
 SOQL query to execute
 
-# queryLongDescription
-
-SOQL query to execute.
-
-# queryToolingDescription
+# flags.useToolingApi
 
 execute query with Tooling API
 
-# queryInvalidReporter
+# flags.file
 
-Unknown result format type. Must be one of the following values: %s
+A SOQL query stored in a file
 
-# resultFormatDescription
+# flags.async
+
+use the bulk 2.0 API to query data
+
+# flags.wait
+
+wait time for command to finish in minutes
+
+# flags.resultFormat
 
 result format emitted to stdout; --json flag overrides this parameter
 
-# resultFormatLongDescription
+# flags.resultFormat.description
 
 Format to use when displaying results. If you also specify the --json flag, --json overrides this parameter.
 
@@ -53,13 +67,9 @@ Querying Data
 
 Result size is %d, current count is %d
 
-# bulkDescription
+# queryInvalidReporter
 
-use the bulk 2.0 API to query data
-
-# waitDescription
-
-wait time for command to finish in minutes
+Unknown result format type. Must be one of the following values: %s
 
 # bulkQueryTimeout
 
@@ -68,24 +78,6 @@ Query is in progress.
 
 Run sfdx force:data:soql:bulk:report -i %s -u %s to get the latest status/results
 
-# soqlqueryfile
+# noResults
 
-A SOQL query stored in a file
-
-# targetusername
-
-username or alias for the target org; overrides default target org
-
-# examples
-
-- $ sfdx force:data:soql:query -q "SELECT Id, Name, Account.Name FROM Contact"
-
-- $ sfdx force:data:soql:query -q "SELECT Id, Name FROM Account WHERE ShippingState IN ('CA', 'NY')"
-
-- $ sfdx force:data:soql:query -q "SELECT Id, Name FROM Account WHERE ShippingState IN ('CA', 'NY')" --perflog --json
-
-- $ sfdx force:data:soql:query -q "SELECT Name FROM ApexTrigger" -t
-
-- $ sfdx force:data:soql:query --soqlqueryfile query.txt
-
-- $ sfdx force:data:soql:query --soqlqueryfile query.txt -t
+Your query returned no results.

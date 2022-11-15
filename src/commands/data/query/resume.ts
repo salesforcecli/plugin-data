@@ -28,7 +28,7 @@ export class BulkQueryReport extends SfCommand<unknown> {
     'bulk-query-id': Flags.salesforceId({
       char: 'i',
       required: true,
-      summary: reportMessages.getMessage('bulkQueryIdDescription'),
+      summary: reportMessages.getMessage('flags.bulkQueryId'),
       aliases: ['bulkqueryid'],
       deprecateAliases: true,
     }),

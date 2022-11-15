@@ -8,25 +8,21 @@ export data from an org
 Exports data from an org into sObject tree format for use with the force:data:tree:import command.
 The query for export can return a maximum of 2,000 records. For more information, see the REST API Developer Guide: https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobject_tree.htm
 
-# query
+# flags.query
 
 soql query, or filepath of file containing a soql query, to retrieve records
 
-# plan
+# flags.plan
 
 generate mulitple sobject tree files and a plan definition file for aggregated import
 
-# prefix
+# flags.prefix
 
 prefix of generated files
 
-# outputdir
+# flags.outputdir
 
-directory to store files'
-
-# targetusername
-
-username or alias for the target org; overrides default target org
+directory to store files
 
 # examples
 

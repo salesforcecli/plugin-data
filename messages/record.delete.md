@@ -12,25 +12,21 @@ Enclose values that contain spaces in single quotes.
 
 To get data on API performance metrics, specify both --perflog and --json.
 
-# sObjectType
+# flags.sobject
 
 the type of the record you’re deleting
 
-# sObjectId
+# flags.recordId
 
 the ID of the record you’re deleting
 
-# where
+# flags.where
 
 a list of <fieldName>=<value> pairs to search for
 
-# useToolingApi
+# flags.useToolingApi
 
 delete the record with Tooling API
-
-# targetusername
-
-username or alias for the target org; overrides default target org
 
 # examples
 

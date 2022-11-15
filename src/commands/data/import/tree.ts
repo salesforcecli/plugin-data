@@ -33,26 +33,26 @@ export default class Import extends SfCommand<ImportResult[] | JsonMap> {
     'target-org': targetOrgFlag,
     files: stringArrayFlag({
       char: 'f',
-      summary: messages.getMessage('sobjecttreefiles'),
+      summary: messages.getMessage('flags.files'),
       exclusive: ['plan'],
       aliases: ['--sobjecttreefiles'],
       deprecateAliases: true,
     }),
     plan: Flags.file({
       char: 'p',
-      summary: messages.getMessage('plan'),
+      summary: messages.getMessage('flags.plan'),
       exists: true,
     }),
     'content-type': Flags.string({
       char: 'c',
-      summary: messages.getMessage('contenttype'),
+      summary: messages.getMessage('flags.contenttype'),
       hidden: true,
       aliases: ['contenttype'],
       deprecateAliases: true,
     }),
     // displays the schema for a data import plan
     'config-help': Flags.boolean({
-      summary: messages.getMessage('confighelp'),
+      summary: messages.getMessage('flags.confighelp'),
       aliases: ['confighelp'],
       deprecateAliases: true,
     }),

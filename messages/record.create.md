@@ -11,15 +11,15 @@ Enclose values that contain spaces in single quotes.
 
 To get data on API performance metrics, specify both --perflog and --json.
 
-# sObjectType
+# flags.sobject
 
 the type of the record you’re creating
 
-# values
+# flags.values
 
 the <fieldName>=<value> pairs you’re creating
 
-# useToolingApi
+# flags.useToolingApi
 
 create the record with tooling api
 

@@ -11,27 +11,23 @@ Enclose values that contain spaces in single quotes.
 
 To get data on API performance metrics, specify both --perflog and --json.
 
-# sObjectType
+# flags.sobject
 
 the sObject type of the record you’re updating
 
-# sObjectId
+# flags.recordId
 
 the ID of the record you’re updating
 
-# where
+# flags.where
 
 a list of <fieldName>=<value> pairs to search for
 
-# targetusername
-
-username or alias for the target org; overrides default target org
-
-# useToolingApi
+# flags.useToolingApi
 
 update the record with Tooling API
 
-# values
+# flags.values
 
 the <fieldName>=<value> pairs you’re updating
 

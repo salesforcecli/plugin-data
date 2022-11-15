@@ -17,7 +17,7 @@ import Status from '../../../src/commands/data/resume';
 describe('force:data:bulk:status', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
-  const config = new Config({ root: path.resolve(__dirname, '../../../../..') });
+  const config = new Config({ root: path.resolve(__dirname, '../../..') });
   let stdoutSpy: sinon.SinonSpy;
 
   const unusedInterfaceParts = {
