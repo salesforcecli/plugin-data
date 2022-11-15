@@ -8,7 +8,7 @@ import * as path from 'path';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { Dictionary, get, getString } from '@salesforce/ts-types';
-import { QueryResult } from '../soql/query/dataSoqlQuery.nut';
+import { QueryResult } from '../dataSoqlQuery.nut';
 
 describe('data:tree commands', () => {
   let testSession: TestSession;

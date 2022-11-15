@@ -13,7 +13,7 @@ import { expect } from 'chai';
 import { Config } from '@oclif/core';
 
 import { SaveResult } from 'jsforce';
-import Delete from '../../../../../src/commands/data/delete/record';
+import Delete from '../../../../src/commands/data/delete/record';
 
 const sObjectId = '0011100001zhhyUAAQ';
 

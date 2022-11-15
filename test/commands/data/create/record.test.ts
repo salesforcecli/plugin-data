@@ -10,7 +10,7 @@ import { expect } from 'chai';
 import { TestContext, MockTestOrgData } from '@salesforce/core/lib/testSetup';
 import { AnyJson, ensureJsonMap, ensureString } from '@salesforce/ts-types';
 import { SaveResult } from 'jsforce';
-import Create from '../../../../../src/commands/data/create/record';
+import Create from '../../../../src/commands/data/create/record';
 
 const sObjectId = '0011100001zhhyUAAQ';
 

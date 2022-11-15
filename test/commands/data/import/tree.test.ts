@@ -12,7 +12,7 @@ import { AnyJson, ensureJsonMap, ensureString } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup';
 import { Config } from '@oclif/core';
-import Import from '../../../../../src/commands/data/import/tree';
+import Import from '../../../../src/commands/data/import/tree';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const dataImportPlanSchema = require('../../../../../schema/dataImportPlanSchema.json');

@@ -12,7 +12,7 @@ import { expect } from 'chai';
 import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup';
 
 import { Config } from '@oclif/core';
-import Get from '../../../../../src/commands/data/get/record';
+import Get from '../../../../src/commands/data/get/record';
 
 const sObjectId = '0011100001zhhyUAAQ';
 

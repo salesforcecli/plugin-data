@@ -12,7 +12,7 @@ import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/
 import { Config } from '@oclif/core';
 import { SfError } from '@salesforce/core';
 import { SaveResult } from 'jsforce';
-import Update from '../../../../../src/commands/data/update/record';
+import Update from '../../../../src/commands/data/update/record';
 
 const sObjectId = '0011100001zhhyUAAQ';
 

@@ -10,8 +10,8 @@ import { strict as assert } from 'node:assert/strict';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { getNumber, getString } from '@salesforce/ts-types';
-import { QueryResult } from '../soql/query/dataSoqlQuery.nut';
-import { BatcherReturnType } from '../../../../../src/batcher';
+import { QueryResult } from '../dataSoqlQuery.nut';
+import { BatcherReturnType } from '../../../../src/batcher';
 
 let testSession: TestSession;
 

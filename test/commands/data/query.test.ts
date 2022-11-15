@@ -24,10 +24,10 @@ import * as chaiAsPromised from 'chai-as-promised';
 import { describe } from 'mocha';
 import sinon = require('sinon');
 import { expect } from 'chai';
-import * as query from '../../../../../../src/commands/data/query';
-import { soqlQueryExemplars } from '../../../../../test-files/soqlQuery.exemplars';
-import { DataSoqlQueryCommand } from '../../../../../../src/commands/data/query';
-import { SoqlQueryResult } from '../../../../../../src/dataSoqlQueryTypes';
+import * as query from '../../../src/commands/data/query';
+import { soqlQueryExemplars } from '../../test-files/soqlQuery.exemplars';
+import { DataSoqlQueryCommand } from '../../../src/commands/data/query';
+import { SoqlQueryResult } from '../../../src/dataSoqlQueryTypes';
 
 chai.use(chaiAsPromised);
 
