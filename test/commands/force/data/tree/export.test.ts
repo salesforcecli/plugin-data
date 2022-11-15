@@ -10,7 +10,7 @@ import { AnyJson, ensureJsonMap, ensureString, isString } from '@salesforce/ts-t
 import { expect } from 'chai';
 import { TestContext, MockTestOrgData } from '@salesforce/core/lib/testSetup';
 import { Config } from '@oclif/core';
-import Export from '../../../../../src/commands/force/data/tree/export';
+import Export from '../../../../../src/commands/data/export/tree';
 
 const query = 'SELECT Id, Name from Account';
 

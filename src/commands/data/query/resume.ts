@@ -9,7 +9,7 @@ import { Messages } from '@salesforce/core';
 import { QueryJobV2 } from 'jsforce/lib/api/bulk';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { DataSoqlQueryCommand, displayResults, transformBulkResults } from '../query';
-import { FormatTypes } from '../../../../../reporters';
+import { FormatTypes } from '../../../reporters';
 
 Messages.importMessagesDirectory(__dirname);
 const reportMessages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.report');
@@ -20,13 +20,17 @@ export class BulkQueryReport extends SfCommand<unknown> {
   public static readonly summary = reportMessages.getMessage('summary');
   public static readonly description = reportMessages.getMessage('description');
   public static readonly examples = reportMessages.getMessage('examples').split(os.EOL);
+  public static readonly aliases = ['force:data:soql:bulk:report'];
+
   public static flags = {
     'target-org': DataSoqlQueryCommand.flags['target-org'],
-    resultformat: DataSoqlQueryCommand.flags.resultformat,
-    bulkqueryid: Flags.salesforceId({
+    'result-format': DataSoqlQueryCommand.flags['result-format'],
+    'bulk-query-id': Flags.salesforceId({
       char: 'i',
       required: true,
       summary: reportMessages.getMessage('bulkQueryIdDescription'),
+      aliases: ['bulkqueryid'],
+      deprecateAliases: true,
     }),
   };
 
@@ -38,7 +42,7 @@ export class BulkQueryReport extends SfCommand<unknown> {
       query: '',
       connection: flags['target-org'].getConnection(),
     });
-    job.jobInfo = { id: flags.bulkqueryid };
+    job.jobInfo = { id: flags['bulk-query-id'] };
     const results = await job.getResults();
     const queryResult = transformBulkResults(results, '');
 

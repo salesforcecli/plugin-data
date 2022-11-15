@@ -9,14 +9,14 @@ import { ReadStream } from 'fs';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
-import { Batcher, BatcherReturnType } from '../../../../batcher';
+import { targetOrgFlag } from '../../../../src/flags';
+import { Batcher, BatcherReturnType } from '../../../batcher';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.load('@salesforce/plugin-data', 'bulk.delete', [
   'examples',
   'summary',
   'description',
-  'flags.targetusername',
   'flags.csvfile',
   'flags.sobjecttype',
   'flags.wait',
@@ -26,22 +26,23 @@ export default class Delete extends SfCommand<BatcherReturnType> {
   public static readonly examples = messages.getMessages('examples');
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
+  public static readonly aliases = ['force:data:bulk:delete'];
   public static flags = {
-    targetusername: Flags.requiredOrg({
-      required: true,
-      char: 'u',
-      summary: messages.getMessage('flags.targetusername'),
-    }),
-    csvfile: Flags.file({
+    'target-org': targetOrgFlag,
+    file: Flags.file({
       char: 'f',
       summary: messages.getMessage('flags.csvfile'),
       required: true,
       exists: true,
+      aliases: ['csvfile'],
+      deprecateAliases: true,
     }),
-    sobjecttype: Flags.string({
+    sobject: Flags.string({
       char: 's',
       summary: messages.getMessage('flags.sobjecttype'),
       required: true,
+      aliases: ['sobjecttype'],
+      deprecateAliases: true,
     }),
     wait: Flags.duration({
       char: 'w',
@@ -57,15 +58,15 @@ export default class Delete extends SfCommand<BatcherReturnType> {
     let result: BatcherReturnType;
 
     try {
-      const conn: Connection = flags.targetusername.getConnection();
+      const conn: Connection = flags['target-org'].getConnection();
       this.spinner.start('Bulk Delete');
 
-      const csvRecords: ReadStream = fs.createReadStream(flags.csvfile, { encoding: 'utf-8' });
-      const job = conn.bulk.createJob<'delete'>(flags.sobjecttype, 'delete');
+      const csvRecords: ReadStream = fs.createReadStream(flags.file, { encoding: 'utf-8' });
+      const job = conn.bulk.createJob<'delete'>(flags.sobject, 'delete');
 
       const batcher: Batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
 
-      result = await batcher.createAndExecuteBatches(job, csvRecords, flags.sobjecttype, flags.wait?.minutes);
+      result = await batcher.createAndExecuteBatches(job, csvRecords, flags.sobject, flags.wait?.minutes);
 
       this.spinner.stop();
       return result;

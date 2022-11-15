@@ -21,10 +21,6 @@ the ID of the job you want to view or of the job whose batch you want to view
 
 the ID of the batch whose status you want to view
 
-# flags.targetusername
-
-username or alias for the target org; overrides default target org
-
 # NoBatchFound
 
 Unable to find batch %s for job %s.

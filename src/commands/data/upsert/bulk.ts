@@ -8,7 +8,8 @@ import * as fs from 'fs';
 import { Messages } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
-import { Batcher, BatcherReturnType } from '../../../../batcher';
+import { targetOrgFlag } from '../../../../src/flags';
+import { Batcher, BatcherReturnType } from '../../../batcher';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.upsert');
@@ -17,27 +18,31 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+  public static readonly aliases = ['force:data:bulk:upsert'];
+
   public static flags = {
-    targetusername: Flags.requiredOrg({
-      required: true,
-      char: 'u',
-      summary: messages.getMessage('flags.targetusername'),
-    }),
-    externalid: Flags.string({
+    'target-org': targetOrgFlag,
+    'external-id': Flags.string({
       char: 'i',
       summary: messages.getMessage('flags.externalid'),
       required: true,
+      aliases: ['externalid'],
+      deprecateAliases: true,
     }),
-    csvfile: Flags.file({
+    file: Flags.file({
       exists: true,
       char: 'f',
       summary: messages.getMessage('flags.csvfile'),
       required: true,
+      aliases: ['csvfile'],
+      deprecateAliases: true,
     }),
-    sobjecttype: Flags.string({
+    sobject: Flags.string({
       char: 's',
       summary: messages.getMessage('flags.sobjecttype'),
       required: true,
+      aliases: ['sobjecttype'],
+      deprecateAliases: true,
     }),
     wait: Flags.duration({
       char: 'w',
@@ -55,15 +60,15 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
 
   public async run(): Promise<BatcherReturnType> {
     const { flags } = await this.parse(Upsert);
-    const conn = flags.targetusername.getConnection();
+    const conn = flags['target-org'].getConnection();
     this.spinner.start('Bulk Upsert');
 
     const batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
-    const csvStream = fs.createReadStream(flags.csvfile, { encoding: 'utf-8' });
+    const csvStream = fs.createReadStream(flags.file, { encoding: 'utf-8' });
 
     const concurrencyMode = flags.serial ? 'Serial' : 'Parallel';
-    const job = conn.bulk.createJob(flags.sobjecttype, 'upsert', {
-      extIdField: flags.externalid,
+    const job = conn.bulk.createJob(flags.sobject, 'upsert', {
+      extIdField: flags['external-id'],
       concurrencyMode,
     });
 
@@ -74,7 +79,7 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
       });
 
       try {
-        resolve(await batcher.createAndExecuteBatches(job, csvStream, flags.sobjecttype, flags.wait?.minutes));
+        resolve(await batcher.createAndExecuteBatches(job, csvStream, flags.sobject, flags.wait?.minutes));
         this.spinner.stop();
       } catch (e) {
         this.spinner.stop('error');

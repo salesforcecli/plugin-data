@@ -12,7 +12,7 @@ import { AnyJson, ensureJsonMap, ensureString } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup';
 import { Config } from '@oclif/core';
-import Import from '../../../../../src/commands/force/data/tree/import';
+import Import from '../../../../../src/commands/data/import/tree';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const dataImportPlanSchema = require('../../../../../schema/dataImportPlanSchema.json');
@@ -75,7 +75,7 @@ describe('force:data:tree:import', () => {
       [
         '--targetusername',
         'test@org.com',
-        '--sobjecttreefiles',
+        '--files',
         pathJoin(__dirname, '..', '..', '..', '..', 'api', 'data', 'tree', 'test-files', 'accounts-contacts-tree.json'),
         '--json',
       ],
@@ -103,7 +103,7 @@ describe('force:data:tree:import', () => {
   });
 
   it('should return the schema with --confighelp param', async () => {
-    const cmd = new Import(['--targetusername', 'test@org.com', '--confighelp', '--json'], config);
+    const cmd = new Import(['--targetusername', 'test@org.com', '--config-help', '--json'], config);
     const result = await cmd.run();
     expect(result).to.deep.equal(dataImportPlanSchema);
   });

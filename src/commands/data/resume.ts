@@ -7,7 +7,8 @@
 import { BatchInfo, JobInfo } from 'jsforce/api/bulk';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
-import { Batcher } from '../../../../batcher';
+import { targetOrgFlag } from '../../../src/flags';
+import { Batcher } from '../../batcher';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.status');
@@ -17,49 +18,51 @@ export default class Status extends SfCommand<StatusResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+  public static aliases = ['force:data:bulk:report'];
+
   public static flags = {
-    targetusername: Flags.requiredOrg({
-      required: true,
-      char: 'u',
-      summary: messages.getMessage('flags.targetusername'),
-    }),
-    batchid: Flags.string({
+    'target-org': targetOrgFlag,
+    'batch-id': Flags.string({
       char: 'b',
       summary: messages.getMessage('flags.batchid'),
+      aliases: ['batchid'],
+      deprecateAliases: true,
     }),
-    jobid: Flags.string({
+    'job-id': Flags.string({
       char: 'i',
       summary: messages.getMessage('flags.jobid'),
       required: true,
+      aliases: ['jobid'],
+      deprecateAliases: true,
     }),
   };
 
   public async run(): Promise<StatusResult> {
     const { flags } = await this.parse(Status);
     this.spinner.start('Getting Status');
-    const conn: Connection = flags.targetusername.getConnection();
+    const conn: Connection = flags['target-org'].getConnection();
     const batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
-    if (flags.jobid && flags.batchid) {
+    if (flags['job-id'] && flags['batch-id']) {
       // view batch status
-      const job = conn.bulk.job(flags.jobid);
+      const job = conn.bulk.job(flags['job-id']);
       let found = false;
 
       const batches: BatchInfo[] = await job.list();
       batches.forEach((batch: BatchInfo) => {
-        if (batch.id === flags.batchid) {
+        if (batch.id === flags['batch-id']) {
           batcher.bulkStatus(batch);
           found = true;
         }
       });
       if (!found) {
-        throw new SfError(messages.getMessage('NoBatchFound', [flags.batchid, flags.jobid]), 'NoBatchFound');
+        throw new SfError(messages.getMessage('NoBatchFound', [flags['batch-id'], flags['job-id']]), 'NoBatchFound');
       }
 
       this.spinner.stop();
       return batches;
     } else {
       // view job status
-      const jobStatus = await batcher.fetchAndDisplayJobStatus(flags.jobid);
+      const jobStatus = await batcher.fetchAndDisplayJobStatus(flags['job-id']);
       this.spinner.stop();
       return jobStatus;
     }

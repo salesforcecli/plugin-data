@@ -12,7 +12,7 @@ import { Config } from '@oclif/core';
 import { expect } from 'chai';
 import Bulk, { Batch, BulkOperation, Job, JobInfo, JobState } from 'jsforce/lib/api/bulk';
 import stripAnsi = require('strip-ansi');
-import Status from '../../../../../src/commands/force/data/bulk/status';
+import Status from '../../../../../src/commands/data/resume';
 
 describe('force:data:bulk:status', () => {
   const $$ = new TestContext();

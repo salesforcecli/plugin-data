@@ -8,7 +8,8 @@
 import { Messages, SfError } from '@salesforce/core';
 import { SaveError, SaveResult } from 'jsforce';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { collectErrorMessages, query, stringToDictionary } from '../../../../dataCommand';
+import { targetOrgFlag } from '../../../../src/flags';
+import { collectErrorMessages, query, stringToDictionary } from '../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'record.update');
@@ -18,27 +19,28 @@ export default class Update extends SfCommand<SaveResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+  public static aliases = ['force:data:record:update'];
 
   public static flags = {
-    targetusername: Flags.requiredOrg({
-      required: true,
-      char: 'u',
-      summary: messages.getMessage('targetusername'),
-    }),
-    sobjecttype: Flags.string({
+    'target-org': targetOrgFlag,
+    sobject: Flags.string({
       char: 's',
       required: true,
       summary: messages.getMessage('sObjectType'),
+      aliases: ['sobjecttype'],
+      deprecateAliases: true,
     }),
-    sobjectid: Flags.salesforceId({
+    'record-id': Flags.salesforceId({
       char: 'i',
       summary: messages.getMessage('sObjectId'),
-      exactlyOne: ['where', 'sobjectid'],
+      exactlyOne: ['where', 'record-id'],
+      aliases: ['sobjectid'],
+      deprecateAliases: true,
     }),
     where: Flags.string({
       char: 'w',
       summary: messages.getMessage('where'),
-      exactlyOne: ['where', 'sobjectid'],
+      exactlyOne: ['where', 'record-id'],
     }),
     values: Flags.string({
       char: 'v',
@@ -64,12 +66,12 @@ export default class Update extends SfCommand<SaveResult> {
 
     let status = 'Success';
     const conn = flags.usetoolingapi
-      ? flags.targetusername.getConnection().tooling
-      : flags.targetusername.getConnection();
-    const sObjectId = flags.sobjectid ?? (await query(conn, flags.sobjecttype, flags.where)).Id;
+      ? flags['target-org'].getConnection().tooling
+      : flags['target-org'].getConnection();
+    const sObjectId = flags['record-id'] ?? (await query(conn, flags.sobject, flags.where)).Id;
     try {
       const updateObject = { ...stringToDictionary(flags.values), Id: sObjectId };
-      const result = await conn.sobject(flags.sobjecttype).update(updateObject);
+      const result = await conn.sobject(flags.sobject).update(updateObject);
       if (result.success) {
         this.log(messages.getMessage('updateSuccess', [sObjectId]));
       } else {

@@ -24,10 +24,9 @@ import * as chaiAsPromised from 'chai-as-promised';
 import { describe } from 'mocha';
 import sinon = require('sinon');
 import { expect } from 'chai';
-import * as query from '../../../../../../src/commands/force/data/soql/query';
+import * as query from '../../../../../../src/commands/data/query';
 import { soqlQueryExemplars } from '../../../../../test-files/soqlQuery.exemplars';
-// import { SoqlQueryResult } from '../../../../../../src/dataSoqlQueryTypes';
-import { DataSoqlQueryCommand } from '../../../../../../src/commands/force/data/soql/query';
+import { DataSoqlQueryCommand } from '../../../../../../src/commands/data/query';
 import { SoqlQueryResult } from '../../../../../../src/dataSoqlQueryTypes';
 
 chai.use(chaiAsPromised);
@@ -181,7 +180,6 @@ describe('Execute a SOQL statement', (): void => {
         $$.SANDBOX.restore();
       });
       //
-      //     '--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'json'])
       it('should have json results', async () => {
         const cmd = new DataSoqlQueryCommand(
           ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'json'],

@@ -8,49 +8,46 @@
 import { Messages, SfError } from '@salesforce/core';
 import { SaveResult } from 'jsforce';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { collectErrorMessages, query } from '../../../../dataCommand';
+import { perflogFlag, targetOrgFlag } from '../../../../src/flags';
+import { collectErrorMessages, query } from '../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'record.delete');
-const commonMessages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
 export default class Delete extends SfCommand<SaveResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+  public static aliases = ['force:data:record:delete'];
 
   public static flags = {
-    targetusername: Flags.requiredOrg({
-      required: true,
-      char: 'u',
-      summary: messages.getMessage('targetusername'),
-    }),
-    sobjecttype: Flags.string({
+    'target-org': targetOrgFlag,
+    sobject: Flags.string({
       char: 's',
       required: true,
       summary: messages.getMessage('sObjectType'),
+      aliases: ['sobjecttype'],
+      deprecateAliases: true,
     }),
-    sobjectid: Flags.salesforceId({
+    'record-id': Flags.salesforceId({
       char: 'i',
       summary: messages.getMessage('sObjectId'),
-      exactlyOne: ['where', 'sobjectid'],
+      exactlyOne: ['where', 'record-id'],
+      aliases: ['sobjectid'],
+      deprecateAliases: true,
     }),
     where: Flags.string({
       char: 'w',
       summary: messages.getMessage('where'),
-      exactlyOne: ['where', 'sobjectid'],
+      exactlyOne: ['where', 'record-id'],
     }),
-    usetoolingapi: Flags.boolean({
+    'use-tooling-api': Flags.boolean({
       char: 't',
       summary: messages.getMessage('useToolingApi'),
+      aliases: ['usetoolingapi'],
+      deprecateAliases: true,
     }),
-    perflog: Flags.boolean({
-      summary: commonMessages.getMessage('perfLogLevelOption'),
-      hidden: true,
-      deprecated: {
-        version: '57',
-      },
-    }),
+    perflog: perflogFlag,
   };
 
   public async run(): Promise<SaveResult> {
@@ -60,11 +57,11 @@ export default class Delete extends SfCommand<SaveResult> {
 
     try {
       const conn = flags.usetoolingapi
-        ? flags.targetusername.getConnection().tooling
-        : flags.targetusername.getConnection();
+        ? flags['target-org'].getConnection().tooling
+        : flags['target-org'].getConnection();
       // "where flag" will be defined if sobjectId is not
-      const sObjectId = flags.sobjectid ?? (await query(conn, flags.sobjecttype, flags.where)).Id;
-      const result = await conn.sobject(flags.sobjecttype).destroy(sObjectId);
+      const sObjectId = flags['record-id'] ?? (await query(conn, flags.sobject, flags.where)).Id;
+      const result = await conn.sobject(flags.sobject).destroy(sObjectId);
       if (result.success) {
         this.log(messages.getMessage('deleteSuccess', [sObjectId]));
       } else {

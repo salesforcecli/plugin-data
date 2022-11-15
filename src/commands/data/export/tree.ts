@@ -7,8 +7,9 @@
 
 import { Messages } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
-import { ExportApi, ExportConfig } from '../../../../api/data/tree/exportApi';
-import { DataPlanPart, SObjectTreeFileContents } from '../../../../dataSoqlQueryTypes';
+import { targetOrgFlag } from '../../../../src/flags';
+import { ExportApi, ExportConfig } from '../../../api/data/tree/exportApi';
+import { DataPlanPart, SObjectTreeFileContents } from '../../../dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.export');
@@ -17,12 +18,10 @@ export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileCo
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+  public static aliases = ['force:data:tree:export'];
+
   public static flags = {
-    targetusername: Flags.requiredOrg({
-      required: true,
-      char: 'u',
-      summary: messages.getMessage('targetusername'),
-    }),
+    'target-org': targetOrgFlag,
     query: Flags.string({
       char: 'q',
       summary: messages.getMessage('query'),
@@ -36,18 +35,20 @@ export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileCo
       char: 'x',
       summary: messages.getMessage('prefix'),
     }),
-    outputdir: Flags.directory({
+    'output-dir': Flags.directory({
       char: 'd',
       summary: messages.getMessage('outputdir'),
+      aliases: ['outputdir'],
+      deprecateAliases: true,
     }),
   };
 
   public async run(): Promise<DataPlanPart[] | SObjectTreeFileContents> {
     const { flags } = await this.parse(Export);
     const ux = new Ux({ jsonEnabled: this.jsonEnabled() });
-    const exportApi = new ExportApi(flags.targetusername, ux);
+    const exportApi = new ExportApi(flags['target-org'], ux);
     const exportConfig: ExportConfig = {
-      outputDir: flags.outputdir,
+      outputDir: flags['output-dir'],
       plan: flags.plan,
       prefix: flags.prefix,
       query: flags.query,

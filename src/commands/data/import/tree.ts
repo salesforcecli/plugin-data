@@ -8,8 +8,8 @@
 import { Logger, Messages, SchemaPrinter } from '@salesforce/core';
 import { getString, JsonMap } from '@salesforce/ts-types';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { ImportApi, ImportConfig } from '../../../../api/data/tree/importApi';
-import { stringArrayFlag } from '../../../../flags';
+import { ImportApi, ImportConfig } from '../../../api/data/tree/importApi';
+import { stringArrayFlag, targetOrgFlag } from '../../../flags';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.import');
@@ -27,39 +27,43 @@ export default class Import extends SfCommand<ImportResult[] | JsonMap> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+  public static readonly aliases = ['force:data:tree:import'];
+
   public static flags = {
-    targetusername: Flags.requiredOrg({
-      required: true,
-      char: 'u',
-      summary: messages.getMessage('flags.targetusername'),
-    }),
-    sobjecttreefiles: stringArrayFlag({
+    'target-org': targetOrgFlag,
+    files: stringArrayFlag({
       char: 'f',
       summary: messages.getMessage('sobjecttreefiles'),
       exclusive: ['plan'],
+      aliases: ['--sobjecttreefiles'],
+      deprecateAliases: true,
     }),
     plan: Flags.file({
       char: 'p',
       summary: messages.getMessage('plan'),
       exists: true,
     }),
-    contenttype: Flags.string({
+    'content-type': Flags.string({
       char: 'c',
       summary: messages.getMessage('contenttype'),
       hidden: true,
+      aliases: ['contenttype'],
+      deprecateAliases: true,
     }),
     // displays the schema for a data import plan
-    confighelp: Flags.boolean({
+    'config-help': Flags.boolean({
       summary: messages.getMessage('confighelp'),
+      aliases: ['confighelp'],
+      deprecateAliases: true,
     }),
   };
 
   public async run(): Promise<ImportResult[] | JsonMap> {
     const { flags } = await this.parse(Import);
     const logger = await Logger.child('Import');
-    const importApi = new ImportApi(flags.targetusername);
+    const importApi = new ImportApi(flags['target-org']);
 
-    if (flags.confighelp) {
+    if (flags['config-help']) {
       // Display config help and return
       const schema = importApi.getSchema();
       if (!this.jsonEnabled()) {
@@ -70,8 +74,8 @@ export default class Import extends SfCommand<ImportResult[] | JsonMap> {
     }
 
     const importConfig: ImportConfig = {
-      sobjectTreeFiles: flags.sobjecttreefiles,
-      contentType: flags.contenttype,
+      sobjectTreeFiles: flags.files,
+      contentType: flags['content-type'],
       plan: flags.plan,
     };
 

@@ -11,7 +11,7 @@ import * as chaiAsPromised from 'chai-as-promised';
 import { expect } from 'chai';
 
 import sinon = require('sinon');
-import { retrieveColumns } from '../src/commands/force/data/soql/query';
+import { retrieveColumns } from '../src/commands/data/query';
 import * as TestUtil from './testUtil';
 import { queryFieldsExemplars } from './test-files/queryFields.exemplars';
 

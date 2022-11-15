@@ -20,66 +20,64 @@ import {
 } from '@salesforce/ts-types';
 import { Duration } from '@salesforce/kit';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
-import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../../../reporters';
-import { Field, FieldType, SoqlQueryResult } from '../../../../dataSoqlQueryTypes';
+import { perflogFlag, targetOrgFlag } from '../../../src/flags';
+import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../reporters';
+import { Field, FieldType, SoqlQueryResult } from '../../dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
-const commonMessages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
 export class DataSoqlQueryCommand extends SfCommand<unknown> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+  public static readonly aliases = ['force:data:soql:query'];
 
   public static flags = {
     query: Flags.string({
       char: 'q',
       summary: messages.getMessage('queryToExecute'),
-      exactlyOne: ['query', 'soqlqueryfile'],
+      exactlyOne: ['query', 'file'],
     }),
-    'target-org': Flags.requiredOrg({
-      required: true,
-      char: 'u',
-      summary: messages.getMessage('targetusername'),
-      aliases: ['targetusername'],
-    }),
-    soqlqueryfile: Flags.file({
+    'target-org': targetOrgFlag,
+    file: Flags.file({
       char: 'f',
       exists: true,
       summary: messages.getMessage('soqlqueryfile'),
-      exactlyOne: ['query', 'soqlqueryfile'],
+      exactlyOne: ['query', 'file'],
+      aliases: ['soqlqueryfile'],
+      deprecateAliases: true,
     }),
-    usetoolingapi: Flags.boolean({
+    'use-tooling-api': Flags.boolean({
       char: 't',
       summary: messages.getMessage('queryToolingDescription'),
+      aliases: ['usetoolingapi'],
+      deprecateAliases: true,
     }),
-    bulk: Flags.boolean({
+    async: Flags.boolean({
       char: 'b',
       default: false,
       summary: messages.getMessage('bulkDescription'),
-      exclusive: ['usetoolingapi'],
+      exclusive: ['use-tooling-api'],
+      aliases: ['bulk'],
+      deprecateAliases: true,
     }),
     wait: Flags.duration({
       unit: 'minutes',
       char: 'w',
       summary: messages.getMessage('waitDescription'),
-      dependsOn: ['bulk'],
+      dependsOn: ['async'],
     }),
     // TODO: use union type from
-    resultformat: Flags.enum({
+    'result-format': Flags.enum({
       char: 'r',
       summary: messages.getMessage('resultFormatDescription'),
       options: ['human', 'json', 'csv'],
       default: 'human',
+      aliases: ['resultformat'],
+      deprecateAliases: true,
     }),
-    perflog: Flags.boolean({
-      summary: commonMessages.getMessage('perfLogLevelOption'),
-      hidden: true,
-      deprecated: {
-        version: '57',
-      },
-    }),
+    perflog: perflogFlag,
   };
 
   private logger!: Logger;
@@ -106,14 +104,14 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
     try {
       // soqlqueryfile will be be present if flags.query isn't. Oclif exactlyOne isn't quite that clever
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const queryString = flags.query ?? fs.readFileSync(flags.soqlqueryfile, 'utf8');
+      const queryString = flags.query ?? fs.readFileSync(flags.file, 'utf8');
       const conn = flags['target-org'].getConnection();
       const ux = new Ux({ jsonEnabled: this.jsonEnabled() });
-      if (flags.resultformat !== 'json') this.spinner.start(messages.getMessage('queryRunningMessage'));
-      const queryResult = flags.bulk
+      if (flags['result-format'] !== 'json') this.spinner.start(messages.getMessage('queryRunningMessage'));
+      const queryResult = flags.async
         ? await runBulkSoqlQuery(conn, queryString, flags.wait, ux)
         : await runSoqlQuery(
-            flags.usetoolingapi ? conn.tooling : conn,
+            flags['use-tooling-api'] ? conn.tooling : conn,
             queryString,
             this.logger,
             ux,
@@ -121,11 +119,11 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
           );
       if (!this.jsonEnabled()) {
         // TODO: make the enum or string/options work correctly
-        displayResults({ ...queryResult }, flags.resultformat as keyof typeof FormatTypes);
+        displayResults({ ...queryResult }, flags['result-format'] as keyof typeof FormatTypes);
       }
       return queryResult.result;
     } finally {
-      if (flags.resultformat !== 'json') this.spinner.stop();
+      if (flags['result-format'] !== 'json') this.spinner.stop();
     }
   }
 }

@@ -13,7 +13,7 @@ import { expect } from 'chai';
 import { Config } from '@oclif/core';
 
 import { SaveResult } from 'jsforce';
-import Delete from '../../../../../src/commands/force/data/record/delete';
+import Delete from '../../../../../src/commands/data/delete/record';
 
 const sObjectId = '0011100001zhhyUAAQ';
 
@@ -61,7 +61,7 @@ describe('force:data:record:delete', () => {
     expect(result?.id).to.equal('0011100001zhhyUAAQ');
   });
 
-  it('should throw an error if both --where and --sobjectid are provided', async () => {
+  it('should throw an error if both --where and --record-id are provided', async () => {
     const cmd = new Delete(
       [
         '--targetusername',

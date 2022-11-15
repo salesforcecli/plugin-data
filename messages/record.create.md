@@ -23,10 +23,6 @@ the <fieldName>=<value> pairs you’re creating
 
 create the record with tooling api
 
-# targetusername
-
-username or alias for the target org; overrides default target org
-
 # examples
 
 - $ sfdx force:data:record:create -s Account -v "Name=Acme"

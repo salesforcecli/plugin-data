@@ -9,60 +9,57 @@ import { Messages, SfError } from '@salesforce/core';
 import { Record } from 'jsforce';
 import { toAnyJson } from '@salesforce/ts-types';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { query, logNestedObject } from '../../../../dataCommand';
+import { perflogFlag, targetOrgFlag } from '../../../../src/flags';
+import { query, logNestedObject } from '../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'record.get');
-const commonMessages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
 export default class Get extends SfCommand<Record> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+  public static aliases = ['force:data:record:get'];
 
   public static flags = {
-    targetusername: Flags.requiredOrg({
-      required: true,
-      char: 'u',
-      summary: messages.getMessage('targetusername'),
-    }),
-    sobjecttype: Flags.string({
+    'target-org': targetOrgFlag,
+    sobject: Flags.string({
       char: 's',
       required: true,
       summary: messages.getMessage('sObjectType'),
+      aliases: ['sobjecttype'],
+      deprecateAliases: true,
     }),
-    sobjectid: Flags.salesforceId({
+    'record-id': Flags.salesforceId({
       char: 'i',
       summary: messages.getMessage('sObjectId'),
-      exactlyOne: ['where', 'sobjectid'],
+      exactlyOne: ['where', 'record-id'],
+      aliases: ['sobjectid'],
+      deprecateAliases: true,
     }),
     where: Flags.string({
       char: 'w',
       summary: messages.getMessage('where'),
-      exactlyOne: ['where', 'sobjectid'],
+      exactlyOne: ['where', 'record-id'],
     }),
-    usetoolingapi: Flags.boolean({
+    'use-tooling-api': Flags.boolean({
       char: 't',
       summary: messages.getMessage('useToolingApi'),
+      aliases: ['usetoolingapi'],
+      deprecateAliases: true,
     }),
-    perflog: Flags.boolean({
-      summary: commonMessages.getMessage('perfLogLevelOption'),
-      hidden: true,
-      deprecated: {
-        version: '57',
-      },
-    }),
+    perflog: perflogFlag,
   };
 
   public async run(): Promise<Record> {
     const { flags } = await this.parse(Get);
     this.spinner.start('Getting Record');
-    const conn = flags.usetoolingapi
-      ? flags.targetusername.getConnection().tooling
-      : flags.targetusername.getConnection();
+    const conn = flags['use-tooling-api']
+      ? flags['target-org'].getConnection().tooling
+      : flags['target-org'].getConnection();
     try {
-      const sObjectId = flags.sobjectid ?? (await query(conn, flags.sobjecttype, flags.where)).Id;
-      const result = await conn.sobject(flags.sobjecttype).retrieve(sObjectId);
+      const sObjectId = flags['record-id'] ?? (await query(conn, flags.sobject, flags.where)).Id;
+      const result = await conn.sobject(flags.sobject).retrieve(sObjectId);
       if (!this.jsonEnabled()) {
         logNestedObject(result as never);
       }

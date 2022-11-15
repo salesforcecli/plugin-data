@@ -39,7 +39,3 @@ the number of minutes to wait for the command to complete before displaying the 
 # flags.serial
 
 run batches in serial mode
-
-# flags.targetusername
-
-username or alias for the target org; overrides default target org

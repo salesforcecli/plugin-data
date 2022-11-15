@@ -13,7 +13,7 @@ import { Logger } from '@salesforce/core';
 import { QueryResult } from 'jsforce';
 import sinon = require('sinon');
 import { Ux } from '@salesforce/sf-plugins-core';
-import { runSoqlQuery } from '../src/commands/force/data/soql/query';
+import { runSoqlQuery } from '../src/commands/data/query';
 import * as TestUtil from './testUtil';
 import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars';
 import { queryFieldsExemplars } from './test-files/queryFields.exemplars';

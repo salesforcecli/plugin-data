@@ -12,7 +12,7 @@ import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/
 import { Config } from '@oclif/core';
 import { SfError } from '@salesforce/core';
 import { SaveResult } from 'jsforce';
-import Update from '../../../../../src/commands/force/data/record/update';
+import Update from '../../../../../src/commands/data/update/record';
 
 const sObjectId = '0011100001zhhyUAAQ';
 
@@ -111,7 +111,7 @@ describe('force:data:record:update', () => {
   it('should throw an error if both --where and --sobjectid are provided', async () => {
     const cmd = new Update(
       [
-        '--targetusername',
+        '--target-org',
         'test@org.com',
         '--sobjecttype',
         'Account',

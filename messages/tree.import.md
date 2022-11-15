@@ -42,7 +42,3 @@ Data plan file %s did not validate against the schema.
 Did you run the force:data:tree:export command with the --plan flag?
 Make sure you are importing a plan file.
 You can get help with the import plan schema by running $ sfdx force:data:tree:import --confighelp
-
-# flags.targetusername
-
-username or alias for the target org; overrides default target org

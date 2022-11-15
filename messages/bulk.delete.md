@@ -26,7 +26,3 @@ the path to the CSV file containing the ids of the records to delete
 # flags.wait
 
 the number of minutes to wait for the command to complete before displaying the results
-
-# flags.targetusername
-
-username or alias for the target org; overrides default target org

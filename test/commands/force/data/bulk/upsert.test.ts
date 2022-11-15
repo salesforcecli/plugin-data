@@ -11,7 +11,7 @@ import { SfError } from '@salesforce/core';
 import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup';
 import { Config } from '@oclif/core';
 import { expect } from 'chai';
-import Upsert from '../../../../../src/commands/force/data/bulk/upsert';
+import Upsert from '../../../../../src/commands/data/upsert/bulk';
 
 describe('force:data:bulk:upsert', () => {
   const $$ = new TestContext();
