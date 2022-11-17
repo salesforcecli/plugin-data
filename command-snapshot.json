@@ -61,6 +61,7 @@
     "flags": [
       "api-version",
       "async",
+      "bulk",
       "file",
       "json",
       "loglevel",
@@ -83,7 +84,7 @@
     "command": "data:resume",
     "plugin": "@salesforce/plugin-data",
     "flags": ["api-version", "batch-id", "job-id", "json", "loglevel", "target-org"],
-    "alias": ["force:data:bulk:report"]
+    "alias": ["force:data:bulk:status"]
   },
   {
     "command": "data:update:record",
@@ -96,7 +97,7 @@
       "record-id",
       "sobject",
       "target-org",
-      "usetoolingapi",
+      "use-tooling-api",
       "values",
       "where"
     ],
@@ -115,10 +116,10 @@
     "alias": ["force:data:bulk:delete"]
   },
   {
-    "command": "force:data:bulk:report",
+    "command": "force:data:bulk:status",
     "plugin": "@salesforce/plugin-data",
     "flags": ["api-version", "batch-id", "job-id", "json", "loglevel", "target-org"],
-    "alias": ["force:data:bulk:report"]
+    "alias": ["force:data:bulk:status"]
   },
   {
     "command": "force:data:bulk:upsert",
@@ -175,7 +176,7 @@
       "record-id",
       "sobject",
       "target-org",
-      "usetoolingapi",
+      "use-tooling-api",
       "values",
       "where"
     ],
@@ -193,6 +194,7 @@
     "flags": [
       "api-version",
       "async",
+      "bulk",
       "file",
       "json",
       "loglevel",
