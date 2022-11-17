@@ -516,7 +516,7 @@ const isRelationshipWithMetadata = (metadata: DescribeSObjectResult, fieldName: 
 
 const getRelatedToWithMetadata = (metadata: DescribeSObjectResult, fieldName: string): string => {
   const result = metadata.fields.find((field) => field.name === fieldName && field.referenceTo?.length);
-  if (!result || !result.referenceTo) {
+  if (!result?.referenceTo) {
     throw new SfError(`Unable to find relation for ${metadata.name}`);
   }
 
