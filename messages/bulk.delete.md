@@ -7,13 +7,13 @@ bulk delete records from a csv file
 bulk delete records from a csv file
 The file must be a CSV file with only one column: "Id".
 One job can contain many batches, depending on the length of the CSV file.
-Returns a job ID and a batch ID. Use these IDs to check job status with data:bulk:status.
+Returns a job ID and a batch ID. Use these IDs to check job status with data:resume.
 
 # examples
 
-- $ sfdx force:data:bulk:delete -s Account -f ./path/to/file.csv
+- <%= config.bin %> <%= command.id %> -s Account -f ./path/to/file.csv
 
-- $ sfdx force:data:bulk:delete -s MyObject\_\_c -f ./path/to/file.csv
+- <%= config.bin %> <%= command.id %> -s MyObject\_\_c -f ./path/to/file.csv
 
 # flags.sobjecttype
 

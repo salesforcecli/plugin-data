@@ -40,7 +40,7 @@ Data plan file %s did not validate against the schema.
 
 # dataPlanValidationErrorAction1
 
-Did you run the force:data:tree:export command with the --plan flag?
+Did you run the data:export:tree command with the --plan flag?
 
 # dataPlanValidationErrorAction2
 
@@ -48,7 +48,7 @@ Make sure you are importing a plan file.
 
 # dataPlanValidationErrorAction3
 
-You can get help with the import plan schema by running $ sfdx force:data:tree:import --confighelp
+You can get help with the import plan schema by running <%= config.bin %> data:import:tree --config-help
 %s
 
 # FlsError

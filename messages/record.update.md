@@ -33,15 +33,15 @@ the <fieldName>=<value> pairs you’re updating
 
 # examples
 
-- $ sfdx force:data:record:update -s Account -i 001D000000Kv3dl -v "Name=NewAcme"
+- <%= config.bin %> <%= command.id %> -s Account -i 001D000000Kv3dl -v "Name=NewAcme"
 
-- $ sfdx force:data:record:update -s Account -w "Name='Old Acme'" -v "Name='New Acme'"
+- <%= config.bin %> <%= command.id %> -s Account -w "Name='Old Acme'" -v "Name='New Acme'"
 
-- $ sfdx force:data:record:update -s Account -i 001D000000Kv3dl -v "Name='Acme III' Website=www.example.com"
+- <%= config.bin %> <%= command.id %> -s Account -i 001D000000Kv3dl -v "Name='Acme III' Website=www.example.com"
 
-- $ sfdx force:data:record:update -t -s TraceFlag -i 7tf170000009cUBAAY -v "ExpirationDate=2017-12-01T00:58:04.000+0000"
+- <%= config.bin %> <%= command.id %> -t -s TraceFlag -i 7tf170000009cUBAAY -v "ExpirationDate=2017-12-01T00:58:04.000+0000"
 
-- $sfdx force:data:record:update -s Account -i 001D000000Kv3dl -v "Name=NewAcme" --perflog --json
+- <%= config.bin %> <%= command.id %> -s Account -i 001D000000Kv3dl -v "Name=NewAcme" --perflog --json
 
 # updateSuccess
 

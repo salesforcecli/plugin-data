@@ -8,7 +8,7 @@ bulk upsert records from a CSV file
 Inserts or updates records from a CSV file.
 
 One job can contain many batches, depending on the length of the CSV file.
-Returns a job ID and a batch ID. Use these IDs to check job status with data:bulk:status.
+Returns a job ID and a batch ID. Use these IDs to check job status with data:resume.
 
 For information about formatting your CSV file, see "Prepare CSV Files" in the Bulk API Developer Guide.
 
@@ -16,9 +16,9 @@ By default, the job runs the batches in parallel. Specify --serial to run them s
 
 # examples
 
-- $ sfdx force:data:bulk:upsert -s MyObject**c -f ./path/to/file.csv -i MyField**c
+- <%= config.bin %> <%= command.id %> -s MyObject**c -f ./path/to/file.csv -i MyField**c
 
-- $ sfdx force:data:bulk:upsert -s MyObject\_\_c -f ./path/to/file.csv -i Id -w 2
+- <%= config.bin %> <%= command.id %> -s MyObject\_\_c -f ./path/to/file.csv -i Id -w 2
 
 # flags.sobjecttype
 

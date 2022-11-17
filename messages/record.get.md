@@ -30,12 +30,12 @@ retrieve the record with Tooling API
 
 # examples
 
-- $ sfdx force:data:record:get -s Account -i 001D000000Kv3dl
+- <%= config.bin %> <%= command.id %> -s Account -i 001D000000Kv3dl
 
-- $ sfdx force:data:record:get -s Account -w "Name=Acme"
+- <%= config.bin %> <%= command.id %> -s Account -w "Name=Acme"
 
-- $ sfdx force:data:record:get -s Account -w "Name='Universal Containers'"
+- <%= config.bin %> <%= command.id %> -s Account -w "Name='Universal Containers'"
 
-- $ sfdx force:data:record:get -s Account -w "Name='Universal Containers' Phone='(123) 456-7890'"
+- <%= config.bin %> <%= command.id %> -s Account -w "Name='Universal Containers' Phone='(123) 456-7890'"
 
-- $ sfdx force:data:record:get -t -s TraceFlag -i 7tf170000009cUBAAY --perflog --json
+- <%= config.bin %> <%= command.id %> -t -s TraceFlag -i 7tf170000009cUBAAY --perflog --json

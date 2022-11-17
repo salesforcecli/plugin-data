@@ -22,7 +22,7 @@ Batch Status
 
 Will poll the batch statuses every %s seconds
 To fetch the status on your own, press CTRL+C and use the command:
-sfdx force:data:bulk:status -i %s -b [<batchId>]
+<%= config.bin %> data resume -i %s -b [<batchId>]
 
 # ExternalIdRequired
 
@@ -31,12 +31,12 @@ An External ID is required on %s to perform an upsert.
 # TimeOut
 
 The operation timed out. Check the status with command:
-sfdx force:data:bulk:status -i %s -b %s
+sfdx data:resume -i %s -b %s
 
 # CheckStatusCommand
 
 Check batch #%s’s status with the command:
-sfdx force:data:bulk:status -i %s -b %s
+<%= config.bin %> data resume -i %s -b %s
 
 # BatchQueued
 

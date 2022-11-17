@@ -11,17 +11,17 @@ To get data on API performance metrics, specify both --perflog and --json.
 
 # examples
 
-- $ sfdx force:data:soql:query -q "SELECT Id, Name, Account.Name FROM Contact"
+- <%= config.bin %> <%= command.id %> -q "SELECT Id, Name, Account.Name FROM Contact"
 
-- $ sfdx force:data:soql:query -q "SELECT Id, Name FROM Account WHERE ShippingState IN ('CA', 'NY')"
+- <%= config.bin %> <%= command.id %> -q "SELECT Id, Name FROM Account WHERE ShippingState IN ('CA', 'NY')"
 
-- $ sfdx force:data:soql:query -q "SELECT Id, Name FROM Account WHERE ShippingState IN ('CA', 'NY')" --perflog --json
+- <%= config.bin %> <%= command.id %> -q "SELECT Id, Name FROM Account WHERE ShippingState IN ('CA', 'NY')" --perflog --json
 
-- $ sfdx force:data:soql:query -q "SELECT Name FROM ApexTrigger" -t
+- <%= config.bin %> <%= command.id %> -q "SELECT Name FROM ApexTrigger" -t
 
-- $ sfdx force:data:soql:query --soqlqueryfile query.txt
+- <%= config.bin %> <%= command.id %> --soqlqueryfile query.txt
 
-- $ sfdx force:data:soql:query --soqlqueryfile query.txt -t
+- <%= config.bin %> <%= command.id %> --soqlqueryfile query.txt -t
 
 # flags.queryToExecute
 
@@ -35,9 +35,13 @@ execute query with Tooling API
 
 A SOQL query stored in a file
 
-# flags.async
+# flags.bulk
 
 use the bulk 2.0 API to query data
+
+# flags.async
+
+use bulk, but do not wait for job to complete
 
 # flags.wait
 
@@ -76,7 +80,7 @@ Unknown result format type. Must be one of the following values: %s
 Query ID: %s
 Query is in progress.
 
-Run sfdx force:data:soql:bulk:report -i %s -u %s to get the latest status/results
+Run <%= config.bin %> data resume -i %s -u %s to get the latest status/results
 
 # noResults
 

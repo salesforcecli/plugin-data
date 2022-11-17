@@ -5,13 +5,13 @@ view the status of a bulk data load job or batch
 # description
 
 view the status of a bulk data load job or batch
-Run this command using the job ID or batch ID returned from the force:data:bulk:delete or force:data:bulk:upsert commands.
+Run this command using the job ID or batch ID returned from the data:delete:bulk or data:upsert:bulk commands.
 
 # examples
 
-- $ sfdx force:data:bulk:status -i 750xx000000005sAAA
+- <%= config.bin %> <%= command.id %> -i 750xx000000005sAAA
 
-- $ sfdx force:data:bulk:status -i 750xx000000005sAAA -b 751xx000000005nAAA
+- <%= config.bin %> <%= command.id %> -i 750xx000000005sAAA -b 751xx000000005nAAA
 
 # flags.jobid
 

@@ -25,15 +25,15 @@ create the record with tooling api
 
 # examples
 
-- $ sfdx force:data:record:create -s Account -v "Name=Acme"
+- <%= config.bin %> <%= command.id %> -s Account -v "Name=Acme"
 
-- $ sfdx force:data:record:create -s Account -v "Name='Universal Containers'"
+- <%= config.bin %> <%= command.id %> -s Account -v "Name='Universal Containers'"
 
-- $ sfdx force:data:record:create -s Account -v "Name='Universal Containers' Website=www.example.com"
+- <%= config.bin %> <%= command.id %> -s Account -v "Name='Universal Containers' Website=www.example.com"
 
-- $ sfdx force:data:record:create -t -s TraceFlag -v "DebugLevelId=7dl170000008U36AAE StartDate=2017-12-01T00:26:04.000+0000 ExpirationDate=2017-12-01T00:56:04.000+0000 LogType=CLASS_TRACING TracedEntityId=01p17000000R6bLAAS"
+- <%= config.bin %> <%= command.id %> -t -s TraceFlag -v "DebugLevelId=7dl170000008U36AAE StartDate=2017-12-01T00:26:04.000+0000 ExpirationDate=2017-12-01T00:56:04.000+0000 LogType=CLASS_TRACING TracedEntityId=01p17000000R6bLAAS"
 
-- $ sfdx force:data:record:create -s Account -v "Name=Acme" --perflog --json
+- <%= config.bin %> <%= command.id %> -s Account -v "Name=Acme" --perflog --json
 
 # createSuccess
 
