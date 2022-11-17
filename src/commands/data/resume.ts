@@ -7,7 +7,7 @@
 import { BatchInfo, JobInfo } from 'jsforce/api/bulk';
 import { Messages, SfError } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
-import { orgFlags } from '../../../src/flags';
+import { orgFlags } from '../../flags';
 import { Batcher } from '../../batcher';
 
 Messages.importMessagesDirectory(__dirname);

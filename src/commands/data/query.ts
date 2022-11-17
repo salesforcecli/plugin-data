@@ -20,7 +20,7 @@ import {
 } from '@salesforce/ts-types';
 import { Duration } from '@salesforce/kit';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
-import { orgFlags, perflogFlag } from '../../../src/flags';
+import { orgFlags, perflogFlag } from '../../flags';
 import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../reporters';
 import { Field, FieldType, SoqlQueryResult } from '../../dataSoqlQueryTypes';
 

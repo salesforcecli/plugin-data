@@ -8,7 +8,7 @@ import * as fs from 'fs';
 import { Messages } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
-import { orgFlags } from '../../../../src/flags';
+import { orgFlags } from '../../../flags';
 import { Batcher, BatcherReturnType } from '../../../batcher';
 
 Messages.importMessagesDirectory(__dirname);

@@ -8,7 +8,7 @@
 import { Messages, SfError } from '@salesforce/core';
 import { SaveResult } from 'jsforce';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { orgFlags, perflogFlag } from '../../../../src/flags';
+import { orgFlags, perflogFlag } from '../../../flags';
 import { collectErrorMessages, query } from '../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);

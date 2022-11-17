@@ -7,7 +7,7 @@
 
 import { Messages } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
-import { orgFlags } from '../../../../src/flags';
+import { orgFlags } from '../../../flags';
 import { ExportApi, ExportConfig } from '../../../api/data/tree/exportApi';
 import { DataPlanPart, SObjectTreeFileContents } from '../../../dataSoqlQueryTypes';
 

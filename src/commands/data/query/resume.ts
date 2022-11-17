@@ -7,7 +7,7 @@
 import { Messages } from '@salesforce/core';
 import { QueryJobV2 } from 'jsforce/lib/api/bulk';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { orgFlags } from '../../../../src/flags';
+import { orgFlags } from '../../../flags';
 import { DataSoqlQueryCommand, displayResults, transformBulkResults } from '../query';
 import { FormatTypes } from '../../../reporters';
 
