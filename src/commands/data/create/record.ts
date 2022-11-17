@@ -8,7 +8,7 @@
 import { Messages } from '@salesforce/core';
 import { SaveResult } from 'jsforce';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { getVersionedConnection, orgFlags, perflogFlag } from '../../../../src/flags';
+import { orgFlags, perflogFlag } from '../../../../src/flags';
 import { stringToDictionary, collectErrorMessages } from '../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -48,9 +48,9 @@ export default class Create extends SfCommand<SaveResult> {
     this.spinner.start(`Creating record for ${flags.sobject}`);
 
     const sobject = (
-      flags.usetoolingapi
-        ? getVersionedConnection(flags['target-org'], flags['api-version']).tooling
-        : getVersionedConnection(flags['target-org'], flags['api-version'])
+      flags['use-tooling-api']
+        ? flags['target-org'].getConnection(flags['api-version']).tooling
+        : flags['target-org'].getConnection(flags['api-version'])
     ).sobject(flags.sobject);
     const values = stringToDictionary(flags.values);
     const result = await sobject.insert(values);

@@ -20,7 +20,7 @@ import {
 } from '@salesforce/ts-types';
 import { Duration } from '@salesforce/kit';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
-import { getVersionedConnection, orgFlags, perflogFlag } from '../../../src/flags';
+import { orgFlags, perflogFlag } from '../../../src/flags';
 import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../reporters';
 import { Field, FieldType, SoqlQueryResult } from '../../dataSoqlQueryTypes';
 
@@ -54,19 +54,23 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
       aliases: ['usetoolingapi'],
       deprecateAliases: true,
     }),
-    async: Flags.boolean({
+    bulk: Flags.boolean({
       char: 'b',
       default: false,
-      summary: messages.getMessage('flags.async'),
+      summary: messages.getMessage('flags.bulk'),
       exclusive: ['use-tooling-api'],
-      aliases: ['bulk'],
-      deprecateAliases: true,
     }),
     wait: Flags.duration({
       unit: 'minutes',
       char: 'w',
       summary: messages.getMessage('flags.wait'),
-      dependsOn: ['async'],
+      dependsOn: ['bulk'],
+      exclusive: ['async'],
+    }),
+    async: Flags.boolean({
+      summary: messages.getMessage('flags.async'),
+      dependsOn: ['bulk'],
+      exclusive: ['wait'],
     }),
     // TODO: use union type from
     'result-format': Flags.enum({
@@ -106,11 +110,11 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
       // soqlqueryfile will be be present if flags.query isn't. Oclif exactlyOne isn't quite that clever
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const queryString = flags.query ?? fs.readFileSync(flags.file, 'utf8');
-      const conn = getVersionedConnection(flags['target-org'], flags['api-version']);
+      const conn = flags['target-org'].getConnection(flags['api-version']);
       const ux = new Ux({ jsonEnabled: this.jsonEnabled() });
       if (flags['result-format'] !== 'json') this.spinner.start(messages.getMessage('queryRunningMessage'));
-      const queryResult = flags.async
-        ? await runBulkSoqlQuery(conn, queryString, flags.wait, ux)
+      const queryResult = flags.bulk
+        ? await runBulkSoqlQuery(conn, queryString, flags.async ? Duration.minutes(0) : flags.wait, ux)
         : await runSoqlQuery(
             flags['use-tooling-api'] ? conn.tooling : conn,
             queryString,

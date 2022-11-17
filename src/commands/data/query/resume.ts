@@ -7,7 +7,7 @@
 import { Messages } from '@salesforce/core';
 import { QueryJobV2 } from 'jsforce/lib/api/bulk';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { getVersionedConnection, orgFlags } from '../../../../src/flags';
+import { orgFlags } from '../../../../src/flags';
 import { DataSoqlQueryCommand, displayResults, transformBulkResults } from '../query';
 import { FormatTypes } from '../../../reporters';
 
@@ -41,13 +41,15 @@ export class BulkQueryReport extends SfCommand<unknown> {
       operation: 'query',
       pollingOptions: { pollTimeout: 0, pollInterval: 0 },
       query: '',
-      connection: getVersionedConnection(flags['target-org'], flags['api-version']),
+      connection: flags['target-org'].getConnection(flags['api-version']),
     });
     job.jobInfo = { id: flags['bulk-query-id'] };
     const results = await job.getResults();
     const queryResult = transformBulkResults(results, '');
 
-    displayResults({ ...queryResult }, flags.resultformat as keyof typeof FormatTypes);
+    if (!this.jsonEnabled()) {
+      displayResults({ ...queryResult }, flags['result-format'] as keyof typeof FormatTypes);
+    }
     return queryResult.result;
   }
 }

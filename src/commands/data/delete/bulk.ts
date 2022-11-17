@@ -9,7 +9,7 @@ import { ReadStream } from 'fs';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
-import { getVersionedConnection, orgFlags } from '../../../../src/flags';
+import { orgFlags } from '../../../../src/flags';
 import { Batcher, BatcherReturnType } from '../../../batcher';
 
 Messages.importMessagesDirectory(__dirname);
@@ -58,7 +58,7 @@ export default class Delete extends SfCommand<BatcherReturnType> {
     let result: BatcherReturnType;
 
     try {
-      const conn: Connection = getVersionedConnection(flags['target-org'], flags['api-version']);
+      const conn: Connection = flags['target-org'].getConnection(flags['api-version']);
       this.spinner.start('Bulk Delete');
 
       const csvRecords: ReadStream = fs.createReadStream(flags.file, { encoding: 'utf-8' });

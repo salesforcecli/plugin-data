@@ -9,7 +9,7 @@ import { Messages, SfError } from '@salesforce/core';
 import { Record } from 'jsforce';
 import { toAnyJson } from '@salesforce/ts-types';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { orgFlags, perflogFlag, getVersionedConnection } from '../../../../src/flags';
+import { orgFlags, perflogFlag } from '../../../../src/flags';
 import { query, logNestedObject } from '../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -55,8 +55,8 @@ export default class Get extends SfCommand<Record> {
     const { flags } = await this.parse(Get);
     this.spinner.start('Getting Record');
     const conn = flags['use-tooling-api']
-      ? getVersionedConnection(flags['target-org'], flags['api-version']).tooling
-      : getVersionedConnection(flags['target-org'], flags['api-version']);
+      ? flags['target-org'].getConnection(flags['api-version']).tooling
+      : flags['target-org'].getConnection(flags['api-version']);
     try {
       const sObjectId = flags['record-id'] ?? (await query(conn, flags.sobject, flags.where)).Id;
       const result = await conn.sobject(flags.sobject).retrieve(sObjectId);

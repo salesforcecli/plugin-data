@@ -8,7 +8,7 @@ import * as fs from 'fs';
 import { Messages } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
-import { getVersionedConnection, orgFlags } from '../../../../src/flags';
+import { orgFlags } from '../../../../src/flags';
 import { Batcher, BatcherReturnType } from '../../../batcher';
 
 Messages.importMessagesDirectory(__dirname);
@@ -60,7 +60,7 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
 
   public async run(): Promise<BatcherReturnType> {
     const { flags } = await this.parse(Upsert);
-    const conn = getVersionedConnection(flags['target-org'], flags['api-version']);
+    const conn = flags['target-org'].getConnection(flags['api-version']);
     this.spinner.start('Bulk Upsert');
 
     const batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));

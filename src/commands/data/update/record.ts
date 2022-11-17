@@ -8,7 +8,7 @@
 import { Messages, SfError } from '@salesforce/core';
 import { SaveError, SaveResult } from 'jsforce';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { orgFlags, getVersionedConnection } from '../../../../src/flags';
+import { orgFlags } from '../../../../src/flags';
 import { collectErrorMessages, query, stringToDictionary } from '../../../dataCommand';
 
 Messages.importMessagesDirectory(__dirname);
@@ -47,9 +47,11 @@ export default class Update extends SfCommand<SaveResult> {
       required: true,
       summary: messages.getMessage('flags.values'),
     }),
-    usetoolingapi: Flags.boolean({
+    'use-tooling-api': Flags.boolean({
       char: 't',
       summary: messages.getMessage('flags.useToolingApi'),
+      aliases: ['usetoolingapi'],
+      deprecateAliases: true,
     }),
     perflog: Flags.boolean({
       summary: commonMessages.getMessage('perfLogLevelOption'),
@@ -66,8 +68,8 @@ export default class Update extends SfCommand<SaveResult> {
 
     let status = 'Success';
     const conn = flags['use-tooling-api']
-      ? getVersionedConnection(flags['target-org'], flags['api-version']).tooling
-      : getVersionedConnection(flags['target-org'], flags['api-version']);
+      ? flags['target-org'].getConnection(flags['api-version']).tooling
+      : flags['target-org'].getConnection(flags['api-version']);
     const sObjectId = flags['record-id'] ?? (await query(conn, flags.sobject, flags.where)).Id;
     try {
       const updateObject = { ...stringToDictionary(flags.values), Id: sObjectId };
