@@ -80,7 +80,7 @@ Unknown result format type. Must be one of the following values: %s
 Query ID: %s
 Query is in progress.
 
-Run <%= config.bin %> data resume -i %s -u %s to get the latest status/results
+Run <%= config.bin %> data resume -i %s -o %s to get the latest status/results
 
 # noResults
 

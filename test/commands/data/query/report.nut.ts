@@ -5,10 +5,29 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import * as path from 'path';
-import { expect } from 'chai';
+import { expect, config } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-import { QueryResult } from 'jsforce';
+import { QueryResult, Record } from 'jsforce';
 import { sleep } from '@salesforce/kit';
+import { JobInfoV2 } from 'jsforce/api/bulk';
+config.truncateThreshold = 0;
+
+/** Verify that the operation completed successfully and results are available before attempting to do stuff with the results */
+const isCompleted = async (cmd: string): Promise<void> => {
+  let complete = false;
+  while (!complete) {
+    // eslint-disable-next-line no-await-in-loop
+    await sleep(2000);
+    const result = execCmd<QueryResult<Record> | JobInfoV2>(cmd);
+    if (result.jsonOutput.status === 0) {
+      if ('state' in result.jsonOutput.result && result.jsonOutput.result.state === 'JobComplete') {
+        complete = true;
+      } else if ('done' in result.jsonOutput.result && result.jsonOutput.result.done) {
+        complete = true;
+      }
+    }
+  }
+};
 
 describe('data:soql:bulk:report command', () => {
   let testSession: TestSession;
@@ -52,7 +71,9 @@ describe('data:soql:bulk:report command', () => {
           ensureExitCode: 0,
         }
       ).jsonOutput?.result?.id;
-      await sleep(2000);
+
+      await isCompleted(`force:data:soql:bulk:report -i ${bulkQueryId} --json`);
+
       const result = execCmd(`force:data:soql:bulk:report -i ${bulkQueryId}`, { ensureExitCode: 0 }).shellOutput.stdout;
       expect(result).to.not.include('[object Object]');
       expect(result).to.include('System Administrator');
@@ -75,7 +96,7 @@ describe('data:soql:bulk:report command', () => {
           ensureExitCode: 0,
         }
       ).jsonOutput?.result?.id;
-      await sleep(2000);
+      await isCompleted(`force:data:soql:bulk:report -i ${bulkQueryId} --json`);
 
       const result = execCmd(`force:data:soql:bulk:report -i ${bulkQueryId}`, { ensureExitCode: 0 }).shellOutput.stdout;
       expect(result).to.match(/ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY/g);
@@ -89,7 +110,7 @@ describe('data:soql:bulk:report command', () => {
           ensureExitCode: 0,
         }
       ).jsonOutput?.result?.id;
-      await sleep(2000);
+      await isCompleted(`force:data:soql:bulk:report -i ${bulkQueryId} --json`);
 
       const result = execCmd(`force:data:soql:bulk:report -i ${bulkQueryId}`, { ensureExitCode: 0 }).shellOutput.stdout;
       expect(result).to.match(/Total number of records retrieved: \d/g);
@@ -103,7 +124,9 @@ describe('data:soql:bulk:report command', () => {
           ensureExitCode: 0,
         }
       ).jsonOutput?.result?.id;
-      await sleep(2000);
+
+      await isCompleted(`force:data:soql:bulk:report -i ${bulkQueryId} --json`);
+
       const result = execCmd(`force:data:soql:bulk:report -i ${bulkQueryId} -r json`, { ensureExitCode: 0 }).shellOutput
         .stdout;
       // the Metadata object parsed correctly

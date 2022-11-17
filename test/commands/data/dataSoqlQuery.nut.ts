@@ -8,8 +8,10 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { strict as assert } from 'assert';
 import { Dictionary, getString } from '@salesforce/ts-types';
-import { expect } from 'chai';
+import { expect, config } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
+
+config.truncateThreshold = 0;
 
 export interface QueryResult {
   totalSize: number;
@@ -320,9 +322,7 @@ describe('data:soql:query command', () => {
         }
       ).shellOutput.stdout;
 
-      expect(queryResult).to.match(
-        /Run sfdx force:data:soql:bulk:report -i .* -u .* to get the latest status\/results/g
-      );
+      expect(queryResult).to.match(/Run .* data resume -i .* -o .* to get the latest status\/results/g);
     });
   });
 });
