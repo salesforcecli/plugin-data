@@ -9,8 +9,6 @@ The format of a field-value pair is <fieldName>=<value>.
 Enclose all field-value pairs in one set of double quotation marks, delimited by spaces.
 Enclose values that contain spaces in single quotes.
 
-To get data on API performance metrics, specify both --perflog and --json.
-
 # flags.sobject
 
 the type of the record you’re creating

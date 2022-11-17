@@ -7,8 +7,6 @@ execute a SOQL query
 execute a SOQL query
 When you execute this command in a project, it executes the query against the data in your default scratch org.
 
-To get data on API performance metrics, specify both --perflog and --json.
-
 # examples
 
 - <%= config.bin %> <%= command.id %> -q "SELECT Id, Name, Account.Name FROM Contact"
