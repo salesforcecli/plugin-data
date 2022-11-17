@@ -23,33 +23,9 @@
       "@salesforce/plugin-command-reference"
     ],
     "topics": {
-      "force": {
-        "description": "tools for the Salesforce developer",
-        "subtopics": {
-          "data": {
-            "description": "manipulate records in your org",
-            "longDescription": "Use the data commands to manipulate records in your org. Commands are available to help you work with various APIs. Import CSV files with the Bulk API. Export and import data with the SObject Tree Save API. Perform simple CRUD operations on individual records with the REST API.",
-            "subtopics": {
-              "bulk": {
-                "description": "manipulate records using the bulk API"
-              },
-              "record": {
-                "description": "manipulate records using the enterprise API"
-              },
-              "soql": {
-                "description": "fetch records using SOQL",
-                "subtopics": {
-                  "bulk": {
-                    "description": "fetch records using the bulk 2.0 API"
-                  }
-                }
-              },
-              "tree": {
-                "description": "import/export records using the tree API"
-              }
-            }
-          }
-        }
+      "data": {
+        "description": "manipulate records in your org",
+        "longDescription": "Use the data commands to manipulate records in your org. Commands are available to help you work with various APIs. Import CSV files with the Bulk API. Export and import data with the SObject Tree Save API. Perform simple CRUD operations on individual records with the REST API."
       }
     }
   },
