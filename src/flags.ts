@@ -5,8 +5,13 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { Flags as oclifFlags } from '@oclif/core';
-import { Connection, Messages, Org } from '@salesforce/core';
-import { Flags } from '@salesforce/sf-plugins-core';
+import { Messages } from '@salesforce/core';
+import {
+  Flags,
+  loglevel,
+  orgApiVersionFlagWithDeprecations,
+  requiredOrgFlagWithDeprecations,
+} from '@salesforce/sf-plugins-core';
 
 export const stringArrayFlag = oclifFlags.custom<string[]>({
   parse: async (input) => Promise.resolve(input.split(',').map((s) => s.trim())),
@@ -19,14 +24,6 @@ const messages = Messages.load('@salesforce/plugin-data', 'messages', [
   'perfLogLevelOptionLong',
 ]);
 
-const targetOrgFlag = Flags.requiredOrg({
-  required: true,
-  char: 'o',
-  summary: messages.getMessage('flags.target-org'),
-  aliases: ['targetusername', 'u'],
-  deprecateAliases: true,
-});
-
 export const perflogFlag = Flags.boolean({
   summary: messages.getMessage('perfLogLevelOption'),
   description: messages.getMessage('perfLogLevelOptionLong'),
@@ -36,28 +33,8 @@ export const perflogFlag = Flags.boolean({
   },
 });
 
-const apiVersionFlag = Flags.orgApiVersion({
-  aliases: ['apiversion'],
-  deprecateAliases: true,
-});
-
-const loglevel = Flags.string({
-  hidden: true,
-  deprecated: {
-    message: 'The loglevel flag is no longer in use.  You may use it without error, but it will be ignored.',
-  },
-});
-
 export const orgFlags = {
-  'target-org': targetOrgFlag,
-  'api-version': apiVersionFlag,
+  'target-org': requiredOrgFlagWithDeprecations,
+  'api-version': orgApiVersionFlagWithDeprecations,
   loglevel,
-};
-
-export const getVersionedConnection = (org: Org, apiVersion?: string): Connection => {
-  const conn = org.getConnection();
-  if (apiVersion) {
-    conn.setApiVersion(apiVersion);
-  }
-  return conn;
 };
