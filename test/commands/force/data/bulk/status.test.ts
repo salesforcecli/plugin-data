@@ -17,19 +17,15 @@ describe('force:data:bulk:status', () => {
   test
     .do(() => {
       const Job = {
-        getAuthInfoFields: () => {
-          return { orgId: '123' };
-        },
+        getAuthInfoFields: () => ({ orgId: '123' }),
         bulk: {
-          job: () => {
-            return {
+          job: () => ({
               id: '75054000006yv68AAA',
               state: 'Open',
               options: {},
               type: null,
               operation: null,
-              list: () => {
-                return [
+              list: () => [
                   {
                     id: '751540000070aNsAAI',
                     jobId: '75054000006yv68AAA',
@@ -42,10 +38,8 @@ describe('force:data:bulk:status', () => {
                     apiActiveProcessingTime: '55',
                     apexProcessingTime: '0',
                   },
-                ];
-              },
-            };
-          },
+                ],
+            }),
         },
       };
       stubMethod($$.SANDBOX, Org.prototype, 'getConnection').returns(Job);
@@ -71,19 +65,15 @@ describe('force:data:bulk:status', () => {
   test
     .do(() => {
       const Job = {
-        getAuthInfoFields: () => {
-          return { orgId: '123' };
-        },
+        getAuthInfoFields: () => ({ orgId: '123' }),
         bulk: {
-          job: () => {
-            return {
+          job: () => ({
               id: '75054000006yv68AAA',
               state: 'Open',
               options: {},
               type: null,
               operation: null,
-              list: () => {
-                return [
+              list: () => [
                   {
                     id: '751540000070aNsAAI',
                     jobId: '75054000006yv68AAA',
@@ -96,10 +86,8 @@ describe('force:data:bulk:status', () => {
                     apiActiveProcessingTime: '55',
                     apexProcessingTime: '0',
                   },
-                ];
-              },
-            };
-          },
+                ],
+            }),
         },
       };
       stubMethod($$.SANDBOX, Org.prototype, 'getConnection').returns(Job);
