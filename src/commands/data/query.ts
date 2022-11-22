@@ -6,7 +6,7 @@
  */
 
 import * as fs from 'fs';
-import { Connection, Logger, Messages, SfError } from '@salesforce/core';
+import { Connection, Lifecycle, Logger, Messages, SfError } from '@salesforce/core';
 import { Record } from 'jsforce';
 import {
   AnyJson,
@@ -125,6 +125,7 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
       if (!this.jsonEnabled()) {
         // TODO: make the enum or string/options work correctly
         displayResults({ ...queryResult }, flags['result-format'] as keyof typeof FormatTypes);
+        await Lifecycle.getInstance().emit('foo', 'bar');
       }
       return queryResult.result;
     } finally {

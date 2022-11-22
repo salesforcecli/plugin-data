@@ -22,6 +22,9 @@
       "@oclif/plugin-command-snapshot",
       "@salesforce/plugin-command-reference"
     ],
+    "hooks": {
+      "foo": "./lib/hooks/foo"
+    },
     "topics": {
       "data": {
         "description": "manipulate records in your org",
