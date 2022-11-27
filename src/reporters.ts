@@ -166,7 +166,7 @@ export class HumanReporter extends QueryReporter {
     // There are subqueries or aggregates. Massage the data.
     let qr;
     if (children.length > 0 || aggregates.length > 0) {
-      qr = queryResults.reduce((newResults: unknown[], result) => {
+      qr = queryResults.reduce<unknown[]>((newResults: unknown[], result) => {
         // Aggregates are soql functions that aggregate data, like "SELECT avg(total)" and
         // are returned in the data as exprX. Aggregates can have aliases, like "avg(total) totalAverage"
         // and are returned in the data as the alias.
@@ -216,7 +216,7 @@ export class HumanReporter extends QueryReporter {
         }
         newResults.push(result, ...subResults);
         return newResults;
-      }, [] as unknown[]);
+      }, []);
     }
     return qr ?? queryResults;
   }
@@ -251,9 +251,7 @@ export class CsvReporter extends QueryReporter {
     // begin output
     this.log(
       attributeNames
-        .map((name) => {
-          return this.escape(name);
-        })
+        .map((name) => this.escape(name))
         .join(SEPARATOR)
     );
 
