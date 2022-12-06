@@ -11,7 +11,7 @@ import { expect } from 'chai';
 import { Config } from '@oclif/core';
 import { DataCommand } from '../../../../src/dataCommand';
 
-describe.only('dataCommand', () => {
+describe('dataCommand', () => {
   // This is a test class that extends DataCommand so that we can test protected methods
   class DataCommandInstance extends DataCommand {
     // The `run` method is abstract in SfdxCommand, so we need to implement it but it doesn't need to do anything
