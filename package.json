@@ -90,7 +90,7 @@
     "@oclif/core": "^1.20.0",
     "@salesforce/core": "^3.32.1",
     "@salesforce/kit": "^1.7.0",
-    "@salesforce/sf-plugins-core": "^1.19.2",
+    "@salesforce/sf-plugins-core": "^1.21.0",
     "@salesforce/ts-types": "^1.7.1",
     "@types/fs-extra": "^9.0.13",
     "chalk": "^4.1.0",
