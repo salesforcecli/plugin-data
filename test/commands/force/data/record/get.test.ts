@@ -95,6 +95,6 @@ describe('force:data:record:get', () => {
     .it('should throw an error if values provided to where flag are invalid', (ctx) => {
       const result = JSON.parse(ctx.stdout) as GetResult;
       expect(result.status).to.equal(1);
-      expect(result.name).to.equal('Malformed key=value pair for value: "Name"');
+      expect(result.name).to.equal('Malformed key=value pair for value: Name');
     });
 });

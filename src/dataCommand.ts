@@ -222,26 +222,52 @@ export abstract class DataCommand extends SfdxCommand {
   }
 
   /**
-   * Splits a sequence of "key=value key=leftValue rightValue   key=value"
-   * into a list of key=value pairs, paying attention to whitespace in values.
-   *
-   * e.g. "key=value key=leftValue rightValue   key=value0"
-   * becomes ["key=value", "key=leftValue rightValue", "key=value"]
+   * Splits a sequence of 'key=value key="leftValue rightValue"   key=value'
+   * into a list of key=value pairs, paying attention to quoted whitespace.
    *
    * This is NOT a full push down-automaton so do NOT expect full error handling/recovery.
    *
    * @param {string} text - The sequence to split
    */
   private parseKeyValueSequence(text: string): string[] {
-    // The regex below uses a positive lookbehind and a positive lookahead to split the string into key=value pairs
-    //   regardless of whitespace or single quotes in the values
-    // Use regex101.com and paste this regex to see how it works
-    const matches = text.match(/(\S+)=(?<=['"]?)([\d\w'"\s]+)(?=\s|$)/g);
+    const separator = /\s/;
 
-    if (matches === null) {
-      throw new Error(messages.getMessage('TextUtilMalformedKeyValuePair', [text]));
+    let inSingleQuote = false;
+    let inDoubleQuote = false;
+    let currentToken: string[] = [];
+    const keyValuePairs: string[] = [];
+
+    const trimmedText = text.trim();
+
+    const singleQuoteCount = (trimmedText.match(/'/g) || []).length;
+    const doubleQuoteCount = (trimmedText.match(/"/g) || []).length;
+
+    for (const currentChar of trimmedText) {
+      const isSeparator = separator.exec(currentChar) !== null;
+
+      if (currentChar === "'" && !inDoubleQuote && singleQuoteCount >= 2) {
+        inSingleQuote = !inSingleQuote;
+        continue;
+      } else if (currentChar === '"' && !inSingleQuote && doubleQuoteCount >= 2) {
+        inDoubleQuote = !inDoubleQuote;
+        continue;
+      }
+
+      if (!inSingleQuote && !inDoubleQuote && isSeparator) {
+        if (currentToken.length > 0) {
+          keyValuePairs.push(currentToken.join(''));
+          currentToken = [];
+        }
+      } else {
+        currentToken.push(currentChar);
+      }
     }
 
-    return matches.map((match) => match.trim());
+    // For the case of only one key=value pair with no separator
+    if (currentToken.length > 0) {
+      keyValuePairs.push(currentToken.join(''));
+    }
+
+    return keyValuePairs;
   }
 }
