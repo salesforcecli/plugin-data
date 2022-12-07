@@ -243,7 +243,7 @@ export abstract class DataCommand extends SfdxCommand {
     const doubleQuoteCount = (trimmedText.match(/"/g) || []).length;
 
     for (const currentChar of trimmedText) {
-      const isSeparator = separator.exec(currentChar) !== null;
+      const isSeparator = separator.test(currentChar);
 
       if (currentChar === "'" && !inDoubleQuote && singleQuoteCount >= 2) {
         inSingleQuote = !inSingleQuote;
