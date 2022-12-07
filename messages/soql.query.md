@@ -8,7 +8,7 @@ Specify the SOQL query at the command line with the --query flag or read the que
 
 If your query returns more than 10,000 records, specify the --bulk flag. The command then runs the query using Bulk API 2.0, which has higher limits than the default API used by the command.
 
-When using --bulk, the command waits 3 minutes by default for the query to complete. Use the --wait parameter to specify a different number of minutes to wait, or set --wait to 0 to immediately return control to the terminal. If you don't wait for the command to complete, or you use the --async flag, the command displays an ID. Pass this ID to the the "data query resume" command using the --bulk-query-id flag to get the results; pass the ID to the "data resume" command to get the status.
+When using --bulk, the command waits 3 minutes by default for the query to complete. Use the --wait parameter to specify a different number of minutes to wait, or set --wait to 0 to immediately return control to the terminal. If you set --wait to 0, or you use the --async flag, or the command simply times out, the command displays an ID. Pass this ID to the the "data query resume" command using the --bulk-query-id flag to get the results; pass the ID to the "data resume" command to get the job status.
 
 # examples
 
@@ -16,11 +16,11 @@ When using --bulk, the command waits 3 minutes by default for the query to compl
 
   <%= config.bin %> <%= command.id %> --query "SELECT Id, Name, Account.Name FROM Contact"
 
-- Read the SOQL query from a file called "query.txt":
+- Read the SOQL query from a file called "query.txt"; the command uses the org with alias "my-scratch":
 
-  <%= config.bin %> <%= command.id %> --file query.txt
+  <%= config.bin %> <%= command.id %> --file query.txt --target-org my-scratch
 
-- Use the Tooling API rather than the Metadata API to run the query:
+- Use Tooling API to run a query on the ApexTrigger Tooling API object:
 
   <%= config.bin %> <%= command.id %> --query "SELECT Name FROM ApexTrigger" --use-tooling-api
 
@@ -34,7 +34,7 @@ SOQL query to execute.
 
 # flags.useToolingApi
 
-Execute the query with Tooling API.
+Use Tooling API so you can run queries on Tooling API objects.
 
 # flags.file
 
