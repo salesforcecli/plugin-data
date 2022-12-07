@@ -62,34 +62,46 @@ describe('dataCommand', () => {
   });
 
   it('should allow single quotes in key=value pairs', () => {
-    const dict = dataCommand.testStringToDictionary('key1="val\'ue"');
+    let dict = dataCommand.testStringToDictionary('key="val\'ue"');
 
     expect(dict).to.deep.equal({
-      key1: "val'ue",
+      key: "val'ue",
+    });
+
+    dict = dataCommand.testStringToDictionary("key=val'ue");
+
+    expect(dict).to.deep.equal({
+      key: "val'ue",
     });
   });
 
   it('should allow double quotes in key=value pairs', () => {
-    const dict = dataCommand.testStringToDictionary("key1='val\"ue'");
+    let dict = dataCommand.testStringToDictionary("key='val\"ue'");
 
     expect(dict).to.deep.equal({
-      key1: 'val"ue',
+      key: 'val"ue',
+    });
+
+    dict = dataCommand.testStringToDictionary('key=val"ue');
+
+    expect(dict).to.deep.equal({
+      key: 'val"ue',
     });
   });
 
   it('should allow non alphanumeric characters in key=value pairs', () => {
-    const dict = dataCommand.testStringToDictionary('key1=!@#$%^&*()-_=+[{]}\\|;:,<.>/?`~');
+    const dict = dataCommand.testStringToDictionary('key=!@#$%^&*()-_=+[{]}\\|;:,<.>/?`~');
 
     expect(dict).to.deep.equal({
-      key1: '!@#$%^&*()-_=+[{]}\\|;:,<.>/?`~',
+      key: '!@#$%^&*()-_=+[{]}\\|;:,<.>/?`~',
     });
   });
 
   it('should allow weird or foreign unicode characters in key=value pairs', () => {
-    const dict = dataCommand.testStringToDictionary('key1=♣♦♥♠&£ë╤è☺¼Φ╚↕↓㍿々');
+    const dict = dataCommand.testStringToDictionary('key=♣♦♥♠&£ë╤è☺¼Φ╚↕↓㍿々');
 
     expect(dict).to.deep.equal({
-      key1: '♣♦♥♠&£ë╤è☺¼Φ╚↕↓㍿々',
+      key: '♣♦♥♠&£ë╤è☺¼Φ╚↕↓㍿々',
     });
   });
 });
