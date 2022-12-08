@@ -1,44 +1,47 @@
 # summary
 
-import data into an org
+Import data from one or more JSON files into an org.
 
 # description
 
-import data into an org
-IMPORTANT: Where possible, we changed noninclusive terms to align with our company value of Equality. We maintained certain terms to avoid any effect on customer implementations.
+The JSON files that contain the data are in sObject tree format, which is a collection of nested, parent-child records with a single root record. Use the "<%= config.bin %> data export tree" command to generate these JSON files.
 
-Imports data into an org using the SObject Tree Save API. This data can include master-detail relationships.
-To generate JSON files for use with data:import:tree, run "<%= config.bin %> data:export:tree".
-The SObject Tree API supports requests that contain up to 200 records. For more information, see the REST API Developer Guide: https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobject_tree.htm
+If you used the --plan flag when exporting the data to generate a plan definition file, use the --plan flag to reference the file when you import. If you're not using a plan, use the --files flag to list the files. If you specify multiple JSON files that depend on each other in a parent-child relationship, be sure you list them in the correct order.
+
+The sObject Tree API supports requests that contain up to 200 records. For more information, see the REST API Developer Guide. (https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobject_tree.htm)
 
 # flags.files
 
-comma-delimited, ordered paths of json files containing collection of record trees to insert
+Comma-separated and in-order JSON files that contain the records, in sObject tree format, that you want to insert.
 
 # flags.plan
 
-path to plan to insert multiple data files that have master-detail relationships
+Plan definition file to insert multiple data files.
 
 # flags.contenttype
 
-if data file extension is not .json, provide content type (applies to all files)
+Content type of import files if their extention is not .json.
 
 # flags.confighelp
 
-display schema information for the --plan configuration file to stdout; if you use this option, all other options except --json are ignored
+Display schema information for the --plan configuration file to stdout; if you specify this flag, all other flags except --json are ignored.
 
 # examples
 
-- <%= config.bin %> <%= command.id %> -f Contact.json,Account.json -u me@my.org
+- Import the records contained in two JSON files into the org with alias "my-scratch":
 
-- <%= config.bin %> <%= command.id %> -p Account-Contact-plan.json -u me@my.org
+  <%= config.bin %> <%= command.id %> --files Contact.json,Account.json --target-org my-scratch
+
+- Import records using a plan definition file into your default org:
+
+  <%= config.bin %> <%= command.id %> --plan Account-Contact-plan.json
 
 # importFailure
 
-Data plan file %s did not validate against the schema.
+Plan definition file %s did not validate against the schema.
 
 # importFailureActions
 
-Did you run the data:export:tree command with the --plan flag?
-Make sure you are importing a plan file.
-You can get help with the import plan schema by running <%= config.bin %> data:import:tree --confighelp
+Did you run the "<%- config.bin %> data export tree" command with the --plan flag?
+Make sure you're importing a plan file.
+Get help with the import plan schema by running "<%= config.bin %> data import tree --confighelp".

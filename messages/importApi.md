@@ -4,7 +4,7 @@ Provide a data plan or file(s).
 
 # dataFileNotFound
 
-Cannot find data file. Indicate a valid path: %s.
+Can't find data file. Indicate a valid path: %s.
 
 # unknownContentType
 
@@ -20,15 +20,15 @@ Data file is empty: %s.
 
 # dataFileInvalidJson
 
-data file is invalid JSON: %s
+Data file is invalid JSON: %s
 
 # dataFileNoRefId
 
-Found references in file, but no reference-id content found (%s). Was parent SObjects saved first?
+Found references in file, but no reference-id content found (%s). Were parent SObjects saved first?
 
 # tooManyFiles
 
-Specify either sobjecttreefiles or a plan, but not both.
+Specify either sObject tree files or a plan definition file, but not both.
 
 # dataImportFailed
 
@@ -40,15 +40,15 @@ Data plan file %s did not validate against the schema.
 
 # dataPlanValidationErrorAction1
 
-Did you run the data:export:tree command with the --plan flag?
+Did you run the "<%= config.bin %> data export tree" command with the --plan flag?
 
 # dataPlanValidationErrorAction2
 
-Make sure you are importing a plan file.
+Make sure you're importing a plan definition file.
 
 # dataPlanValidationErrorAction3
 
-You can get help with the import plan schema by running <%= config.bin %> data:import:tree --config-help
+Get help with the import plan schema by running "<%= config.bin %> data import tree --config-help".
 %s
 
 # FlsError
