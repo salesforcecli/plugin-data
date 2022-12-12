@@ -10,7 +10,7 @@ When you execute this command, it starts a job and one or more batches, displays
 
 See "Prepare CSV Files" in the Bulk API Developer Guide for details on formatting your CSV file. (https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/datafiles_csv_preparing.htm)
 
-By default, the job runs the batches in parallel. Specify --serial to run them serially.
+By default, the job runs the batches in parallel, which we recommend. You can run jobs serially by specifying the --serial flag. But don't process data in serial mode unless you know this would otherwise result in lock timeouts and you can't reorganize your batches to avoid the locks.
 
 # examples
 

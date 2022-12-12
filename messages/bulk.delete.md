@@ -1,28 +1,31 @@
 # summary
 
-bulk delete records from a csv file
+Bulk delete records from an org using a CSV file.
 
 # description
 
-bulk delete records from a csv file
-The file must be a CSV file with only one column: "Id".
-One job can contain many batches, depending on the length of the CSV file.
-Returns a job ID and a batch ID. Use these IDs to check job status with data:resume.
+The CSV file must have only one column ("Id") and then the list of record IDs you want to delete, one ID per line.
+
+When you execute this command, it starts a job and one or more batches, displays their IDs, and then immediately returns control of the terminal to you by default. If you prefer to wait, set the --wait flag to the number of minutes; if it times out, the command outputs the IDs. Use the job and batch IDs to check the status of the job with the "<%= config.bin %> data resume" command. A single job can contain many batches, depending on the length of the CSV file.
 
 # examples
 
-- <%= config.bin %> <%= command.id %> -s Account -f ./path/to/file.csv
+- Bulk delete Account records using the list of IDs in the "files/delete.csv" file:
 
-- <%= config.bin %> <%= command.id %> -s MyObject\_\_c -f ./path/to/file.csv
+  <%= config.bin %> <%= command.id %> --sobject Account --file files/delete.csv
+
+- Bulk delete records from a custom object and wait 5 minutes for the command to complete:
+
+  <%= config.bin %> <%= command.id %> --sobject MyObject\_\_c --file files/delete.csv --wait 5
 
 # flags.sobjecttype
 
-the sObject type of the records you’re deleting
+Salesforce object, either standard or custom, that you want to delete records from.
 
 # flags.csvfile
 
-the path to the CSV file containing the ids of the records to delete
+CSV file that contains the IDs of the records to delete.
 
 # flags.wait
 
-the number of minutes to wait for the command to complete before displaying the results
+Number of minutes to wait for the command to complete before displaying the results.
