@@ -32,7 +32,7 @@ CSV file that contains the records to upsert.
 
 # flags.externalid
 
-Field name of the external ID.
+Name of the external ID field, or the Id field.
 
 # flags.wait
 
