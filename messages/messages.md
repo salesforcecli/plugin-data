@@ -1,26 +1,26 @@
 # perfLogLevelOption
 
-get API performance data
+Get API performance data.
 
 # perfLogLevelOptionLong
 
-Gets data on API performance metrics from the server. The data is stored in $HOME/.sfdx/apiPerformanceLog.json
+Gets data on API performance metrics from the server. The data is stored in $HOME/.sfdx/apiPerformanceLog.json.
 
 # NeitherSobjectidNorWhereError
 
-Either --where or --sobjectid flags must be specified
+You must specify either the --where or --record-id flag.
 
 # NeitherSobjectidNorWhereErrorActions
 
-Provide values for either --where or --sobjectid flags
+Provide values for either the --where or --record-id flag.
 
 # BothSobjectidAndWhereError
 
-Both --where and --sobjectid flags are specified
+Both --where and --record-id flags are specified.
 
 # DataRecordGetNoRecord
 
-No matching record found
+No matching record found.
 
 # DataRecordGetMultipleRecords
 
@@ -29,11 +29,11 @@ Retrieve only one record.
 
 # TextUtilMalformedKeyValuePair
 
-Malformed key=value pair for value: %s
+Malformed key=value pair for value: %s.
 
 # PathDoesNotExist
 
-The specified path [%s] does not exist
+The specified path [%s] does not exist.
 
 # flags.target-org
 
