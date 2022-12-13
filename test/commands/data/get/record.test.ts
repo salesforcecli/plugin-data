@@ -74,7 +74,7 @@ describe('force:data:record:get', () => {
       await shouldThrow(cmd.run());
     } catch (e) {
       assert(e instanceof Error);
-      expect(e.name).to.equal('Malformed key=value pair for value: Name');
+      expect(e.name).to.equal('Malformed key=value pair for value: Name.');
     }
   });
 });
