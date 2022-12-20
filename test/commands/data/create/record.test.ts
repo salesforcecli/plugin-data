@@ -28,9 +28,10 @@ describe('force:data:record:create', () => {
         return Promise.resolve({
           id: sObjectId,
           success: true,
-          errors: undefined,
+          errors: [],
         });
       }
+      throw new Error('Unexpected request: ' + JSON.stringify(request));
     };
   });
 

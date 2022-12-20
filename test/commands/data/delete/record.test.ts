@@ -45,6 +45,7 @@ describe('force:data:record:delete', () => {
             : [],
         });
       }
+      throw new Error('Unexpected request: ' + JSON.stringify(request));
     };
   });
 

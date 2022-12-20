@@ -19,7 +19,7 @@ const isCompleted = async (cmd: string): Promise<void> => {
     // eslint-disable-next-line no-await-in-loop
     await sleep(2000);
     const result = execCmd<QueryResult<Record> | JobInfoV2>(cmd);
-    if (result.jsonOutput.status === 0) {
+    if (result.jsonOutput?.status === 0) {
       if ('state' in result.jsonOutput.result && result.jsonOutput.result.state === 'JobComplete') {
         complete = true;
       } else if ('done' in result.jsonOutput.result && result.jsonOutput.result.done) {
