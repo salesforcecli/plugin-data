@@ -118,6 +118,7 @@ describe('ImportApi', () => {
       config = {
         plan: './test/unit/data/non-existant-plan.json',
       };
+      // @ts-ignore
       const expectedFilePath = path.resolve(process.cwd(), config.plan);
       try {
         // @ts-ignore

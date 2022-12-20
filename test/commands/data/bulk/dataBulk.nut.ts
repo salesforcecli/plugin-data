@@ -27,7 +27,7 @@ const isCompleted = async (cmd: string): Promise<void> => {
     // eslint-disable-next-line no-await-in-loop
     await sleep(2000);
     const result = execCmd<StatusResult>(cmd);
-    if (result.jsonOutput.status === 0) {
+    if (result.jsonOutput?.status === 0) {
       if ('state' in result.jsonOutput.result && result.jsonOutput.result.state === 'Closed') {
         complete = true;
       } else if (
@@ -55,7 +55,7 @@ const checkBulkStatusJsonResponse = (jobId: string, batchId: string): void => {
     ensureExitCode: 0,
   }).jsonOutput?.result;
   expect(statusResponse).to.be.an('array').with.lengthOf(1);
-  expect(statusResponse[0].state).to.equal('Completed');
+  expect(statusResponse?.[0].state).to.equal('Completed');
 };
 
 /* Check the status of the bulk upsert job using human output to determine progress
