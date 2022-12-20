@@ -20,11 +20,11 @@ By default, the job runs the batches in parallel, which we recommend. You can ru
 
 - Bulk upsert records to a custom object and wait 5 minutes for the command to complete:
 
-  <%= config.bin %> <%= command.id %> --sobject MyObject**c --file files/file.csv --external-id MyField**c --wait 5
+  <%= config.bin %> <%= command.id %> --sobject MyObject__c --file files/file.csv --external-id MyField__c --wait 5
 
 # flags.sobjecttype
 
-Salesforce object, either standard or custom, that you want to upsert records to.
+API name of the Salesforce object, either standard or custom, that you want to upsert records to.
 
 # flags.csvfile
 
