@@ -19,6 +19,7 @@ export default class Delete extends SfCommand<SaveResult> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static aliases = ['force:data:record:delete'];
+  public static readonly deprecateAliases = true;
 
   public static flags = {
     ...orgFlags,

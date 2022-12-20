@@ -19,6 +19,7 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly aliases = ['force:data:bulk:upsert'];
+  public static readonly deprecateAliases = true;
 
   public static flags = {
     ...orgFlags,
