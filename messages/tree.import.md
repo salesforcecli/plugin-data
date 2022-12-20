@@ -35,13 +35,3 @@ Display schema information for the --plan configuration file to stdout; if you s
 - Import records using a plan definition file into your default org:
 
   <%= config.bin %> <%= command.id %> --plan Account-Contact-plan.json
-
-# importFailure
-
-Plan definition file %s did not validate against the schema.
-
-# importFailureActions
-
-Did you run the "<%- config.bin %> data export tree" command with the --plan flag?
-Make sure you're importing a plan file.
-Get help with the import plan schema by running "<%= config.bin %> data import tree --confighelp".

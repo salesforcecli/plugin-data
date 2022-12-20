@@ -292,7 +292,8 @@ export class ImportApi {
         if (error.name === 'ValidationSchemaFieldErrors') {
           throw new SfError(
             messages.getMessage('dataPlanValidationError', [planPath, error.message]),
-            INVALID_DATA_IMPORT_ERR_NAME
+            INVALID_DATA_IMPORT_ERR_NAME,
+            messages.getMessages('dataPlanValidationErrorActions')
           );
         }
         throw SfError.wrap(error);

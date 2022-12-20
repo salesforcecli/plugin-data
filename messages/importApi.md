@@ -38,18 +38,14 @@ Import failed from file: %s. Results: %s.
 
 Data plan file %s did not validate against the schema.
 
-# dataPlanValidationErrorAction1
+# dataPlanValidationErrorActions
 
-Did you run the "<%= config.bin %> data export tree" command with the --plan flag?
+- Did you run the "<%= config.bin %> data export tree" command with the --plan flag?
 
-# dataPlanValidationErrorAction2
+- Make sure you're importing a plan definition file.
 
-Make sure you're importing a plan definition file.
-
-# dataPlanValidationErrorAction3
-
-Get help with the import plan schema by running "<%= config.bin %> data import tree --config-help".
-%s
+- Get help with the import plan schema by running "<%= config.bin %> data import tree --config-help".
+  %s
 
 # FlsError
 

@@ -60,21 +60,9 @@ Format to display the results; the --json flag overrides this flag.
 
 Total number of records retrieved: %s.
 
-# queryNoResults
-
-Your query returned no results.
-
 # queryRunningMessage
 
 Querying Data
-
-# queryMoreUpdateMessage
-
-Result size is %d, current count is %d
-
-# queryInvalidReporter
-
-Unknown result format type. Must be one of the following values: %s.
 
 # bulkQueryTimeout
 
@@ -82,7 +70,3 @@ Query ID: %s
 Query is in progress.
 
 Run "<%= config.bin %> data query resume -i %s -o %s" to get the latest status and results.
-
-# noResults
-
-Your query returned no results.

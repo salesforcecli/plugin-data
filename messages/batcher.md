@@ -2,10 +2,6 @@
 
 Batch #%s
 
-# NoBatchFound
-
-Unable to find batch %s for job %s.
-
 # BulkError
 
 Upsert errors
