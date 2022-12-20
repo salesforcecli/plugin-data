@@ -356,7 +356,7 @@ export class ExportApi {
           this.objectTypeRegistry[key].saveRefs,
           this.objectTypeRegistry[key].resolveRefs,
           `${key}s.json`,
-          { records: objects.get(key) }
+          { records: objects.get(key) ?? [] }
         )
       )
     );

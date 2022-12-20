@@ -109,8 +109,7 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
 
     try {
       // soqlqueryfile will be be present if flags.query isn't. Oclif exactlyOne isn't quite that clever
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const queryString = flags.query ?? fs.readFileSync(flags.file, 'utf8');
+      const queryString = flags.query ?? fs.readFileSync(flags.file as string, 'utf8');
       const conn = flags['target-org'].getConnection(flags['api-version']);
       const ux = new Ux({ jsonEnabled: this.jsonEnabled() });
       if (flags['result-format'] !== 'json') this.spinner.start(messages.getMessage('queryRunningMessage'));

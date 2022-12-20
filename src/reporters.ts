@@ -343,9 +343,9 @@ const prepColumns = (columns: Array<Optional<string>>): CliUx.Table.table.Column
   const formattedColumns: CliUx.Table.table.Columns<Record<string, unknown>> = {};
   columns
     .map((field: Optional<string>) => field)
-    .filter((field): string => field)
+    .filter(isString)
     .map(
-      (field: string) =>
+      (field) =>
         (formattedColumns[field] = {
           header: field.toUpperCase(),
           get: (row): string => {
