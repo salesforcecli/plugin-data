@@ -28,6 +28,7 @@ export default class Import extends SfCommand<ImportResult[] | JsonMap> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly aliases = ['force:data:tree:import'];
+  public static readonly deprecateAliases = true;
 
   public static flags = {
     ...orgFlags,

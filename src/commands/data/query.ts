@@ -32,6 +32,7 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly aliases = ['force:data:soql:query'];
+  public static readonly deprecateAliases = true;
 
   public static flags = {
     ...orgFlags,

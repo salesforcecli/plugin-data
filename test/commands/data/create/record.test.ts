@@ -40,7 +40,7 @@ describe('force:data:record:create', () => {
       config
     );
 
-    const result = (await cmd.run()) as unknown as SaveResult;
+    const result = await cmd.run();
     expect(result.id).to.equal(sObjectId);
   });
 });

@@ -21,6 +21,7 @@ export class BulkQueryReport extends SfCommand<unknown> {
   public static readonly description = reportMessages.getMessage('description');
   public static readonly examples = reportMessages.getMessages('examples');
   public static readonly aliases = ['force:data:soql:bulk:report'];
+  public static readonly deprecateAliases = true;
 
   public static flags = {
     ...orgFlags,
