@@ -16,11 +16,11 @@ When you execute this command, it starts a job and one or more batches, displays
 
 - Bulk delete records from a custom object and wait 5 minutes for the command to complete:
 
-  <%= config.bin %> <%= command.id %> --sobject MyObject\_\_c --file files/delete.csv --wait 5
+  <%= config.bin %> <%= command.id %> --sobject MyObject__c --file files/delete.csv --wait 5
 
 # flags.sobjecttype
 
-Salesforce object, either standard or custom, that you want to delete records from.
+API name of the Salesforce object, either standard or custom, that you want to delete records from.
 
 # flags.csvfile
 
