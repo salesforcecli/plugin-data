@@ -12,7 +12,7 @@ This command inserts a record into Salesforce objects by default. Use the --use-
 
 # flags.sobject
 
-Salesforce or Tooling API object that you're inserting a record into.
+API name of the Salesforce or Tooling API object that you're inserting a record into.
 
 # flags.values
 

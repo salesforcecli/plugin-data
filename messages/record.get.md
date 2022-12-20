@@ -14,7 +14,7 @@ This command retrieves a record from Salesforce objects by default. Use the --us
 
 # flags.sobject
 
-Salesforce or Tooling API object that you're retrieving a record from.
+API name of the Salesforce or Tooling API object that you're retrieving a record from.
 
 # flags.recordId
 

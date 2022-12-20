@@ -12,7 +12,7 @@ This command deletes a record from Salesforce objects by default. Use the --use-
 
 # flags.sobject
 
-Salesforce or Tooling API object that you're deleting a record from.
+API name of the Salesforce or Tooling API object that you're deleting a record from.
 
 # flags.recordId
 

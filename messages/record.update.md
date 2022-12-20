@@ -12,7 +12,7 @@ This command updates a record in Salesforce objects by default. Use the --use-to
 
 # flags.sobject
 
-Salesforce or Tooling API object that contains the record you're updating.
+API name of the Salesforce or Tooling API object that contains the record you're updating.
 
 # flags.recordId
 
