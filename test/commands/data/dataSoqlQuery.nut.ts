@@ -322,7 +322,7 @@ describe('data:soql:query command', () => {
         }
       ).shellOutput.stdout;
 
-      expect(queryResult).to.match(/Run .* data resume -i .* -o .* to get the latest status\/results/g);
+      expect(queryResult).to.match(/Run .* data -i .* -o .* to get the latest status\/results/g);
     });
   });
 });
