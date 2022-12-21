@@ -80,13 +80,17 @@ const parseKeyValueSequence = (text: string): string[] => {
   const keyValuePairs: string[] = [];
 
   const trimmedText = text.trim();
-  for (const currentChar of trimmedText) {
-    const isSeparator = separator.exec(currentChar);
 
-    if (currentChar === "'" && !inDoubleQuote) {
+  const singleQuoteCount = (trimmedText.match(/'/g) ?? []).length;
+  const doubleQuoteCount = (trimmedText.match(/"/g) ?? []).length;
+
+  for (const currentChar of trimmedText) {
+    const isSeparator = separator.test(currentChar);
+
+    if (currentChar === "'" && !inDoubleQuote && singleQuoteCount >= 2) {
       inSingleQuote = !inSingleQuote;
       continue;
-    } else if (currentChar === '"' && !inSingleQuote) {
+    } else if (currentChar === '"' && !inSingleQuote && doubleQuoteCount >= 2) {
       inDoubleQuote = !inDoubleQuote;
       continue;
     }
