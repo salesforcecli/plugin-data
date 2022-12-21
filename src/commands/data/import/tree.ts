@@ -7,9 +7,9 @@
 
 import { Logger, Messages, SchemaPrinter } from '@salesforce/core';
 import { getString, JsonMap } from '@salesforce/ts-types';
-import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
+import { SfCommand, Flags, arrayWithDeprecation } from '@salesforce/sf-plugins-core';
 import { ImportApi, ImportConfig } from '../../../api/data/tree/importApi';
-import { orgFlags, stringArrayFlag } from '../../../flags';
+import { orgFlags } from '../../../flags';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.import');
@@ -32,7 +32,7 @@ export default class Import extends SfCommand<ImportResult[] | JsonMap> {
 
   public static flags = {
     ...orgFlags,
-    files: stringArrayFlag({
+    files: arrayWithDeprecation({
       char: 'f',
       summary: messages.getMessage('flags.files'),
       exclusive: ['plan'],
