@@ -72,66 +72,42 @@ export const createBaseFakeConnection = function (): Connection {
     instanceUrl: '',
     version: '',
     accessToken: '',
-    loginBySoap: () => {
-      return new Promise<UserInfo>(function (resolve, reject) {
+    loginBySoap: () => new Promise<UserInfo>((resolve, reject) => {
         resolve({} as UserInfo);
-      });
-    },
+      }),
     async request() {
-      return new Promise<Record<string, any>>(function (resolve, reject) {
+      return new Promise<Record<string, any>>((resolve, reject) => {
         resolve({});
       });
     },
-    describe: () => {
-      return new Promise<Record<string, any>>(function (resolve, reject) {
+    describe: () => new Promise<Record<string, any>>((resolve, reject) => {
         resolve({});
-      });
-    },
-    describeGlobal: () => {
-      return new Promise<Record<string, any>>(function (resolve, reject) {
+      }),
+    describeGlobal: () => new Promise<Record<string, any>>((resolve, reject) => {
         resolve({});
-      });
-    },
-    query: () => {
-      return {} as QueryResult<object>;
-    },
-    queryMore: () => {
-      return {} as QueryResult<object>;
-    },
-    sobject: () => {
-      return {};
-    },
-    _baseUrl: () => {
-      return 'https://some.sfdc.site.com';
-    },
+      }),
+    query: () => ({} as QueryResult<object>),
+    queryMore: () => ({} as QueryResult<object>),
+    sobject: () => ({}),
+    _baseUrl: () => 'https://some.sfdc.site.com',
     metadata: {
-      read: () => {
-        return new Promise<any>(function (resolve, reject) {
+      read: () => new Promise<any>((resolve, reject) => {
           resolve({});
-        });
-      },
-      upsert: () => {
-        return new Promise<UpsertResult>(function (resolve, reject) {
+        }),
+      upsert: () => new Promise<UpsertResult>((resolve, reject) => {
           resolve({} as UpsertResult);
-        });
-      },
-      delete: () => {
-        return new Promise<SaveResult>(function (resolve, reject) {
+        }),
+      delete: () => new Promise<SaveResult>((resolve, reject) => {
           resolve({} as SaveResult);
-        });
-      },
+        }),
     },
     bulk: {
-      load: () => {
-        return {
+      load: () => ({
           on: () => {},
-          check: () => {
-            return {};
-          },
+          check: () => ({}),
           poll: () => {},
           execute: () => {},
-        };
-      },
+        }),
       createJob: () => {
         const job = createBaseFakeEmitter();
         return Object.assign(job, {
@@ -140,37 +116,23 @@ export const createBaseFakeConnection = function (): Connection {
           },
         });
       },
-      job: () => {
-        return {};
-      },
+      job: () => ({}),
     },
     tooling: {
-      query: () => {
-        return {} as QueryResult<object>;
-      },
-      retrieve: () => {
-        return new Promise<Record<string, any>>(function (resolve, reject) {
+      query: () => ({} as QueryResult<object>),
+      retrieve: () => new Promise<Record<string, any>>((resolve, reject) => {
           resolve({} as Record<string, any>);
-        });
-      },
-      create: () => {
-        return new Promise<SaveResult>(function (resolve, reject) {
+        }),
+      create: () => new Promise<SaveResult>((resolve, reject) => {
           resolve({} as SaveResult);
-        });
-      },
-      update: () => {
-        return new Promise<SaveResult>(function (resolve, reject) {
+        }),
+      update: () => new Promise<SaveResult>((resolve, reject) => {
           resolve({} as SaveResult);
-        });
-      },
-      destroy: () => {
-        return new Promise<SaveResult>(function (resolve, reject) {
+        }),
+      destroy: () => new Promise<SaveResult>((resolve, reject) => {
           resolve({} as SaveResult);
-        });
-      },
-      sobject: () => {
-        return {};
-      },
+        }),
+      sobject: () => ({}),
     },
   } as any;
 };
@@ -181,70 +143,46 @@ export const createFakeConnection = function (): Connection {
     instanceUrl: '',
     version: '',
     accessToken: '',
-    loginBySoap: () => {
-      return new Promise<UserInfo>(function (resolve, reject) {
+    loginBySoap: () => new Promise<UserInfo>((resolve, reject) => {
         resolve({} as UserInfo);
-      });
-    },
+      }),
     async request() {
-      return new Promise<Record<string, any>>(function (resolve, reject) {
+      return new Promise<Record<string, any>>((resolve, reject) => {
         resolve({});
       });
     },
-    describe: () => {
-      return new Promise<Record<string, any>>(function (resolve, reject) {
+    describe: () => new Promise<Record<string, any>>((resolve, reject) => {
         resolve({});
-      });
-    },
-    describeGlobal: () => {
-      return new Promise<Record<string, any>>(function (resolve, reject) {
+      }),
+    describeGlobal: () => new Promise<Record<string, any>>((resolve, reject) => {
         resolve({});
-      });
-    },
-    query: () => {
-      return new Promise<QueryResult<object>>(function (resolve, reject) {
+      }),
+    query: () => new Promise<QueryResult<object>>((resolve, reject) => {
         resolve({} as QueryResult<object>);
-      });
-    },
-    queryMore: () => {
-      return new Promise<QueryResult<object>>(function (resolve, reject) {
+      }),
+    queryMore: () => new Promise<QueryResult<object>>((resolve, reject) => {
         resolve({} as QueryResult<object>);
-      });
-    },
-    sobject: () => {
-      return {};
-    },
-    _baseUrl: () => {
-      return 'https://some.sfdc.site.com';
-    },
+      }),
+    sobject: () => ({}),
+    _baseUrl: () => 'https://some.sfdc.site.com',
     metadata: {
-      read: () => {
-        return new Promise<any>(function (resolve, reject) {
+      read: () => new Promise<any>((resolve, reject) => {
           resolve({});
-        });
-      },
-      upsert: () => {
-        return new Promise<UpsertResult>(function (resolve, reject) {
+        }),
+      upsert: () => new Promise<UpsertResult>((resolve, reject) => {
           resolve({} as UpsertResult);
-        });
-      },
-      delete: () => {
-        return new Promise<SaveResult>(function (resolve, reject) {
+        }),
+      delete: () => new Promise<SaveResult>((resolve, reject) => {
           resolve({} as SaveResult);
-        });
-      },
+        }),
     },
     bulk: {
-      load: () => {
-        return {
+      load: () => ({
           on: () => {},
-          check: () => {
-            return {};
-          },
+          check: () => ({}),
           poll: () => {},
           execute: () => {},
-        };
-      },
+        }),
       createJob: () => {
         const job = createBaseFakeEmitter();
         return Object.assign(job, {
@@ -253,39 +191,25 @@ export const createFakeConnection = function (): Connection {
           },
         });
       },
-      job: () => {
-        return {};
-      },
+      job: () => ({}),
     },
     tooling: {
-      query: () => {
-        return new Promise<QueryResult<object>>(function (resolve, reject) {
+      query: () => new Promise<QueryResult<object>>((resolve, reject) => {
           resolve({} as QueryResult<object>);
-        });
-      },
-      retrieve: () => {
-        return new Promise<Record<string, any>>(function (resolve, reject) {
+        }),
+      retrieve: () => new Promise<Record<string, any>>((resolve, reject) => {
           resolve({} as Record<string, any>);
-        });
-      },
-      create: () => {
-        return new Promise<SaveResult>(function (resolve, reject) {
+        }),
+      create: () => new Promise<SaveResult>((resolve, reject) => {
           resolve({} as SaveResult);
-        });
-      },
-      update: () => {
-        return new Promise<SaveResult>(function (resolve, reject) {
+        }),
+      update: () => new Promise<SaveResult>((resolve, reject) => {
           resolve({} as SaveResult);
-        });
-      },
-      destroy: () => {
-        return new Promise<SaveResult>(function (resolve, reject) {
+        }),
+      destroy: () => new Promise<SaveResult>((resolve, reject) => {
           resolve({} as SaveResult);
-        });
-      },
-      sobject: () => {
-        return {};
-      },
+        }),
+      sobject: () => ({}),
     },
   } as any;
 };

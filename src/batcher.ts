@@ -263,12 +263,10 @@ export class Batcher {
           const result = await newBatch.check();
           if (result.state === 'Failed') {
             reject(result.stateMessage);
-          } else {
-            if (!overallInfo) {
+          } else if (!overallInfo) {
               this.ux.log(messages.getMessage('PollingInfo', [POLL_FREQUENCY_MS / 1000, batchInfo.jobId]));
               overallInfo = true;
             }
-          }
           this.ux.log(messages.getMessage('BatchQueued', [batchNum, batchInfo.id]));
           newBatch.poll(POLL_FREQUENCY_MS, waitMins * 60000);
         }
@@ -300,7 +298,7 @@ export class Batcher {
     let batchHeaderBytes = 0;
     batches[batchIndex] = [];
 
-    return await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const parser = parse({
         columns: true,
         // library option is snakecase
