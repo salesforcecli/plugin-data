@@ -64,13 +64,11 @@ describe('force:data:record:update', () => {
 
   test
     .withOrg({ username: 'test@org.com' }, true)
-    .withConnectionRequest(() => {
-      return Promise.reject({
+    .withConnectionRequest(() => Promise.reject({
         errorCode: 'FIELD_CUSTOM_VALIDATION_EXCEPTION',
         message: 'name cannot start with x',
         fields: [],
-      });
-    })
+      }))
     .stdout()
     .command([
       'force:data:record:update',
