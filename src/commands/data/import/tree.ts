@@ -30,7 +30,7 @@ export default class Import extends SfCommand<ImportResult[] | JsonMap> {
   public static readonly aliases = ['force:data:tree:import'];
   public static readonly deprecateAliases = true;
 
-  public static flags = {
+  public static readonly flags = {
     ...orgFlags,
     files: arrayWithDeprecation({
       char: 'f',

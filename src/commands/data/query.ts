@@ -34,7 +34,7 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
   public static readonly aliases = ['force:data:soql:query'];
   public static readonly deprecateAliases = true;
 
-  public static flags = {
+  public static readonly flags = {
     ...orgFlags,
     query: Flags.string({
       char: 'q',
@@ -77,7 +77,6 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
     'result-format': Flags.enum({
       char: 'r',
       summary: messages.getMessage('flags.resultFormat'),
-      description: messages.getMessage('flags.resultFormat.description'),
       options: ['human', 'json', 'csv'],
       default: 'human',
       aliases: ['resultformat'],

@@ -23,7 +23,7 @@ export class BulkQueryReport extends SfCommand<unknown> {
   public static readonly aliases = ['force:data:soql:bulk:report'];
   public static readonly deprecateAliases = true;
 
-  public static flags = {
+  public static readonly flags = {
     ...orgFlags,
     'result-format': DataSoqlQueryCommand.flags['result-format'],
     'bulk-query-id': Flags.salesforceId({

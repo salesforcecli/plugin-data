@@ -5,8 +5,8 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { resolve } from 'path';
-
 import { strict as assert } from 'assert';
+import { Messages } from '@salesforce/core';
 import { ensureJsonMap, ensureString, AnyJson } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup';
@@ -15,6 +15,8 @@ import { Config } from '@oclif/core';
 import Get from '../../../../src/commands/data/get/record';
 
 const sObjectId = '0011100001zhhyUAAQ';
+Messages.importMessagesDirectory(__dirname);
+const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
 describe('force:data:record:get', () => {
   const $$ = new TestContext();
@@ -74,7 +76,7 @@ describe('force:data:record:get', () => {
       await shouldThrow(cmd.run());
     } catch (e) {
       assert(e instanceof Error);
-      expect(e.name).to.equal('Malformed key=value pair for value: Name');
+      expect(e.name).to.equal(messages.getMessage('TextUtilMalformedKeyValuePair', ['Name']));
     }
   });
 });

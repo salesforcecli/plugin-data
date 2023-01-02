@@ -292,7 +292,7 @@ describe('ImportApi', () => {
       } catch (err) {
         const error = err as Error;
         expect(error.name).to.equal('InvalidDataImport');
-        expect(error.message).to.equal(`Cannot find data file. Indicate a valid path: ${filepath}.`);
+        expect(error.message).to.equal(messages.getMessage('dataFileNotFound', [filepath]));
       }
     });
 

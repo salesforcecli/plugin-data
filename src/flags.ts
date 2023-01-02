@@ -13,11 +13,7 @@ import {
 } from '@salesforce/sf-plugins-core';
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.load('@salesforce/plugin-data', 'messages', [
-  'flags.target-org',
-  'perfLogLevelOption',
-  'perfLogLevelOptionLong',
-]);
+const messages = Messages.load('@salesforce/plugin-data', 'messages', ['perfLogLevelOption', 'perfLogLevelOptionLong']);
 
 export const perflogFlag = Flags.boolean({
   summary: messages.getMessage('perfLogLevelOption'),

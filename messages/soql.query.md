@@ -1,85 +1,72 @@
 # summary
 
-execute a SOQL query
+Execute a SOQL query.
 
 # description
 
-execute a SOQL query
-When you execute this command in a project, it executes the query against the data in your default scratch org.
+Specify the SOQL query at the command line with the --query flag or read the query from a file with the --file flag.
+
+If your query returns more than 10,000 records, specify the --bulk flag. The command then runs the query using Bulk API 2.0, which has higher limits than the default API used by the command.
+
+When using --bulk, the command waits 3 minutes by default for the query to complete. Use the --wait parameter to specify a different number of minutes to wait, or set --wait to 0 to immediately return control to the terminal. If you set --wait to 0, or you use the --async flag, or the command simply times out, the command displays an ID. Pass this ID to the the "data query resume" command using the --bulk-query-id flag to get the results; pass the ID to the "data resume" command to get the job status.
 
 # examples
 
-- <%= config.bin %> <%= command.id %> -q "SELECT Id, Name, Account.Name FROM Contact"
+- Specify a SOQL query at the command line; the command uses your default org:
 
-- <%= config.bin %> <%= command.id %> -q "SELECT Id, Name FROM Account WHERE ShippingState IN ('CA', 'NY')"
+  <%= config.bin %> <%= command.id %> --query "SELECT Id, Name, Account.Name FROM Contact"
 
-- <%= config.bin %> <%= command.id %> -q "SELECT Id, Name FROM Account WHERE ShippingState IN ('CA', 'NY')" --perflog --json
+- Read the SOQL query from a file called "query.txt"; the command uses the org with alias "my-scratch":
 
-- <%= config.bin %> <%= command.id %> -q "SELECT Name FROM ApexTrigger" -t
+  <%= config.bin %> <%= command.id %> --file query.txt --target-org my-scratch
 
-- <%= config.bin %> <%= command.id %> --soqlqueryfile query.txt
+- Use Tooling API to run a query on the ApexTrigger Tooling API object:
 
-- <%= config.bin %> <%= command.id %> --soqlqueryfile query.txt -t
+  <%= config.bin %> <%= command.id %> --query "SELECT Name FROM ApexTrigger" --use-tooling-api
+
+- Use Bulk API 2.0 to run a query that returns many rows, and return control to the terminal immediately:
+
+  <%= config.bin %> <%= command.id %> --query "SELECT Id FROM Contact" --bulk --wait 0
 
 # flags.queryToExecute
 
-SOQL query to execute
+SOQL query to execute.
 
 # flags.useToolingApi
 
-execute query with Tooling API
+Use Tooling API so you can run queries on Tooling API objects.
 
 # flags.file
 
-A SOQL query stored in a file
+File that contains the SOQL query.
 
 # flags.bulk
 
-use the bulk 2.0 API to query data
+Use Bulk API 2.0 to run the query.
 
 # flags.async
 
-use bulk, but do not wait for job to complete
+Use Bulk API 2.0, but don't wait for the job to complete.
 
 # flags.wait
 
-wait time for command to finish in minutes
+Time to wait for the command to finish, in minutes.
 
 # flags.resultFormat
 
-result format emitted to stdout; --json flag overrides this parameter
-
-# flags.resultFormat.description
-
-Format to use when displaying results. If you also specify the --json flag, --json overrides this parameter.
+Format to display the results; the --json flag overrides this flag.
 
 # displayQueryRecordsRetrieved
 
 Total number of records retrieved: %s.
 
-# queryNoResults
-
-Your query returned no results.
-
 # queryRunningMessage
 
 Querying Data
-
-# queryMoreUpdateMessage
-
-Result size is %d, current count is %d
-
-# queryInvalidReporter
-
-Unknown result format type. Must be one of the following values: %s
 
 # bulkQueryTimeout
 
 Query ID: %s
 Query is in progress.
 
-Run <%= config.bin %> data resume -i %s -o %s to get the latest status/results
-
-# noResults
-
-Your query returned no results.
+Run "<%= config.bin %> data query resume -i %s -o %s" to get the latest status and results.

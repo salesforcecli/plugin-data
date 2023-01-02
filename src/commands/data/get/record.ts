@@ -22,7 +22,7 @@ export default class Get extends SfCommand<Record> {
   public static aliases = ['force:data:record:get'];
   public static readonly deprecateAliases = true;
 
-  public static flags = {
+  public static readonly flags = {
     ...orgFlags,
     sobject: Flags.string({
       char: 's',

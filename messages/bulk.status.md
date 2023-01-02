@@ -1,25 +1,28 @@
 # summary
 
-view the status of a bulk data load job or batch
+View the status of a bulk data load job or batch.
 
 # description
 
-view the status of a bulk data load job or batch
-Run this command using the job ID or batch ID returned from the data:delete:bulk or data:upsert:bulk commands.
+Run this command using the job ID or batch ID returned from the "<%= config.bin %> data delete bulk" or "<%= config.bin %> data upsert bulk" commands.
 
 # examples
 
-- <%= config.bin %> <%= command.id %> -i 750xx000000005sAAA
+- View the status of a bulk load job:
 
-- <%= config.bin %> <%= command.id %> -i 750xx000000005sAAA -b 751xx000000005nAAA
+  <%= config.bin %> <%= command.id %> --job-id 750xx000000005sAAA
+
+- View the status of a bulk load job and a specific batches:
+
+  <%= config.bin %> <%= command.id %> --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA
 
 # flags.jobid
 
-the ID of the job you want to view or of the job whose batch you want to view
+ID of the job whose status you want to view.
 
 # flags.batchid
 
-the ID of the batch whose status you want to view
+ID of the batch whose status you want to view; you must also specify the job ID.
 
 # NoBatchFound
 

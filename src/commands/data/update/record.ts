@@ -22,7 +22,7 @@ export default class Update extends SfCommand<SaveResult> {
   public static readonly aliases = ['force:data:record:update'];
   public static readonly deprecateAliases = true;
 
-  public static flags = {
+  public static readonly flags = {
     ...orgFlags,
     sobject: Flags.string({
       char: 's',

@@ -21,7 +21,7 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
   public static readonly aliases = ['force:data:bulk:upsert'];
   public static readonly deprecateAliases = true;
 
-  public static flags = {
+  public static readonly flags = {
     ...orgFlags,
     'external-id': Flags.string({
       char: 'i',
