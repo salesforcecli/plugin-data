@@ -21,7 +21,7 @@ export default class Delete extends SfCommand<SaveResult> {
   public static aliases = ['force:data:record:delete'];
   public static readonly deprecateAliases = true;
 
-  public static flags = {
+  public static readonly flags = {
     ...orgFlags,
     sobject: Flags.string({
       char: 's',

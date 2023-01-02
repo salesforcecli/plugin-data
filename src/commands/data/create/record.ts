@@ -20,7 +20,7 @@ export default class Create extends SfCommand<SaveResult> {
   public static readonly examples = messages.getMessages('examples');
   public static aliases = ['force:data:record:create'];
   public static readonly deprecateAliases = true;
-  public static flags = {
+  public static readonly flags = {
     ...orgFlags,
     sobject: Flags.string({
       char: 's',

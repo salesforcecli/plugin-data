@@ -21,7 +21,7 @@ export default class Status extends SfCommand<StatusResult> {
   public static readonly aliases = ['force:data:bulk:status'];
   public static readonly deprecateAliases = true;
 
-  public static flags = {
+  public static readonly flags = {
     ...orgFlags,
     'batch-id': Flags.salesforceId({
       char: 'b',

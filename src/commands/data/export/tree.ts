@@ -21,7 +21,7 @@ export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileCo
   public static aliases = ['force:data:tree:export'];
   public static readonly deprecateAliases = true;
 
-  public static flags = {
+  public static readonly flags = {
     ...orgFlags,
     query: Flags.string({
       char: 'q',

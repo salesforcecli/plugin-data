@@ -29,7 +29,7 @@ export default class Delete extends SfCommand<BatcherReturnType> {
   public static readonly aliases = ['force:data:bulk:delete'];
   public static readonly deprecateAliases = true;
 
-  public static flags = {
+  public static readonly flags = {
     ...orgFlags,
     file: Flags.file({
       char: 'f',
