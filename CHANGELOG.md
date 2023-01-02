@@ -1,3 +1,15 @@
+## [2.1.19](https://github.com/salesforcecli/plugin-data/compare/2.1.18...2.1.19) (2023-01-01)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/command from 5.2.35 to 5.2.37 ([fcdd1cb](https://github.com/salesforcecli/plugin-data/commit/fcdd1cb6ee52fbcedd8e3275c6a0d682e47f7e2e))
+
+## [2.1.18](https://github.com/salesforcecli/plugin-data/compare/2.1.17...2.1.18) (2022-12-25)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/core from 3.32.9 to 3.32.12 ([c628404](https://github.com/salesforcecli/plugin-data/commit/c628404d385d49dbe6cf80f8c2edb763302e7834))
+
 ## [2.1.17](https://github.com/salesforcecli/plugin-data/compare/2.1.16...2.1.17) (2022-12-11)
 
 ### Bug Fixes
