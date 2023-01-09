@@ -1,3 +1,15 @@
+## [2.1.21](https://github.com/salesforcecli/plugin-data/compare/2.1.20...2.1.21) (2023-01-08)
+
+### Bug Fixes
+
+- **deps:** bump json5 from 1.0.1 to 1.0.2 ([862e0e5](https://github.com/salesforcecli/plugin-data/commit/862e0e570689186edadc4d26898d750ab04ccf20))
+
+## [2.1.20](https://github.com/salesforcecli/plugin-data/compare/2.1.19...2.1.20) (2023-01-08)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/ts-types from 1.7.1 to 1.7.2 ([3b6fb74](https://github.com/salesforcecli/plugin-data/commit/3b6fb74fd8c0aa898780bc978dc5e1734b9cfa11))
+
 ## [2.1.19](https://github.com/salesforcecli/plugin-data/compare/2.1.18...2.1.19) (2023-01-01)
 
 ### Bug Fixes
