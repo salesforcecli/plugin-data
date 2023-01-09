@@ -69,4 +69,4 @@ Querying Data
 Query ID: %s
 Query is in progress.
 
-Run "<%= config.bin %> data query resume -i %s -o %s" to get the latest status and results.
+Run "data query resume -i %s -o %s" to get the latest status and results.
