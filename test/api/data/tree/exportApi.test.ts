@@ -15,7 +15,7 @@ import * as fs from 'fs';
 import * as sinon from 'sinon';
 import { Connection, Messages, Org } from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
-import { UX } from '@salesforce/command';
+import { Ux } from '@salesforce/sf-plugins-core';
 import { assert, expect } from 'chai';
 import { ExportApi } from '../../../../src/api/data/tree/exportApi';
 
@@ -255,7 +255,7 @@ describe('Export API', () => {
       // @ts-ignore
       sobject: sobjectStub,
     });
-    const ux = await UX.create();
+    const ux = new Ux({ jsonEnabled: true });
     sandbox.stub(ux, 'log');
 
     exportApi = new ExportApi(testOrg, ux);

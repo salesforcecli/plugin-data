@@ -123,6 +123,7 @@ export class ImportApi {
             contentType,
           })
         )) {
+          // eslint-disable-next-line no-await-in-loop
           await promise;
         }
       }
@@ -130,11 +131,13 @@ export class ImportApi {
       importResults.responseRefs = this.responseRefs;
       importResults.sobjectTypes = this.sobjectTypes;
     } catch (err) {
+      if (!(err instanceof SfError)) {
+        throw err;
+      }
       const error = err as Error;
       if (getString(error, 'errorCode') === 'ERROR_HTTP_400' && error.message != null) {
-        let msg;
         try {
-          msg = JSON.parse(error.message) as { hasErrors?: boolean; results?: [] };
+          const msg = JSON.parse(error.message) as { hasErrors?: boolean; results?: [] };
           if (msg.hasErrors && msg.results && msg.results.length > 0) {
             importResults.errors = msg.results;
           }
@@ -153,134 +156,10 @@ export class ImportApi {
     return this.schemaValidator.loadSync();
   }
 
-  private async getPlanPromises({
-    plan,
-    contentType,
-    refMap,
-    instanceUrl,
-  }: {
-    plan: string;
-    contentType?: string;
-    refMap: Map<string, string>;
-    instanceUrl: string;
-  }): Promise<void> {
-    // REVIEWME: support both files and plan in same invocation?
-    const importPlanRootPath = path.dirname(plan);
-    for (const sobjectConfig of this.importPlanConfig) {
-      const globalSaveRefs = sobjectConfig.saveRefs != null ? sobjectConfig.saveRefs : false;
-      const globalResolveRefs = sobjectConfig.resolveRefs != null ? sobjectConfig.resolveRefs : false;
-      for (const fileDef of sobjectConfig.files) {
-        let filepath;
-        let saveRefs = globalSaveRefs;
-        let resolveRefs = globalResolveRefs;
-
-        // file definition can be just a filepath or an object that
-        // has a filepath and overriding global config
-        if (typeof fileDef === 'string') {
-          filepath = fileDef;
-        } else if (fileDef.file) {
-          filepath = fileDef.file;
-
-          // override save references, if set
-          saveRefs = fileDef.saveRefs == null ? globalSaveRefs : fileDef.saveRefs;
-
-          // override resolve references, if set
-          resolveRefs = fileDef.resolveRefs == null ? globalResolveRefs : fileDef.resolveRefs;
-        } else {
-          throw new SfError('file definition format unknown.', 'InvalidDataImportPlan');
-        }
-
-        filepath = path.resolve(importPlanRootPath, filepath);
-        const importConfig: DataImportComponents = {
-          instanceUrl,
-          saveRefs,
-          resolveRefs,
-          refMap,
-          filepath,
-          contentType,
-        };
-        await this.importSObjectTreeFile(importConfig);
-      }
-    }
-  }
-
-  /**
-   * Validates the import configuration.  If a plan is passed, validates
-   * the plan per the schema.
-   *
-   * @param config - The data import configuration.
-   * @returns Promise.<ImportConfig>
-   */
-  private async validate(config: ImportConfig): Promise<ImportConfig> {
-    const { sobjectTreeFiles, plan } = config;
-
-    // --sobjecttreefiles option is required when --plan option is unset
-    if (!sobjectTreeFiles && !plan) {
-      throw new SfError(messages.getMessage('dataFileNotProvided'), INVALID_DATA_IMPORT_ERR_NAME);
-    }
-
-    // Prevent both --sobjecttreefiles and --plan option from being set
-    if (sobjectTreeFiles && plan) {
-      throw new SfError(messages.getMessage('tooManyFiles'), INVALID_DATA_IMPORT_ERR_NAME);
-    }
-
-    if (plan) {
-      const planPath = path.resolve(process.cwd(), plan);
-
-      if (!fs.existsSync(planPath)) {
-        throw new SfError(messages.getMessage('dataFileNotFound', [planPath]), INVALID_DATA_IMPORT_ERR_NAME);
-      }
-
-      this.importPlanConfig = JSON.parse(fs.readFileSync(planPath, 'utf8')) as DataPlanPart[];
-      try {
-        await this.schemaValidator.validate(this.importPlanConfig as unknown as AnyJson);
-      } catch (err) {
-        const error = err as Error;
-        if (error.name === 'ValidationSchemaFieldErrors') {
-          throw new SfError(
-            messages.getMessage('dataPlanValidationError', [planPath, error.message]),
-            INVALID_DATA_IMPORT_ERR_NAME
-          );
-        }
-        throw SfError.wrap(error);
-      }
-    }
-    return config;
-  }
-
-  /**
-   * Create a hash of sobject { ReferenceId: Type } assigned to this.sobjectTypes.
-   * Used to display the sobject type in the results.
-   *
-   * @param content  The content string defined by the file(s).
-   * @param isJson
-   */
-  private createSObjectTypeMap(content: string, isJson: boolean): void {
-    let contentJson;
-
-    const getTypes = (records: SObjectTreeInput[]): void => {
-      records.forEach((record) => {
-        Object.entries(record).forEach(([key, val]) => {
-          if (key === 'attributes' && isAttributesElement(val)) {
-            this.sobjectTypes[val.referenceId] = val.type;
-          } else if (hasNestedRecords<SObjectTreeInput>(val) && Array.isArray(val.records)) {
-            getTypes(val.records);
-          }
-        });
-      });
-    };
-
-    if (isJson) {
-      contentJson = JSON.parse(content) as { records: SObjectTreeInput[] };
-      if (Array.isArray(contentJson.records)) {
-        getTypes(contentJson.records);
-      }
-    }
-  }
-
   // Does some basic validation on the filepath and returns some file metadata such as
   // isJson, refRegex, and headers.
-  private getSObjectTreeFileMeta(filepath: string, contentType?: string): RequestMeta {
+  // eslint-disable-next-line class-methods-use-this
+  public getSObjectTreeFileMeta(filepath: string, contentType?: string): RequestMeta {
     const meta: RequestMeta = {
       isJson: false,
       headers: {} as Dictionary,
@@ -326,6 +205,131 @@ export class ImportApi {
     return meta;
   }
 
+  private async getPlanPromises({
+    plan,
+    contentType,
+    refMap,
+    instanceUrl,
+  }: {
+    plan: string;
+    contentType?: string;
+    refMap: Map<string, string>;
+    instanceUrl: string;
+  }): Promise<void> {
+    // REVIEWME: support both files and plan in same invocation?
+    const importPlanRootPath = path.dirname(plan);
+    for (const sobjectConfig of this.importPlanConfig) {
+      const globalSaveRefs = sobjectConfig.saveRefs != null ? sobjectConfig.saveRefs : false;
+      const globalResolveRefs = sobjectConfig.resolveRefs != null ? sobjectConfig.resolveRefs : false;
+      for (const fileDef of sobjectConfig.files) {
+        let filepath: string;
+        let saveRefs = globalSaveRefs;
+        let resolveRefs = globalResolveRefs;
+
+        // file definition can be just a filepath or an object that
+        // has a filepath and overriding global config
+        if (typeof fileDef === 'string') {
+          filepath = fileDef;
+        } else if (fileDef.file) {
+          filepath = fileDef.file;
+
+          // override save references, if set
+          saveRefs = fileDef.saveRefs == null ? globalSaveRefs : fileDef.saveRefs;
+
+          // override resolve references, if set
+          resolveRefs = fileDef.resolveRefs == null ? globalResolveRefs : fileDef.resolveRefs;
+        } else {
+          throw new SfError('file definition format unknown.', 'InvalidDataImportPlan');
+        }
+
+        filepath = path.resolve(importPlanRootPath, filepath);
+        const importConfig: DataImportComponents = {
+          instanceUrl,
+          saveRefs,
+          resolveRefs,
+          refMap,
+          filepath,
+          contentType,
+        };
+        // eslint-disable-next-line no-await-in-loop
+        await this.importSObjectTreeFile(importConfig);
+      }
+    }
+  }
+
+  /**
+   * Validates the import configuration.  If a plan is passed, validates
+   * the plan per the schema.
+   *
+   * @param config - The data import configuration.
+   * @returns Promise.<ImportConfig>
+   */
+  private async validate(config: ImportConfig): Promise<ImportConfig> {
+    const { sobjectTreeFiles, plan } = config;
+
+    // --sobjecttreefiles option is required when --plan option is unset
+    if (!sobjectTreeFiles && !plan) {
+      throw new SfError(messages.getMessage('dataFileNotProvided'), INVALID_DATA_IMPORT_ERR_NAME);
+    }
+
+    // Prevent both --sobjecttreefiles and --plan option from being set
+    if (sobjectTreeFiles && plan) {
+      throw new SfError(messages.getMessage('tooManyFiles'), INVALID_DATA_IMPORT_ERR_NAME);
+    }
+
+    if (plan) {
+      const planPath = path.resolve(process.cwd(), plan);
+
+      if (!fs.existsSync(planPath)) {
+        throw new SfError(messages.getMessage('dataFileNotFound', [planPath]), INVALID_DATA_IMPORT_ERR_NAME);
+      }
+
+      this.importPlanConfig = JSON.parse(fs.readFileSync(planPath, 'utf8')) as DataPlanPart[];
+      try {
+        await this.schemaValidator.validate(this.importPlanConfig as unknown as AnyJson);
+      } catch (err) {
+        const error = err as Error;
+        if (error.name === 'ValidationSchemaFieldErrors') {
+          throw new SfError(
+            messages.getMessage('dataPlanValidationError', [planPath, error.message]),
+            INVALID_DATA_IMPORT_ERR_NAME,
+            messages.getMessages('dataPlanValidationErrorActions')
+          );
+        }
+        throw SfError.wrap(error);
+      }
+    }
+    return config;
+  }
+
+  /**
+   * Create a hash of sobject { ReferenceId: Type } assigned to this.sobjectTypes.
+   * Used to display the sobject type in the results.
+   *
+   * @param content  The content string defined by the file(s).
+   * @param isJson
+   */
+  private createSObjectTypeMap(content: string, isJson: boolean): void {
+    const getTypes = (records: SObjectTreeInput[]): void => {
+      records.forEach((record) => {
+        Object.entries(record).forEach(([key, val]) => {
+          if (key === 'attributes' && isAttributesElement(val)) {
+            this.sobjectTypes[val.referenceId] = val.type;
+          } else if (hasNestedRecords<SObjectTreeInput>(val) && Array.isArray(val.records)) {
+            getTypes(val.records);
+          }
+        });
+      });
+    };
+
+    if (isJson) {
+      const contentJson = JSON.parse(content) as { records: SObjectTreeInput[] };
+      if (Array.isArray(contentJson.records)) {
+        getTypes(contentJson.records);
+      }
+    }
+  }
+
   // Parse the SObject tree file, resolving any saved refs if specified.
   // Return a promise with the contents of the SObject tree file and the type.
   private async parseSObjectTreeFile(
@@ -336,8 +340,7 @@ export class ImportApi {
     refMap?: Map<string, string>
   ): Promise<{ contentStr: string; sobject: string }> {
     let contentStr: string;
-    let contentJson;
-    let match;
+    let match: RegExpExecArray | null;
     let sobject = '';
     const foundRefs = new Set<string>();
 
@@ -352,7 +355,7 @@ export class ImportApi {
     if (isJson) {
       // is valid json?  (save round-trip to server)
       try {
-        contentJson = JSON.parse(contentStr) as { records: SObjectTreeInput[] };
+        const contentJson = JSON.parse(contentStr) as { records: SObjectTreeInput[] };
 
         // All top level records should be of the same sObject type so just grab the first one
         sobject = contentJson.records[0].attributes.type.toLowerCase();
@@ -431,7 +434,7 @@ export class ImportApi {
     if (isJson) {
       this.logger.debug(`SObject Tree API results:  ${JSON.stringify(response, null, 4)}`);
 
-      if (response.hasErrors) {
+      if (response.hasErrors === true) {
         throw messages.createError('dataImportFailed', [filepath, JSON.stringify(response.results, null, 4)]);
       }
 
@@ -442,13 +445,10 @@ export class ImportApi {
 
         // if enabled, save references to map to be used to replace references
         // prior to subsequent saves
-        if (saveRefs) {
-          for (let i = 0, len = response.results.length, ref; i < len; i++) {
-            ref = response.results[i] as { referenceId: string; id: string };
-            if (refMap) {
-              refMap.set(ref.referenceId.toLowerCase(), ref.id);
-            }
-          }
+        if (saveRefs && refMap) {
+          response.results.forEach((result) => {
+            refMap.set(result.referenceId.toLowerCase(), result.id);
+          });
         }
       }
     } else {

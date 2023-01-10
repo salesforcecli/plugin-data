@@ -2115,7 +2115,7 @@ export const soqlQueryExemplars = {
       },
     },
   },
-  queryWithAgregates: {
+  queryWithAggregates: {
     soqlQueryResult: {
       query: 'SELECT Name, Avg(AnnualRevenue) FROM Account GROUP BY Name',
       columns: [

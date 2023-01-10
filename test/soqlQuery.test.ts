@@ -9,10 +9,11 @@
 import * as chai from 'chai';
 import { expect } from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import { Logger, SfdxConfigAggregator } from '@salesforce/core';
+import { Logger } from '@salesforce/core';
 import { QueryResult } from 'jsforce';
 import sinon = require('sinon');
-import { SoqlQuery } from '../src/commands/force/data/soql/query';
+import { Ux } from '@salesforce/sf-plugins-core';
+import { runSoqlQuery } from '../src/commands/data/query';
 import * as TestUtil from './testUtil';
 import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars';
 import { queryFieldsExemplars } from './test-files/queryFields.exemplars';
@@ -29,45 +30,39 @@ describe('soqlQuery tests', () => {
     sandbox.restore();
   });
 
-  it.skip('should handle a simple query with all records returned in single call', async () => {
-    const configAgg = await SfdxConfigAggregator.create();
+  it('should handle a simple query with all records returned in single call', async () => {
     sandbox
       .stub(fakeConnection, 'request')
       .resolves({ columnMetadata: queryFieldsExemplars.simpleQuery.columnMetadata });
     querySpy = sandbox
       .stub(fakeConnection, 'query')
       .resolves(soqlQueryExemplars.simpleQuery.queryResult as unknown as QueryResult<any>);
-    const soqlQuery = new SoqlQuery();
-    const results = await soqlQuery.runSoqlQuery(fakeConnection, 'SELECT id, name FROM Contact', logger, configAgg);
+    const results = await runSoqlQuery(fakeConnection, 'SELECT id, name FROM Contact', logger, new Ux());
     sinon.assert.calledOnce(querySpy);
     expect(results).to.be.deep.equal(soqlQueryExemplars.simpleQuery.soqlQueryResult);
   });
-  it.skip('should handle a query with a subquery', async () => {
-    const configAgg = await SfdxConfigAggregator.create();
+  it('should handle a query with a subquery', async () => {
     sandbox.stub(fakeConnection, 'request').resolves({ columnMetadata: queryFieldsExemplars.subquery.columnMetadata });
     querySpy = sandbox
       .stub(fakeConnection, 'query')
       .resolves(soqlQueryExemplars.subQuery.queryResult as unknown as QueryResult<any>);
-    const soqlQuery = new SoqlQuery();
-    const results = await soqlQuery.runSoqlQuery(
+    const results = await runSoqlQuery(
       fakeConnection,
       'SELECT Name, ( SELECT LastName FROM Contacts ) FROM Account',
       logger,
-      configAgg
+      new Ux()
     );
     sinon.assert.calledOnce(querySpy);
     expect(results).to.be.deep.equal(soqlQueryExemplars.subQuery.soqlQueryResult);
   });
-  it.skip('should handle empty query', async () => {
-    const configAgg = await SfdxConfigAggregator.create();
+  it('should handle empty query', async () => {
     requestSpy = sandbox.stub(fakeConnection, 'request');
     querySpy = sandbox.stub(fakeConnection, 'query').resolves(soqlQueryExemplars.emptyQuery.queryResult);
-    const soqlQuery = new SoqlQuery();
-    const results = await soqlQuery.runSoqlQuery(
+    const results = await runSoqlQuery(
       fakeConnection,
       "SELECT Name FROM Contact where name = 'some nonexistent name'",
       logger,
-      configAgg
+      new Ux()
     );
     sinon.assert.calledOnce(querySpy);
     sinon.assert.notCalled(requestSpy);

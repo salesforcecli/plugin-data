@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { QueryResult } from 'jsforce';
+import { QueryResult, Record } from 'jsforce';
 import { Optional } from '@salesforce/ts-types';
 
 export enum FieldType {
@@ -32,7 +32,7 @@ export type SoqlQueryResult = {
   // an id can be present when a bulk query times out
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore jsforce v2 types are too strict for running general queries
-  result: QueryResult<unknown> & { id?: string };
+  result: QueryResult<Record> & { id?: string };
   columns: Field[];
 };
 
@@ -64,14 +64,10 @@ export type SObjectTreeFileContents = {
   records: SObjectTreeInput[];
 };
 
-export const hasNestedRecords = <T>(element: { records: T[] } | unknown): element is { records: T[] } => {
-  return Array.isArray((element as { records: T[] })?.records);
-};
+export const hasNestedRecords = <T>(element: { records: T[] } | unknown): element is { records: T[] } =>
+  Array.isArray((element as { records: T[] })?.records);
 
 export const isAttributesElement = (
   element: SObjectTreeInput['attributes'] | unknown
-): element is SObjectTreeInput['attributes'] => {
-  return (
-    !!(element as SObjectTreeInput['attributes']).referenceId && !!(element as SObjectTreeInput['attributes']).type
-  );
-};
+): element is SObjectTreeInput['attributes'] =>
+  !!(element as SObjectTreeInput['attributes']).referenceId && !!(element as SObjectTreeInput['attributes']).type;

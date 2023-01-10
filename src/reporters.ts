@@ -6,35 +6,28 @@
  */
 import { EOL } from 'os';
 import { Logger, Messages } from '@salesforce/core';
-import { UX } from '@salesforce/command';
+import { CliUx } from '@oclif/core';
 import * as chalk from 'chalk';
 import { get, getArray, getNumber, isString, Optional } from '@salesforce/ts-types';
-import { CliUx } from '@oclif/core';
 import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
 
-export class Reporter {
-  protected ux: UX;
+class Reporter {
   protected logger: Logger;
 
-  public constructor(ux: UX, logger: Logger) {
-    this.ux = ux;
-    this.logger = logger.child('reporter');
-  }
-
-  public log(...args: string[]): void {
-    this.ux.log(...args);
+  public constructor() {
+    this.logger = Logger.childFromRoot('reporter');
   }
 }
 
-export class QueryReporter extends Reporter {
+class QueryReporter extends Reporter {
   protected columns: Field[] = [];
   protected data: SoqlQueryResult;
 
-  public constructor(data: SoqlQueryResult, columns: Field[], ux: UX, logger: Logger) {
-    super(ux, logger);
+  public constructor(data: SoqlQueryResult, columns: Field[]) {
+    super();
     this.columns = columns;
     this.data = data;
   }
@@ -47,14 +40,14 @@ type ParsedFields = {
 };
 
 export class HumanReporter extends QueryReporter {
-  public constructor(data: SoqlQueryResult, columns: Field[], ux: UX, logger: Logger) {
-    super(data, columns, ux, logger);
+  public constructor(data: SoqlQueryResult, columns: Field[]) {
+    super(data, columns);
   }
 
   public display(): void {
     const { attributeNames, children, aggregates } = this.parseFields();
     // in case of count() there are no records, but there is a totalSize
-    const totalCount = this.data.result.records.length || this.data.result.totalSize;
+    const totalCount = this.data.result.records.length ? this.data.result.records.length : this.data.result.totalSize;
     this.soqlQuery(attributeNames, this.massageRows(this.data.result.records, children, aggregates), totalCount);
   }
 
@@ -94,10 +87,14 @@ export class HumanReporter extends QueryReporter {
     return { attributeNames, children, aggregates };
   }
 
-  public soqlQuery(columns: Array<Optional<string>>, records: unknown[], totalCount: number): void {
+  public soqlQuery(
+    columns: Array<Optional<string>>,
+    records: Array<Record<string, unknown>>,
+    totalCount: number
+  ): void {
     this.prepNullValues(records);
-    this.ux.table(records, this.prepColumns(columns));
-    this.log(chalk.bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
+    CliUx.ux.table(records, prepColumns(columns));
+    CliUx.ux.log(chalk.bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
   }
 
   public prepNullValues(records: unknown[]): void {
@@ -119,37 +116,17 @@ export class HumanReporter extends QueryReporter {
       });
   }
 
-  public prepColumns(columns: Array<Optional<string>>): CliUx.Table.table.Columns<Record<string, unknown>> {
-    const formattedColumns: CliUx.Table.table.Columns<Record<string, unknown>> = {};
-    columns
-      .map((field: Optional<string>) => field as string)
-      .filter((field): string => field)
-      .map(
-        (field: string) =>
-          (formattedColumns[field] = {
-            header: field.toUpperCase(),
-            get: (row): string => {
-              // first test if key exists, if so, return value
-              if (Reflect.has(row, field)) {
-                return (Reflect.get(row, field) as string) || '';
-              } else {
-                // if not, try to find it query
-                return (get(row, field) as string) || '';
-              }
-            },
-          })
-      );
-    return formattedColumns;
-  }
-
   //  public massageRows(queryResults: BasicRecord[], children: string[], aggregates: Field[]): BasicRecord[] {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public massageRows(queryResults: unknown[], children: string[], aggregates: Field[]): any {
+  public massageRows(
+    queryResults: Array<Record<string, unknown>>,
+    children: string[],
+    aggregates: Field[]
+  ): Array<Record<string, unknown>> {
     // some fields will return a JSON object that isn't accessible via the query (SELECT Metadata FROM RemoteProxy)
     // some will return a JSON that IS accessible via the query (SELECT owner.Profile.Name FROM Lead)
     // querying (SELECT Metadata.isActive FROM RemoteProxy) throws a SOQL validation error, so we have to display the entire Metadata object
     queryResults.forEach((qr) => {
-      const result = qr as Record<string, unknown>;
+      const result = qr;
       this.data.columns.forEach((col) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const entry = Reflect.get(result, col.name);
@@ -164,61 +141,64 @@ export class HumanReporter extends QueryReporter {
     });
 
     // There are subqueries or aggregates. Massage the data.
-    let qr;
     if (children.length > 0 || aggregates.length > 0) {
-      qr = queryResults.reduce((newResults: unknown[], result) => {
-        // Aggregates are soql functions that aggregate data, like "SELECT avg(total)" and
-        // are returned in the data as exprX. Aggregates can have aliases, like "avg(total) totalAverage"
-        // and are returned in the data as the alias.
-        if (aggregates.length > 0) {
-          for (let i = 0; i < aggregates.length; i++) {
-            const aggregate = aggregates[i];
-            if (!aggregate.alias) {
-              Reflect.set(result as never, aggregate.name, Reflect.get(result as never, `expr${i}`));
+      const qr = queryResults.reduce<Array<Record<string, unknown>>>(
+        (newResults: Array<Record<string, unknown>>, result) => {
+          // Aggregates are soql functions that aggregate data, like "SELECT avg(total)" and
+          // are returned in the data as exprX. Aggregates can have aliases, like "avg(total) totalAverage"
+          // and are returned in the data as the alias.
+          if (aggregates.length > 0) {
+            for (let i = 0; i < aggregates.length; i++) {
+              const aggregate = aggregates[i];
+              if (!aggregate.alias) {
+                Reflect.set(result as never, aggregate.name, Reflect.get(result as never, `expr${i}`));
+              }
             }
           }
-        }
 
-        const subResults: Array<Record<string, unknown>> = [];
-        if (children.length > 0) {
-          const childrenRows: Record<string, unknown> = {};
-          children.forEach((child) => {
-            const aChild = get(result as never, child);
-            Reflect.set(childrenRows, child, aChild);
-            Reflect.deleteProperty(result as never, child);
-          });
+          const subResults: Array<Record<string, unknown>> = [];
+          if (children.length > 0) {
+            const childrenRows: Record<string, unknown> = {};
+            children.forEach((child) => {
+              const aChild = get(result as never, child);
+              Reflect.set(childrenRows, child, aChild);
+              Reflect.deleteProperty(result as never, child);
+            });
 
-          Reflect.ownKeys(childrenRows).forEach((child) => {
-            const childO = get(childrenRows, child as string);
-            if (childO) {
-              const childRecords = getArray(childO, 'records', []);
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              childRecords.forEach((record: unknown, index) => {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                const newResult: Record<string, unknown> = {};
-                Object.entries(record as never).forEach(([key, value]) => {
-                  if (!index) {
-                    Reflect.defineProperty(result as Record<string, unknown>, `${child.toString()}.${key}`, {
-                      value: value ? value : chalk.bold('null'),
-                    });
-                  } else {
-                    Reflect.defineProperty(newResult, `${child.toString()}.${key}`, {
-                      value: value ? value : chalk.bold('null'),
-                    });
+            Reflect.ownKeys(childrenRows).forEach((child) => {
+              const childO = get(childrenRows, child as string);
+              if (childO) {
+                const childRecords = getArray(childO, 'records', []);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                childRecords.forEach((record: unknown, index) => {
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                  const newResult: Record<string, unknown> = {};
+                  Object.entries(record as never).forEach(([key, value]) => {
+                    if (!index) {
+                      Reflect.defineProperty(result, `${child.toString()}.${key}`, {
+                        value: value ? value : chalk.bold('null'),
+                      });
+                    } else {
+                      Reflect.defineProperty(newResult, `${child.toString()}.${key}`, {
+                        value: value ? value : chalk.bold('null'),
+                      });
+                    }
+                  });
+                  if (index) {
+                    subResults.push(newResult);
                   }
                 });
-                if (index) {
-                  subResults.push(newResult);
-                }
-              });
-            }
-          });
-        }
-        newResults.push(result, ...subResults);
-        return newResults;
-      }, [] as unknown[]);
+              }
+            });
+          }
+          newResults.push(result, ...subResults);
+          return newResults;
+        },
+        []
+      );
+      return qr;
     }
-    return qr ?? queryResults;
+    return queryResults;
   }
 }
 
@@ -227,35 +207,15 @@ const DOUBLE_QUOTE = '"';
 const SHOULD_QUOTE_REGEXP = new RegExp(`[${SEPARATOR}${DOUBLE_QUOTE}${EOL}]`);
 
 export class CsvReporter extends QueryReporter {
-  public constructor(data: SoqlQueryResult, columns: Field[], ux: UX, logger: Logger) {
-    super(data, columns, ux, logger);
-  }
-
-  /**
-   * Escape a value to be placed in a CSV row. We follow rfc 4180
-   * https://tools.ietf.org/html/rfc4180#section-2 and will not surround the
-   * value in quotes if it doesn't contain the separator, double quote, or EOL.
-   *
-   * @param value The escaped value
-   */
-  public escape(value: string): string {
-    if (value && SHOULD_QUOTE_REGEXP.test(value)) {
-      return `"${value.replace(/"/gi, '""')}"`;
-    }
-    return value;
+  public constructor(data: SoqlQueryResult, columns: Field[]) {
+    super(data, columns);
   }
 
   public display(): void {
-    const attributeNames: string[] = this.massageRows();
+    const attributeNames = this.massageRows();
 
     // begin output
-    this.log(
-      attributeNames
-        .map((name) => {
-          return this.escape(name);
-        })
-        .join(SEPARATOR)
-    );
+    CliUx.ux.log(attributeNames.map((name) => escape(name)).join(SEPARATOR));
 
     // explained why we need this below - foreach does not allow types
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -266,16 +226,16 @@ export class CsvReporter extends QueryReporter {
         // the standard case returns {field:{nested: 'value'}}, while the bulk will return {field.nested: 'value'}
         const value = get(row, name, row[name]);
         if (isString(value)) {
-          return this.escape(value);
+          return escape(value);
           // if value is null, then typeof value === 'object' so check before typeof to avoid illegal csv
         } else if (value === null) {
           return;
         } else if (typeof value === 'object') {
-          return this.escape(JSON.stringify(value));
+          return escape(JSON.stringify(value));
         }
         return value;
       });
-      this.log(values.join(SEPARATOR));
+      CliUx.ux.log(values.join(SEPARATOR));
     });
   }
 
@@ -356,16 +316,17 @@ export class CsvReporter extends QueryReporter {
 }
 
 export class JsonReporter extends QueryReporter {
-  public constructor(data: SoqlQueryResult, columns: Field[], ux: UX, logger: Logger) {
-    super(data, columns, ux, logger);
+  public constructor(data: SoqlQueryResult, columns: Field[]) {
+    super(data, columns);
   }
 
+  // eslint-disable-next-line class-methods-use-this
   public log(): void {
     return;
   }
 
   public display(): void {
-    this.ux.styledJSON({ status: 0, result: this.data.result });
+    CliUx.ux.styledJSON({ status: 0, result: this.data.result });
   }
 }
 
@@ -376,4 +337,41 @@ export const FormatTypes = {
   human: HumanReporter,
   csv: CsvReporter,
   json: JsonReporter,
+} as const;
+
+const prepColumns = (columns: Array<Optional<string>>): CliUx.Table.table.Columns<Record<string, unknown>> => {
+  const formattedColumns: CliUx.Table.table.Columns<Record<string, unknown>> = {};
+  columns
+    .map((field: Optional<string>) => field)
+    .filter(isString)
+    .map(
+      (field) =>
+        (formattedColumns[field] = {
+          header: field.toUpperCase(),
+          get: (row): string => {
+            // first test if key exists, if so, return value
+            if (Reflect.has(row, field)) {
+              return (Reflect.get(row, field) as string) || '';
+            } else {
+              // if not, try to find it query
+              return (get(row, field) as string) || '';
+            }
+          },
+        })
+    );
+  return formattedColumns;
+};
+
+/**
+ * Escape a value to be placed in a CSV row. We follow rfc 4180
+ * https://tools.ietf.org/html/rfc4180#section-2 and will not surround the
+ * value in quotes if it doesn't contain the separator, double quote, or EOL.
+ *
+ * @param value The escaped value
+ */
+export const escape = (value: string): string => {
+  if (value && SHOULD_QUOTE_REGEXP.test(value)) {
+    return `"${value.replace(/"/gi, '""')}"`;
+  }
+  return value;
 };

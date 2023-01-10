@@ -5,32 +5,31 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { expect } from '@salesforce/command/lib/test';
-import * as chai from 'chai';
+import { expect, use as chaiUse } from 'chai';
+
 import * as chaiAsPromised from 'chai-as-promised';
-import { UX } from '@salesforce/command';
-import { Logger } from '@salesforce/core';
 import { get, getPlainObject } from '@salesforce/ts-types';
 import { createSandbox } from 'sinon';
+import { CliUx } from '@oclif/core';
 import { Field, SoqlQueryResult } from '../src/dataSoqlQueryTypes';
-import { CsvReporter, HumanReporter } from '../src/reporters';
+import { CsvReporter, HumanReporter, escape } from '../src/reporters';
 import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars';
 
-chai.use(chaiAsPromised);
+chaiUse(chaiAsPromised);
 
 describe('reporter tests', () => {
-  const logger = Logger.childFromRoot('reporterTest');
   describe('human reporter tests', () => {
     let reporter: HumanReporter;
     let queryData: SoqlQueryResult;
     beforeEach(async () => {
-      queryData = soqlQueryExemplars.queryWithAgregates.soqlQueryResult;
+      // jsforce has records/attributes/url as a non-optional property.  It may not be!
+      queryData = soqlQueryExemplars.queryWithAggregates.soqlQueryResult as unknown as SoqlQueryResult;
       const dataSoqlQueryResult: SoqlQueryResult = {
         columns: queryData.columns,
         query: queryData.query,
         result: queryData.result,
       };
-      reporter = new HumanReporter(dataSoqlQueryResult, queryData.columns, await UX.create(), logger);
+      reporter = new HumanReporter(dataSoqlQueryResult, queryData.columns);
     });
     it('parses result fields', () => {
       const { attributeNames, children, aggregates } = reporter.parseFields();
@@ -57,7 +56,7 @@ describe('reporter tests', () => {
       };
       const sb = createSandbox();
       const reflectSpy = sb.spy(Reflect, 'set');
-      reporter = new HumanReporter(dataSoqlQueryResult, queryData.columns, await UX.create(), logger);
+      reporter = new HumanReporter(dataSoqlQueryResult, queryData.columns);
       const { attributeNames, children, aggregates } = reporter.parseFields();
       expect(attributeNames).to.be.ok;
 
@@ -77,13 +76,14 @@ describe('reporter tests', () => {
     let reporter: CsvReporter;
     let queryData: SoqlQueryResult;
     beforeEach(async () => {
-      queryData = soqlQueryExemplars.queryWithAgregates.soqlQueryResult;
+      //
+      queryData = soqlQueryExemplars.queryWithAggregates.soqlQueryResult as unknown as SoqlQueryResult;
       const dataSoqlQueryResult: SoqlQueryResult = {
         columns: queryData.columns,
         query: queryData.query,
         result: queryData.result,
       };
-      reporter = new CsvReporter(dataSoqlQueryResult, queryData.columns, await UX.create(), logger);
+      reporter = new CsvReporter(dataSoqlQueryResult, queryData.columns);
     });
 
     it('stringifies JSON results correctly', async () => {
@@ -94,15 +94,12 @@ describe('reporter tests', () => {
         result: queryData.result,
       };
       const sb = createSandbox();
-      reporter = new CsvReporter(dataSoqlQueryResult, queryData.columns, await UX.create(), logger);
-      const escapeSpy = sb.spy(reporter, 'escape');
-      const logStub = sb.stub(reporter, 'log');
+      reporter = new CsvReporter(dataSoqlQueryResult, queryData.columns);
+      const logStub = sb.stub(CliUx.ux, 'log');
 
       const massagedRows = reporter.massageRows();
       const data = getPlainObject(reporter, 'data');
       reporter.display();
-      // callCount would be 5 if were printing '[object Object]' instead of the string representation
-      expect(escapeSpy.callCount).to.equal(8);
       expect(logStub.called).to.be.true;
       expect(massagedRows).to.be.deep.equal(
         soqlQueryExemplars.queryWithNestedObject.soqlQueryResult.columns.map((column: Field) => column.name)
@@ -116,20 +113,20 @@ describe('reporter tests', () => {
       const massagedRows = reporter.massageRows();
       const data = getPlainObject(reporter, 'data');
       expect(massagedRows).to.be.deep.equal(
-        soqlQueryExemplars.queryWithAgregates.soqlQueryResult.columns.map((column: Field) => column.name)
+        soqlQueryExemplars.queryWithAggregates.soqlQueryResult.columns.map((column: Field) => column.name)
       );
       expect(get(data, 'result.records')).be.equal(
-        soqlQueryExemplars.queryWithAgregates.soqlQueryResult.result.records
+        soqlQueryExemplars.queryWithAggregates.soqlQueryResult.result.records
       );
     });
     it('escapes embedded separator', () => {
-      let escapedString = reporter.escape('"a,b,c"');
+      let escapedString = escape('"a,b,c"');
       expect(escapedString).to.be.equal('"""a,b,c"""');
-      escapedString = reporter.escape('a,b,c');
+      escapedString = escape('a,b,c');
       expect(escapedString).to.be.equal('"a,b,c"');
     });
     it('noop escape with no embedded separator', () => {
-      const escapedString = reporter.escape('abc');
+      const escapedString = escape('abc');
       expect(escapedString).to.be.equal('abc');
     });
   });
@@ -143,7 +140,7 @@ describe('reporter tests', () => {
         query: queryData.query,
         result: queryData.result,
       };
-      reporter = new HumanReporter(dataSoqlQueryResult, queryData.columns, await UX.create(), logger);
+      reporter = new HumanReporter(dataSoqlQueryResult, queryData.columns);
     });
     it('parses result fields', () => {
       const { attributeNames, children, aggregates } = reporter.parseFields();
@@ -162,7 +159,7 @@ describe('reporter tests', () => {
         query: queryData.query,
         result: queryData.result,
       };
-      reporter = new CsvReporter(dataSoqlQueryResult, queryData.columns, await UX.create(), logger);
+      reporter = new CsvReporter(dataSoqlQueryResult, queryData.columns);
     });
     it('massages report results', () => {
       const massagedRows = reporter.massageRows();

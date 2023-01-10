@@ -1,3 +1,3 @@
 module.exports = {
-  extends: ['eslint-config-salesforce-typescript', 'eslint-config-salesforce-license'],
+  extends: ['eslint-config-salesforce-typescript', 'eslint-config-salesforce-license', 'plugin:sf-plugin/recommended'],
 };
