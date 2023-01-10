@@ -30,7 +30,7 @@ Directory in which to generate the JSON files; default is current directory.
 
 - Export records retrieved with the specified SOQL query into a single JSON file in the current directory; the command uses your default org:
 
-  <%= config.bin %> <%= command.id %> --query "SELECT Id, Name, (SELECT Name, Address\_\_c FROM Properties\_\_r) FROM Broker\_\_c"
+  <%= config.bin %> <%= command.id %> --query "SELECT Id, Name, (SELECT Name, Address**c FROM Properties**r) FROM Broker\_\_c"
 
 - Export data using a SOQL query in the "query.txt" file and generate JSON files for each object and a plan that aggregates them:
 
