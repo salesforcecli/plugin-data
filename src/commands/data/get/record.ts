@@ -68,7 +68,7 @@ export default class Get extends SfCommand<Record> {
       return toAnyJson(result) as Record;
     } catch (err) {
       this.spinner.stop('failed');
-      throw new SfError((err as Error).name, (err as Error).message);
+      throw new SfError((err as Error).message, (err as Error).name);
     }
   }
 }

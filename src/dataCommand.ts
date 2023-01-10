@@ -130,13 +130,13 @@ export const query = async (
   const sobject = conn.sobject(objectType);
   const records = await sobject.find(queryObject, 'id');
   if (!records || records.length === 0) {
-    throw new SfError('DataRecordGetNoRecord', messages.getMessage('DataRecordGetNoRecord'));
+    throw new SfError(messages.getMessage('DataRecordGetNoRecord'), 'DataRecordGetNoRecord');
   }
 
   if (records.length > 1) {
     throw new SfError(
-      'DataRecordGetMultipleRecords',
-      messages.getMessage('DataRecordGetMultipleRecords', [where, objectType, records.length])
+      messages.getMessage('DataRecordGetMultipleRecords', [where, objectType, records.length]),
+      'DataRecordGetMultipleRecords'
     );
   }
   return records[0];

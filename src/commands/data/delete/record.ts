@@ -78,7 +78,7 @@ export default class Delete extends SfCommand<SaveResult> {
       if (!(err instanceof Error)) {
         throw err;
       }
-      throw new SfError(err.name, err.message);
+      throw new SfError(err.message, err.name);
     }
   }
 }
