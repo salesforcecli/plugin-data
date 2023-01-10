@@ -13,7 +13,7 @@ No matching record found.
 # DataRecordGetMultipleRecords
 
 %s is not a unique qualifier for %s; %s records were retrieved.
-Retrieve only one record.
+Retrieve only one record by making your --where clause more specific.
 
 # TextUtilMalformedKeyValuePair
 
