@@ -76,7 +76,7 @@ describe('force:data:record:get', () => {
       await shouldThrow(cmd.run());
     } catch (e) {
       assert(e instanceof Error);
-      expect(e.name).to.equal(messages.getMessage('TextUtilMalformedKeyValuePair', ['Name']));
+      expect(e.message).to.equal(messages.getMessage('TextUtilMalformedKeyValuePair', ['Name']));
     }
   });
 });
