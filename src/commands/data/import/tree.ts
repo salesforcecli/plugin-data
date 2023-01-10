@@ -36,7 +36,7 @@ export default class Import extends SfCommand<ImportResult[] | JsonMap> {
       char: 'f',
       summary: messages.getMessage('flags.files'),
       exclusive: ['plan'],
-      aliases: ['--sobjecttreefiles'],
+      aliases: ['sobjecttreefiles'],
       deprecateAliases: true,
     }),
     plan: Flags.file({
