@@ -38,7 +38,7 @@ Use Tooling API so you can retrieve a record from a Tooling API object.
 
   <%= config.bin %> <%= command.id %> --sobject Account --where "Name=Acme"
 
-- Retriee a record from Account identified with two field values, one that contains a space; the command uses the org with alias "my-scratch":
+- Retrieve a record from Account identified with two field values, one that contains a space; the command uses the org with alias "my-scratch":
 
   <%= config.bin %> <%= command.id %> --sobject Account --where "Name='Universal Containers' Phone='(123) 456-7890'" --target-org myscratch
 
