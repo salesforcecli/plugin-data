@@ -114,7 +114,7 @@
     "@types/graceful-fs": "^4.1.5",
     "@types/shelljs": "^0.8.10",
     "@typescript-eslint/eslint-plugin": "^5.47.0",
-    "@typescript-eslint/parser": "^5.47.0",
+    "@typescript-eslint/parser": "^5.48.2",
     "chai": "^4.3.7",
     "chai-as-promised": "^7.1.1",
     "eslint": "^8.21.0",
