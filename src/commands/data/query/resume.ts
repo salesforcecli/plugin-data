@@ -6,10 +6,17 @@
  */
 import { Messages } from '@salesforce/core';
 import { QueryJobV2 } from 'jsforce/lib/api/bulk';
-import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { orgFlags } from '../../../flags';
-import { DataSoqlQueryCommand, displayResults, transformBulkResults } from '../query';
+import {
+  Flags,
+  loglevel,
+  optionalOrgFlagWithDeprecations,
+  orgApiVersionFlagWithDeprecations,
+  SfCommand
+} from '@salesforce/sf-plugins-core';
+import { resultFormatFlag } from '../../../flags';
+import { displayResults, transformBulkResults } from '../../../queryUtils';
 import { FormatTypes } from '../../../reporters';
+import { BulkQueryRequestCache } from '../../../bulkDataRequestCache';
 
 Messages.importMessagesDirectory(__dirname);
 const reportMessages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.report');
@@ -24,33 +31,42 @@ export class BulkQueryReport extends SfCommand<unknown> {
   public static readonly deprecateAliases = true;
 
   public static readonly flags = {
-    ...orgFlags,
-    'result-format': DataSoqlQueryCommand.flags['result-format'],
+    'target-org': optionalOrgFlagWithDeprecations,
+    'api-version': orgApiVersionFlagWithDeprecations,
+    loglevel,
+    'result-format': resultFormatFlag,
     'bulk-query-id': Flags.salesforceId({
+      length: 18,
       char: 'i',
-      required: true,
       startsWith: '750',
       summary: reportMessages.getMessage('flags.bulkQueryId'),
       aliases: ['bulkqueryid'],
-      deprecateAliases: true,
+      deprecateAliases: true
     }),
+    'use-most-recent': Flags.boolean({
+      char: 'r',
+      summary: reportMessages.getMessage('flags.useMostRecent.summary'),
+      exclusive: ['bulk-query-id']
+    })
   };
 
   public async run(): Promise<unknown> {
     const { flags } = await this.parse(BulkQueryReport);
-    const job = new QueryJobV2({
-      operation: 'query',
-      pollingOptions: { pollTimeout: 0, pollInterval: 0 },
-      query: '',
-      connection: flags['target-org'].getConnection(flags['api-version']),
-    });
-    job.jobInfo = { id: flags['bulk-query-id'] };
+    const cache = await BulkQueryRequestCache.create();
+    const resumeOptions = await cache.resolveResumeOptionsFromCache(flags['bulk-query-id'], flags['use-most-recent'], flags['target-org'], flags['api-version']);
+    const job = new QueryJobV2(resumeOptions.options);
+    job.jobInfo = resumeOptions.jobInfo;
     const results = await job.getResults();
     const queryResult = transformBulkResults(results, '');
 
     if (!this.jsonEnabled()) {
-      displayResults({ ...queryResult }, flags['result-format'] as keyof typeof FormatTypes);
+      displayResults({ ...queryResult }, flags['result-format'] as FormatTypes);
     }
+
+    if (queryResult.result.done) {
+      await BulkQueryRequestCache.unset(resumeOptions.jobInfo.id);
+    }
+
     return queryResult.result;
   }
 }

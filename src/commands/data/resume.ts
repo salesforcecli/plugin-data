@@ -6,7 +6,7 @@
  */
 import { BatchInfo, JobInfo } from 'jsforce/api/bulk';
 import { Messages, SfError } from '@salesforce/core';
-import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
+import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { orgFlags } from '../../flags';
 import { Batcher } from '../../batcher';
 
@@ -15,6 +15,8 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.status')
 
 export type StatusResult = BatchInfo[] | JobInfo;
 export default class Status extends SfCommand<StatusResult> {
+  public static readonly state = 'deprecated';
+  public static readonly deprecationOptions = {to: 'force:data:bulk:status', message: 'Use force:data:bulk:status instead'}
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -24,6 +26,7 @@ export default class Status extends SfCommand<StatusResult> {
   public static readonly flags = {
     ...orgFlags,
     'batch-id': Flags.salesforceId({
+      length: 18,
       char: 'b',
       startsWith: '751',
       summary: messages.getMessage('flags.batchid'),
@@ -31,10 +34,10 @@ export default class Status extends SfCommand<StatusResult> {
       deprecateAliases: true,
     }),
     'job-id': Flags.salesforceId({
+      length: 18,
       char: 'i',
       startsWith: '750',
       summary: messages.getMessage('flags.jobid'),
-      required: true,
       aliases: ['jobid'],
       deprecateAliases: true,
     }),
@@ -44,20 +47,16 @@ export default class Status extends SfCommand<StatusResult> {
     const { flags } = await this.parse(Status);
     this.spinner.start('Getting Status');
     const conn = flags['target-org'].getConnection(flags['api-version']);
-    const batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
+    const batcher = new Batcher(conn);
     if (flags['job-id'] && flags['batch-id']) {
       // view batch status
       const job = conn.bulk.job(flags['job-id']);
-      let found = false;
 
       const batches: BatchInfo[] = await job.list();
-      batches.forEach((batch: BatchInfo) => {
-        if (batch.id === flags['batch-id']) {
-          batcher.bulkStatus(batch);
-          found = true;
-        }
-      });
-      if (!found) {
+      const batch = batches.find((b: BatchInfo) => b.id === flags['batch-id']);
+      if (batch) {
+        this.displayBatch(batch);
+      } else {
         throw new SfError(messages.getMessage('NoBatchFound', [flags['batch-id'], flags['job-id']]), 'NoBatchFound');
       }
 
@@ -65,9 +64,19 @@ export default class Status extends SfCommand<StatusResult> {
       return batches;
     } else {
       // view job status
-      const jobStatus = await batcher.fetchAndDisplayJobStatus(flags['job-id']);
+      const jobStatus = await batcher.fetchJobStatus(flags['job-id'] ?? '');
+      this.info(`Job Status: ${jobStatus.state} operation: ${jobStatus.operation}`);
       this.spinner.stop();
       return jobStatus;
     }
+  }
+
+  private displayBatch(batch: BatchInfo): void {
+    const tableData = Object.entries(batch).map(([key, value]) => ({ key, value }));
+    const columns = {
+        key: { header: 'Key' },
+        value: { header: 'Key' },
+      };
+    this.table(tableData, columns);
   }
 }

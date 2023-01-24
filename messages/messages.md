@@ -18,3 +18,23 @@ Retrieve only one record by making your --where clause more specific.
 # TextUtilMalformedKeyValuePair
 
 Malformed key=value pair for value: %s.
+
+# flags.resultFormat
+
+Format to display the results; the --json flag overrides this flag.
+
+# bulkRequestIdRequiredWhenNotUsingMostRecent
+
+The bulk request id must be supplied when not looking for most recent cache entry.
+
+# cannotFindMostRecentCacheEntry
+
+Could not load a most recent cache entry for a bulk request. Please rerun your command with a bulk request id.
+
+# cannotCreateResumeOptionsWithoutAnOrg
+
+Cannot create a cache entry without a valid org.
+
+# usernameRequired
+
+A valid username is required when creating a cache entry.

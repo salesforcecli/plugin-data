@@ -4,10 +4,10 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+import { EventEmitter } from 'events';
 import { ReadStream } from 'fs';
 import { Connection, Messages, SfError } from '@salesforce/core';
-import { Ux } from '@salesforce/sf-plugins-core';
-import { BulkIngestBatchResult, Job, JobInfo, Batch, BatchInfo, BulkOperation } from 'jsforce/api/bulk';
+import { Batch, BatchInfo, BatchState, BulkIngestBatchResult, BulkOperation, Job, JobInfo } from 'jsforce/api/bulk';
 import { Schema } from 'jsforce';
 import { stringify } from 'csv-stringify/sync';
 import parse = require('csv-parse');
@@ -24,13 +24,13 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'batcher');
 type BatchEntry = Record<string, string>;
 type Batches = BatchEntry[][];
 
-type BulkResult = {
+export type BulkResult = {
   $: {
     xmlns: string;
   };
   id: string;
   jobId: string;
-  state: string;
+  state: BatchState;
   createdDate: string;
   systemModStamp: string;
   numberRecordsProcessed: string;
@@ -40,10 +40,33 @@ type BulkResult = {
   apexProcessingTime: string;
 };
 
-export type BatcherReturnType = Awaited<ReturnType<Batcher['createAndExecuteBatches']>>;
+export type BatcherReturnType = BulkResult[] | JobInfo[];
 
-export class Batcher {
-  public constructor(private readonly conn: Connection, private readonly ux: Ux) {}
+export class Batcher extends EventEmitter {
+  private batchesCompleted = 0;
+
+  public constructor(private readonly conn: Connection) {
+    super();
+  }
+
+  /**
+   * The timeout error handling is messy so to increase readability
+   * break it out into it's own method
+   *
+   * @param err The timeout Error
+   * @private
+   */
+  private static parseTimeOutError(err: Error): string {
+    const jobIdIndex = err.message.indexOf('750');
+    const batchIdIndex = err.message.indexOf('751');
+    const message = messages.getMessage('TimeOut', [
+      err.message.substr(jobIdIndex, 18),
+      err.message.substr(batchIdIndex, 18)
+    ]);
+
+    process.exitCode = 69;
+    return message;
+  }
 
   /**
    * get and display the job status; close the job if completed
@@ -51,7 +74,7 @@ export class Batcher {
    * @param jobId {string}
    * @param doneCallback
    */
-  public async fetchAndDisplayJobStatus(
+  public async fetchJobStatus(
     jobId: string,
     doneCallback?: (...args: [{ job: JobInfo }]) => void
   ): Promise<JobInfo> {
@@ -77,26 +100,11 @@ export class Batcher {
     batchNum?: number,
     isJob?: boolean
   ): JobInfo | BatchInfo {
-    this.ux.log('');
-    if (batchNum) {
-      this.ux.styledHeader(messages.getMessage('BulkBatch', [batchNum]));
-    }
     const errorMessages = (results ?? []).flatMap((result) => result.errors);
-    if (errorMessages.length > 0) {
-      this.ux.styledHeader(messages.getMessage('BulkError'));
-      errorMessages.forEach((errorMessage) => {
-        this.ux.log(errorMessage);
-      });
-    }
-
-    this.ux.styledHeader(isJob ? messages.getMessage('BulkJobStatus') : messages.getMessage('BatchStatus'));
-
+    this.emit('bulkBatchStatus', { summary, results, batchNum, isJob, errorMessages });
     // remove url field (present if isJob)
     // Object.entries loses type info, but will match the original type
-    const output = Object.fromEntries(Object.entries(summary).filter(([key]) => key !== '$')) as typeof summary;
-    this.ux.styledObject(output);
-
-    return output;
+    return Object.fromEntries(Object.entries(summary).filter(([key]) => key !== '$')) as typeof summary;
   }
 
   /**
@@ -114,100 +122,72 @@ export class Batcher {
     sobjectType: string,
     wait?: number
   ): Promise<BulkResult[] | JobInfo[]> {
-    const batchesCompleted = 0;
     let batchesQueued = 0;
     const overallInfo = false;
 
     const batches = await splitIntoBatches(records);
+    const totalRecords = batches.reduce((acc, batch) => acc + batch.length, 0);
 
+    this.emit('bulkStatusTotals', { totalRecords, totalBatches: batches.length });
     // The error handling for this gets quite tricky when there are multiple batches
     // Currently, we bail out early by calling an Error.exit
     // But, we might want to actually continue to the next batch.
-    return (await Promise.all(
-      batches.map(
-        async (batch: Array<Record<string, string>>, i: number): Promise<BulkResult | BatchInfo | void | JobInfo> => {
-          const newBatch = job.createBatch();
+    const batchPromises = batches.map(
+      async (batch: Array<Record<string, string>>, i: number): Promise<unknown> => {
+        const newBatch = job.createBatch();
 
-          return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
+          // eslint-disable-next-line @typescript-eslint/no-floating-promises
+          newBatch.on('error', (err: Error): void => {
+            // reword no external id error message to direct it to org user rather than api user
+            if (err.message.startsWith('External ID was blank')) {
+              err.message = messages.getMessage('ExternalIdRequired', [sobjectType]);
+              job.emit('error', err);
+              this.emit('batchError', err);
+            }
+            if (err.message.startsWith('Polling time out')) {
+              err.message = Batcher.parseTimeOutError(err);
+              // using the reject method for all of the promises wasn't handling errors properly
+              // so emit a 'error' on the job.
+              const error = new SfError(err.message, 'Time Out', [], 69);
+              job.emit('error', error);
+              this.emit('batchError', error);
+            }
+          });
+
+          if (!wait) {
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            newBatch.on('error', (err: Error) => {
-              // reword no external id error message to direct it to org user rather than api user
-              if (err.message.startsWith('External ID was blank')) {
-                err.message = messages.getMessage('ExternalIdRequired', [sobjectType]);
-                job.emit('error', err);
-              }
-              if (err.message.startsWith('Polling time out')) {
-                err.message = this.parseTimeOutError(err);
-                // using the reject method for all of the promises wasn't handling errors properly
-                // so emit a 'error' on the job.
-
-                job.emit('error', new SfError(err.message, 'Time Out', [], 69));
-              }
-              this.ux.spinner.stop('Error');
-            });
-
-            void newBatch.on(
+            newBatch.on(
               'queue',
+              // we're using an async method on an event listener which doesn't fit the .on method parameter types
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              async (): Promise<void> => {
+              async (batchInfo: BatchInfo): Promise<void> => {
                 batchesQueued++;
                 if (batchesQueued === batches.length) {
-                  /* jsforce clears out the id after close, but you should be able to close a job
-              after the queue, so add it back so future batch.check don't fail.*/
-
-                  const id = job.id;
-                  await job.close();
-                  job.id = id;
+                  this.emit('allBatchesQueued', batchesQueued);
+                }
+                const result = await newBatch.check();
+                if (result.state === 'Failed') {
+                  reject(result.stateMessage);
+                  this.emit('batchFailed', result.stateMessage);
+                } else {
+                  resolve(batchInfo);
                 }
               }
             );
+          } else {
+            resolve(this.waitForCompletion(job, newBatch, overallInfo, i + 1, batches.length, wait));
+          }
 
-            if (!wait) {
-              // eslint-disable-next-line @typescript-eslint/no-floating-promises
-              newBatch.on(
-                'queue',
-                // we're using an async method on an event listener which doesn't fit the .on method parameter types
-                // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                async (batchInfo: BatchInfo): Promise<void> => {
-                  this.ux.log(messages.getMessage('CheckStatusCommand', [i + 1, batchInfo.jobId, batchInfo.id]));
-                  const result = await newBatch.check();
-                  if (result.state === 'Failed') {
-                    reject(result.stateMessage);
-                  } else {
-                    resolve(batchInfo);
-                  }
-                }
-              );
-            } else {
-              resolve(this.waitForCompletion(newBatch, batchesCompleted, overallInfo, i + 1, batches.length, wait));
-            }
-
-            void newBatch.execute(batch);
-          });
-        }
-      )
-    )) as BulkResult[];
-  }
-
-  /**
-   * The timeout error handling is messy so to increase readability
-   * break it out into it's own method
-   *
-   * @param err The timeout Error
-   * @private
-   */
-  private parseTimeOutError(err: Error): string {
-    const jobIdIndex = err.message.indexOf('750');
-    const batchIdIndex = err.message.indexOf('751');
-    const message = messages.getMessage('TimeOut', [
-      err.message.substr(jobIdIndex, 18),
-      err.message.substr(batchIdIndex, 18),
-    ]);
-    this.ux.log('');
-    this.ux.log(message);
-
-    process.exitCode = 69;
-    return message;
+          let batchResult: unknown;
+          resolve((async (): Promise<void> => {
+            batchResult = await newBatch.execute(batch);
+          })());
+          resolve(batchResult);
+        });
+      }
+    );
+    return (await Promise.all(batchPromises)) as BulkResult[];
   }
 
   /**
@@ -215,45 +195,46 @@ export class Batcher {
    * exposed for unit testing
    *
    * @param newBatch
-   * @param batchesCompleted
    * @param overallInfo
    * @param batchNum
    * @param totalNumBatches
    * @param waitMins
    */
   private async waitForCompletion<J extends Schema, T extends BulkOperation>(
+    job: Job<J, T>,
     newBatch: Batch<J, T>,
-    batchesCompleted: number,
     overallInfo: boolean,
     batchNum: number,
-    totalNumBatches: number,
-    waitMins: number
-  ): Promise<JobInfo> {
+    totalNumBatches: number
+    , waitMins: number): Promise<JobInfo> {
     return new Promise((resolve, reject) => {
-      void newBatch.on(
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      newBatch.on(
         'queue',
         // we're using an async method on an event listener which doesn't fit the .on method parameter types
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        async (batchInfo: BatchInfo): Promise<void> => {
+        async (): Promise<void> => {
           const result = await newBatch.check();
           if (result.state === 'Failed') {
             reject(result.stateMessage);
+            this.emit('batchFailed', result.stateMessage);
           } else if (!overallInfo) {
-            this.ux.log(messages.getMessage('PollingInfo', [POLL_FREQUENCY_MS / 1000, batchInfo.jobId]));
             overallInfo = true;
           }
-          this.ux.log(messages.getMessage('BatchQueued', [batchNum, batchInfo.id]));
           newBatch.poll(POLL_FREQUENCY_MS, waitMins * 60000);
         }
       );
       // we're using an async method on an event listener which doesn't fit the .on method parameter types
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      void newBatch.on('response', async (results: BulkIngestBatchResult): Promise<void> => {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises,@typescript-eslint/no-misused-promises
+      newBatch.on('response', async (results: BulkIngestBatchResult): Promise<void> => {
         const summary: BatchInfo = await newBatch.check();
         this.bulkStatus(summary, results, batchNum);
-        batchesCompleted++;
-        if (batchesCompleted === totalNumBatches) {
-          resolve(await this.fetchAndDisplayJobStatus(summary.jobId));
+        this.batchesCompleted++;
+        if (this.batchesCompleted === totalNumBatches) {
+          const jobInfo = await this.fetchJobStatus(summary.jobId);
+          this.emit('allBatchesDone', jobInfo);
+          job.emit('close', jobInfo);
+          resolve(jobInfo);
         }
       });
     });
@@ -280,7 +261,7 @@ export const splitIntoBatches = async (readStream: ReadStream): Promise<Batches>
       // library option is snakecase
       // eslint-disable-next-line camelcase
       skip_empty_lines: true,
-      bom: true,
+      bom: true
     });
 
     readStream.pipe(parser);

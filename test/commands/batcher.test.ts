@@ -31,33 +31,33 @@ describe('batcher', () => {
       styledHeaderSpy = $$.stub(ux, 'styledHeader');
       logSpy = $$.stub(ux, 'log');
 
-      batcher = new Batcher(conn, ux);
+      batcher = new Batcher(conn);
     });
 
     afterEach(() => {
       $$.restore();
     });
 
-    it('will correctly call to print the expected messages 1 log, 1 styledHeader', () => {
-      batcher.bulkStatus(summary);
+    it('will correctly call to print the expected messages 1 log, 1 styledHeader', async () => {
+      await batcher.bulkStatus(summary);
       expect(styledHeaderSpy.callCount).to.equal(1);
       expect(logSpy.callCount).to.equal(1);
     });
 
-    it('will correctly call to print the expected messages 1 log, 2 styledHeader', () => {
-      batcher.bulkStatus(summary, [], 123);
+    it('will correctly call to print the expected messages 1 log, 2 styledHeader', async () => {
+      await batcher.bulkStatus(summary, [], 123);
       expect(styledHeaderSpy.callCount, 'styledHeader').to.equal(2);
       expect(logSpy.callCount, 'logSpy').to.equal(1);
     });
 
-    it('will correctly call to print the expected messages 3 log, 2 styledHeader', () => {
-      batcher.bulkStatus(summary, [{ errors: ['error1', 'error2'], success: false, id: '123' }]);
+    it('will correctly call to print the expected messages 3 log, 2 styledHeader', async () => {
+      await batcher.bulkStatus(summary, [{ errors: ['error1', 'error2'], success: false, id: '123' }]);
       expect(styledHeaderSpy.callCount).to.equal(2);
       expect(logSpy.callCount).to.equal(3);
     });
 
-    it('will correctly call to print the expected messages 3 log, 3 styledHeader', () => {
-      batcher.bulkStatus(summary, [{ errors: ['error1', 'error2'], success: false, id: '123' }], 123, true);
+    it('will correctly call to print the expected messages 3 log, 3 styledHeader', async () => {
+      await batcher.bulkStatus(summary, [{ errors: ['error1', 'error2'], success: false, id: '123' }], 123, true);
       expect(styledHeaderSpy.callCount).to.equal(3);
       expect(logSpy.callCount).to.equal(3);
     });

@@ -9,6 +9,8 @@ import { Logger, Messages } from '@salesforce/core';
 import { CliUx } from '@oclif/core';
 import * as chalk from 'chalk';
 import { get, getArray, getNumber, isString, Optional } from '@salesforce/ts-types';
+import { BatchInfo } from 'jsforce/lib/api/bulk';
+import { BatchState } from 'jsforce/api/bulk';
 import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
@@ -176,11 +178,11 @@ export class HumanReporter extends QueryReporter {
                   Object.entries(record as never).forEach(([key, value]) => {
                     if (!index) {
                       Reflect.defineProperty(result, `${child.toString()}.${key}`, {
-                        value: value ? value : chalk.bold('null'),
+                        value: value ? value : chalk.bold('null')
                       });
                     } else {
                       Reflect.defineProperty(newResult, `${child.toString()}.${key}`, {
-                        value: value ? value : chalk.bold('null'),
+                        value: value ? value : chalk.bold('null')
                       });
                     }
                   });
@@ -333,11 +335,8 @@ export class JsonReporter extends QueryReporter {
 /**
  * A list of the accepted reporter types
  */
-export const FormatTypes = {
-  human: HumanReporter,
-  csv: CsvReporter,
-  json: JsonReporter,
-} as const;
+
+export type FormatTypes = 'human' | 'csv' | 'json';
 
 const prepColumns = (columns: Array<Optional<string>>): CliUx.Table.table.Columns<Record<string, unknown>> => {
   const formattedColumns: CliUx.Table.table.Columns<Record<string, unknown>> = {};
@@ -356,7 +355,7 @@ const prepColumns = (columns: Array<Optional<string>>): CliUx.Table.table.Column
               // if not, try to find it query
               return (get(row, field) as string) || '';
             }
-          },
+          }
         })
     );
   return formattedColumns;
@@ -375,3 +374,31 @@ export const escape = (value: string): string => {
   }
   return value;
 };
+
+export const BatchInfoColumns = {
+  id: { header: 'Batch Id' },
+  state: { header: 'State' },
+  failed: { header: 'Failed' },
+  stateMessage: { header: 'Message' }
+};
+
+export const getBatchTotals = (batches: BatchInfo[]): { total: number; failed: number; success: number } => {
+  const ttls = batches.reduce((acc: { total: number; failed: number; success: number }, batch) => {
+    acc.total += parseInt(batch.numberRecordsProcessed, 10);
+    acc.failed += parseInt(batch.numberRecordsFailed, 10);
+    acc.success = acc.total - acc.failed;
+    return acc;
+  }, { total: 0, failed: 0, success: 0 });
+  return ttls;
+}
+
+export const getFailedBatchesForDisplay = (batches: BatchInfo[]): Array<{id: string; state: BatchState; failed: string; stateMessage: string}> => {
+  const failedBatches = batches.filter((batch) => parseInt(batch.numberRecordsFailed, 10) > 0);
+  const batchesForTable = failedBatches.map(batch => ({
+    id: batch.id,
+    state: batch.state,
+    failed: `${batch.numberRecordsFailed.toString().padStart(5, ' ')}/${batch.numberRecordsProcessed.toString().padStart(5, ' ')}`,
+    stateMessage: batch.stateMessage
+  }));
+  return batchesForTable;
+}

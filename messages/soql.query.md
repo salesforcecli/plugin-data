@@ -52,10 +52,6 @@ Use Bulk API 2.0, but don't wait for the job to complete.
 
 Time to wait for the command to finish, in minutes.
 
-# flags.resultFormat
-
-Format to display the results; the --json flag overrides this flag.
-
 # displayQueryRecordsRetrieved
 
 Total number of records retrieved: %s.
