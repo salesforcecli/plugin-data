@@ -10,6 +10,7 @@ import { Connection, Messages, SfError } from '@salesforce/core';
 import { Batch, BatchInfo, BatchState, BulkIngestBatchResult, BulkOperation, Job, JobInfo } from 'jsforce/api/bulk';
 import { Schema } from 'jsforce';
 import { stringify } from 'csv-stringify/sync';
+import { Duration } from '@salesforce/kit';
 import parse = require('csv-parse');
 
 // max rows per file in Bulk 1.0
@@ -60,8 +61,8 @@ export class Batcher extends EventEmitter {
     const jobIdIndex = err.message.indexOf('750');
     const batchIdIndex = err.message.indexOf('751');
     const message = messages.getMessage('TimeOut', [
-      err.message.substr(jobIdIndex, 18),
-      err.message.substr(batchIdIndex, 18)
+      err.message.slice(jobIdIndex, 18),
+      err.message.slice(batchIdIndex, 18)
     ]);
 
     process.exitCode = 69;
@@ -92,7 +93,7 @@ export class Batcher extends EventEmitter {
 
   /**
    *
-   * Handles ux output and massaging the data by filtering out the $ from the response
+   * Handles massaging the data by filtering out the $ from the response
    */
   public bulkStatus(
     summary: JobInfo | BatchInfo,
@@ -124,11 +125,21 @@ export class Batcher extends EventEmitter {
   ): Promise<BulkResult[] | JobInfo[]> {
     let batchesQueued = 0;
     const overallInfo = false;
-
+    job.on('error', () => {
+      // do nothing
+    });
+    const timeNow = Date.now() + Duration.minutes(wait ?? 0).milliseconds;
+    this.emit('bulkStatusTotals', {
+      totalRecords: 0,
+      totalBatches: 0
+    });
     const batches = await splitIntoBatches(records);
     const totalRecords = batches.reduce((acc, batch) => acc + batch.length, 0);
 
-    this.emit('bulkStatusTotals', { totalRecords, totalBatches: batches.length });
+    this.emit('bulkStatusTotals', {
+      totalRecords,
+      totalBatches: batches.length
+    });
     // The error handling for this gets quite tricky when there are multiple batches
     // Currently, we bail out early by calling an Error.exit
     // But, we might want to actually continue to the next batch.
@@ -142,7 +153,12 @@ export class Batcher extends EventEmitter {
             // reword no external id error message to direct it to org user rather than api user
             if (err.message.startsWith('External ID was blank')) {
               err.message = messages.getMessage('ExternalIdRequired', [sobjectType]);
-              job.emit('error', err);
+              // job.emit('error', err);
+              this.emit('batchError', err);
+            }
+            if (err.message.startsWith('Unable to find object')) {
+              err.message = messages.getMessage('InvalidSObject', [sobjectType]);
+              // job.emit('error', err);
               this.emit('batchError', err);
             }
             if (err.message.startsWith('Polling time out')) {
@@ -151,7 +167,7 @@ export class Batcher extends EventEmitter {
               // so emit a 'error' on the job.
               const error = new SfError(err.message, 'Time Out', [], 69);
               job.emit('error', error);
-              this.emit('batchError', error);
+              this.emit('batchTimeout', error);
             }
           });
 
@@ -176,18 +192,27 @@ export class Batcher extends EventEmitter {
               }
             );
           } else {
-            resolve(this.waitForCompletion(job, newBatch, overallInfo, i + 1, batches.length, wait));
+            resolve(this.waitForCompletion(job, newBatch, overallInfo, i + 1, batches.length, Duration.milliseconds(timeNow - Date.now()).minutes));
           }
 
           let batchResult: unknown;
           resolve((async (): Promise<void> => {
-            batchResult = await newBatch.execute(batch);
+            try {
+              batchResult = await newBatch.execute(batch);
+            } catch (err) {
+              // reject(err);
+            }
           })());
           resolve(batchResult);
         });
       }
     );
-    return (await Promise.all(batchPromises)) as BulkResult[];
+    try {
+      return (await Promise.all(batchPromises)) as BulkResult[];
+    } catch (err) {
+      throw new SfError('batchError', 'Batch Error', [], 69);
+    }
+
   }
 
   /**
@@ -205,8 +230,8 @@ export class Batcher extends EventEmitter {
     newBatch: Batch<J, T>,
     overallInfo: boolean,
     batchNum: number,
-    totalNumBatches: number
-    , waitMins: number): Promise<JobInfo> {
+    totalNumBatches: number,
+    waitMins: number): Promise<JobInfo> {
     return new Promise((resolve, reject) => {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       newBatch.on(
@@ -216,12 +241,13 @@ export class Batcher extends EventEmitter {
         async (): Promise<void> => {
           const result = await newBatch.check();
           if (result.state === 'Failed') {
-            reject(result.stateMessage);
             this.emit('batchFailed', result.stateMessage);
+            reject(result.stateMessage);
           } else if (!overallInfo) {
+            this.emit('batchQueued', batchNum);
             overallInfo = true;
           }
-          newBatch.poll(POLL_FREQUENCY_MS, waitMins * 60000);
+          newBatch.poll(POLL_FREQUENCY_MS, waitMins * Duration.minutes(waitMins).milliseconds);
         }
       );
       // we're using an async method on an event listener which doesn't fit the .on method parameter types
@@ -232,8 +258,10 @@ export class Batcher extends EventEmitter {
         this.batchesCompleted++;
         if (this.batchesCompleted === totalNumBatches) {
           const jobInfo = await this.fetchJobStatus(summary.jobId);
+          const id = job.id;
+          await job.close();
+          job.id = id;
           this.emit('allBatchesDone', jobInfo);
-          job.emit('close', jobInfo);
           resolve(jobInfo);
         }
       });

@@ -37,3 +37,7 @@ sfdx data resume -i %s -b %s
 # BatchQueued
 
 Batch #%s queued (Batch ID: %s).
+
+# InvalidSObject
+
+The sobject %s is not valid.

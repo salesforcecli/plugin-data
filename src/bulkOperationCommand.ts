@@ -63,6 +63,9 @@ export abstract class BulkOperationCommand extends SfCommand<BatcherReturnType> 
   private recordsProcessed = 0;
   private isAsync = false;
   private operation!: BulkOperation;
+  private endWaitTime = 0;
+  private wait = 0;
+  private timeout = false;
 
   public async runBulkOperation(sobject: string,
                                 csvFileName: string,
@@ -73,20 +76,12 @@ export abstract class BulkOperationCommand extends SfCommand<BatcherReturnType> 
     this.cache = await this.getCache();
     this.isAsync = !wait;
     this.operation = operation;
-    let result: BatcherReturnType;
+    this.wait = wait;
     try {
       const csvRecords: ReadStream = fs.createReadStream(csvFileName, { encoding: 'utf-8' });
-      if (wait > 0) {
-        this.progress.start(0, { title: operation }, {
-          title: `Bulk ${operation} Progress`,
-          format: '%s | {bar} | {value} records of {total} processed',
-          barCompleteChar: '\u2588',
-          barIncompleteChar: '\u2591',
-          linewrap: true
-        });
-      } else {
-        this.spinner.start(`Creating async bulk ${operation} request`);
-      }
+      this.spinner.start(`Running ${this.isAsync ? 'async ' : ''}bulk ${operation} request`);
+      this.endWaitTime = Date.now() + Duration.minutes(this.wait).milliseconds;
+      this.spinner.status = this.getRemainingTimeStatus();
 
       this.job = connection.bulk.createJob(sobject, operation, options);
       this.connection = connection;
@@ -94,24 +89,9 @@ export abstract class BulkOperationCommand extends SfCommand<BatcherReturnType> 
       const batcher: Batcher = new Batcher(connection);
       this.setupLifecycleListeners(batcher);
 
-      result = await batcher.createAndExecuteBatches(this.job, csvRecords, sobject, wait);
-      const jobInfo = await this.job.check();
-      const inProgress = result.some((batch) => batch.state in ['InProgress', 'Queued']);
-      if (!inProgress) {
-        const cache = await this.getCache();
-        await cache.createCacheEntryForRequest(jobInfo.id, connection.getUsername(), connection.getApiVersion());
-      }
-      this.progress.stop();
-      return result;
-    } catch (e) {
-      this.progress.stop();
-      if (!(e instanceof Error)) {
-        throw e;
-      }
-      throw SfError.wrap(e);
+      return await batcher.createAndExecuteBatches(this.job, csvRecords, sobject, this.wait);
     } finally {
       this.spinner.stop();
-      this.progress.stop();
     }
   }
 
@@ -131,9 +111,7 @@ export abstract class BulkOperationCommand extends SfCommand<BatcherReturnType> 
       this.info(resultMessage);
       if (failedBatches.length > 0) {
         this.table(failedBatches, BatchInfoColumns);
-        if (jobInfo.state !== 'Closed') {
-          this.info(`To review the details of this job, run:\n${this.config.bin} org open --target-org ${this.connection?.getUsername()} --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F${jobInfo.id}"`);
-        }
+        this.info(`To review the details of this job, run:\n${this.config.bin} org open --target-org ${this.connection?.getUsername()} --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F${jobInfo.id}"`);
       }
       if (jobInfo.state !== 'Closed') {
         this.info(`Run command '${this.config.bin} data ${this.operation} resume -i ${jobInfo.id} -o ${this.connection?.getUsername()}' to check status.\n`);
@@ -145,8 +123,7 @@ export abstract class BulkOperationCommand extends SfCommand<BatcherReturnType> 
     /* eslint-disable @typescript-eslint/require-await */
     batcher.on('bulkStatusTotals', (totals: { totalRecords: number; totalBatches: number }) => {
       this.totalRecords = totals.totalRecords;
-      this.progress.setTotal(this.totalRecords);
-      this.progress.update(0);
+      this.spinner.status = `${this.getRemainingTimeStatus()}${this.getRemainingRecordsStatus()}`;
     });
     batcher.on('bulkBatchStatus', (data: {
       summary: JobInfo | BatchInfo;
@@ -159,12 +136,12 @@ export abstract class BulkOperationCommand extends SfCommand<BatcherReturnType> 
       if (batchInfo && batchInfo.state === 'Completed') {
         this.recordsProcessed += batchInfo ? parseInt(batchInfo.numberRecordsProcessed, 10) : 0;
       }
-      this.progress.update(this.recordsProcessed);
+      this.spinner.status = `${this.getRemainingTimeStatus()}${this.getRemainingRecordsStatus()}`;
     });
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     batcher.on('allBatchesDone', async (): Promise<void> => {
       await this.displayResult();
-      this.progress.stop();
+      this.spinner.stop();
     });
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     batcher.on('allBatchesQueued', async (): Promise<void> => {
@@ -172,14 +149,32 @@ export abstract class BulkOperationCommand extends SfCommand<BatcherReturnType> 
       this.spinner.stop();
     });
 
-    batcher.on('bulkJobError', (data: Error) => {
-      this.progress.stop();
-      throw SfError.wrap(data);
+    batcher.on('batchError', (message: string) => {
+      try {
+        this.error(message);
+      } finally {
+        this.spinner.stop();
+      }
+    });
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    batcher.on('batchTimeout', async () => {
+      if (!this.timeout) {
+        this.timeout = true;
+        await this.cache?.createCacheEntryForRequest(this.job.id ?? '', this.connection?.getUsername(), this.connection?.getApiVersion());
+        await this.displayResult();
+      }
     });
     batcher.on('bulkOperationTimeout', (data: Error) => {
-      this.progress.stop();
       throw SfError.wrap(data);
     });
+  }
+
+  private getRemainingTimeStatus(): string {
+    return this.isAsync ? '' : `Remaining time: ${Duration.milliseconds(this.endWaitTime - Date.now()).minutes} minutes. `;
+  }
+
+  private getRemainingRecordsStatus(): string {
+    return `${this.recordsProcessed}/${this.totalRecords} records processed`;
   }
 
   protected abstract getCache(): Promise<BulkDataRequestCache>;
