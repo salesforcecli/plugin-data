@@ -8,7 +8,7 @@ import * as fs from 'fs';
 import { ReadStream } from 'fs';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
-import { Connection, Lifecycle, Messages, SfError } from '@salesforce/core';
+import { Connection, Lifecycle, Messages } from '@salesforce/core';
 import { BulkOperation, Job, JobInfo } from 'jsforce/api/bulk';
 import { BatchInfo, BulkIngestBatchResult } from 'jsforce/lib/api/bulk';
 import { Schema } from 'jsforce';
@@ -87,9 +87,21 @@ export abstract class BulkOperationCommand extends SfCommand<BatcherReturnType> 
       this.connection = connection;
 
       const batcher: Batcher = new Batcher(connection);
-      this.setupLifecycleListeners(batcher);
-
-      return await batcher.createAndExecuteBatches(this.job, csvRecords, sobject, this.wait);
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
+      return await new Promise(async (resolve, reject) => {
+        batcher.on('error', (err) => {
+          this.spinner.stop();
+          reject(err);
+        });
+        this.setupLifecycleListeners(batcher);
+        try {
+          const result = await batcher.createAndExecuteBatches(this.job, csvRecords, sobject, this.wait);
+          resolve(result);
+        } catch (err) {
+          this.spinner.stop();
+          reject(err);
+        }
+      });
     } finally {
       this.spinner.stop();
     }
@@ -149,7 +161,7 @@ export abstract class BulkOperationCommand extends SfCommand<BatcherReturnType> 
       this.spinner.stop();
     });
 
-    batcher.on('batchError', (message: string) => {
+    batcher.on('error', (message: string) => {
       try {
         this.error(message);
       } finally {
@@ -157,15 +169,14 @@ export abstract class BulkOperationCommand extends SfCommand<BatcherReturnType> 
       }
     });
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    batcher.on('batchTimeout', async () => {
+    batcher.on('batchTimeout', async (err) => {
       if (!this.timeout) {
         this.timeout = true;
         await this.cache?.createCacheEntryForRequest(this.job.id ?? '', this.connection?.getUsername(), this.connection?.getApiVersion());
         await this.displayResult();
+        this.log(this.formatError(err as SfCommand.Error));
+        // process.exit(69);
       }
-    });
-    batcher.on('bulkOperationTimeout', (data: Error) => {
-      throw SfError.wrap(data);
     });
   }
 

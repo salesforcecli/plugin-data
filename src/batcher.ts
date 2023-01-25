@@ -57,12 +57,13 @@ export class Batcher extends EventEmitter {
    * @param err The timeout Error
    * @private
    */
-  private static parseTimeOutError(err: Error): string {
+  private static parseTimeOutError(err: Error, operation: BulkOperation | null): string {
     const jobIdIndex = err.message.indexOf('750');
     const batchIdIndex = err.message.indexOf('751');
     const message = messages.getMessage('TimeOut', [
-      err.message.slice(jobIdIndex, 18),
-      err.message.slice(batchIdIndex, 18)
+      operation ?? '',
+      err.message.substr(jobIdIndex, 18),
+      err.message.substr(batchIdIndex, 18)
     ]);
 
     process.exitCode = 69;
@@ -125,8 +126,9 @@ export class Batcher extends EventEmitter {
   ): Promise<BulkResult[] | JobInfo[]> {
     let batchesQueued = 0;
     const overallInfo = false;
-    job.on('error', () => {
-      // do nothing
+    let batchTimedOut = false;
+    job.on('error', (err) => {
+      this.emit('error', err);
     });
     const timeNow = Date.now() + Duration.minutes(wait ?? 0).milliseconds;
     this.emit('bulkStatusTotals', {
@@ -154,22 +156,43 @@ export class Batcher extends EventEmitter {
             if (err.message.startsWith('External ID was blank')) {
               err.message = messages.getMessage('ExternalIdRequired', [sobjectType]);
               // job.emit('error', err);
-              this.emit('batchError', err);
+              this.emit('error', err);
             }
             if (err.message.startsWith('Unable to find object')) {
               err.message = messages.getMessage('InvalidSObject', [sobjectType]);
               // job.emit('error', err);
-              this.emit('batchError', err);
+              this.emit('error', err);
             }
             if (err.message.startsWith('Polling time out')) {
-              err.message = Batcher.parseTimeOutError(err);
+              err.message = Batcher.parseTimeOutError(err, job.operation);
               // using the reject method for all of the promises wasn't handling errors properly
               // so emit a 'error' on the job.
-              const error = new SfError(err.message, 'Time Out', [], 69);
-              job.emit('error', error);
-              this.emit('batchTimeout', error);
+              if (!batchTimedOut) {
+                batchTimedOut = true;
+                const error = new SfError(err.message, 'Time Out', [], 69);
+                this.emit('batchTimeout', error);
+                this.emit('error', error);
+                throw error;
+              }
             }
           });
+
+          // eslint-disable-next-line @typescript-eslint/no-floating-promises
+          newBatch.on(
+            'queue',
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            async (): Promise<void> => {
+              batchesQueued++;
+              if (batchesQueued === batches.length) {
+                /* jsforce clears out the id after close, but you should be able to close a job
+            after the queue, so add it back so future batch.check don't fail.*/
+
+                const id = job.id;
+                await job.close();
+                job.id = id;
+              }
+            }
+          );
 
           if (!wait) {
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -247,7 +270,7 @@ export class Batcher extends EventEmitter {
             this.emit('batchQueued', batchNum);
             overallInfo = true;
           }
-          newBatch.poll(POLL_FREQUENCY_MS, waitMins * Duration.minutes(waitMins).milliseconds);
+          newBatch.poll(POLL_FREQUENCY_MS, waitMins * Duration.minutes(100).milliseconds);
         }
       );
       // we're using an async method on an event listener which doesn't fit the .on method parameter types
@@ -259,7 +282,9 @@ export class Batcher extends EventEmitter {
         if (this.batchesCompleted === totalNumBatches) {
           const jobInfo = await this.fetchJobStatus(summary.jobId);
           const id = job.id;
-          await job.close();
+          if (jobInfo.state !== 'Closed') {
+            await job.close();
+          }
           job.id = id;
           this.emit('allBatchesDone', jobInfo);
           resolve(jobInfo);
