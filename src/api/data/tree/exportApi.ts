@@ -80,7 +80,7 @@ export class ExportApi {
       queryResults = await this.org.getConnection().query(query);
     } catch (err) {
       if (err instanceof Error && err.name === 'MALFORMED_QUERY') {
-        const errMsg = messages.getMessage('soqlMalformed');
+        const errMsg = messages.getMessage('soqlMalformed', [query]);
         const errMsgAction = messages.getMessage('soqlMalformedAction');
         throw new SfError(errMsg, 'MalformedQuery', [errMsgAction]);
       } else {

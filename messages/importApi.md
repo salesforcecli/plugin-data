@@ -37,6 +37,7 @@ Import failed from file: %s. Results: %s.
 # dataPlanValidationError
 
 Data plan file %s did not validate against the schema.
+%s
 
 # dataPlanValidationErrorActions
 
@@ -45,7 +46,6 @@ Data plan file %s did not validate against the schema.
 - Make sure you're importing a plan definition file.
 
 - Get help with the import plan schema by running "sfdx data import tree --config-help".
-  %s
 
 # FlsError
 
