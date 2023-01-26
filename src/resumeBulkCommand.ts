@@ -5,18 +5,18 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { Flags, loglevel, optionalOrgFlagWithDeprecations, SfCommand } from '@salesforce/sf-plugins-core';
-import { BatchInfo } from 'jsforce/lib/api/bulk';
+import { IngestJobV2, IngestOperation } from 'jsforce/lib/api/bulk';
 import { Messages } from '@salesforce/core';
-import { BulkOperation, Job } from 'jsforce/api/bulk';
+import { JobInfoV2 } from 'jsforce/api/bulk';
 import { Schema } from 'jsforce';
-import { ResumeOptions, StatusResult } from './types';
-import { Batcher } from './batcher';
-import { BatchInfoColumns, getBatchTotals, getFailedBatchesForDisplay } from './reporters';
+import { BulkResultV2, ResumeOptions } from './types';
+import { didBulkV2RequestJobFail, isBulkV2RequestDone } from './bulkUtils';
+import { getResultMessage } from './reporters';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.resume.command');
 
-export abstract class ResumeBulkCommand extends SfCommand<StatusResult> {
+export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
   public static readonly globalFlags = {
     'target-org': optionalOrgFlagWithDeprecations,
     'batch-id': Flags.salesforceId({
@@ -45,43 +45,35 @@ export abstract class ResumeBulkCommand extends SfCommand<StatusResult> {
     loglevel
   };
 
+  protected job!: IngestJobV2<Schema, IngestOperation>;
   private username: string | undefined;
 
-  protected async resume(resumeOptions: ResumeOptions): Promise<StatusResult> {
+  protected async resume(resumeOptions: ResumeOptions): Promise<BulkResultV2> {
     this.spinner.start('Getting status');
     const conn = resumeOptions.options.connection;
     this.username = resumeOptions.options.connection.getUsername();
-    const batcher = new Batcher(conn);
-    const job = conn.bulk.job(resumeOptions.jobInfo.id);
+    const job = conn.bulk2.job({ id: resumeOptions.jobInfo.id });
 
     // view job status
-    const jobStatus = await batcher.fetchJobStatus(resumeOptions.jobInfo.id);
+    const jobInfo = await job.check();
     this.spinner.stop();
-    await this.displayResult(job);
-    return jobStatus;
+    this.displayResult(jobInfo);
+    if (!isBulkV2RequestDone(jobInfo) || !this.jsonEnabled()) {
+      return jobInfo;
+    }
+    return job.getAllResults();
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  protected isDone(resumeResults: StatusResult): boolean {
-    if (Array.isArray(resumeResults)) {
-      return resumeResults.every((batch) => !['InProgress', 'Queued'].includes(batch.state));
-    } else {
-      return resumeResults.state === 'Closed';
-    }
-  }
+  private displayResult<J extends Schema>(jobInfo: JobInfoV2): void {
 
-  private async displayResult(job: Job<Schema, BulkOperation>): Promise<void> {
-    const jobInfo = await job.info();
-    const batches: BatchInfo[] = await job.list();
-    const ttls = getBatchTotals(batches);
+    this.log();
+    this.info(getResultMessage(jobInfo));
 
-    const failedBatches = getFailedBatchesForDisplay(batches);
-    const resultMessage = `Job ${jobInfo.id} Status ${jobInfo.state} Total Records ${ttls.total} Success ${ttls.success} Failed ${ttls.failed}. Number of Batches ${batches.length}. Number of failed batches ${failedBatches.length}`;
-    this.info(resultMessage);
-    if (failedBatches.length > 0) {
-      this.table(failedBatches, BatchInfoColumns);
+    if (!isBulkV2RequestDone(jobInfo)) {
+      this.info(`Run command '${this.config.bin} data ${jobInfo.operation} resume -i ${jobInfo.id} -o ${this.username}' to check status.`);
     }
-    if (failedBatches.length > 0 || jobInfo.state !== 'Closed') {
+    ;
+    if ((jobInfo.numberRecordsFailed ?? 0) > 0 || didBulkV2RequestJobFail(jobInfo)) {
       this.info(`To review the details of this job, run:\n${this.config.bin} org open --target-org ${this.username} --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F${jobInfo.id}"`);
     }
   }

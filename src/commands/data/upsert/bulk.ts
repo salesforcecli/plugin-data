@@ -6,10 +6,9 @@
  */
 import { Messages } from '@salesforce/core';
 import { Flags } from '@salesforce/sf-plugins-core';
-import { JobInfo } from 'jsforce/lib/api/bulk';
 import { BulkUpsertRequestCache } from '../../../bulkDataRequestCache';
 import { BulkOperationCommand } from '../../../bulkOperationCommand';
-import { BulkResult } from '../../../batcher';
+import { BulkResultV2 } from '../../../types';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.upsert');
@@ -36,7 +35,7 @@ export default class Upsert extends BulkOperationCommand {
     })
   };
 
-  public async run(): Promise<BulkResult[] | JobInfo[]> {
+  public async run(): Promise<BulkResultV2> {
     const { flags } = await this.parse(Upsert);
     const concurrencyMode = flags.serial ? 'Serial' : 'Parallel';
     // eslint-disable-next-line @typescript-eslint/no-misused-promises

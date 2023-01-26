@@ -9,8 +9,9 @@ import { Logger, Messages } from '@salesforce/core';
 import { CliUx } from '@oclif/core';
 import * as chalk from 'chalk';
 import { get, getArray, getNumber, isString, Optional } from '@salesforce/ts-types';
-import { BatchInfo } from 'jsforce/lib/api/bulk';
+import { BatchInfo, IngestJobV2Results, JobInfoV2 } from 'jsforce/lib/api/bulk';
 import { BatchState } from 'jsforce/api/bulk';
+import { Schema } from 'jsforce';
 import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes';
 
 Messages.importMessagesDirectory(__dirname);
@@ -390,9 +391,18 @@ export const getBatchTotals = (batches: BatchInfo[]): { total: number; failed: n
     return acc;
   }, { total: 0, failed: 0, success: 0 });
   return ttls;
+};
+
+export function getBulk2JobTotals<J extends Schema>(results: IngestJobV2Results<J>): { total: number; failed: number; success: number; unprocessed: number } {
+  const ttls = { total: 0, failed: 0, success: 0, unprocessed: 0 };
+  ttls.total = Object.keys(results.successfulResults).length + Object.keys(results.failedResults).length + Object.keys(results.unprocessedRecords).length;
+  ttls.failed = Object.keys(results.failedResults).length;
+  ttls.success = Object.keys(results.successfulResults).length;
+  ttls.unprocessed = Object.keys(results.unprocessedRecords).length;
+  return ttls;
 }
 
-export const getFailedBatchesForDisplay = (batches: BatchInfo[]): Array<{id: string; state: BatchState; failed: string; stateMessage: string}> => {
+export const getFailedBatchesForDisplay = (batches: BatchInfo[]): Array<{ id: string; state: BatchState; failed: string; stateMessage: string }> => {
   const failedBatches = batches.filter((batch) => parseInt(batch.numberRecordsFailed, 10) > 0);
   const batchesForTable = failedBatches.map(batch => ({
     id: batch.id,
@@ -401,4 +411,7 @@ export const getFailedBatchesForDisplay = (batches: BatchInfo[]): Array<{id: str
     stateMessage: batch.stateMessage
   }));
   return batchesForTable;
-}
+};
+
+export const getResultMessage = (jobInfo: JobInfoV2): string => `Job ${jobInfo.id} Status ${jobInfo.state} Records processed ${jobInfo.numberRecordsProcessed}. Records failed ${jobInfo.numberRecordsFailed}.`;
+

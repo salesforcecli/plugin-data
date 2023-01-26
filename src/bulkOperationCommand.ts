@@ -9,18 +9,21 @@ import { ReadStream } from 'fs';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
 import { Connection, Lifecycle, Messages } from '@salesforce/core';
-import { BulkOperation, Job, JobInfo } from 'jsforce/api/bulk';
-import { BatchInfo, BulkIngestBatchResult } from 'jsforce/lib/api/bulk';
+import { BulkOperation, IngestJobV2, IngestOperation, JobInfoV2, JobStateV2 } from 'jsforce/api/bulk';
 import { Schema } from 'jsforce';
-import { Batcher, BatcherReturnType } from './batcher';
+import { capitalCase } from 'change-case';
 import { orgFlags } from './flags';
 import { BulkDataRequestCache } from './bulkDataRequestCache';
-import { BatchInfoColumns, getBatchTotals, getFailedBatchesForDisplay } from './reporters';
+import { BulkResultV2 } from './types';
+import { isBulkV2RequestDone } from './bulkUtils';
+import { getResultMessage } from './reporters';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.operation.command');
 
-export abstract class BulkOperationCommand extends SfCommand<BatcherReturnType> {
+const POLL_FREQUENCY_MS = 5000;
+
+export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
   public static readonly globalFlags = {
     ...orgFlags,
     file: Flags.file({
@@ -56,23 +59,73 @@ export abstract class BulkOperationCommand extends SfCommand<BatcherReturnType> 
   };
 
   protected lifeCycle = Lifecycle.getInstance();
-  protected job!: Job<Schema, BulkOperation>;
+  protected job!: IngestJobV2<Schema, IngestOperation>;
   protected connection: Connection | undefined;
   protected cache: BulkDataRequestCache | undefined;
-  private totalRecords = 0;
-  private recordsProcessed = 0;
+  private numberRecordsProcessed = 0;
+  private numberRecordsFailed = 0;
+  private numberRecordSuceeded = 0;
   private isAsync = false;
   private operation!: BulkOperation;
   private endWaitTime = 0;
   private wait = 0;
   private timeout = false;
 
+  /**
+   * create and execute batches based on the record arrays; wait for completion response if -w flag is set with > 0 minutes
+   * to get proper logging/printing to console pass the instance of UX that called this method
+   *
+   * @param job {Job}
+   * @param input
+   * @param sobjectType {string}
+   * @param wait {number}
+   */
+  private static async executeBulkV2DataRequest<J extends Schema, T extends IngestOperation>(
+    job: IngestJobV2<J, T>,
+    input: ReadStream,
+    sobjectType: string,
+    wait?: number
+  ): Promise<JobInfoV2> {
+    await job.open();
+    const timeNow = Date.now();
+    const waitTime = (wait ? Duration.minutes(wait).milliseconds : 0);
+    let remainingTime = waitTime;
+    job.emit('jobProgress', { remainingTime, stage: 'uploading' });
+    await job.uploadData(input);
+    remainingTime = remainingTime - (Date.now() - timeNow);
+    job.emit('jobProgress', { remainingTime, stage: 'uploadComplete' });
+    await job.close();
+    if (remainingTime > 0) {
+      job.emit('startPolling');
+      await BulkOperationCommand.waitOrTimeout(job, remainingTime);
+    }
+    return job.check();
+  }
+
+  private static async waitOrTimeout(job: IngestJobV2<Schema, IngestOperation>, wait: number): Promise<void> {
+    let waitCountDown = wait;
+    const progress = setInterval(() => {
+      const remainingTime = waitCountDown -= POLL_FREQUENCY_MS;
+      job.emit('jobProgress', { remainingTime, stage: 'polling' });
+    }, POLL_FREQUENCY_MS);
+    const timeout = setTimeout(() => {
+      clearInterval(progress);
+      job.emit('jobTimeout');
+    }, wait ?? 0);
+    try {
+      await job.poll(POLL_FREQUENCY_MS, wait);
+    } finally {
+      clearInterval(progress);
+      clearTimeout(timeout);
+    }
+  }
+
   public async runBulkOperation(sobject: string,
                                 csvFileName: string,
                                 connection: Connection,
                                 wait: number,
                                 operation: BulkOperation,
-                                options?: { extIdField: string; concurrencyMode?: 'Serial' | 'Parallel' }): Promise<BatcherReturnType> {
+                                options?: { extIdField: string; concurrencyMode?: 'Serial' | 'Parallel' }): Promise<BulkResultV2> {
     this.cache = await this.getCache();
     this.isAsync = !wait;
     this.operation = operation;
@@ -82,86 +135,55 @@ export abstract class BulkOperationCommand extends SfCommand<BatcherReturnType> 
       this.spinner.start(`Running ${this.isAsync ? 'async ' : ''}bulk ${operation} request`);
       this.endWaitTime = Date.now() + Duration.minutes(this.wait).milliseconds;
       this.spinner.status = this.getRemainingTimeStatus();
-
-      this.job = connection.bulk.createJob(sobject, operation, options);
+      this.job = connection.bulk2.createJob({ object: sobject, operation, externalIdFieldName: options?.extIdField });
       this.connection = connection;
 
-      const batcher: Batcher = new Batcher(connection);
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
-      return await new Promise(async (resolve, reject) => {
-        batcher.on('error', (err) => {
-          this.spinner.stop();
-          reject(err);
-        });
-        this.setupLifecycleListeners(batcher);
-        try {
-          const result = await batcher.createAndExecuteBatches(this.job, csvRecords, sobject, this.wait);
-          resolve(result);
-        } catch (err) {
-          this.spinner.stop();
-          reject(err);
+      this.setupLifecycleListeners();
+      try {
+        const jobInfo = await BulkOperationCommand.executeBulkV2DataRequest(this.job, csvRecords, sobject, this.wait);
+        await this.displayResult(jobInfo);
+        if (!isBulkV2RequestDone(jobInfo) || !this.jsonEnabled()) {
+          return jobInfo;
         }
-      });
+        return await this.job.getAllResults();
+      } catch (err) {
+        this.spinner.stop();
+        throw(err);
+      }
     } finally {
       this.spinner.stop();
     }
   }
 
-  private async displayResult(): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/require-await
+  private async displayResult(jobInfo: JobInfoV2): Promise<void> {
 
-    const jobInfo = await this.job.info();
-    const batches = await this.job.list();
-
-    const ttls = getBatchTotals(batches);
     if (this.isAsync) {
       this.logSuccess(`Bulk ${this.operation} request ${jobInfo.id} started successfully.`);
       this.info(`Run command '${this.config.bin} data ${this.operation} resume -i ${jobInfo.id} -o ${this.connection?.getUsername()}' to check status.`);
     } else {
       this.log();
-      const failedBatches = getFailedBatchesForDisplay(batches);
-      const resultMessage = `Job ${jobInfo.id} Status ${jobInfo.state} Total Records ${ttls.total} Success ${ttls.success} Failed ${ttls.failed}. Number of Batches ${batches.length}. Number of failed batches ${failedBatches.length}`;
-      this.info(resultMessage);
-      if (failedBatches.length > 0) {
-        this.table(failedBatches, BatchInfoColumns);
+      this.info(getResultMessage(jobInfo));
+      if ((jobInfo.numberRecordsFailed ?? 0) > 0) {
         this.info(`To review the details of this job, run:\n${this.config.bin} org open --target-org ${this.connection?.getUsername()} --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F${jobInfo.id}"`);
       }
-      if (jobInfo.state !== 'Closed') {
+      if (jobInfo.state === 'InProgress' || jobInfo.state === 'Open') {
         this.info(`Run command '${this.config.bin} data ${this.operation} resume -i ${jobInfo.id} -o ${this.connection?.getUsername()}' to check status.\n`);
       }
     }
   }
 
-  private setupLifecycleListeners(batcher: Batcher): void {
-    /* eslint-disable @typescript-eslint/require-await */
-    batcher.on('bulkStatusTotals', (totals: { totalRecords: number; totalBatches: number }) => {
-      this.totalRecords = totals.totalRecords;
-      this.spinner.status = `${this.getRemainingTimeStatus()}${this.getRemainingRecordsStatus()}`;
-    });
-    batcher.on('bulkBatchStatus', (data: {
-      summary: JobInfo | BatchInfo;
-      results?: BulkIngestBatchResult;
-      batchNum?: number;
-      isJob?: boolean;
-      errorMessages: string[];
-    }) => {
-      const batchInfo = !data.isJob ? data.summary as BatchInfo : undefined;
-      if (batchInfo && batchInfo.state === 'Completed') {
-        this.recordsProcessed += batchInfo ? parseInt(batchInfo.numberRecordsProcessed, 10) : 0;
-      }
-      this.spinner.status = `${this.getRemainingTimeStatus()}${this.getRemainingRecordsStatus()}`;
-    });
+  private setupLifecycleListeners(): void {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    batcher.on('allBatchesDone', async (): Promise<void> => {
-      await this.displayResult();
-      this.spinner.stop();
-    });
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    batcher.on('allBatchesQueued', async (): Promise<void> => {
-      await this.displayResult();
-      this.spinner.stop();
+    this.job.on('jobProgress', async (data: { remainingTime: number; stage: string }) => {
+      const jobInfo = await this.job.check();
+      this.numberRecordsProcessed = jobInfo.numberRecordsProcessed ?? 0;
+      this.numberRecordsFailed = jobInfo.numberRecordsFailed ?? 0;
+      this.numberRecordSuceeded = this.numberRecordsProcessed - this.numberRecordsFailed;
+      this.spinner.status = `${this.getRemainingTimeStatus()}${this.getStage(jobInfo.state)}${this.getRemainingRecordsStatus()}`;
     });
 
-    batcher.on('error', (message: string) => {
+    this.job.on('error', (message: string) => {
       try {
         this.error(message);
       } finally {
@@ -169,13 +191,11 @@ export abstract class BulkOperationCommand extends SfCommand<BatcherReturnType> 
       }
     });
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    batcher.on('batchTimeout', async (err) => {
+    this.job.on('jobTimeout', async (err) => {
       if (!this.timeout) {
         this.timeout = true;
         await this.cache?.createCacheEntryForRequest(this.job.id ?? '', this.connection?.getUsername(), this.connection?.getApiVersion());
-        await this.displayResult();
-        this.log(this.formatError(err as SfCommand.Error));
-        // process.exit(69);
+        await this.displayResult(await this.job.check());
       }
     });
   }
@@ -185,7 +205,12 @@ export abstract class BulkOperationCommand extends SfCommand<BatcherReturnType> 
   }
 
   private getRemainingRecordsStatus(): string {
-    return `${this.recordsProcessed}/${this.totalRecords} records processed`;
+    return ` ${this.numberRecordSuceeded}/${this.numberRecordsFailed}/${this.numberRecordsProcessed} records successful/failed/processed.`;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private getStage(state: JobStateV2): string {
+    return ` Stage: ${capitalCase(state)}.`;
   }
 
   protected abstract getCache(): Promise<BulkDataRequestCache>;

@@ -12,7 +12,7 @@ import { Ux } from '@salesforce/sf-plugins-core';
 import { Connection, SfError } from '@salesforce/core';
 import { JobInfo } from 'jsforce/api/bulk';
 import * as sinon from 'sinon';
-import { Batcher, splitIntoBatches } from '../../src/batcher';
+import { Batcher, loadBulkRecords } from '../../src/batcher';
 
 let styledHeaderSpy: sinon.SinonStub;
 let logSpy: sinon.SinonStub;
@@ -31,7 +31,7 @@ describe('batcher', () => {
       styledHeaderSpy = $$.stub(ux, 'styledHeader');
       logSpy = $$.stub(ux, 'log');
 
-      batcher = new Batcher(conn);
+      batcher = new Batcher();
     });
 
     afterEach(() => {
@@ -79,7 +79,7 @@ describe('batcher', () => {
       inStream.push(`obj1,val1,val2${os.EOL}`);
       inStream.push(`obj2,val3,val4${os.EOL}`);
       inStream.push(null);
-      const batches = await splitIntoBatches(inStream);
+      const batches = await loadBulkRecords(inStream);
       expect(batches).to.deep.equal([
         [
           {
@@ -102,7 +102,7 @@ describe('batcher', () => {
         inStream.push(`obj1,val1,val2${os.EOL}`);
       }
       inStream.push(null);
-      const batches = splitIntoBatches(inStream);
+      const batches = loadBulkRecords(inStream);
       const result = await batches;
       expect(result.length).to.equal(2);
       expect(result[0].length).to.equal(10000);
@@ -115,7 +115,7 @@ describe('batcher', () => {
         inStream.push(`obj1,val1,val2${os.EOL}`);
       }
       inStream.push(null);
-      const batches = splitIntoBatches(inStream);
+      const batches = loadBulkRecords(inStream);
       const result = await batches;
       expect(result.length).to.equal(1);
       expect(result[0].length).to.equal(10000);
@@ -132,7 +132,7 @@ describe('batcher', () => {
         inStream.push(`obj1,"v""al""1",${bigField}${os.EOL}`);
       }
       inStream.push(null);
-      const batches = splitIntoBatches(inStream);
+      const batches = loadBulkRecords(inStream);
       const result = await batches;
       expect(result.length).to.equal(2);
       expect(result[0].length).to.equal(4952);
@@ -143,7 +143,7 @@ describe('batcher', () => {
       inStream.push(`name,field1,field2${os.EOL}`);
       inStream.push(`obj1,"val1\n\nval1","\nval2"${os.EOL}`);
       inStream.push(null);
-      const batches = await splitIntoBatches(inStream);
+      const batches = await loadBulkRecords(inStream);
       expect(batches).to.deep.equal([
         [
           {
@@ -160,7 +160,7 @@ describe('batcher', () => {
       inStream.push(`"obj,1",val1,val2${os.EOL}`);
       inStream.push(`"obj,2",val3,val4${os.EOL}`);
       inStream.push(null);
-      const batches = await splitIntoBatches(inStream);
+      const batches = await loadBulkRecords(inStream);
       expect(batches).to.deep.equal([
         [
           {

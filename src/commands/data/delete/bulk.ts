@@ -5,9 +5,9 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { Messages } from '@salesforce/core';
-import { BatcherReturnType } from '../../../batcher';
 import { BulkDeleteRequestCache } from '../../../bulkDataRequestCache';
 import { BulkOperationCommand } from '../../../bulkOperationCommand';
+import { BulkResultV2 } from '../../../types';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.load('@salesforce/plugin-data', 'bulk.delete', [
@@ -28,7 +28,7 @@ export default class Delete extends BulkOperationCommand {
   public static readonly aliases = ['force:data:bulk:delete'];
   public static readonly deprecateAliases = true;
 
-  public async run(): Promise<BatcherReturnType> {
+  public async run(): Promise<BulkResultV2> {
     const { flags } = await this.parse(Delete);
     return this.runBulkOperation(flags.sobject, flags.file, flags['target-org'].getConnection(flags['api-version']), (flags.async ? 0 : flags.wait?.minutes), 'delete');
   }

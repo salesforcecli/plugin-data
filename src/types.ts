@@ -6,8 +6,11 @@
  */
 import { BatchInfo, JobInfo, QueryOperation } from 'jsforce/lib/api/bulk';
 import { Connection } from '@salesforce/core';
+import { IngestJobV2Results, JobInfoV2 } from 'jsforce/api/bulk';
+import { Schema } from 'jsforce';
 
 export type StatusResult = BatchInfo[] | JobInfo;
+export type StatusResultV2 = JobInfoV2;
 
 export type ResumeOptions = {
   options: {
@@ -18,3 +21,6 @@ export type ResumeOptions = {
   };
   jobInfo: { id: string };
 };
+
+export type BulkResultV2<J extends Schema = Schema> = JobInfoV2 | IngestJobV2Results<J>;
+
