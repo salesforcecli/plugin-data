@@ -27,25 +27,18 @@ export default class Upsert extends BulkOperationCommand {
       required: true,
       aliases: ['externalid'],
       deprecateAliases: true
-    }),
-    serial: Flags.boolean({
-      char: 'r',
-      summary: messages.getMessage('flags.serial'),
-      default: false
     })
   };
 
   public async run(): Promise<BulkResultV2> {
     const { flags } = await this.parse(Upsert);
-    const concurrencyMode = flags.serial ? 'Serial' : 'Parallel';
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     return this.runBulkOperation(flags.sobject,
       flags.file,
       flags['target-org'].getConnection(flags['api-version']),
       (flags.async ? 0 : flags.wait?.minutes),
       'upsert', {
-        extIdField: flags['external-id'],
-        concurrencyMode
+        extIdField: flags['external-id']
       });
   }
 

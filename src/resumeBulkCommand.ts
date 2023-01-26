@@ -64,7 +64,7 @@ export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
     return job.getAllResults();
   }
 
-  private displayResult<J extends Schema>(jobInfo: JobInfoV2): void {
+  private displayResult(jobInfo: JobInfoV2): void {
 
     this.log();
     this.info(getResultMessage(jobInfo));
@@ -72,7 +72,6 @@ export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
     if (!isBulkV2RequestDone(jobInfo)) {
       this.info(`Run command '${this.config.bin} data ${jobInfo.operation} resume -i ${jobInfo.id} -o ${this.username}' to check status.`);
     }
-    ;
     if ((jobInfo.numberRecordsFailed ?? 0) > 0 || didBulkV2RequestJobFail(jobInfo)) {
       this.info(`To review the details of this job, run:\n${this.config.bin} org open --target-org ${this.username} --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F${jobInfo.id}"`);
     }

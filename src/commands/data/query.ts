@@ -117,7 +117,7 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
     }
   }
  /**
-  * Executs a SOQL query using the bulk 2.0 API
+  * Executes a SOQL query using the bulk 2.0 API
   *
   * @param connection
   * @param query

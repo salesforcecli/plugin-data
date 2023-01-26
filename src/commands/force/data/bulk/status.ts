@@ -7,34 +7,28 @@
 import { BatchInfo, JobInfo } from 'jsforce/api/bulk';
 import { Messages, SfError } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
-import { orgFlags } from '../../flags';
-import { Batcher } from '../../batcher';
+import { orgFlags } from '../../../../flags';
+import { Batcher } from '../../../../batcher';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.status');
 
 export type StatusResult = BatchInfo[] | JobInfo;
 export default class Status extends SfCommand<StatusResult> {
-  public static readonly state = 'deprecated';
-  public static readonly deprecationOptions = {to: 'force:data:bulk:status', message: 'Use force:data:bulk:status instead'}
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
-  public static readonly aliases = ['force:data:bulk:status'];
-  public static readonly deprecateAliases = true;
 
   public static readonly flags = {
     ...orgFlags,
-    'batch-id': Flags.salesforceId({
-      length: 18,
+    'batch-id': Flags.salesforceId({length: 18,
       char: 'b',
       startsWith: '751',
       summary: messages.getMessage('flags.batchid'),
       aliases: ['batchid'],
       deprecateAliases: true,
     }),
-    'job-id': Flags.salesforceId({
-      length: 18,
+    'job-id': Flags.salesforceId({length: 18,
       char: 'i',
       startsWith: '750',
       summary: messages.getMessage('flags.jobid'),

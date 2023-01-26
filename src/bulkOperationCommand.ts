@@ -75,7 +75,7 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
    * create and execute batches based on the record arrays; wait for completion response if -w flag is set with > 0 minutes
    * to get proper logging/printing to console pass the instance of UX that called this method
    *
-   * @param job {Job}
+   * @param job {IngestJobV2}
    * @param input
    * @param sobjectType {string}
    * @param wait {number}
@@ -88,8 +88,7 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
   ): Promise<JobInfoV2> {
     await job.open();
     const timeNow = Date.now();
-    const waitTime = (wait ? Duration.minutes(wait).milliseconds : 0);
-    let remainingTime = waitTime;
+    let remainingTime = (wait ? Duration.minutes(wait).milliseconds : 0);
     job.emit('jobProgress', { remainingTime, stage: 'uploading' });
     await job.uploadData(input);
     remainingTime = remainingTime - (Date.now() - timeNow);
@@ -125,7 +124,7 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
                                 connection: Connection,
                                 wait: number,
                                 operation: BulkOperation,
-                                options?: { extIdField: string; concurrencyMode?: 'Serial' | 'Parallel' }): Promise<BulkResultV2> {
+                                options?: { extIdField: string }): Promise<BulkResultV2> {
     this.cache = await this.getCache();
     this.isAsync = !wait;
     this.operation = operation;
@@ -175,7 +174,7 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
 
   private setupLifecycleListeners(): void {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this.job.on('jobProgress', async (data: { remainingTime: number; stage: string }) => {
+    this.job.on('jobProgress', async () => {
       const jobInfo = await this.job.check();
       this.numberRecordsProcessed = jobInfo.numberRecordsProcessed ?? 0;
       this.numberRecordsFailed = jobInfo.numberRecordsFailed ?? 0;
@@ -191,7 +190,7 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
       }
     });
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this.job.on('jobTimeout', async (err) => {
+    this.job.on('jobTimeout', async () => {
       if (!this.timeout) {
         this.timeout = true;
         await this.cache?.createCacheEntryForRequest(this.job.id ?? '', this.connection?.getUsername(), this.connection?.getApiVersion());

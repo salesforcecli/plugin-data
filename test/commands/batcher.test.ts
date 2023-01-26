@@ -12,7 +12,7 @@ import { Ux } from '@salesforce/sf-plugins-core';
 import { Connection, SfError } from '@salesforce/core';
 import { JobInfo } from 'jsforce/api/bulk';
 import * as sinon from 'sinon';
-import { Batcher, loadBulkRecords } from '../../src/batcher';
+import { Batcher, splitIntoBatches } from '../../src/batcher';
 
 let styledHeaderSpy: sinon.SinonStub;
 let logSpy: sinon.SinonStub;
@@ -31,33 +31,33 @@ describe('batcher', () => {
       styledHeaderSpy = $$.stub(ux, 'styledHeader');
       logSpy = $$.stub(ux, 'log');
 
-      batcher = new Batcher();
+      batcher = new Batcher(conn, ux);
     });
 
     afterEach(() => {
       $$.restore();
     });
 
-    it('will correctly call to print the expected messages 1 log, 1 styledHeader', async () => {
-      await batcher.bulkStatus(summary);
+    it('will correctly call to print the expected messages 1 log, 1 styledHeader', () => {
+      batcher.bulkStatus(summary);
       expect(styledHeaderSpy.callCount).to.equal(1);
       expect(logSpy.callCount).to.equal(1);
     });
 
-    it('will correctly call to print the expected messages 1 log, 2 styledHeader', async () => {
-      await batcher.bulkStatus(summary, [], 123);
+    it('will correctly call to print the expected messages 1 log, 2 styledHeader', () => {
+      batcher.bulkStatus(summary, [], 123);
       expect(styledHeaderSpy.callCount, 'styledHeader').to.equal(2);
       expect(logSpy.callCount, 'logSpy').to.equal(1);
     });
 
-    it('will correctly call to print the expected messages 3 log, 2 styledHeader', async () => {
-      await batcher.bulkStatus(summary, [{ errors: ['error1', 'error2'], success: false, id: '123' }]);
+    it('will correctly call to print the expected messages 3 log, 2 styledHeader', () => {
+      batcher.bulkStatus(summary, [{ errors: ['error1', 'error2'], success: false, id: '123' }]);
       expect(styledHeaderSpy.callCount).to.equal(2);
       expect(logSpy.callCount).to.equal(3);
     });
 
-    it('will correctly call to print the expected messages 3 log, 3 styledHeader', async () => {
-      await batcher.bulkStatus(summary, [{ errors: ['error1', 'error2'], success: false, id: '123' }], 123, true);
+    it('will correctly call to print the expected messages 3 log, 3 styledHeader', () => {
+      batcher.bulkStatus(summary, [{ errors: ['error1', 'error2'], success: false, id: '123' }], 123, true);
       expect(styledHeaderSpy.callCount).to.equal(3);
       expect(logSpy.callCount).to.equal(3);
     });
@@ -79,7 +79,7 @@ describe('batcher', () => {
       inStream.push(`obj1,val1,val2${os.EOL}`);
       inStream.push(`obj2,val3,val4${os.EOL}`);
       inStream.push(null);
-      const batches = await loadBulkRecords(inStream);
+      const batches = await splitIntoBatches(inStream);
       expect(batches).to.deep.equal([
         [
           {
@@ -102,7 +102,7 @@ describe('batcher', () => {
         inStream.push(`obj1,val1,val2${os.EOL}`);
       }
       inStream.push(null);
-      const batches = loadBulkRecords(inStream);
+      const batches = splitIntoBatches(inStream);
       const result = await batches;
       expect(result.length).to.equal(2);
       expect(result[0].length).to.equal(10000);
@@ -115,7 +115,7 @@ describe('batcher', () => {
         inStream.push(`obj1,val1,val2${os.EOL}`);
       }
       inStream.push(null);
-      const batches = loadBulkRecords(inStream);
+      const batches = splitIntoBatches(inStream);
       const result = await batches;
       expect(result.length).to.equal(1);
       expect(result[0].length).to.equal(10000);
@@ -132,7 +132,7 @@ describe('batcher', () => {
         inStream.push(`obj1,"v""al""1",${bigField}${os.EOL}`);
       }
       inStream.push(null);
-      const batches = loadBulkRecords(inStream);
+      const batches = splitIntoBatches(inStream);
       const result = await batches;
       expect(result.length).to.equal(2);
       expect(result[0].length).to.equal(4952);
@@ -143,7 +143,7 @@ describe('batcher', () => {
       inStream.push(`name,field1,field2${os.EOL}`);
       inStream.push(`obj1,"val1\n\nval1","\nval2"${os.EOL}`);
       inStream.push(null);
-      const batches = await loadBulkRecords(inStream);
+      const batches = await splitIntoBatches(inStream);
       expect(batches).to.deep.equal([
         [
           {
@@ -160,7 +160,7 @@ describe('batcher', () => {
       inStream.push(`"obj,1",val1,val2${os.EOL}`);
       inStream.push(`"obj,2",val3,val4${os.EOL}`);
       inStream.push(null);
-      const batches = await loadBulkRecords(inStream);
+      const batches = await splitIntoBatches(inStream);
       expect(batches).to.deep.equal([
         [
           {
@@ -178,170 +178,4 @@ describe('batcher', () => {
       expect(exitSpy.notCalled).to.equal(true);
     });
   });
-
-  // describe('Batch creation tests', () => {
-  //   let creationSpy: sinon.SinonSpy;
-  //   let exitSpy: sinon.SinonSpy;
-  //   let waitForCompletionSpy: sinon.SinonStub;
-
-  //   let createdBatches: Batch[];
-  //   const job = {
-  //     async close(): Promise<JobInfo> {
-  //       return {} as JobInfo;
-  //     },
-  //     async list(): Promise<BatchInfo[]> {
-  //       return [];
-  //     },
-  //     async check(): Promise<JobInfo> {
-  //       return {} as JobInfo;
-  //     },
-  //     createBatch(): Batch {
-  //       // defined in before block
-  //       return {} as Batch;
-  //     },
-  //   } as Job;
-  //   beforeEach(() => {
-  //     createdBatches = [];
-  //     // only stub the methods we need, cast to unknown then to Batch
-  //     const batch: Batch = {
-  //       check(): BatchInfo {
-  //         return {} as BatchInfo;
-  //       },
-  //     } as unknown as Batch;
-
-  //     const batchListeners: Map<string, (result: Record<string, string>) => void> = new Map<
-  //       string,
-  //       (result: Record<string, string>) => void
-  //     >();
-  //     creationSpy = stubMethod($$.SANDBOX, job, 'createBatch').callsFake((): Batch => {
-  //       // @ts-ignore
-  //       batch.on = (event: string, listener: (result: Record<string, string>) => void) => {
-  //         batchListeners.set(event, listener);
-  //         return batch;
-  //       };
-  //       // just add the emit function to avoid defining all the Event Emitter functions too
-  //       batch['emit'] = (event: string, ...args: never[]): boolean => {
-  //         if (event === 'error' || event === 'queue') {
-  //           // eslint-disable-next-line @typescript-eslint/ban-types
-  //           batchListeners.forEach((listener: Function) => {
-  //             listener(args[0]);
-  //           });
-  //         }
-  //         return true;
-  //       };
-  //       createdBatches.push(batch);
-  //       return batch;
-  //     });
-  //     exitSpy = spyMethod($$.SANDBOX, SfError, 'wrap');
-  //     waitForCompletionSpy = stubMethod($$.SANDBOX, Batcher.prototype, 'waitForCompletion');
-  //   });
-
-  //   afterEach(() => {
-  //     createdBatches = [];
-  //   });
-
-  //   it('Should create all batches and should wait for completion', async () => {
-  //     const batches: Batches = [
-  //       [
-  //         { field1: 'aaa', field2: 'bbb' },
-  //         { field1: 'ccc', field2: 'ddd' },
-  //       ],
-  //       [
-  //         { field1: '111', field2: '222' },
-  //         { field1: '333', field2: '444' },
-  //       ],
-  //     ];
-  //     stubMethod($$.SANDBOX, Batcher.prototype, 'splitIntoBatches').resolves(batches);
-  //     await batcher.createAndExecuteBatches(job, ReadStream.prototype, 'TestObject__c', 2);
-  //     expect(creationSpy.calledTwice).to.be.true;
-  //     expect(waitForCompletionSpy.calledTwice).to.be.true;
-  //     expect(exitSpy.notCalled).to.be.true;
-  //   });
-
-  //   it('Should handle a batch error', async () => {
-  //     const batches: Batches = [
-  //       [
-  //         { field1: 'aaa', field2: 'bbb' },
-  //         { field1: 'ccc', field2: 'ddd' },
-  //       ],
-  //     ];
-
-  //     stubMethod($$.SANDBOX, Batcher.prototype, 'splitIntoBatches').resolves(batches);
-  //     await batcher.createAndExecuteBatches(job, ReadStream.prototype, 'TestObject__c', 5);
-  //     createdBatches[0]['emit']('error', new Error('test error from bulkUpsertTest.ts'));
-  //     expect(creationSpy.calledOnce).to.be.true;
-  //     expect(createdBatches.length).to.equal(1);
-  //   });
-
-  //   it('should report failures in batches to the user ', async () => {
-  //     const batches: Batches = [
-  //       [
-  //         { field1: 'aaa', field2: 'bbb' },
-  //         { field1: 'ccc', field2: 'ddd' },
-  //       ],
-  //     ];
-
-  //     const newBatch = job.createBatch();
-  //     // @ts-ignore
-  //     newBatch.check = (): BatchInfo =>
-  //       ({
-  //         id: 'INCORRECT BATCH',
-  //         jobId: '',
-  //         state: 'Failed',
-  //         stateMessage: 'Invalid batch',
-  //         numberRecordsFailed: '1',
-  //         numberRecordsProcessed: '2',
-  //         totalProcessingTime: '100',
-  //       } as BatchInfo);
-  //     stubMethod($$.SANDBOX, Batcher.prototype, 'splitIntoBatches').resolves(batches);
-  //     waitForCompletionSpy.throws('Invalid Batch');
-  //     try {
-  //       await batcher.createAndExecuteBatches(job, ReadStream.prototype, 'TestObject__c', 3);
-  //       newBatch.emit('queue', []);
-  //       chai.assert.fail('the above should throw');
-  //     } catch (e) {
-  //       expect((e as Error).name).to.equal('Invalid Batch');
-  //     }
-  //   });
-
-  //
-  // });
-
-  // describe('timeout errors', () => {
-  //   it('Should properly handle External Id Required errors', async () => {
-  //     const batches: Batches = [
-  //       [
-  //         { field1: 'aaa', field2: 'bbb' },
-  //         { field1: 'ccc', field2: 'ddd' },
-  //       ],
-  //     ];
-
-  //     stubMethod($$.SANDBOX, Batcher.prototype, 'splitIntoBatches').resolves(batches);
-  //     const batch = job.createBatch();
-  //     batch.emit('External ID was blank');
-  //     try {
-  //       await batcher.createAndExecuteBatches(job, ReadStream.prototype, 'TestObject__c', 5);
-  //     } catch (e) {
-  //       expect((e as Error).message).to.equal('An External ID is required on TestObject__c to perform an upsert.');
-  //     }
-  //   });
-
-  //   it('Should properly handle timeout errors', async () => {
-  //     const batches: Batches = [
-  //       [
-  //         { field1: 'aaa', field2: 'bbb' },
-  //         { field1: 'ccc', field2: 'ddd' },
-  //       ],
-  //     ];
-
-  //     stubMethod($$.SANDBOX, Batcher.prototype, 'splitIntoBatches').resolves(batches);
-  //     const batch = job.createBatch();
-  //     batch.emit('Polling time out');
-  //     try {
-  //       await batcher.createAndExecuteBatches(job, ReadStream.prototype, 'TestObject__c', 5);
-  //     } catch (e) {
-  //       expect((e as Error).message).to.contain('The operation timed out. Check the status with command');
-  //     }
-  //   });
-  // });
 });
