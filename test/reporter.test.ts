@@ -10,7 +10,7 @@ import { expect, use as chaiUse } from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import { get, getPlainObject } from '@salesforce/ts-types';
 import { createSandbox } from 'sinon';
-import { CliUx } from '@oclif/core';
+import { ux } from '@oclif/core';
 import { Field, SoqlQueryResult } from '../src/dataSoqlQueryTypes';
 import { CsvReporter, HumanReporter, escape } from '../src/reporters';
 import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars';
@@ -95,7 +95,7 @@ describe('reporter tests', () => {
       };
       const sb = createSandbox();
       reporter = new CsvReporter(dataSoqlQueryResult, queryData.columns);
-      const logStub = sb.stub(CliUx.ux, 'log');
+      const logStub = sb.stub(ux, 'log');
 
       const massagedRows = reporter.massageRows();
       const data = getPlainObject(reporter, 'data');
