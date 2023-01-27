@@ -32,14 +32,14 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
       required: true,
       exists: true,
       aliases: ['csvfile'],
-      deprecateAliases: true
+      deprecateAliases: true,
     }),
     sobject: Flags.string({
       char: 's',
       summary: messages.getMessage('flags.sobjecttype'),
       required: true,
       aliases: ['sobjecttype'],
-      deprecateAliases: true
+      deprecateAliases: true,
     }),
     wait: Flags.duration({
       char: 'w',
@@ -47,14 +47,14 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
       summary: messages.getMessage('flags.wait'),
       min: 0,
       default: Duration.minutes(0),
-      exclusive: ['async']
+      exclusive: ['async'],
     }),
     async: Flags.boolean({
       char: 'a',
       summary: messages.getMessage('flags.async.summary'),
       default: false,
-      exclusive: ['wait']
-    })
+      exclusive: ['wait'],
+    }),
   };
 
   protected lifeCycle = Lifecycle.getInstance();
@@ -87,7 +87,7 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
   ): Promise<JobInfoV2> {
     await job.open();
     const timeNow = Date.now();
-    let remainingTime = (wait ? Duration.minutes(wait).milliseconds : 0);
+    let remainingTime = wait ? Duration.minutes(wait).milliseconds : 0;
     job.emit('jobProgress', { remainingTime, stage: 'uploading' });
     await job.uploadData(input);
     remainingTime = remainingTime - (Date.now() - timeNow);
@@ -103,7 +103,7 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
   private static async waitOrTimeout(job: IngestJobV2<Schema, IngestOperation>, wait: number): Promise<void> {
     let waitCountDown = wait;
     const progress = setInterval(() => {
-      const remainingTime = waitCountDown -= POLL_FREQUENCY_MS;
+      const remainingTime = (waitCountDown -= POLL_FREQUENCY_MS);
       job.emit('jobProgress', { remainingTime, stage: 'polling' });
     }, POLL_FREQUENCY_MS);
     const timeout = setTimeout(() => {
@@ -118,12 +118,14 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
     }
   }
 
-  public async runBulkOperation(sobject: string,
-                                csvFileName: string,
-                                connection: Connection,
-                                wait: number,
-                                operation: BulkOperation,
-                                options?: { extIdField: string }): Promise<BulkResultV2> {
+  public async runBulkOperation(
+    sobject: string,
+    csvFileName: string,
+    connection: Connection,
+    wait: number,
+    operation: BulkOperation,
+    options?: { extIdField: string }
+  ): Promise<BulkResultV2> {
     this.cache = await this.getCache();
     this.isAsync = !wait;
     this.operation = operation;
@@ -139,6 +141,13 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
       this.setupLifecycleListeners();
       try {
         const jobInfo = await BulkOperationCommand.executeBulkV2DataRequest(this.job, csvRecords, sobject, this.wait);
+        if (this.isAsync) {
+          await this.cache?.createCacheEntryForRequest(
+            this.job.id ?? '',
+            this.connection?.getUsername(),
+            this.connection?.getApiVersion()
+          );
+        }
         this.displayBulkV2Result(jobInfo);
         const result = { jobInfo } as BulkResultV2;
         if (!isBulkV2RequestDone(jobInfo) || !this.jsonEnabled()) {
@@ -148,7 +157,7 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
         return result;
       } catch (err) {
         this.spinner.stop();
-        throw(err);
+        throw err;
       }
     } finally {
       this.spinner.stop();
@@ -156,18 +165,31 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
   }
 
   private displayBulkV2Result(jobInfo: JobInfoV2): void {
-
     if (this.isAsync) {
       this.logSuccess(messages.getMessage('success', [this.operation, jobInfo.id]));
-      this.info(messages.getMessage('checkStatus',[this.config.bin, this.operation, jobInfo.id,this.connection?.getUsername()]));
+      this.info(
+        messages.getMessage('checkStatus', [
+          this.config.bin,
+          this.operation,
+          jobInfo.id,
+          this.connection?.getUsername(),
+        ])
+      );
     } else {
       this.log();
       this.info(getResultMessage(jobInfo));
       if ((jobInfo.numberRecordsFailed ?? 0) > 0) {
-        this.info(messages.getMessage('checkJobViaUi',[this.config.bin, this.connection?.getUsername(), jobInfo.id]));
+        this.info(messages.getMessage('checkJobViaUi', [this.config.bin, this.connection?.getUsername(), jobInfo.id]));
       }
       if (jobInfo.state === 'InProgress' || jobInfo.state === 'Open') {
-        this.info(messages.getMessage('checkStatus',[this.config.bin, this.operation, jobInfo.id,this.connection?.getUsername()]));
+        this.info(
+          messages.getMessage('checkStatus', [
+            this.config.bin,
+            this.operation,
+            jobInfo.id,
+            this.connection?.getUsername(),
+          ])
+        );
       }
     }
   }
@@ -179,7 +201,9 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
       this.numberRecordsProcessed = jobInfo.numberRecordsProcessed ?? 0;
       this.numberRecordsFailed = jobInfo.numberRecordsFailed ?? 0;
       this.numberRecordSuceeded = this.numberRecordsProcessed - this.numberRecordsFailed;
-      this.spinner.status = `${this.getRemainingTimeStatus()}${this.getStage(jobInfo.state)}${this.getRemainingRecordsStatus()}`;
+      this.spinner.status = `${this.getRemainingTimeStatus()}${this.getStage(
+        jobInfo.state
+      )}${this.getRemainingRecordsStatus()}`;
     });
 
     this.job.on('error', (message: string) => {
@@ -193,19 +217,29 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
     this.job.on('jobTimeout', async () => {
       if (!this.timeout) {
         this.timeout = true;
-        await this.cache?.createCacheEntryForRequest(this.job.id ?? '', this.connection?.getUsername(), this.connection?.getApiVersion());
+        await this.cache?.createCacheEntryForRequest(
+          this.job.id ?? '',
+          this.connection?.getUsername(),
+          this.connection?.getApiVersion()
+        );
         this.displayBulkV2Result(await this.job.check());
       }
     });
   }
 
   private getRemainingTimeStatus(): string {
-    return this.isAsync ? '' : messages.getMessage('remainingTimeStatus', [Duration.milliseconds(this.endWaitTime - Date.now()).minutes]);
+    return this.isAsync
+      ? ''
+      : messages.getMessage('remainingTimeStatus', [Duration.milliseconds(this.endWaitTime - Date.now()).minutes]);
   }
 
   private getRemainingRecordsStatus(): string {
     // the leading space is intentional
-    return ` ${messages.getMessage('remainingRecordsStatus', [this.numberRecordSuceeded,this.numberRecordsFailed,this.numberRecordsProcessed])}`;
+    return ` ${messages.getMessage('remainingRecordsStatus', [
+      this.numberRecordSuceeded,
+      this.numberRecordsFailed,
+      this.numberRecordsProcessed,
+    ])}`;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -214,5 +248,4 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
   }
 
   protected abstract getCache(): Promise<BulkDataRequestCache>;
-
 }

@@ -11,9 +11,8 @@ import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { sleep } from '@salesforce/kit';
 import { ensurePlainObject } from '@salesforce/ts-types';
-import { JobInfoV2 } from 'jsforce/api/bulk';
-import { QueryResult } from '../dataSoqlQuery.nut';
-import { BulkResultV2 } from '../../../../src/types';
+import { BulkResultV2 } from '../../../src/types';
+import { QueryResult } from './dataSoqlQuery.nut';
 
 let testSession: TestSession;
 
@@ -43,14 +42,14 @@ const isCompleted = async (cmd: string): Promise<void> => {
  * The four states of a job are Queued, JobComplete, InProgress, and Aborted. If Aborted, the test will fail
  * Otherwise run status until job is JobComplete
  */
-const checkBulkStatusJsonResponse = (jobId: string, operation: 'delete' | 'upsert'): void => {
+const checkBulkResumeJsonResponse = (jobId: string, operation: 'delete' | 'upsert'): void => {
   const statusResponse = execCmd<BulkResultV2>(`data:${operation}:resume --jobid ${jobId} --json`, {
-    ensureExitCode: 0
+    ensureExitCode: 0,
   }).jsonOutput?.result;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   expect(statusResponse?.jobInfo.state).to.equal('JobComplete');
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  expect(statusResponse?.records?.successfulResults).to.be.an('array').with.lengthOf(1);
+  expect(statusResponse?.records?.successfulResults).to.be.an('array').with.lengthOf(10);
 };
 
 /* Check the status of the bulk upsert job using human output to determine progress
@@ -59,10 +58,10 @@ const checkBulkStatusJsonResponse = (jobId: string, operation: 'delete' | 'upser
  */
 const checkBulkStatusHumanResponse = (statusCommand: string): void => {
   const statusResponse = execCmd(statusCommand, {
-    ensureExitCode: 0
+    ensureExitCode: 0,
   }).shellOutput.stdout.split('\n');
-  const jobState = statusResponse.find((line) => line.startsWith('state:'));
-  expect(jobState).to.include('JobComplete');
+  const jobState = statusResponse.find((line) => line.includes('Status'));
+  expect(jobState).to.include('Job Complete');
 };
 
 describe('data:bulk commands', () => {
@@ -72,11 +71,11 @@ describe('data:bulk commands', () => {
         {
           executable: 'sfdx',
           config: 'config/project-scratch-def.json',
-          setDefault: true
-        }
+          setDefault: true,
+        },
       ],
       project: { sourceDir: path.join('test', 'test-files', 'data-project') },
-      devhubAuthStrategy: 'AUTO'
+      devhubAuthStrategy: 'AUTO',
     });
   });
 
@@ -89,47 +88,17 @@ describe('data:bulk commands', () => {
       it('should upsert, query, and delete 10 accounts', async () => {
         const bulkUpsertResult: BulkResultV2 = bulkInsertAccounts();
         let jobInfo = bulkUpsertResult.jobInfo;
-        await isCompleted(
-          `data:upsert:resume --jobid ${jobInfo.id} --json`);
+        await isCompleted(`data:upsert:resume --jobid ${jobInfo.id} --json`);
 
-        checkBulkStatusHumanResponse(
-          `data:upsert:resume --jobid ${jobInfo.id}`
-        );
-        checkBulkStatusJsonResponse(jobInfo.id, 'upsert');
+        checkBulkStatusHumanResponse(`data:upsert:resume --jobid ${jobInfo.id}`);
+        checkBulkResumeJsonResponse(jobInfo.id, 'upsert');
 
         const bulkDeleteResult = queryAndBulkDelete();
         jobInfo = bulkDeleteResult.jobInfo;
-        await isCompleted(
-          `data:delete:resume --jobid ${jobInfo.id} --json`
-        );
+        await isCompleted(`data:delete:resume --jobid ${jobInfo.id} --json`);
 
-        checkBulkStatusHumanResponse(
-          `data:delete:resume --jobid ${jobInfo.id}`
-        );
-        checkBulkStatusJsonResponse(jobInfo.id, 'upsert');
-      });
-
-      it('should upsert, query, and delete 10 accounts all serially', async () => {
-        const bulkUpsertResult = bulkInsertAccounts();
-        let jobInfo: JobInfoV2 = bulkUpsertResult.jobInfo;
-        await isCompleted(
-          'data:upsert:resume --jobid $jobInfo.id} --json'
-        );
-        checkBulkStatusHumanResponse(
-          `data:upsert:resume --jobid ${jobInfo.id}`
-        );
-        checkBulkStatusJsonResponse(jobInfo.id, 'delete');
-
-        const bulkDeleteResult = queryAndBulkDelete();
-        jobInfo = bulkDeleteResult.jobInfo;
-        await isCompleted(
-          `data:delete:resume --jobid ${jobInfo.id} --json`
-        );
-
-        checkBulkStatusHumanResponse(
-          `data:delete:resume --jobid ${jobInfo.id}`
-        );
-        checkBulkStatusJsonResponse(jobInfo.id, 'delete');
+        checkBulkStatusHumanResponse(`data:delete:resume --jobid ${jobInfo.id}`);
+        checkBulkResumeJsonResponse(jobInfo.id, 'upsert');
       });
     });
   });
@@ -137,9 +106,9 @@ describe('data:bulk commands', () => {
 
 const queryAccountRecords = () => {
   const queryResponse = execCmd<QueryResult>(
-    'data:soql:query --query "select id from Account where phone=\'415-555-0000\'" --json',
+    'data:query --query "select id from Account where phone=\'415-555-0000\'" --json',
     {
-      ensureExitCode: 0
+      ensureExitCode: 0,
     }
   ).jsonOutput?.result ?? { records: [], done: false, totalSize: 0 };
   expect(queryResponse).to.have.property('records').with.lengthOf.above(9);
@@ -155,18 +124,16 @@ const queryAndBulkDelete = (): BulkResultV2 => {
 
   // Run bulk delete
   const deleteResponse: BulkResultV2 | undefined = execCmd<Awaited<BulkResultV2>>(
-    `data:delete:bulk --sobjecttype Account --csvfile ${idsFile} --json`,
+    `data:delete:bulk --sobjecttype Account --csvfile ${idsFile} --json --wait 5`,
     {
-      ensureExitCode: 0
+      ensureExitCode: 0,
     }
   ).jsonOutput?.result;
 
-  /* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment */
-  assert.equal(deleteResponse?.records?.successfulResults.length, 1);
+  assert.equal(deleteResponse?.records?.successfulResults.length, 10);
   const bulkDeleteResult = deleteResponse?.records?.successfulResults[0];
-  assert('id' in bulkDeleteResult);
+  assert('Id' in bulkDeleteResult);
   return deleteResponse;
-  /* eslint-enable @typescript-eslint/no-unsafe-member-access */
 };
 
 /** Bulk upsert 10 accounts */
@@ -176,15 +143,15 @@ const bulkInsertAccounts = (): BulkResultV2 => {
       '.',
       'data',
       'bulkUpsert.csv'
-    )} --externalid Id --json`,
+    )} --externalid Id --json --wait 5`,
     { ensureExitCode: 0 }
   ).jsonOutput?.result as BulkResultV2;
   if (response) {
     /* eslint-disable @typescript-eslint/no-unsafe-member-access, ,@typescript-eslint/no-unsafe-assignment */
     const records = response.records?.successfulResults;
-    assert.equal(records?.length, 1);
+    assert.equal(records?.length, 10);
     const bulkUpsertResult = response.records?.successfulResults[0];
-    assert(Object.keys(ensurePlainObject(bulkUpsertResult)).includes('id'));
+    assert(Object.keys(ensurePlainObject(bulkUpsertResult)).includes('sf__Id'));
     const jobInfo = response.jobInfo;
     assert('id' in jobInfo);
     /* eslint-enable @typescript-eslint/no-unsafe-member-access, ,@typescript-eslint/no-unsafe-assignment */

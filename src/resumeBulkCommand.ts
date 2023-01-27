@@ -25,15 +25,15 @@ export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
       startsWith: '750',
       summary: messages.getMessage('flags.jobid'),
       aliases: ['jobid'],
-      deprecateAliases: true
+      deprecateAliases: true,
     }),
     'use-most-recent': Flags.boolean({
       summary: messages.getMessage('flags.useMostRecent.summary'),
-      default: false,
-      exclusive: ['job-id']
+      default: true,
+      exclusive: ['job-id'],
     }),
     'api-version': Flags.orgApiVersion(),
-    loglevel
+    loglevel,
   };
 
   protected job!: IngestJobV2<Schema, IngestOperation>;
@@ -59,15 +59,14 @@ export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
   }
 
   private displayResult(jobInfo: JobInfoV2): void {
-
     this.log();
     this.info(getResultMessage(jobInfo));
 
     if (!isBulkV2RequestDone(jobInfo)) {
-      this.info(messages.getMessage('checkStatus',[this.config.bin, jobInfo.operation, jobInfo.id, this.username]));
+      this.info(messages.getMessage('checkStatus', [this.config.bin, jobInfo.operation, jobInfo.id, this.username]));
     }
     if ((jobInfo.numberRecordsFailed ?? 0) > 0 || didBulkV2RequestJobFail(jobInfo)) {
-      this.info(messages.getMessage('checkJobViaUi',[this.config.bin, this.username, jobInfo.id]));
+      this.info(messages.getMessage('checkJobViaUi', [this.config.bin, this.username, jobInfo.id]));
     }
   }
 }
