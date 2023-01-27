@@ -39,7 +39,7 @@ describe('data:tree commands', () => {
 
   it('should error with invalid soql', () => {
     const result = execCmd(
-      `force:data:tree:export --query 'SELECT' --prefix INT --outputdir ${path.join('.', 'export_data')}`
+      `data:export:tree --query 'SELECT' --prefix INT --outputdir ${path.join('.', 'export_data')}`
     );
     const stdError = getString(result, 'shellOutput.stderr', '').toLowerCase();
     const errorKeywords = ['malformed', 'check the soql', 'invalid soql query'];
@@ -51,12 +51,12 @@ describe('data:tree commands', () => {
       "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry, (SELECT Lastname, Title, Email FROM Contacts) FROM Account  WHERE Name LIKE 'SampleAccount%'";
 
     // Import data to the default org.
-    execCmd(`force:data:tree:import --plan ${path.join('.', 'data', 'accounts-contacts-plan.json')} --json`, {
+    execCmd(`data:import:tree --plan ${path.join('.', 'data', 'accounts-contacts-plan.json')} --json`, {
       ensureExitCode: 0,
     });
 
     execCmd(
-      `force:data:tree:export --query "${query}" --prefix INT --outputdir ${path.join(
+      `data:export:tree --query "${query}" --prefix INT --outputdir ${path.join(
         '.',
         'export_data'
       )} --plan --json`,
@@ -65,7 +65,7 @@ describe('data:tree commands', () => {
 
     // Import data to the default org.
     execCmd(
-      `force:data:tree:import --targetusername importOrg --plan ${path.join(
+      `data:import:tree --targetusername importOrg --plan ${path.join(
         '.',
         'export_data',
         'INT-Account-Contact-plan.json'
@@ -77,7 +77,7 @@ describe('data:tree commands', () => {
 
     // query the new org for import verification
     const queryResults = execCmd<QueryResult>(
-      `force:data:soql:query --targetusername importOrg --query "${query}" --json`,
+      `data:query --targetusername importOrg --query "${query}" --json`,
       {
         ensureExitCode: 0,
       }

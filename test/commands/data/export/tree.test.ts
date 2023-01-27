@@ -54,7 +54,7 @@ interface ExportResult {
   result: AnyJson;
 }
 
-describe('force:data:tree:export', () => {
+describe('data:export:tree', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   const config = new Config({ root: resolve(__dirname, '../../../package.json') });

@@ -5,14 +5,15 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import * as path from 'path';
-import fs = require('fs');
 import { strict as assert } from 'node:assert/strict';
+import * as fs from 'fs';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { sleep } from '@salesforce/kit';
 import { QueryResult } from '../../../data/dataSoqlQuery.nut';
 import { BatcherReturnType } from '../../../../../src/batcher';
-import { StatusResult } from '../../../../../src/commands/force/data/bulk/status';
+import { StatusResult } from '../../../../../src/types';
+
 let testSession: TestSession;
 
 interface BulkStatus {
@@ -52,7 +53,7 @@ const isCompleted = async (cmd: string): Promise<void> => {
  */
 const checkBulkStatusJsonResponse = (jobId: string, batchId: string): void => {
   const statusResponse = execCmd<BulkStatus[]>(`force:data:bulk:status --jobid ${jobId} --batchid ${batchId} --json`, {
-    ensureExitCode: 0,
+    ensureExitCode: 0
   }).jsonOutput?.result;
   expect(statusResponse).to.be.an('array').with.lengthOf(1);
   expect(statusResponse?.[0].state).to.equal('Completed');
@@ -64,24 +65,24 @@ const checkBulkStatusJsonResponse = (jobId: string, batchId: string): void => {
  */
 const checkBulkStatusHumanResponse = (statusCommand: string): void => {
   const statusResponse = execCmd(statusCommand, {
-    ensureExitCode: 0,
+    ensureExitCode: 0
   }).shellOutput.stdout.split('\n');
   const jobState = statusResponse.find((line) => line.startsWith('state:'));
   expect(jobState).to.include('Completed');
 };
 
-describe('data:bulk commands', () => {
+describe('force:data:bulk commands', () => {
   before(async () => {
     testSession = await TestSession.create({
       scratchOrgs: [
         {
           executable: 'sfdx',
           config: 'config/project-scratch-def.json',
-          setDefault: true,
-        },
+          setDefault: true
+        }
       ],
       project: { sourceDir: path.join('test', 'test-files', 'data-project') },
-      devhubAuthStrategy: 'AUTO',
+      devhubAuthStrategy: 'AUTO'
     });
   });
 
@@ -141,7 +142,7 @@ const queryAccountRecords = () => {
   const queryResponse = execCmd<QueryResult>(
     'force:data:soql:query --query "select id from Account where phone=\'415-555-0000\'" --json',
     {
-      ensureExitCode: 0,
+      ensureExitCode: 0
     }
   ).jsonOutput?.result ?? { records: [], done: false, totalSize: 0 };
   expect(queryResponse).to.have.property('records').with.lengthOf.above(9);
@@ -159,7 +160,7 @@ const queryAndBulkDelete = () => {
   const deleteResponse = execCmd<BatcherReturnType>(
     `force:data:bulk:delete --sobjecttype Account --csvfile ${idsFile} --json`,
     {
-      ensureExitCode: 0,
+      ensureExitCode: 0
     }
   ).jsonOutput?.result;
 

@@ -414,4 +414,3 @@ export const getFailedBatchesForDisplay = (batches: BatchInfo[]): Array<{ id: st
 };
 
 export const getResultMessage = (jobInfo: JobInfoV2): string => `Job ${jobInfo.id} Status ${jobInfo.state} Records processed ${jobInfo.numberRecordsProcessed}. Records failed ${jobInfo.numberRecordsFailed}.`;
-

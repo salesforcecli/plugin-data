@@ -13,20 +13,13 @@ Messages.importMessagesDirectory(__dirname);
 const messages = Messages.load('@salesforce/plugin-data', 'bulk.delete', [
   'examples',
   'summary',
-  'description',
-  'flags.csvfile',
-  'flags.sobjecttype',
-  'flags.wait',
-  'flags.async.summary',
-  'flags.async.description'
+  'description'
 ]);
 
 export default class Delete extends BulkOperationCommand {
   public static readonly examples = messages.getMessages('examples');
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
-  public static readonly aliases = ['force:data:bulk:delete'];
-  public static readonly deprecateAliases = true;
 
   public async run(): Promise<BulkResultV2> {
     const { flags } = await this.parse(Delete);

@@ -26,7 +26,7 @@ export default class DeleteResume extends ResumeBulkCommand {
     const cache = await BulkDeleteRequestCache.create();
     const resumeOptions = await cache.resolveResumeOptionsFromCache(flags['job-id'], flags['use-most-recent'], flags['target-org'], flags['api-version']);
     const resumeResults = await this.resume(resumeOptions);
-    if (isBulkV2RequestDone(resumeResults)) {
+    if (isBulkV2RequestDone(resumeResults.jobInfo)) {
       await BulkDeleteRequestCache.unset(resumeOptions.jobInfo.id);
     }
     return resumeResults;

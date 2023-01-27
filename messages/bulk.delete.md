@@ -33,8 +33,3 @@ Number of minutes to wait for the command to complete before displaying the resu
 # flags.async.summary
 
 Run the command asynchronously.
-
-# flags.async.description
-
-Run the command asynchronously. The command returns immediately and displays the job ID. Use the job ID to check the status of the job with the "<%= config.bin %> data resume" command.
-

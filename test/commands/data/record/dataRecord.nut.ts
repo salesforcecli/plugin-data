@@ -70,7 +70,7 @@ describe('data:record commands', () => {
 
       it('creates a record', () => {
         const createRecordResponse = execCmd<SaveResult>(
-          `force:data:record:create --sobjecttype Account --values "name=${accountNameBefore} phone=${phoneNumber}" --json`,
+          `data:create:record --sobjecttype Account --values "name=${accountNameBefore} phone=${phoneNumber}" --json`,
           { ensureExitCode: 0 }
         ).jsonOutput;
         assert(createRecordResponse?.result?.id);
@@ -79,7 +79,7 @@ describe('data:record commands', () => {
       });
       it('get the created record by ID', () => {
         const getRecordResponse = execCmd<AccountRecord>(
-          `force:data:record:get --sobjecttype Account --sobjectid ${createdRecordId} --json`,
+          `data:get:record --sobjecttype Account --sobjectid ${createdRecordId} --json`,
           { ensureExitCode: 0 }
         ).jsonOutput;
         expect(getRecordResponse?.result).to.have.property('Id', createdRecordId);
@@ -89,7 +89,7 @@ describe('data:record commands', () => {
 
       it('get the created record by where', () => {
         const getRecordResponse = execCmd<AccountRecord>(
-          `force:data:record:get --sobjecttype Account --where "Name='${accountNameBefore}' Phone='${phoneNumber}'" --json`,
+          `data:get:record --sobjecttype Account --where "Name='${accountNameBefore}' Phone='${phoneNumber}'" --json`,
           { ensureExitCode: 0 }
         ).jsonOutput;
         expect(getRecordResponse?.result).to.have.property('Id', createdRecordId);
@@ -99,14 +99,14 @@ describe('data:record commands', () => {
 
       it('updates the record by Id', () => {
         execCmd<SaveResult>(
-          `force:data:record:update --sobjectid ${createdRecordId} --sobjecttype Account --values "name=${accountNameAfter} phone=${updatedPhoneNumber}" --json`,
+          `data:update:record --sobjectid ${createdRecordId} --sobjecttype Account --values "name=${accountNameAfter} phone=${updatedPhoneNumber}" --json`,
           { ensureExitCode: 0 }
         );
       });
 
       it('gets the updated record by ID', () => {
         const getRecordResponse = execCmd<AccountRecord>(
-          `force:data:record:get --sobjecttype Account --sobjectid ${createdRecordId} --json --perflog`,
+          `data:get:record --sobjecttype Account --sobjectid ${createdRecordId} --json --perflog`,
           { ensureExitCode: 0 }
         ).jsonOutput;
         expect(getRecordResponse?.result).to.have.property('Id', createdRecordId);
@@ -116,14 +116,14 @@ describe('data:record commands', () => {
 
       it('gets the updated record by where', () => {
         execCmd<SaveResult>(
-          `force:data:record:update --where "Name='${accountNameAfter}'" --sobjecttype Account --values "name='${accountNameBefore}'" --json`,
+          `data:update:record --where "Name='${accountNameAfter}'" --sobjecttype Account --values "name='${accountNameBefore}'" --json`,
           { ensureExitCode: 0 }
         );
       });
 
       it('gets the updated record ', () => {
         const getRecordResponse = execCmd<AccountRecord>(
-          `force:data:record:get --sobjecttype Account --sobjectid ${createdRecordId} --json `,
+          `data:get:record --sobjecttype Account --sobjectid ${createdRecordId} --json `,
           { ensureExitCode: 0 }
         ).jsonOutput;
         expect(getRecordResponse?.result).to.have.property('Id', createdRecordId);
@@ -133,7 +133,7 @@ describe('data:record commands', () => {
 
       it('deletes the record ', () => {
         const deleteRecordResponse = execCmd<SaveResult>(
-          `force:data:record:delete --sobjecttype Account --sobjectid ${createdRecordId} --json`,
+          `data:delete:record --sobjecttype Account --sobjectid ${createdRecordId} --json`,
           { ensureExitCode: 0 }
         ).jsonOutput;
         expect(deleteRecordResponse?.result).to.have.property('id', createdRecordId);
@@ -142,7 +142,7 @@ describe('data:record commands', () => {
 
       it('creates a new record with the original name', () => {
         const createRecordResponse = execCmd<SaveResult>(
-          `force:data:record:create --sobjecttype Account --values "name=${accountNameBefore} phone=${phoneNumber}" --json`,
+          `data:create:record --sobjecttype Account --values "name=${accountNameBefore} phone=${phoneNumber}" --json`,
           { ensureExitCode: 0 }
         ).jsonOutput;
         assert(createRecordResponse?.result?.id);
@@ -153,7 +153,7 @@ describe('data:record commands', () => {
 
       it('deletes the record via "where"', () => {
         const deleteRecordResponse = execCmd<SaveResult>(
-          `force:data:record:delete --sobjecttype Account --where "name='${accountNameBefore}' phone='${phoneNumber}'" --json`,
+          `data:delete:record --sobjecttype Account --where "name='${accountNameBefore}' phone='${phoneNumber}'" --json`,
           { ensureExitCode: 0 }
         ).jsonOutput;
         expect(deleteRecordResponse?.result).to.have.property('id', createdRecordId);
@@ -173,7 +173,7 @@ describe('data:record commands', () => {
 
       it('create a record', () => {
         const createRecordResponse = execCmd(
-          `force:data:record:create --sobjecttype Account --values "name=${accountNameBefore} phone=${phoneNumber}"`,
+          `data:create:record --sobjecttype Account --values "name=${accountNameBefore} phone=${phoneNumber}"`,
           { ensureExitCode: 0 }
         ).shellOutput.stdout;
         const m = new RegExp('Successfully created record: (001.{15})\\.');
@@ -183,7 +183,7 @@ describe('data:record commands', () => {
       });
 
       it('get the created record', () => {
-        const getRecordResponse = execCmd(`force:data:record:get --sobjecttype Account --sobjectid ${recordId}`, {
+        const getRecordResponse = execCmd(`data:get:record --sobjecttype Account --sobjectid ${recordId}`, {
           ensureExitCode: 0,
         }).shellOutput.stdout;
         validateAccount(getRecordResponse, recordId, accountNameBefore, phoneNumber);
@@ -192,21 +192,21 @@ describe('data:record commands', () => {
 
       it('update the created record', () => {
         const updateRecordResponse = execCmd(
-          `force:data:record:update --sobjectid ${recordId} --sobjecttype Account --values "name=${accountNameAfter} phone=${updatedPhoneNumber}"`,
+          `data:update:record --sobjectid ${recordId} --sobjecttype Account --values "name=${accountNameAfter} phone=${updatedPhoneNumber}"`,
           { ensureExitCode: 0 }
         ).shellOutput.stdout;
         expect(updateRecordResponse).to.include('Successfully updated record: 001');
       });
 
       it('get the updated record', () => {
-        const getRecordResponse = execCmd(`force:data:record:get --sobjecttype Account --sobjectid ${recordId}`, {
+        const getRecordResponse = execCmd(`data:get:record --sobjecttype Account --sobjectid ${recordId}`, {
           ensureExitCode: 0,
         }).shellOutput.stdout;
         validateAccount(getRecordResponse, recordId, accountNameAfter, updatedPhoneNumber);
       });
 
       it('delete the record', () => {
-        const deleteRecordResponse = execCmd(`force:data:record:delete --sobjecttype Account --sobjectid ${recordId}`, {
+        const deleteRecordResponse = execCmd(`data:delete:record --sobjecttype Account --sobjectid ${recordId}`, {
           ensureExitCode: 0,
         }).shellOutput.stdout;
         expect(deleteRecordResponse).to.include('Successfully deleted record: 001');
@@ -217,7 +217,7 @@ describe('data:record commands', () => {
     it('should get, update, and delete a data record', () => {
       // Get ApexClass
       let getRecordResponse = execCmd<ApexClassRecord>(
-        'force:data:record:get --sobjecttype ApexClass --where Name=MyClass --json',
+        'data:get:record --sobjecttype ApexClass --where Name=MyClass --json',
         { ensureExitCode: 0 }
       ).jsonOutput?.result;
       expect(getRecordResponse).to.have.property('Id');
@@ -226,7 +226,7 @@ describe('data:record commands', () => {
 
       // Get ApexClass via tooling API
       getRecordResponse = execCmd<ApexClassRecord>(
-        'force:data:record:get --sobjecttype ApexClass --where Name=MyClass --usetoolingapi --json',
+        'data:get:record --sobjecttype ApexClass --where Name=MyClass --usetoolingapi --json',
         { ensureExitCode: 0 }
       ).jsonOutput?.result;
       expect(getRecordResponse).to.have.property('Id', getRecordResponse?.Id);
@@ -239,14 +239,14 @@ describe('data:record commands', () => {
     const objectType = 'Test_Object__c';
     const recordName = 'TestRecord';
     it('create a record in a custom object that we can query', () => {
-      execCmd(`force:data:record:create --sobjecttype ${objectType} --values "Name=${recordName}"`, {
+      execCmd(`data:create:record --sobjecttype ${objectType} --values "Name=${recordName}"`, {
         ensureExitCode: 0,
       });
     });
 
     it('get the record using a boolean field', () => {
       const result = execCmd(
-        `force:data:record:get --sobjecttype ${objectType} --where "Name='${recordName}' Bool__c=false" --json`,
+        `data:get:record --sobjecttype ${objectType} --where "Name='${recordName}' Bool__c=false" --json`,
         { ensureExitCode: 0 }
       ).jsonOutput?.result;
       expect(result).to.have.property('Name', recordName);
@@ -257,7 +257,7 @@ describe('data:record commands', () => {
   describe('json parsing', () => {
     it('will parse JSON correctly for update', () => {
       const result = execCmd<{ records: Array<{ Id: string }> }>(
-        'force:data:soql:query -q "SELECT Id FROM RemoteProxy LIMIT 1" -t --json',
+        'data:query -q "SELECT Id FROM RemoteProxy LIMIT 1" -t --json',
         {
           ensureExitCode: 0,
         }
@@ -265,7 +265,7 @@ describe('data:record commands', () => {
       assert(result?.records.length);
 
       const update = execCmd(
-        'force:data:record:update ' +
+        'data:update:record ' +
           '--sobjecttype RemoteProxy ' +
           `--sobjectid ${result.records[0].Id} ` +
           '--usetoolingapi ' +
@@ -276,13 +276,13 @@ describe('data:record commands', () => {
     });
 
     it('will parse invalid JSON data, but that contains {}', () => {
-      const result = execCmd<{ id: string }>('force:data:record:create -s Account -v "Name=Test" --json', {
+      const result = execCmd<{ id: string }>('data:create:record -s Account -v "Name=Test" --json', {
         ensureExitCode: 0,
       }).jsonOutput?.result;
 
       assert(result?.id);
       const update = execCmd(
-        'force:data:record:update ' +
+        'data:update:record ' +
           '--sobjecttype Account ' +
           `--sobjectid ${result.id} ` +
           '--values "Description=\'my new description { with invalid } JSON\'"',

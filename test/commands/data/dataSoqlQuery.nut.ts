@@ -39,7 +39,7 @@ function runQuery(
     bulk: false,
   }
 ) {
-  const queryCmd = `force:data:soql:query --query "${query}" ${options.bulk ? '-b' : ''} ${
+  const queryCmd = `data:query --query "${query}" ${options.bulk ? '-b' : ''} ${
     options.toolingApi ? '-t' : ''
   } ${options.json ? '--json' : ''}`.trim();
   const results = execCmd<QueryResult>(queryCmd, {
@@ -60,7 +60,7 @@ function runQuery(
   }
 }
 
-describe('data:soql:query command', () => {
+describe('data:query command', () => {
   let testSession: TestSession;
   let hubOrgUsername: string | undefined;
 
@@ -87,7 +87,7 @@ describe('data:soql:query command', () => {
     });
 
     // Import data to the default org.
-    execCmd(`force:data:tree:import --plan ${path.join('.', 'data', 'accounts-contacts-plan.json')}`, {
+    execCmd(`data:import:tree --plan ${path.join('.', 'data', 'accounts-contacts-plan.json')}`, {
       ensureExitCode: 0,
     });
   });
@@ -96,7 +96,7 @@ describe('data:soql:query command', () => {
     await testSession?.clean();
   });
 
-  describe('data:soql:query respects maxQueryLimit config', () => {
+  describe('data:query respects maxQueryLimit config', () => {
     it('should return 1 account record', () => {
       // set maxQueryLimit to 1 globally
       execCmd('config:set maxQueryLimit=1 --global', { ensureExitCode: 0, cli: 'sfdx' });
@@ -112,7 +112,7 @@ describe('data:soql:query command', () => {
       execCmd('config:set maxQueryLimit=3756 --global', { ensureExitCode: 0, cli: 'sfdx' });
 
       const soqlQuery = 'SELECT Id FROM ScratchOrgInfo';
-      const queryCmd = `force:data:soql:query --query "${soqlQuery}" --json --target-org ${hubOrgUsername}`;
+      const queryCmd = `data:query --query "${soqlQuery}" --json --target-org ${hubOrgUsername}`;
       const results = execCmd<QueryResult>(queryCmd, { ensureExitCode: 0 });
 
       const queryResult: QueryResult = results.jsonOutput?.result ?? { done: false, records: [], totalSize: 0 };
@@ -123,7 +123,7 @@ describe('data:soql:query command', () => {
     });
   });
 
-  describe('data:soql:query verify query errors', () => {
+  describe('data:query verify query errors', () => {
     it('should error with invalid soql', () => {
       const result = runQuery('SELECT', { ensureExitCode: 1, json: false }) as string;
       const stdError = result?.toLowerCase();
@@ -134,7 +134,7 @@ describe('data:soql:query command', () => {
       const filepath = path.join(testSession.dir, 'soql.txt');
       fs.writeFileSync(filepath, 'SELECT');
 
-      const result = execCmd(`force:data:soql:query --soqlqueryfile ${filepath}`, { ensureExitCode: 1 }).shellOutput
+      const result = execCmd(`data:query --soqlqueryfile ${filepath}`, { ensureExitCode: 1 }).shellOutput
         .stderr;
       const stdError = result?.toLowerCase();
       expect(stdError).to.include('unexpected token');
@@ -149,7 +149,7 @@ describe('data:soql:query command', () => {
       expect(result?.toLowerCase()).to.include("No such column 'SymbolTable' on entity 'ApexClass'".toLowerCase());
     });
   });
-  describe('data:soql:query verify json results', () => {
+  describe('data:query verify json results', () => {
     it('should return account records', () => {
       const query =
         "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry FROM Account WHERE Name LIKE 'SampleAccount%'";
@@ -188,9 +188,9 @@ describe('data:soql:query command', () => {
     });
   });
 
-  describe('data:soql:query verify human results', () => {
+  describe('data:query verify human results', () => {
     it('should return Lead.owner.name (multi-level relationships)', () => {
-      execCmd('force:data:record:create -s Lead -v "Company=Salesforce LastName=Astro"', { ensureExitCode: 0 });
+      execCmd('data:record:create -s Lead -v "Company=Salesforce LastName=Astro"', { ensureExitCode: 0 });
 
       const profileId = (runQuery("SELECT ID FROM Profile WHERE Name='System Administrator'") as QueryResult).records[0]
         .Id;
@@ -225,7 +225,7 @@ describe('data:soql:query command', () => {
       const filepath = path.join(testSession.dir, 'soql.txt');
       fs.writeFileSync(filepath, query);
 
-      const queryResult = execCmd(`force:data:soql:query --soqlqueryfile ${filepath}`, { ensureExitCode: 0 })
+      const queryResult = execCmd(`data:query --soqlqueryfile ${filepath}`, { ensureExitCode: 0 })
         .shellOutput.stdout;
 
       expect(queryResult).to.match(/ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY/g);
@@ -245,7 +245,7 @@ describe('data:soql:query command', () => {
       expect(queryResult).to.match(/Total number of records retrieved: 2\./g);
     });
     it('should handle count()', () => {
-      const queryResult = execCmd('force:data:soql:query -q "SELECT Count() from User"', {
+      const queryResult = execCmd('data:query -q "SELECT Count() from User"', {
         ensureExitCode: 0,
       }).shellOutput as string;
       expect(queryResult).to.match(/Total number of records retrieved: [1-9]\d*\./g);
@@ -275,9 +275,9 @@ describe('data:soql:query command', () => {
       expect(result).to.include('description');
     });
   });
-  describe('data:soql:query --bulk', () => {
+  describe('data:query --bulk', () => {
     it('should return Lead.owner.name (multi-level relationships)', () => {
-      execCmd('force:data:record:create -s Lead -v "Company=Salesforce LastName=Astro"', { ensureExitCode: 0 });
+      execCmd('data:create:record -s Lead -v "Company=Salesforce LastName=Astro"', { ensureExitCode: 0 });
 
       const profileId = (runQuery("SELECT ID FROM Profile WHERE Name='System Administrator'") as QueryResult).records[0]
         .Id;
@@ -307,7 +307,7 @@ describe('data:soql:query command', () => {
     });
 
     it('should handle count() error correctly', () => {
-      const queryResult = execCmd('force:data:soql:query -q "SELECT Count() from User" --bulk', {
+      const queryResult = execCmd('data:query -q "SELECT Count() from User" --bulk', {
         ensureExitCode: 1,
       }).shellOutput.stderr;
 
@@ -316,7 +316,7 @@ describe('data:soql:query command', () => {
 
     it('should emit suggestion to use query:report', () => {
       const queryResult = execCmd(
-        'force:data:soql:query -q "SELECT ID FROM Profile WHERE Name=\'System Administrator\'" --bulk --wait 0',
+        'data:query -q "SELECT ID FROM Profile WHERE Name=\'System Administrator\'" --bulk --wait 0',
         {
           ensureExitCode: 0,
         }

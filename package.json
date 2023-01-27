@@ -23,9 +23,18 @@
       "@salesforce/plugin-command-reference"
     ],
     "topics": {
+      "force": {
+        "description": "manipulate data in your orgs using Bulk API V1",
+        "subtopics": {
+          "data": {
+            "description": "manipulate records in your org",
+            "longDescription": "Use the data commands to insert and delete data in your orgs using V1 of Bulk API, using CSV files as input."
+          }
+        }
+      },
       "data": {
         "description": "manipulate records in your org",
-        "longDescription": "Use the data commands to manipulate records in your org. Commands are available to help you work with various APIs. Import CSV files with the Bulk API. Export and import data with the SObject Tree Save API. Perform simple CRUD operations on individual records with the REST API.",
+        "longDescription": "Use the data commands to manipulate records in your org. Commands are available to help you work with various APIs. Import CSV files with the Bulk API V2. Export and import data with the SObject Tree Save API. Perform simple CRUD operations on individual records with the REST API.",
         "subtopics": {
           "create": {
             "description": "create a record"

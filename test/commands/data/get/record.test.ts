@@ -18,7 +18,7 @@ const sObjectId = '0011100001zhhyUAAQ';
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
-describe('force:data:record:get', () => {
+describe('data:get:record', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   const config = new Config({ root: resolve(__dirname, '../../../package.json') });

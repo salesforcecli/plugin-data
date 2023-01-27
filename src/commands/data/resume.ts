@@ -4,16 +4,16 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { BatchInfo, JobInfo } from 'jsforce/api/bulk';
+import { BatchInfo } from 'jsforce/api/bulk';
 import { Messages, SfError } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
 import { orgFlags } from '../../flags';
 import { Batcher } from '../../batcher';
+import { StatusResult } from '../../types';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.status');
 
-export type StatusResult = BatchInfo[] | JobInfo;
 export default class Status extends SfCommand<StatusResult> {
   public static readonly state = 'deprecated';
   public static readonly deprecationOptions = {to: 'force:data:bulk:status', message: 'Use force:data:bulk:status instead'}

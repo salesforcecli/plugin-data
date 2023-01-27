@@ -6,11 +6,20 @@
  */
 import { BatchInfo, JobInfo, QueryOperation } from 'jsforce/lib/api/bulk';
 import { Connection } from '@salesforce/core';
-import { IngestJobV2Results, JobInfoV2 } from 'jsforce/api/bulk';
-import { Schema } from 'jsforce';
+import { JobInfoV2 } from 'jsforce/api/bulk';
+
+export type BulkProcessedRecordV2 = {
+  sf__Created: 'true' | 'false';
+  sf__Id: string;
+} & Record<string, unknown>;
+
+export type BulkRecordsV2 = {
+  successfulResults: BulkProcessedRecordV2[];
+  failedResults: BulkProcessedRecordV2[];
+  unprocessedRecords: Array<Exclude<BulkProcessedRecordV2, 'sf__Created' | 'sf__id'>>;
+};
 
 export type StatusResult = BatchInfo[] | JobInfo;
-export type StatusResultV2 = JobInfoV2;
 
 export type ResumeOptions = {
   options: {
@@ -22,5 +31,8 @@ export type ResumeOptions = {
   jobInfo: { id: string };
 };
 
-export type BulkResultV2<J extends Schema = Schema> = JobInfoV2 | IngestJobV2Results<J>;
+export type BulkResultV2 = {
+  jobInfo: JobInfoV2;
+  records?: BulkRecordsV2;
+};
 

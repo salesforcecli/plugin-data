@@ -2,14 +2,14 @@
 
 ID of the job whose status you want to view.
 
-# flags.batchid
-
-ID of the batch whose status you want to view; you must also specify the job ID.
-
-# NoBatchFound
-
-Unable to find batch %s for job %s.
-
 # flags.useMostRecent.summary
 
 Use the most recent bulk job ID from cache.
+
+# checkStatus
+
+Run command %s data %s resume -i %s -o %s' to check status.
+
+# checkJobViaUi
+
+To review the details of this job, run:\n%s org open --target-org %s --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F%s"

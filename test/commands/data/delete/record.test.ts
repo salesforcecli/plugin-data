@@ -17,7 +17,7 @@ import Delete from '../../../../src/commands/data/delete/record';
 
 const sObjectId = '0011100001zhhyUAAQ';
 
-describe('force:data:record:delete', () => {
+describe('data:delete:record', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   const config = new Config({ root: resolve(__dirname, '../../../package.json') });

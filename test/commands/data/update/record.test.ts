@@ -16,7 +16,7 @@ import Update from '../../../../src/commands/data/update/record';
 
 const sObjectId = '0011100001zhhyUAAQ';
 
-describe('force:data:record:update', () => {
+describe('data:update:record', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   const config = new Config({ root: resolve(__dirname, '../../../package.json') });

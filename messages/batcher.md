@@ -27,7 +27,7 @@ An External ID is required on %s to perform an upsert.
 # TimeOut
 
 The operation timed out. Check the status with command:
-sfdx data %s resume -i %s -b %s
+sfdx force:data:bulk:status -i %s -b %s
 
 # CheckStatusCommand
 
@@ -37,7 +37,3 @@ sfdx data resume -i %s -b %s
 # BatchQueued
 
 Batch #%s queued (Batch ID: %s).
-
-# InvalidSObject
-
-The sobject %s is not valid.

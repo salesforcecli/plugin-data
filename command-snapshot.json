@@ -17,23 +17,6 @@
         ]
     },
     {
-        "command": "data:delete:bulk",
-        "plugin": "@salesforce/plugin-data",
-        "flags": [
-            "api-version",
-            "async",
-            "file",
-            "json",
-            "loglevel",
-            "sobject",
-            "target-org",
-            "wait"
-        ],
-        "alias": [
-            "force:data:bulk:delete"
-        ]
-    },
-    {
         "command": "data:delete:record",
         "plugin": "@salesforce/plugin-data",
         "flags": [
@@ -56,7 +39,6 @@
         "plugin": "@salesforce/plugin-data",
         "flags": [
             "api-version",
-            "batch-id",
             "job-id",
             "json",
             "loglevel",
@@ -200,7 +182,6 @@
             "file",
             "json",
             "loglevel",
-            "serial",
             "sobject",
             "target-org",
             "wait"
@@ -214,7 +195,6 @@
         "plugin": "@salesforce/plugin-data",
         "flags": [
             "api-version",
-            "batch-id",
             "job-id",
             "json",
             "loglevel",
@@ -224,5 +204,19 @@
         "alias": [
             "force:data:bulk:status"
         ]
+    },
+    {
+        "command": "force:data:bulk:delete",
+        "plugin": "@salesforce/plugin-data",
+        "flags": [
+            "api-version",
+            "file",
+            "json",
+            "loglevel",
+            "sobject",
+            "target-org",
+            "wait"
+        ],
+        "alias": []
     }
 ]

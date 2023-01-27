@@ -13,7 +13,7 @@ import { Config } from '@oclif/core';
 import { expect } from 'chai';
 import Upsert from '../../../../src/commands/data/upsert/bulk';
 
-describe('force:data:bulk:upsert', () => {
+describe('data:upsert:bulk', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   let config: Config;

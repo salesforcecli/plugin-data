@@ -15,7 +15,7 @@ import { capitalCase } from 'change-case';
 import { orgFlags } from './flags';
 import { BulkDataRequestCache } from './bulkDataRequestCache';
 import { BulkResultV2 } from './types';
-import { isBulkV2RequestDone } from './bulkUtils';
+import { isBulkV2RequestDone, transformResults } from './bulkUtils';
 import { getResultMessage } from './reporters';
 
 Messages.importMessagesDirectory(__dirname);
@@ -52,7 +52,6 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
     async: Flags.boolean({
       char: 'a',
       summary: messages.getMessage('flags.async.summary'),
-      description: messages.getMessage('flags.async.description'),
       default: false,
       exclusive: ['wait']
     })
@@ -140,11 +139,13 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
       this.setupLifecycleListeners();
       try {
         const jobInfo = await BulkOperationCommand.executeBulkV2DataRequest(this.job, csvRecords, sobject, this.wait);
-        await this.displayResult(jobInfo);
+        this.displayBulkV2Result(jobInfo);
+        const result = { jobInfo } as BulkResultV2;
         if (!isBulkV2RequestDone(jobInfo) || !this.jsonEnabled()) {
-          return jobInfo;
+          return result;
         }
-        return await this.job.getAllResults();
+        result.records = transformResults(await this.job.getAllResults());
+        return result;
       } catch (err) {
         this.spinner.stop();
         throw(err);
@@ -154,20 +155,19 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
-  private async displayResult(jobInfo: JobInfoV2): Promise<void> {
+  private displayBulkV2Result(jobInfo: JobInfoV2): void {
 
     if (this.isAsync) {
-      this.logSuccess(`Bulk ${this.operation} request ${jobInfo.id} started successfully.`);
-      this.info(`Run command '${this.config.bin} data ${this.operation} resume -i ${jobInfo.id} -o ${this.connection?.getUsername()}' to check status.`);
+      this.logSuccess(messages.getMessage('success', [this.operation, jobInfo.id]));
+      this.info(messages.getMessage('checkStatus',[this.config.bin, this.operation, jobInfo.id,this.connection?.getUsername()]));
     } else {
       this.log();
       this.info(getResultMessage(jobInfo));
       if ((jobInfo.numberRecordsFailed ?? 0) > 0) {
-        this.info(`To review the details of this job, run:\n${this.config.bin} org open --target-org ${this.connection?.getUsername()} --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F${jobInfo.id}"`);
+        this.info(messages.getMessage('checkJobViaUi',[this.config.bin, this.connection?.getUsername(), jobInfo.id]));
       }
       if (jobInfo.state === 'InProgress' || jobInfo.state === 'Open') {
-        this.info(`Run command '${this.config.bin} data ${this.operation} resume -i ${jobInfo.id} -o ${this.connection?.getUsername()}' to check status.\n`);
+        this.info(messages.getMessage('checkStatus',[this.config.bin, this.operation, jobInfo.id,this.connection?.getUsername()]));
       }
     }
   }
@@ -194,17 +194,18 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
       if (!this.timeout) {
         this.timeout = true;
         await this.cache?.createCacheEntryForRequest(this.job.id ?? '', this.connection?.getUsername(), this.connection?.getApiVersion());
-        await this.displayResult(await this.job.check());
+        this.displayBulkV2Result(await this.job.check());
       }
     });
   }
 
   private getRemainingTimeStatus(): string {
-    return this.isAsync ? '' : `Remaining time: ${Duration.milliseconds(this.endWaitTime - Date.now()).minutes} minutes. `;
+    return this.isAsync ? '' : messages.getMessage('remainingTimeStatus', [Duration.milliseconds(this.endWaitTime - Date.now()).minutes]);
   }
 
   private getRemainingRecordsStatus(): string {
-    return ` ${this.numberRecordSuceeded}/${this.numberRecordsFailed}/${this.numberRecordsProcessed} records successful/failed/processed.`;
+    // the leading space is intentional
+    return ` ${messages.getMessage('remainingRecordsStatus', [this.numberRecordSuceeded,this.numberRecordsFailed,this.numberRecordsProcessed])}`;
   }
 
   // eslint-disable-next-line class-methods-use-this

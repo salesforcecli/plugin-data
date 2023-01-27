@@ -10,7 +10,7 @@ import { Messages } from '@salesforce/core';
 import { JobInfoV2 } from 'jsforce/api/bulk';
 import { Schema } from 'jsforce';
 import { BulkResultV2, ResumeOptions } from './types';
-import { didBulkV2RequestJobFail, isBulkV2RequestDone } from './bulkUtils';
+import { didBulkV2RequestJobFail, isBulkV2RequestDone, transformResults } from './bulkUtils';
 import { getResultMessage } from './reporters';
 
 Messages.importMessagesDirectory(__dirname);
@@ -19,15 +19,6 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.resume.c
 export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
   public static readonly globalFlags = {
     'target-org': optionalOrgFlagWithDeprecations,
-    'batch-id': Flags.salesforceId({
-      deprecated: true,
-      length: 18,
-      char: 'b',
-      startsWith: '751',
-      summary: messages.getMessage('flags.batchid'),
-      aliases: ['batchid'],
-      deprecateAliases: true
-    }),
     'job-id': Flags.salesforceId({
       length: 18,
       char: 'i',
@@ -52,16 +43,19 @@ export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
     this.spinner.start('Getting status');
     const conn = resumeOptions.options.connection;
     this.username = resumeOptions.options.connection.getUsername();
+
     const job = conn.bulk2.job({ id: resumeOptions.jobInfo.id });
 
     // view job status
     const jobInfo = await job.check();
     this.spinner.stop();
     this.displayResult(jobInfo);
+    const result = { jobInfo } as BulkResultV2;
     if (!isBulkV2RequestDone(jobInfo) || !this.jsonEnabled()) {
-      return jobInfo;
+      return result;
     }
-    return job.getAllResults();
+    result.records = transformResults(await job.getAllResults());
+    return result;
   }
 
   private displayResult(jobInfo: JobInfoV2): void {
@@ -70,10 +64,10 @@ export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
     this.info(getResultMessage(jobInfo));
 
     if (!isBulkV2RequestDone(jobInfo)) {
-      this.info(`Run command '${this.config.bin} data ${jobInfo.operation} resume -i ${jobInfo.id} -o ${this.username}' to check status.`);
+      this.info(messages.getMessage('checkStatus',[this.config.bin, jobInfo.operation, jobInfo.id, this.username]));
     }
     if ((jobInfo.numberRecordsFailed ?? 0) > 0 || didBulkV2RequestJobFail(jobInfo)) {
-      this.info(`To review the details of this job, run:\n${this.config.bin} org open --target-org ${this.username} --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F${jobInfo.id}"`);
+      this.info(messages.getMessage('checkJobViaUi',[this.config.bin, this.username, jobInfo.id]));
     }
   }
 }
