@@ -105,7 +105,7 @@
     "@oclif/plugin-command-snapshot": "^3.3.0",
     "@salesforce/cli-plugins-testkit": "^3.2.19",
     "@salesforce/dev-config": "^3.0.1",
-    "@salesforce/dev-scripts": "^3.1.0",
+    "@salesforce/dev-scripts": "^3.1.1",
     "@salesforce/plugin-command-reference": "^2.2.8",
     "@salesforce/prettier-config": "^0.0.2",
     "@salesforce/ts-sinon": "^1.4.4",
