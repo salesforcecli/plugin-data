@@ -1053,14 +1053,14 @@
     mv "~2"
     safe-json-stringify "~1"
 
-"@salesforce/cli-plugins-testkit@^3.2.15":
-  version "3.2.15"
-  resolved "https://registry.yarnpkg.com/@salesforce/cli-plugins-testkit/-/cli-plugins-testkit-3.2.15.tgz#77483ab8a9235f76d270bdc133f5a47e72a570ee"
-  integrity sha512-/XYHPshMIyPk+KkSa4AG9BNMs5pO4pVmWhWV+unY+b8HfMJbHDTSUlnAhLdDUBaIASRoWyEil7kb8YZExeDVGw==
+"@salesforce/cli-plugins-testkit@^3.2.19":
+  version "3.2.19"
+  resolved "https://registry.yarnpkg.com/@salesforce/cli-plugins-testkit/-/cli-plugins-testkit-3.2.19.tgz#9bedcecb7f39bed8df1af967ebb57b9819e2672c"
+  integrity sha512-+Dd0mNDbe0MjhGh66dgM+tyXnl2vivN2A+fRrrEo2gt87XU6wigT36onV5vNXQfUwmYmSpq0mSstKbVg3LzT5Q==
   dependencies:
-    "@salesforce/core" "^3.32.12"
+    "@salesforce/core" "^3.33.1"
     "@salesforce/kit" "^1.8.0"
-    "@salesforce/ts-types" "^1.5.21"
+    "@salesforce/ts-types" "^1.7.2"
     "@types/shelljs" "^0.8.11"
     archiver "^5.2.0"
     debug "^4.3.1"
@@ -1068,15 +1068,15 @@
     strip-ansi "6.0.1"
     ts-retry-promise "^0.7.0"
 
-"@salesforce/core@^3.32.12", "@salesforce/core@^3.32.9", "@salesforce/core@^3.8.0":
-  version "3.32.12"
-  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-3.32.12.tgz#853cc5b6a5f95d4896b2d34a40a6042ef9aa6d2c"
-  integrity sha512-27rqSiQWul7b/OkJs19FYDv2M/S4oI4efiGv+6sR7UWv7D7CG1P+0XpgLS3d9xRYF30h98n6VQr4W2a+BWFRvA==
+"@salesforce/core@^3.32.12", "@salesforce/core@^3.32.9", "@salesforce/core@^3.33.1", "@salesforce/core@^3.8.0":
+  version "3.33.1"
+  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-3.33.1.tgz#3dd0a44ba22763e8e0c2c97df03393e5c2c845d9"
+  integrity sha512-jaed8rK+NhSxB6MjYUN8f/2VkvtbFN/Ce/l6JvgFE+cvOf2g+lPv1pSsnKKlaSiiYcXkOvIRDT9d9ns1RLJzUw==
   dependencies:
     "@salesforce/bunyan" "^2.0.0"
     "@salesforce/kit" "^1.8.0"
     "@salesforce/schemas" "^1.4.0"
-    "@salesforce/ts-types" "^1.5.21"
+    "@salesforce/ts-types" "^1.7.2"
     "@types/graceful-fs" "^4.1.5"
     "@types/semver" "^7.3.13"
     ajv "^8.11.2"
@@ -1192,7 +1192,7 @@
     sinon "^5.1.1"
     tslib "^2.2.0"
 
-"@salesforce/ts-types@^1.5.20", "@salesforce/ts-types@^1.5.21", "@salesforce/ts-types@^1.7.1", "@salesforce/ts-types@^1.7.2":
+"@salesforce/ts-types@^1.5.20", "@salesforce/ts-types@^1.7.1", "@salesforce/ts-types@^1.7.2":
   version "1.7.2"
   resolved "https://registry.yarnpkg.com/@salesforce/ts-types/-/ts-types-1.7.2.tgz#ab40399d291c7eca57efc9890daf2fa2632197ec"
   integrity sha512-eCpWKEb03UCKBJ6Svp0Vwcwt+fG6BQbopO4x5wt6CYeT8Rjt0dbDQicZPmVL59j2qyt3Q4Y4EYsxXUGZmdfvDw==
