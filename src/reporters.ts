@@ -385,8 +385,8 @@ export const BatchInfoColumns = {
   stateMessage: { header: 'Message' },
 };
 
-export const getBatchTotals = (batches: BatchInfo[]): { total: number; failed: number; success: number } => {
-  const ttls = batches.reduce(
+export const getBatchTotals = (batches: BatchInfo[]): { total: number; failed: number; success: number } =>
+  batches.reduce(
     (acc: { total: number; failed: number; success: number }, batch) => {
       acc.total += parseInt(batch.numberRecordsProcessed, 10);
       acc.failed += parseInt(batch.numberRecordsFailed, 10);
@@ -395,8 +395,6 @@ export const getBatchTotals = (batches: BatchInfo[]): { total: number; failed: n
     },
     { total: 0, failed: 0, success: 0 }
   );
-  return ttls;
-};
 
 export function getBulk2JobTotals<J extends Schema>(
   results: IngestJobV2Results<J>

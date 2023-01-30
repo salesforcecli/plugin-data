@@ -6,7 +6,6 @@
  */
 import { TTLConfig, Global, Logger, Messages, Org } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
-import { Optional } from '@salesforce/ts-types';
 import { QueryOperation } from 'jsforce/lib/api/bulk';
 import { ResumeOptions } from './types';
 
@@ -37,7 +36,11 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
    * @param bulkRequestId
    * @param username
    */
-  public async createCacheEntryForRequest(bulkRequestId: string, username: Optional<string>, apiVersion: string | undefined): Promise<void> {
+  public async createCacheEntryForRequest(
+    bulkRequestId: string,
+    username: string | undefined,
+    apiVersion: string | undefined
+  ): Promise<void> {
     if (!username) {
       throw messages.createError('usernameRequired');
     }
@@ -54,23 +57,26 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
     bulkQueryId: string | undefined,
     useMostRecent: boolean,
     org: Org | undefined,
-    apiVersion: string | undefined): Promise<ResumeOptions> {
+    apiVersion: string | undefined
+  ): Promise<ResumeOptions> {
     if (!useMostRecent && !bulkQueryId) {
       throw messages.createError('bulkRequestIdRequiredWhenNotUsingMostRecent');
     }
-    const resumeOptions: ResumeOptions = {
+    const resumeOptions = {
       options: {
         operation: 'query' as QueryOperation,
         query: '',
-        pollingOptions: { pollTimeout: 0, pollInterval: 0 }
-      }
+        pollingOptions: { pollTimeout: 0, pollInterval: 0 },
+      },
     } as ResumeOptions;
 
     if (useMostRecent) {
       const key = this.getLatestKey();
       if (key) {
         const entry = this.get(key);
-        resumeOptions.options.connection = (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion);
+        resumeOptions.options.connection = (await Org.create({ aliasOrUsername: entry.username })).getConnection(
+          apiVersion
+        );
         resumeOptions.jobInfo = { id: entry.jobId };
         return resumeOptions;
       }
@@ -78,7 +84,9 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
     if (bulkQueryId) {
       const entry = this.get(bulkQueryId);
       if (entry) {
-        resumeOptions.options.connection = (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion);
+        resumeOptions.options.connection = (await Org.create({ aliasOrUsername: entry.username })).getConnection(
+          apiVersion
+        );
         resumeOptions.jobInfo = { id: entry.jobId };
         return resumeOptions;
       } else if (org) {
@@ -89,10 +97,10 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
         throw messages.createError('cannotCreateResumeOptionsWithoutAnOrg');
       }
     } else if (useMostRecent) {
-        throw messages.createError('cannotFindMostRecentCacheEntry');
-      } else {
-        throw messages.createError('bulkRequestIdRequiredWhenNotUsingMostRecent');
-      }
+      throw messages.createError('cannotFindMostRecentCacheEntry');
+    } else {
+      throw messages.createError('bulkRequestIdRequiredWhenNotUsingMostRecent');
+    }
   }
 }
 
@@ -116,10 +124,8 @@ export class BulkQueryRequestCache extends BulkDataRequestCache {
     cache.unset(key);
     await cache.write();
   }
-
 }
 export class BulkDeleteRequestCache extends BulkDataRequestCache {
-
   public static getDefaultOptions(): TTLConfig.Options {
     return {
       isGlobal: true,
@@ -139,7 +145,6 @@ export class BulkDeleteRequestCache extends BulkDataRequestCache {
     cache.unset(key);
     await cache.write();
   }
-
 }
 
 export class BulkUpsertRequestCache extends BulkDataRequestCache {
