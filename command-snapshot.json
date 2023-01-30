@@ -113,7 +113,7 @@
     "command": "data:upsert:bulk",
     "plugin": "@salesforce/plugin-data",
     "flags": ["api-version", "async", "external-id", "file", "json", "loglevel", "sobject", "target-org", "wait"],
-    "alias": ["force:data:bulk:upsert"]
+    "alias": []
   },
   {
     "command": "data:upsert:resume",
@@ -125,6 +125,12 @@
     "command": "force:data:bulk:delete",
     "plugin": "@salesforce/plugin-data",
     "flags": ["api-version", "file", "json", "loglevel", "sobject", "target-org", "wait"],
+    "alias": []
+  },
+  {
+    "command": "force:data:bulk:upsert",
+    "plugin": "@salesforce/plugin-data",
+    "flags": ["api-version", "external-id", "file", "json", "loglevel", "serial", "sobject", "target-org", "wait"],
     "alias": []
   }
 ]

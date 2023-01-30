@@ -17,8 +17,6 @@ export default class Upsert extends BulkOperationCommand {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
-  public static readonly aliases = ['force:data:bulk:upsert'];
-  public static readonly deprecateAliases = true;
 
   public static readonly flags = {
     'external-id': Flags.string({
@@ -26,25 +24,27 @@ export default class Upsert extends BulkOperationCommand {
       summary: messages.getMessage('flags.externalid'),
       required: true,
       aliases: ['externalid'],
-      deprecateAliases: true
-    })
+      deprecateAliases: true,
+    }),
   };
 
   public async run(): Promise<BulkResultV2> {
     const { flags } = await this.parse(Upsert);
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    return this.runBulkOperation(flags.sobject,
+    return this.runBulkOperation(
+      flags.sobject,
       flags.file,
       flags['target-org'].getConnection(flags['api-version']),
-      (flags.async ? 0 : flags.wait?.minutes),
-      'upsert', {
-        extIdField: flags['external-id']
-      });
+      flags.async ? 0 : flags.wait?.minutes,
+      'upsert',
+      {
+        extIdField: flags['external-id'],
+      }
+    );
   }
 
   // eslint-disable-next-line class-methods-use-this
   protected async getCache(): Promise<BulkUpsertRequestCache> {
     return BulkUpsertRequestCache.create();
   }
-
 }
