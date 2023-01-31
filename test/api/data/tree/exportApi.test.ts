@@ -275,7 +275,7 @@ describe('Export API', () => {
       const error = err as Error;
       // solves flappy test - on linux, the writeStub is called to write the log file
       if (writeStub.called) {
-        expect(writeStub.args.filter((arg: string) => arg[0].includes('sf.log'))).to.be.empty;
+        expect(writeStub.args.filter((arg: string) => !arg[0].includes('sf.log'))).to.be.empty;
       } else {
         expect(writeStub.called).to.be.false;
       }
