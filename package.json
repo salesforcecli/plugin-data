@@ -28,7 +28,13 @@
         "subtopics": {
           "data": {
             "description": "manipulate records in your org",
-            "longDescription": "Use the data commands to insert and delete data in your orgs using V1 of Bulk API, using CSV files as input."
+            "longDescription": "Use the data commands to insert and delete data in your orgs using V1 of Bulk API, using CSV files as input.",
+            "subtopics": {
+              "bulk": {
+                "description": "manipulate records in your org using Bulk API V1",
+                "longDescription": "Use the data commands to insert and delete data in your orgs using V1 of Bulk API, using CSV files as input."
+              }
+            }
           }
         }
       },
