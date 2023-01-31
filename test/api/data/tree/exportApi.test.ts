@@ -273,9 +273,8 @@ describe('Export API', () => {
       assert.fail();
     } catch (err) {
       const error = err as Error;
-      // eslint-disable-next-line no-console
-      // console.log(JSON.stringify(writeStub, null, 2));
-      // expect(writeStub.called).to.be.false;
+      expect(writeStub.args).to.be.deep.equal([]);
+      expect(writeStub.called).to.be.false;
       expect(error.name).to.equal('queryNotProvided');
       expect(error.message).to.equal(messages.getMessage('queryNotProvided'));
     }
