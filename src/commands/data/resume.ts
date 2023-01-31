@@ -12,11 +12,14 @@ import { Batcher } from '../../batcher';
 import { StatusResult } from '../../types';
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.status');
+const messages = Messages.loadMessages('@salesforce/plugin-data', 'data.resume');
 
 export default class Status extends SfCommand<StatusResult> {
   public static readonly state = 'deprecated';
-  public static readonly deprecationOptions = {to: 'force:data:bulk:status', message: 'Use force:data:bulk:status instead'}
+  public static readonly deprecationOptions = {
+    to: 'force:data:bulk:status',
+    message: 'Use force:data:bulk:status instead',
+  };
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
