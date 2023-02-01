@@ -17,14 +17,17 @@ export default class DeleteResume extends ResumeBulkCommand {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
-  public static readonly aliases = ['force:data:bulk:status'];
   public static readonly deprecateAliases = true;
-
 
   public async run(): Promise<BulkResultV2> {
     const { flags } = await this.parse(DeleteResume);
     const cache = await BulkDeleteRequestCache.create();
-    const resumeOptions = await cache.resolveResumeOptionsFromCache(flags['job-id'], flags['use-most-recent'], flags['target-org'], flags['api-version']);
+    const resumeOptions = await cache.resolveResumeOptionsFromCache(
+      flags['job-id'],
+      flags['use-most-recent'],
+      flags['target-org'],
+      flags['api-version']
+    );
     const resumeResults = await this.resume(resumeOptions);
     if (isBulkV2RequestDone(resumeResults.jobInfo)) {
       await BulkDeleteRequestCache.unset(resumeOptions.jobInfo.id);

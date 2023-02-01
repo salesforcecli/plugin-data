@@ -31,7 +31,7 @@
     "command": "data:delete:resume",
     "plugin": "@salesforce/plugin-data",
     "flags": ["api-version", "job-id", "json", "loglevel", "target-org", "use-most-recent"],
-    "alias": ["force:data:bulk:status"]
+    "alias": []
   },
   {
     "command": "data:export:tree",
