@@ -11,7 +11,7 @@ import { BulkOperationCommand } from '../../../bulkOperationCommand';
 import { BulkResultV2 } from '../../../types';
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.upsert');
+const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulkv2.upsert');
 
 export default class Upsert extends BulkOperationCommand {
   public static readonly summary = messages.getMessage('summary');

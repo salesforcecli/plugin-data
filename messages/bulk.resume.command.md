@@ -1,10 +1,10 @@
 # flags.jobid
 
-ID of the job whose status you want to view.
+ID of the job you want to resume.
 
 # flags.useMostRecent.summary
 
-Use the most recent bulk job ID from cache.
+Use the ID of the most recently-run bulk job.
 
 # checkStatus
 

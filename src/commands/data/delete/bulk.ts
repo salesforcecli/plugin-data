@@ -10,11 +10,7 @@ import { BulkOperationCommand } from '../../../bulkOperationCommand';
 import { BulkResultV2 } from '../../../types';
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.load('@salesforce/plugin-data', 'bulk.delete', [
-  'examples',
-  'summary',
-  'description'
-]);
+const messages = Messages.load('@salesforce/plugin-data', 'bulkv2.delete', ['examples', 'summary', 'description']);
 
 export default class Delete extends BulkOperationCommand {
   public static readonly examples = messages.getMessages('examples');
@@ -23,12 +19,17 @@ export default class Delete extends BulkOperationCommand {
 
   public async run(): Promise<BulkResultV2> {
     const { flags } = await this.parse(Delete);
-    return this.runBulkOperation(flags.sobject, flags.file, flags['target-org'].getConnection(flags['api-version']), (flags.async ? 0 : flags.wait?.minutes), 'delete');
+    return this.runBulkOperation(
+      flags.sobject,
+      flags.file,
+      flags['target-org'].getConnection(flags['api-version']),
+      flags.async ? 0 : flags.wait?.minutes,
+      'delete'
+    );
   }
 
   // eslint-disable-next-line class-methods-use-this
   protected async getCache(): Promise<BulkDeleteRequestCache> {
     return BulkDeleteRequestCache.create();
   }
-
 }
