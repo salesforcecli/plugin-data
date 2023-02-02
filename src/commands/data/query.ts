@@ -74,14 +74,14 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
       exclusive: ['wait'],
     }),
     // TODO: use union type from
-    'result-format': Flags.enum({
+    'result-format': Flags.custom<'human' | 'json' | 'csv'>({
       char: 'r',
       summary: messages.getMessage('flags.resultFormat'),
       options: ['human', 'json', 'csv'],
       default: 'human',
       aliases: ['resultformat'],
       deprecateAliases: true,
-    }),
+    })(),
     perflog: perflogFlag,
   };
 
