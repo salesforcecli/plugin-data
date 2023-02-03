@@ -52,6 +52,10 @@ Use Bulk API 2.0, but don't wait for the job to complete.
 
 Time to wait for the command to finish, in minutes.
 
+# flags.targetOrg.summary
+
+Org alias or username to use for the target org.
+
 # displayQueryRecordsRetrieved
 
 Total number of records retrieved: %s.

@@ -10,7 +10,7 @@ import { BulkOperationCommand } from '../../../bulkOperationCommand';
 import { BulkResultV2 } from '../../../types';
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.load('@salesforce/plugin-data', 'bulk.delete', ['examples', 'summary', 'description']);
+const messages = Messages.load('@salesforce/plugin-data', 'bulkv2.delete', ['examples', 'summary', 'description']);
 
 export default class Delete extends BulkOperationCommand {
   public static readonly examples = messages.getMessages('examples');

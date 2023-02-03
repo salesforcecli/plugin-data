@@ -38,3 +38,7 @@ Cannot create a cache entry without a valid org.
 # usernameRequired
 
 A valid username is required when creating a cache entry.
+
+# flags.targetOrg.summary
+
+Org alias or username to use for the target org.

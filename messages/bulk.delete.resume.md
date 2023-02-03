@@ -1,24 +1,17 @@
 # summary
 
-Resume the resolution of a bulk delete that had been previously started.
+Resume a bulk delete job that you previously started. Uses Bulk API 2.0.
 
 # description
 
-Resume the resolution of a bulk delete that had been previously started.
-The command uses the job ID and batch ID returned from the "data bulk delete" command or the most recent bulk delete job from the cache.
+The command uses the job ID returned by the "<%= config.bin %> data delete bulk" command or the most recently-run bulk delete job.
 
 # examples
 
-- View the status of a bulk delete job:
+- Resume a bulk delete job from your default org using an ID:
 
   <%= config.bin %> <%= command.id %> --job-id 750xx000000005sAAA
 
-- View the status of a bulk delete job and a specific batches:
+- Resume the most recently run bulk delete job for an org with alias my-scratch:
 
-  <%= config.bin %> <%= command.id %> --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA
-
-- View the status of a bulk delete job using the most recent job ID from cache:
-
-  <%= config.bin %> <%= command.id %> --use-most-recent
-
-
+  <%= config.bin %> <%= command.id %> --use-most-recent --target-org my-scratch

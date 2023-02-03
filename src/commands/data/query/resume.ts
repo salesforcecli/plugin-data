@@ -11,7 +11,7 @@ import {
   loglevel,
   optionalOrgFlagWithDeprecations,
   orgApiVersionFlagWithDeprecations,
-  SfCommand
+  SfCommand,
 } from '@salesforce/sf-plugins-core';
 import { resultFormatFlag } from '../../../flags';
 import { displayResults, transformBulkResults } from '../../../queryUtils';
@@ -21,7 +21,7 @@ import { BulkQueryRequestCache } from '../../../bulkDataRequestCache';
 Messages.importMessagesDirectory(__dirname);
 const reportMessages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.report');
 // needed by the flags loaded from the other command
-Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
+const queryMessages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
 
 export class BulkQueryReport extends SfCommand<unknown> {
   public static readonly summary = reportMessages.getMessage('summary');
@@ -31,7 +31,7 @@ export class BulkQueryReport extends SfCommand<unknown> {
   public static readonly deprecateAliases = true;
 
   public static readonly flags = {
-    'target-org': optionalOrgFlagWithDeprecations,
+    'target-org': { ...optionalOrgFlagWithDeprecations, summary: queryMessages.getMessage('flags.targetOrg.summary') },
     'api-version': orgApiVersionFlagWithDeprecations,
     loglevel,
     'result-format': resultFormatFlag,
@@ -41,19 +41,24 @@ export class BulkQueryReport extends SfCommand<unknown> {
       startsWith: '750',
       summary: reportMessages.getMessage('flags.bulkQueryId'),
       aliases: ['bulkqueryid'],
-      deprecateAliases: true
+      deprecateAliases: true,
     }),
     'use-most-recent': Flags.boolean({
       char: 'r',
       summary: reportMessages.getMessage('flags.useMostRecent.summary'),
-      exclusive: ['bulk-query-id']
-    })
+      exclusive: ['bulk-query-id'],
+    }),
   };
 
   public async run(): Promise<unknown> {
     const { flags } = await this.parse(BulkQueryReport);
     const cache = await BulkQueryRequestCache.create();
-    const resumeOptions = await cache.resolveResumeOptionsFromCache(flags['bulk-query-id'], flags['use-most-recent'], flags['target-org'], flags['api-version']);
+    const resumeOptions = await cache.resolveResumeOptionsFromCache(
+      flags['bulk-query-id'],
+      flags['use-most-recent'],
+      flags['target-org'],
+      flags['api-version']
+    );
     const job = new QueryJobV2(resumeOptions.options);
     job.jobInfo = resumeOptions.jobInfo;
     const results = await job.getResults();
