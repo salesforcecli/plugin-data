@@ -1,3 +1,9 @@
+# [2.2.0](https://github.com/salesforcecli/plugin-data/compare/2.1.24...2.2.0) (2023-02-02)
+
+### Features
+
+- use latest sf-plugins-core and oclif/core ([#472](https://github.com/salesforcecli/plugin-data/issues/472)) ([c400e2e](https://github.com/salesforcecli/plugin-data/commit/c400e2ed3dd36035187c2026179cff7a60ca6926))
+
 ## [2.1.24](https://github.com/salesforcecli/plugin-data/compare/2.1.23...2.1.24) (2023-01-30)
 
 ### Bug Fixes

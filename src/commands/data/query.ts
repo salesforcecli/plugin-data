@@ -106,8 +106,17 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
       const conn = flags['target-org'].getConnection(flags['api-version']);
       if (flags['result-format'] !== 'json') this.spinner.start(messages.getMessage('queryRunningMessage'));
       const queryResult = flags.bulk
-        ? await this.runBulkSoqlQuery(conn, queryString, flags.async ? Duration.minutes(0) : flags.wait ?? Duration.minutes(0))
-        : await this.runSoqlQuery(flags['use-tooling-api'] ? conn.tooling : conn, queryString, this.logger, this.configAggregator.getInfo('org-max-query-limit').value as number);
+        ? await this.runBulkSoqlQuery(
+            conn,
+            queryString,
+            flags.async ? Duration.minutes(0) : flags.wait ?? Duration.minutes(0)
+          )
+        : await this.runSoqlQuery(
+            flags['use-tooling-api'] ? conn.tooling : conn,
+            queryString,
+            this.logger,
+            this.configAggregator.getInfo('org-max-query-limit').value as number
+          );
       if (!this.jsonEnabled()) {
         displayResults({ ...queryResult }, flags['result-format'] as FormatTypes);
       }
@@ -116,18 +125,14 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
       if (flags['result-format'] !== 'json') this.spinner.stop();
     }
   }
- /**
-  * Executes a SOQL query using the bulk 2.0 API
-  *
-  * @param connection
-  * @param query
-  * @param timeout
-  */
-  private async runBulkSoqlQuery (
-    connection: Connection,
-    query: string,
-    timeout: Duration,
-  ): Promise<SoqlQueryResult> {
+  /**
+   * Executes a SOQL query using the bulk 2.0 API
+   *
+   * @param connection
+   * @param query
+   * @param timeout
+   */
+  private async runBulkSoqlQuery(connection: Connection, query: string, timeout: Duration): Promise<SoqlQueryResult> {
     connection.bulk2.pollTimeout = timeout.milliseconds ?? Duration.minutes(5).milliseconds;
     let res: Record[];
     try {
@@ -145,7 +150,7 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
         throw SfError.wrap(err);
       }
     }
-  };
+  }
   private async runSoqlQuery(
     connection: Connection | Connection['tooling'],
     query: string,
@@ -178,7 +183,7 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
       columns,
       result,
     };
-  };
+  }
 }
 
 const searchSubColumnsRecursively = (parent: AnyJson): string[] => {
@@ -197,6 +202,7 @@ const searchSubColumnsRecursively = (parent: AnyJson): string[] => {
  *
  * @param connection
  * @param query
+ * @param logger
  */
 
 export const retrieveColumns = async (
@@ -265,5 +271,3 @@ const recursivelyFindColumns = (data: JsonArray): Field[] => {
   }
   return columns;
 };
-
-

@@ -24,7 +24,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.operatio
 const POLL_FREQUENCY_MS = 5000;
 
 export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
-  public static readonly globalFlags = {
+  public static readonly baseFlags = {
     ...orgFlags,
     file: Flags.file({
       char: 'f',

@@ -6,7 +6,7 @@
  */
 import { EOL } from 'os';
 import { Logger, Messages } from '@salesforce/core';
-import { CliUx } from '@oclif/core';
+import { ux } from '@oclif/core';
 import * as chalk from 'chalk';
 import { get, getArray, getNumber, isString, Optional } from '@salesforce/ts-types';
 import { BatchInfo, IngestJobV2Results, JobInfoV2 } from 'jsforce/lib/api/bulk';
@@ -98,8 +98,8 @@ export class HumanReporter extends QueryReporter {
     totalCount: number
   ): void {
     this.prepNullValues(records);
-    CliUx.ux.table(records, prepColumns(columns));
-    CliUx.ux.log(chalk.bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
+    ux.table(records, prepColumns(columns));
+    ux.log(chalk.bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
   }
 
   public prepNullValues(records: unknown[]): void {
@@ -220,7 +220,7 @@ export class CsvReporter extends QueryReporter {
     const attributeNames = this.massageRows();
 
     // begin output
-    CliUx.ux.log(attributeNames.map((name) => escape(name)).join(SEPARATOR));
+    ux.log(attributeNames.map((name) => escape(name)).join(SEPARATOR));
 
     // explained why we need this below - foreach does not allow types
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -240,7 +240,7 @@ export class CsvReporter extends QueryReporter {
         }
         return value;
       });
-      CliUx.ux.log(values.join(SEPARATOR));
+      ux.log(values.join(SEPARATOR));
     });
   }
 
@@ -331,7 +331,7 @@ export class JsonReporter extends QueryReporter {
   }
 
   public display(): void {
-    CliUx.ux.styledJSON({ status: 0, result: this.data.result });
+    ux.styledJSON({ status: 0, result: this.data.result });
   }
 }
 
@@ -341,8 +341,8 @@ export class JsonReporter extends QueryReporter {
 
 export type FormatTypes = 'human' | 'csv' | 'json';
 
-const prepColumns = (columns: Array<Optional<string>>): CliUx.Table.table.Columns<Record<string, unknown>> => {
-  const formattedColumns: CliUx.Table.table.Columns<Record<string, unknown>> = {};
+const prepColumns = (columns: Array<Optional<string>>): ux.Table.table.Columns<Record<string, unknown>> => {
+  const formattedColumns: ux.Table.table.Columns<Record<string, unknown>> = {};
   columns
     .map((field: Optional<string>) => field)
     .filter(isString)
