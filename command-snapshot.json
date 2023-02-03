@@ -90,7 +90,7 @@
     "command": "data:resume",
     "plugin": "@salesforce/plugin-data",
     "flags": ["api-version", "batch-id", "job-id", "json", "loglevel", "target-org"],
-    "alias": ["force:data:bulk:status"]
+    "alias": []
   },
   {
     "command": "data:update:record",

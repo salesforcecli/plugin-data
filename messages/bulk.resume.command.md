@@ -6,6 +6,10 @@ ID of the job you want to resume.
 
 Use the ID of the most recently-run bulk job.
 
+# flags.targetOrg.summary
+
+Org alias or username to use for the target org.
+
 # checkStatus
 
 Run command %s data %s resume -i %s -o %s' to check status.

@@ -9,25 +9,30 @@ import {
   Flags,
   loglevel,
   orgApiVersionFlagWithDeprecations,
-  requiredOrgFlagWithDeprecations
+  requiredOrgFlagWithDeprecations,
 } from '@salesforce/sf-plugins-core';
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.load('@salesforce/plugin-data', 'messages', ['perfLogLevelOption', 'perfLogLevelOptionLong', 'flags.resultFormat']);
+const messages = Messages.load('@salesforce/plugin-data', 'messages', [
+  'perfLogLevelOption',
+  'perfLogLevelOptionLong',
+  'flags.resultFormat',
+  'flags.targetOrg.summary',
+]);
 
 export const perflogFlag = Flags.boolean({
   summary: messages.getMessage('perfLogLevelOption'),
   description: messages.getMessage('perfLogLevelOptionLong'),
   hidden: true,
   deprecated: {
-    version: '57'
-  }
+    version: '57',
+  },
 });
 
 export const orgFlags = {
-  'target-org': requiredOrgFlagWithDeprecations,
+  'target-org': { ...requiredOrgFlagWithDeprecations, summary: messages.getMessage('flags.targetOrg.summary') },
   'api-version': orgApiVersionFlagWithDeprecations,
-  loglevel
+  loglevel,
 };
 
 export const resultFormatFlag = Flags.string({
@@ -36,6 +41,5 @@ export const resultFormatFlag = Flags.string({
   options: ['human', 'json', 'csv'],
   default: 'human',
   aliases: ['resultformat'],
-  deprecateAliases: true
+  deprecateAliases: true,
 });
-
