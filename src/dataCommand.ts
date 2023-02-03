@@ -8,7 +8,7 @@
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { Record as jsforceRecord, SaveResult } from 'jsforce';
 
-import { CliUx } from '@oclif/core';
+import { ux } from '@oclif/core';
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
@@ -16,10 +16,10 @@ export const logNestedObject = (obj: Record<string, unknown>, indentation = 0): 
   const space = ' '.repeat(indentation);
   Object.entries(obj).forEach(([key, value]) => {
     if (!!value && typeof value === 'object') {
-      CliUx.ux.log(`${space}${key}:`);
+      ux.log(`${space}${key}:`);
       logNestedObject(value as Record<string, unknown>, indentation + 2);
     } else {
-      CliUx.ux.log(`${space}${key}: ${value as string}`);
+      ux.log(`${space}${key}: ${value as string}`);
     }
   });
 };

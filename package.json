@@ -1,6 +1,6 @@
 {
   "name": "@salesforce/plugin-data",
-  "version": "2.1.24",
+  "version": "2.2.0",
   "description": "Plugin for salesforce data commands",
   "author": "Salesforce",
   "main": "lib/index.js",
@@ -103,10 +103,10 @@
     "version": "oclif readme"
   },
   "dependencies": {
-    "@oclif/core": "^1.24.0",
+    "@oclif/core": "^2.0.7",
     "@salesforce/core": "^3.32.13",
     "@salesforce/kit": "^1.8.4",
-    "@salesforce/sf-plugins-core": "^1.22.1",
+    "@salesforce/sf-plugins-core": "^2.0.1",
     "@salesforce/ts-types": "^1.7.3",
     "@types/fs-extra": "^9.0.13",
     "chalk": "^4.1.0",

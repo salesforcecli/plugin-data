@@ -17,7 +17,7 @@ Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.resume.command');
 
 export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
-  public static readonly globalFlags = {
+  public static readonly baseFlags = {
     'target-org': optionalOrgFlagWithDeprecations,
     'job-id': Flags.salesforceId({
       length: 18,
