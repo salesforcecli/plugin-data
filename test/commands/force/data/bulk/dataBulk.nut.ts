@@ -52,8 +52,8 @@ const isCompleted = async (cmd: string): Promise<void> => {
  * Otherwise run status until job is Completed
  */
 const checkBulkStatusJsonResponse = (jobId: string, batchId: string): void => {
-  const statusResponse = execCmd<BulkStatus[]>(`force:data:bulk:status --jobid ${jobId} --batchid ${batchId} --json`, {
-    ensureExitCode: 0
+  const statusResponse = execCmd<BulkStatus[]>(`force:data:bulk:status --jobid ${jobId} --batch-id ${batchId} --json`, {
+    ensureExitCode: 0,
   }).jsonOutput?.result;
   expect(statusResponse).to.be.an('array').with.lengthOf(1);
   expect(statusResponse?.[0].state).to.equal('Completed');
@@ -65,7 +65,7 @@ const checkBulkStatusJsonResponse = (jobId: string, batchId: string): void => {
  */
 const checkBulkStatusHumanResponse = (statusCommand: string): void => {
   const statusResponse = execCmd(statusCommand, {
-    ensureExitCode: 0
+    ensureExitCode: 0,
   }).shellOutput.stdout.split('\n');
   const jobState = statusResponse.find((line) => line.startsWith('state:'));
   expect(jobState).to.include('Completed');
@@ -78,11 +78,11 @@ describe('force:data:bulk commands', () => {
         {
           executable: 'sfdx',
           config: 'config/project-scratch-def.json',
-          setDefault: true
-        }
+          setDefault: true,
+        },
       ],
       project: { sourceDir: path.join('test', 'test-files', 'data-project') },
-      devhubAuthStrategy: 'AUTO'
+      devhubAuthStrategy: 'AUTO',
     });
   });
 
@@ -95,21 +95,21 @@ describe('force:data:bulk commands', () => {
       it('should upsert, query, and delete 10 accounts', async () => {
         const bulkUpsertResult = bulkInsertAccounts();
         await isCompleted(
-          `force:data:bulk:status --jobid ${bulkUpsertResult.jobId} --batchid ${bulkUpsertResult.id} --json`
+          `force:data:bulk:status --jobid ${bulkUpsertResult.jobId} --batch-id ${bulkUpsertResult.id} --json`
         );
 
         checkBulkStatusHumanResponse(
-          `force:data:bulk:status --jobid ${bulkUpsertResult.jobId} --batchid ${bulkUpsertResult.id}`
+          `force:data:bulk:status --jobid ${bulkUpsertResult.jobId} --batch-id ${bulkUpsertResult.id}`
         );
         checkBulkStatusJsonResponse(bulkUpsertResult.jobId, bulkUpsertResult.id);
 
         const bulkDeleteResult = queryAndBulkDelete();
         await isCompleted(
-          `force:data:bulk:status --jobid ${bulkDeleteResult.jobId} --batchid ${bulkDeleteResult.id} --json`
+          `force:data:bulk:status --jobid ${bulkDeleteResult.jobId} --batch-id ${bulkDeleteResult.id} --json`
         );
 
         checkBulkStatusHumanResponse(
-          `force:data:bulk:status --jobid ${bulkDeleteResult.jobId} --batchid ${bulkDeleteResult.id}`
+          `force:data:bulk:status --jobid ${bulkDeleteResult.jobId} --batch-id ${bulkDeleteResult.id}`
         );
         checkBulkStatusJsonResponse(bulkDeleteResult.jobId, bulkDeleteResult.id);
       });
@@ -117,20 +117,20 @@ describe('force:data:bulk commands', () => {
       it('should upsert, query, and delete 10 accounts all serially', async () => {
         const bulkUpsertResult = bulkInsertAccounts();
         await isCompleted(
-          `force:data:bulk:status --jobid ${bulkUpsertResult.jobId} --batchid ${bulkUpsertResult.id} --json`
+          `force:data:bulk:status --jobid ${bulkUpsertResult.jobId} --batch-id ${bulkUpsertResult.id} --json`
         );
         checkBulkStatusHumanResponse(
-          `force:data:bulk:status --jobid ${bulkUpsertResult.jobId} --batchid ${bulkUpsertResult.id}`
+          `force:data:bulk:status --jobid ${bulkUpsertResult.jobId} --batch-id ${bulkUpsertResult.id}`
         );
         checkBulkStatusJsonResponse(bulkUpsertResult.jobId, bulkUpsertResult.id);
 
         const bulkDeleteResult = queryAndBulkDelete();
         await isCompleted(
-          `force:data:bulk:status --jobid ${bulkUpsertResult.jobId} --batchid ${bulkUpsertResult.id} --json`
+          `force:data:bulk:status --jobid ${bulkUpsertResult.jobId} --batch-id ${bulkUpsertResult.id} --json`
         );
 
         checkBulkStatusHumanResponse(
-          `force:data:bulk:status --jobid ${bulkDeleteResult.jobId} --batchid ${bulkDeleteResult.id}`
+          `force:data:bulk:status --jobid ${bulkDeleteResult.jobId} --batch-id ${bulkDeleteResult.id}`
         );
         checkBulkStatusJsonResponse(bulkDeleteResult.jobId, bulkDeleteResult.id);
       });
@@ -142,7 +142,7 @@ const queryAccountRecords = () => {
   const queryResponse = execCmd<QueryResult>(
     'force:data:soql:query --query "select id from Account where phone=\'415-555-0000\'" --json',
     {
-      ensureExitCode: 0
+      ensureExitCode: 0,
     }
   ).jsonOutput?.result ?? { records: [], done: false, totalSize: 0 };
   expect(queryResponse).to.have.property('records').with.lengthOf.above(9);
@@ -160,7 +160,7 @@ const queryAndBulkDelete = () => {
   const deleteResponse = execCmd<BatcherReturnType>(
     `force:data:bulk:delete --sobjecttype Account --csvfile ${idsFile} --json`,
     {
-      ensureExitCode: 0
+      ensureExitCode: 0,
     }
   ).jsonOutput?.result;
 

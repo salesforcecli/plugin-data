@@ -8,7 +8,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { strict as assert } from 'assert';
 import { Dictionary, getString } from '@salesforce/ts-types';
-import { expect, config } from 'chai';
+import { config, expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 
 config.truncateThreshold = 0;
@@ -39,9 +39,10 @@ function runQuery(
     bulk: false,
   }
 ) {
-  const queryCmd = `data:query --query "${query}" ${options.bulk ? '-b' : ''} ${
+  const queryCmd = `data:query --query "${query}" ${options.bulk ? '-b --wait 5' : ''} ${
     options.toolingApi ? '-t' : ''
   } ${options.json ? '--json' : ''}`.trim();
+
   const results = execCmd<QueryResult>(queryCmd, {
     ensureExitCode: options.ensureExitCode,
   });
@@ -134,8 +135,7 @@ describe('data:query command', () => {
       const filepath = path.join(testSession.dir, 'soql.txt');
       fs.writeFileSync(filepath, 'SELECT');
 
-      const result = execCmd(`data:query --soqlqueryfile ${filepath}`, { ensureExitCode: 1 }).shellOutput
-        .stderr;
+      const result = execCmd(`data:query --soqlqueryfile ${filepath}`, { ensureExitCode: 1 }).shellOutput.stderr;
       const stdError = result?.toLowerCase();
       expect(stdError).to.include('unexpected token');
     });
@@ -190,7 +190,7 @@ describe('data:query command', () => {
 
   describe('data:query verify human results', () => {
     it('should return Lead.owner.name (multi-level relationships)', () => {
-      execCmd('data:record:create -s Lead -v "Company=Salesforce LastName=Astro"', { ensureExitCode: 0 });
+      execCmd('data:create:record -s Lead -v "Company=Salesforce LastName=Astro"', { ensureExitCode: 0 });
 
       const profileId = (runQuery("SELECT ID FROM Profile WHERE Name='System Administrator'") as QueryResult).records[0]
         .Id;
@@ -225,8 +225,7 @@ describe('data:query command', () => {
       const filepath = path.join(testSession.dir, 'soql.txt');
       fs.writeFileSync(filepath, query);
 
-      const queryResult = execCmd(`data:query --soqlqueryfile ${filepath}`, { ensureExitCode: 0 })
-        .shellOutput.stdout;
+      const queryResult = execCmd(`data:query --soqlqueryfile ${filepath}`, { ensureExitCode: 0 }).shellOutput.stdout;
 
       expect(queryResult).to.match(/ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY/g);
       expect(queryResult).to.match(/Total number of records retrieved: 1\./g);
