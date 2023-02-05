@@ -1488,6 +1488,43 @@ export const soqlQueryExemplars = {
       },
     },
   },
+  queryWithZeroFields: {
+    soqlQueryResult: {
+      columns: [
+        { fieldType: FieldType.field, name: 'Name' },
+        { fieldType: FieldType.field, name: 'Amount' },
+        makeSubfield('OpportunityLineItems', [{ fieldType: FieldType.field, name: 'UnitPrice' }]),
+      ],
+      query: 'SELECT Name, Amount, (SELECT UnitPrice FROM OpportunityLineItems) FROM Opportunity',
+      result: {
+        records: [
+          {
+            attributes: {
+              type: 'Opportunity',
+              url: '/services/data/v56.0/sobjects/Opportunity/006Dn000007gWlNIAU',
+            },
+            Name: 'Dickenson Mobile Generators',
+            Amount: 0,
+            OpportunityLineItems: {
+              totalSize: 1,
+              done: true,
+              records: [
+                {
+                  attributes: {
+                    type: 'OpportunityLineItem',
+                    url: '/services/data/v56.0/sobjects/OpportunityLineItem/00kDn00000adXhAIAU',
+                  },
+                  UnitPrice: 0,
+                },
+              ],
+            },
+          },
+        ],
+        totalSize: 1,
+        done: true,
+      },
+    },
+  },
   subqueryAccountsAndContacts: {
     soqlQueryResult: {
       query: 'SELECT Name, ( SELECT LastName FROM Contacts ) FROM Account limit 50',
@@ -2123,7 +2160,7 @@ export const soqlQueryExemplars = {
         { fieldType: FieldType.functionField, name: 'avg(AnnualRevenue)' },
       ],
       result: {
-        totalSize: 16,
+        totalSize: 17,
         done: true,
         records: [
           {
@@ -2237,6 +2274,13 @@ export const soqlQueryExemplars = {
             },
             Name: 'foo',
             expr0: 100,
+          },
+          {
+            attributes: {
+              type: 'AggregateResult',
+            },
+            Name: 'bar',
+            expr0: 0,
           },
         ],
       },
