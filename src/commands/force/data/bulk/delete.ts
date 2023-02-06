@@ -6,11 +6,12 @@
  */
 import * as fs from 'fs';
 import { ReadStream } from 'fs';
-import { Connection, Messages, SfError } from '@salesforce/core';
-import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
+import { Connection, Messages } from '@salesforce/core';
+import { Flags, SfCommand, Ux } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
 import { orgFlags } from '../../../../flags';
 import { Batcher, BatcherReturnType } from '../../../../batcher';
+import { validateSobjectType } from '../../../../bulkUtils';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.load('@salesforce/plugin-data', 'bulk.delete', [
@@ -55,27 +56,29 @@ export default class Delete extends SfCommand<BatcherReturnType> {
 
   public async run(): Promise<BatcherReturnType> {
     const { flags } = await this.parse(Delete);
-    let result: BatcherReturnType;
 
-    try {
-      const conn: Connection = flags['target-org'].getConnection(flags['api-version']);
-      this.spinner.start('Bulk Delete');
+    const conn: Connection = flags['target-org'].getConnection(flags['api-version']);
+    this.spinner.start('Bulk Delete');
 
-      const csvRecords: ReadStream = fs.createReadStream(flags.file, { encoding: 'utf-8' });
-      const job = conn.bulk.createJob<'delete'>(flags.sobject, 'delete');
+    await validateSobjectType(flags.sobject, conn);
 
-      const batcher: Batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
+    const csvRecords: ReadStream = fs.createReadStream(flags.file, { encoding: 'utf-8' });
+    const job = conn.bulk.createJob<'delete'>(flags.sobject, 'delete');
+    const batcher: Batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
 
-      result = await batcher.createAndExecuteBatches(job, csvRecords, flags.sobject, flags.wait?.minutes);
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
+    return new Promise(async (resolve, reject) => {
+      job.on('error', (err): void => {
+        throw err;
+      });
 
-      this.spinner.stop();
-      return result;
-    } catch (e) {
-      this.spinner.stop('error');
-      if (!(e instanceof Error)) {
-        throw e;
+      try {
+        resolve(await batcher.createAndExecuteBatches(job, csvRecords, flags.sobject, flags.wait?.minutes));
+        this.spinner.stop();
+      } catch (e) {
+        this.spinner.stop('error');
+        reject(e);
       }
-      throw SfError.wrap(e);
-    }
+    });
   }
 }

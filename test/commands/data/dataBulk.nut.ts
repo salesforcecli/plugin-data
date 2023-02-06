@@ -43,7 +43,7 @@ const isCompleted = async (cmd: string): Promise<void> => {
  * Otherwise run status until job is JobComplete
  */
 const checkBulkResumeJsonResponse = (jobId: string, operation: 'delete' | 'upsert'): void => {
-  const statusResponse = execCmd<BulkResultV2>(`data:${operation}:resume --jobid ${jobId} --json`, {
+  const statusResponse = execCmd<BulkResultV2>(`data:${operation}:resume --job-id ${jobId} --json`, {
     ensureExitCode: 0,
   }).jsonOutput?.result;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -88,16 +88,16 @@ describe('data:bulk commands', () => {
       it('should upsert, query, and delete 10 accounts', async () => {
         const bulkUpsertResult: BulkResultV2 = bulkInsertAccounts();
         let jobInfo = bulkUpsertResult.jobInfo;
-        await isCompleted(`data:upsert:resume --jobid ${jobInfo.id} --json`);
+        await isCompleted(`data:upsert:resume --job-id ${jobInfo.id} --json`);
 
-        checkBulkStatusHumanResponse(`data:upsert:resume --jobid ${jobInfo.id}`);
+        checkBulkStatusHumanResponse(`data:upsert:resume --job-id ${jobInfo.id}`);
         checkBulkResumeJsonResponse(jobInfo.id, 'upsert');
 
         const bulkDeleteResult = queryAndBulkDelete();
         jobInfo = bulkDeleteResult.jobInfo;
-        await isCompleted(`data:delete:resume --jobid ${jobInfo.id} --json`);
+        await isCompleted(`data:delete:resume --job-id ${jobInfo.id} --json`);
 
-        checkBulkStatusHumanResponse(`data:delete:resume --jobid ${jobInfo.id}`);
+        checkBulkStatusHumanResponse(`data:delete:resume --job-id ${jobInfo.id}`);
         checkBulkResumeJsonResponse(jobInfo.id, 'upsert');
       });
     });

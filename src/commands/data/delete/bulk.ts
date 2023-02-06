@@ -8,6 +8,7 @@ import { Messages } from '@salesforce/core';
 import { BulkDeleteRequestCache } from '../../../bulkDataRequestCache';
 import { BulkOperationCommand } from '../../../bulkOperationCommand';
 import { BulkResultV2 } from '../../../types';
+import { validateSobjectType } from '../../../bulkUtils';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.load('@salesforce/plugin-data', 'bulkv2.delete', ['examples', 'summary', 'description']);
@@ -19,13 +20,12 @@ export default class Delete extends BulkOperationCommand {
 
   public async run(): Promise<BulkResultV2> {
     const { flags } = await this.parse(Delete);
-    return this.runBulkOperation(
-      flags.sobject,
-      flags.file,
-      flags['target-org'].getConnection(flags['api-version']),
-      flags.async ? 0 : flags.wait?.minutes,
-      'delete'
-    );
+
+    const conn = flags['target-org'].getConnection(flags['api-version']);
+
+    await validateSobjectType(flags.sobject, conn);
+
+    return this.runBulkOperation(flags.sobject, flags.file, conn, flags.async ? 0 : flags.wait?.minutes, 'delete');
   }
 
   // eslint-disable-next-line class-methods-use-this

@@ -24,7 +24,7 @@ Bulk %s request %s started successfully
 
 # checkStatus
 
-Run command %s data %s resume -i %s -o %s' to check status.
+Run command %s data %s resume -i %s -o %s to check status.
 
 # checkJobViaUi
 

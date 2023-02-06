@@ -42,3 +42,7 @@ A valid username is required when creating a cache entry.
 # flags.targetOrg.summary
 
 Org alias or username to use for the target org.
+
+# invalidSobject
+
+The supplied SObject type "%s" is invalid. Error message: %s.

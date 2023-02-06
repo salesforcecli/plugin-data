@@ -12,7 +12,7 @@ Org alias or username to use for the target org.
 
 # checkStatus
 
-Run command %s data %s resume -i %s -o %s' to check status.
+Run command %s data %s resume -i %s -o %s to check status.
 
 # checkJobViaUi
 

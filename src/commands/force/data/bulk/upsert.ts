@@ -10,6 +10,7 @@ import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
 import { orgFlags } from '../../../../flags';
 import { Batcher, BatcherReturnType } from '../../../../batcher';
+import { validateSobjectType } from '../../../../bulkUtils';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.upsert');
@@ -61,6 +62,8 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
     const { flags } = await this.parse(Upsert);
     const conn = flags['target-org'].getConnection(flags['api-version']);
     this.spinner.start('Bulk Upsert');
+
+    await validateSobjectType(flags.sobject, conn);
 
     const batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
     const csvStream = fs.createReadStream(flags.file, { encoding: 'utf-8' });
