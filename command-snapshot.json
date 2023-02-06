@@ -119,12 +119,18 @@
     "command": "data:upsert:resume",
     "plugin": "@salesforce/plugin-data",
     "flags": ["api-version", "job-id", "json", "loglevel", "target-org", "use-most-recent"],
-    "alias": ["force:data:bulk:status"]
+    "alias": []
   },
   {
     "command": "force:data:bulk:delete",
     "plugin": "@salesforce/plugin-data",
     "flags": ["api-version", "file", "json", "loglevel", "sobject", "target-org", "wait"],
+    "alias": []
+  },
+  {
+    "command": "force:data:bulk:status",
+    "plugin": "@salesforce/plugin-data",
+    "flags": ["api-version", "batch-id", "job-id", "json", "loglevel", "target-org"],
     "alias": []
   },
   {
