@@ -34,19 +34,21 @@ export const validateSobjectType = async (sobjectType: string, connection: Conne
 };
 
 export const waitOrTimeout = async (job: IngestJobV2<Schema, IngestOperation>, wait: number): Promise<void> => {
-  let waitCountDown = wait;
-  const progress = setInterval(() => {
-    const remainingTime = (waitCountDown -= POLL_FREQUENCY_MS);
-    job.emit('jobProgress', { remainingTime, stage: 'polling' });
-  }, POLL_FREQUENCY_MS);
-  const timeout = setTimeout(() => {
-    clearInterval(progress);
-    job.emit('jobTimeout');
-  }, wait ?? 0);
-  try {
-    await job.poll(POLL_FREQUENCY_MS, wait);
-  } finally {
-    clearInterval(progress);
-    clearTimeout(timeout);
+  if (wait > 0) {
+    let waitCountDown = wait;
+    const progress = setInterval(() => {
+      const remainingTime = (waitCountDown -= POLL_FREQUENCY_MS);
+      job.emit('jobProgress', { remainingTime, stage: 'polling' });
+    }, POLL_FREQUENCY_MS);
+    const timeout = setTimeout(() => {
+      clearInterval(progress);
+      job.emit('jobTimeout');
+    }, wait ?? 0);
+    try {
+      await job.poll(POLL_FREQUENCY_MS, wait);
+    } finally {
+      clearInterval(progress);
+      clearTimeout(timeout);
+    }
   }
 };

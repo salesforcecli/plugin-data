@@ -161,7 +161,7 @@ const queryAndBulkDelete = () => {
 
   // Run bulk delete
   const deleteResponse = execCmd<BatcherReturnType>(
-    `force:data:bulk:delete --sobjecttype Account --csvfile ${idsFile} --json`,
+    `force:data:bulk:delete --sobject Account --file ${idsFile} --json`,
     {
       ensureExitCode: 0,
     }
@@ -177,7 +177,7 @@ const queryAndBulkDelete = () => {
 /** Bulk upsert 10 accounts */
 const bulkInsertAccounts = () => {
   const response = execCmd<BatcherReturnType>(
-    `force:data:bulk:upsert --sobjecttype Account --csvfile ${path.join(
+    `force:data:bulk:upsert --sobject Account --file ${path.join(
       '.',
       'data',
       'bulkUpsert.csv'

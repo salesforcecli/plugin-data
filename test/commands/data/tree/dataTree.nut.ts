@@ -56,16 +56,13 @@ describe('data:tree commands', () => {
     });
 
     execCmd(
-      `data:export:tree --query "${query}" --prefix INT --outputdir ${path.join(
-        '.',
-        'export_data'
-      )} --plan --json`,
+      `data:export:tree --query "${query}" --prefix INT --outputdir ${path.join('.', 'export_data')} --plan --json`,
       { ensureExitCode: 0 }
     );
 
     // Import data to the default org.
     execCmd(
-      `data:import:tree --targetusername importOrg --plan ${path.join(
+      `data:import:tree --target-org importOrg --plan ${path.join(
         '.',
         'export_data',
         'INT-Account-Contact-plan.json'
@@ -76,12 +73,9 @@ describe('data:tree commands', () => {
     );
 
     // query the new org for import verification
-    const queryResults = execCmd<QueryResult>(
-      `data:query --targetusername importOrg --query "${query}" --json`,
-      {
-        ensureExitCode: 0,
-      }
-    ).jsonOutput;
+    const queryResults = execCmd<QueryResult>(`data:query --target-org importOrg --query "${query}" --json`, {
+      ensureExitCode: 0,
+    }).jsonOutput;
 
     expect(queryResults?.result.totalSize).to.equal(
       2,

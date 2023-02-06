@@ -56,9 +56,9 @@ describe('data:get:record', () => {
     $$.restore();
   });
 
-  it('returns record for provided sobjectid', async () => {
+  it('returns record for provided record-id', async () => {
     const cmd = new Get(
-      ['--targetusername', 'test@org.com', '--sobjecttype', 'Account', '--sobjectid', sObjectId, '--json'],
+      ['--target-org', 'test@org.com', '--sobject', 'Account', '--record-id', sObjectId, '--json'],
       config
     );
 
@@ -69,7 +69,7 @@ describe('data:get:record', () => {
 
   it('should throw an error if values provided to where flag are invalid', async () => {
     const cmd = new Get(
-      ['--targetusername', 'test@org.com', '--sobjecttype', 'Account', '--where', '"Name"', '--json'],
+      ['--target-org', 'test@org.com', '--sobject', 'Account', '--where', '"Name"', '--json'],
       config
     );
     try {

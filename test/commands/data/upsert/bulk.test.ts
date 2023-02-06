@@ -37,11 +37,11 @@ describe('data:upsert:bulk', () => {
   it('should fail correctly with error message', async () => {
     const cmd = new Upsert(
       [
-        '--targetusername',
+        '--target-org',
         'test@org.com',
-        '--sobjecttype',
+        '--sobject',
         'custom__c',
-        '--csvfile',
+        '--file',
         'fileToUpsert.csv',
         '--externalid',
         'field__c',

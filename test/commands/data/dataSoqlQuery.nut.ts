@@ -135,7 +135,7 @@ describe('data:query command', () => {
       const filepath = path.join(testSession.dir, 'soql.txt');
       fs.writeFileSync(filepath, 'SELECT');
 
-      const result = execCmd(`data:query --soqlqueryfile ${filepath}`, { ensureExitCode: 1 }).shellOutput.stderr;
+      const result = execCmd(`data:query --file ${filepath}`, { ensureExitCode: 1 }).shellOutput.stderr;
       const stdError = result?.toLowerCase();
       expect(stdError).to.include('unexpected token');
     });
@@ -201,7 +201,7 @@ describe('data:query command', () => {
       expect(queryResult).to.include('System Administrator');
       expect(queryResult).to.include(profileId);
 
-      const queryResultCSV = runQuery(query + '" --resultformat "csv', { ensureExitCode: 0 });
+      const queryResultCSV = runQuery(query + '" --result-format "csv', { ensureExitCode: 0 });
       expect(queryResultCSV).to.not.include('[object Object]');
       expect(queryResultCSV).to.include('System Administrator');
       expect(queryResultCSV).to.include(profileId);
@@ -219,13 +219,13 @@ describe('data:query command', () => {
       expect(queryResult).to.match(/Total number of records retrieved: 1\./g);
     });
 
-    it('should return account records, from --soqlqueryfile', () => {
+    it('should return account records, from --file', () => {
       const query =
         "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry FROM Account WHERE Name LIKE 'SampleAccount%' limit 1";
       const filepath = path.join(testSession.dir, 'soql.txt');
       fs.writeFileSync(filepath, query);
 
-      const queryResult = execCmd(`data:query --soqlqueryfile ${filepath}`, { ensureExitCode: 0 }).shellOutput.stdout;
+      const queryResult = execCmd(`data:query --file ${filepath}`, { ensureExitCode: 0 }).shellOutput.stdout;
 
       expect(queryResult).to.match(/ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY/g);
       expect(queryResult).to.match(/Total number of records retrieved: 1\./g);
@@ -287,7 +287,7 @@ describe('data:query command', () => {
       expect(queryResult).to.include('System Administrator');
       expect(queryResult).to.include(profileId);
 
-      const queryResultCSV = runQuery(query + '" --resultformat "csv', { ensureExitCode: 0, bulk: true });
+      const queryResultCSV = runQuery(query + '" --result-format "csv', { ensureExitCode: 0, bulk: true });
       expect(queryResultCSV).to.not.include('[object Object]');
       expect(queryResultCSV).to.include('System Administrator');
       expect(queryResultCSV).to.include(profileId);

@@ -53,9 +53,9 @@ describe('data:delete:record', () => {
     $$.restore();
   });
 
-  it('should delete the sobject by sobjectid', async () => {
+  it('should delete the sobject by record-id', async () => {
     const cmd = new Delete(
-      ['--targetusername', 'test@org.com', '--sobjecttype', 'Account', '--sobjectid', sObjectId, '--json'],
+      ['--target-org', 'test@org.com', '--sobject', 'Account', '--record-id', sObjectId, '--json'],
       config
     );
     const result = (await cmd.run()) as unknown as SaveResult;
@@ -65,11 +65,11 @@ describe('data:delete:record', () => {
   it('should throw an error if both --where and --record-id are provided', async () => {
     const cmd = new Delete(
       [
-        '--targetusername',
+        '--target-org',
         'test@org.com',
-        '--sobjecttype',
+        '--sobject',
         'Account',
-        '--sobjectid',
+        '--record-id',
         sObjectId,
         '--where',
         '"Name=Acme"',
@@ -88,7 +88,7 @@ describe('data:delete:record', () => {
 
   it('should throw an error if the where flag returns nothing', async () => {
     const cmd = new Delete(
-      ['--targetusername', 'test@org.com', '--sobjecttype', 'Contact', '--where', '"Name=Acme"', '--json'],
+      ['--target-org', 'test@org.com', '--sobject', 'Contact', '--where', '"Name=Acme"', '--json'],
       config
     );
     try {

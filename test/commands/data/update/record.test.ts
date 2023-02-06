@@ -54,11 +54,11 @@ describe('data:update:record', () => {
     };
     const cmd = new Update(
       [
-        '--targetusername',
+        '--target-org',
         'test@org.com',
-        '--sobjecttype',
+        '--sobject',
         'Account',
-        '--sobjectid',
+        '--record-id',
         sObjectId,
         '-v',
         '"Name=NewName"',
@@ -85,11 +85,11 @@ describe('data:update:record', () => {
 
     const cmd = new Update(
       [
-        '--targetusername',
+        '--target-org',
         'test@org.com',
-        '--sobjecttype',
+        '--sobject',
         'Account',
-        '--sobjectid',
+        '--record-id',
         sObjectId,
         '-v',
         '"Name=Xavier"',
@@ -108,14 +108,14 @@ describe('data:update:record', () => {
     }
   });
 
-  it('should throw an error if both --where and --sobjectid are provided', async () => {
+  it('should throw an error if both --where and --record-id are provided', async () => {
     const cmd = new Update(
       [
         '--target-org',
         'test@org.com',
-        '--sobjecttype',
+        '--sobject',
         'Account',
-        '--sobjectid',
+        '--record-id',
         sObjectId,
         '--where',
         '"Name=Acme"',

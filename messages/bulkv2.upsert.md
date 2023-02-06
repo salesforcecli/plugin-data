@@ -18,24 +18,8 @@ See "Prepare CSV Files" in the Bulk API Developer Guide for details on formattin
 
 - Bulk upsert records to a custom object in an org with alias my-scratch and wait 5 minutes for the command to complete:
 
-  <%= config.bin %> <%= command.id %> --sobject MyObject__c --file files/file.csv --external-id MyField__c --wait 5 --target-org my-scratch
-
-# flags.sobjecttype
-
-API name of the Salesforce object, either standard or custom, that you want to upsert records to.
-
-# flags.csvfile
-
-CSV file that contains the records to upsert.
+  <%= config.bin %> <%= command.id %> --sobject MyObject**c --file files/file.csv --external-id MyField**c --wait 5 --target-org my-scratch
 
 # flags.externalid
 
 Name of the external ID field, or the Id field.
-
-# flags.wait
-
-Number of minutes to wait for the command to complete before displaying the results.
-
-# flags.async.summary
-
-Run the command asynchronously.

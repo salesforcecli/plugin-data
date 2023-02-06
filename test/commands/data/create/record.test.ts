@@ -37,7 +37,7 @@ describe('data:create:record', () => {
 
   it('should create a new sobject', async () => {
     const cmd = new Create(
-      ['--targetusername', 'test@org.com', '--sobjecttype', 'Account', '-v', '"Name=Acme"', '--json'],
+      ['--target-org', 'test@org.com', '--sobject', 'Account', '-v', '"Name=Acme"', '--json'],
       config
     );
 

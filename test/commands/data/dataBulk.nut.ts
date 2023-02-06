@@ -6,7 +6,7 @@
  */
 import * as path from 'path';
 import { strict as assert } from 'node:assert/strict';
-import fs = require('fs');
+import * as fs from 'fs';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { sleep } from '@salesforce/kit';
@@ -23,6 +23,7 @@ const isCompleted = async (cmd: string): Promise<void> => {
     // eslint-disable-next-line no-await-in-loop
     await sleep(2000);
     const result = execCmd<BulkResultV2>(cmd);
+    // eslint-disable-next-line no-console
     if (result.jsonOutput?.status === 0) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (result.jsonOutput.result.jobInfo.state === 'JobComplete') {
@@ -88,6 +89,7 @@ describe('data:bulk commands', () => {
       it('should upsert, query, and delete 10 accounts', async () => {
         const bulkUpsertResult: BulkResultV2 = bulkInsertAccounts();
         let jobInfo = bulkUpsertResult.jobInfo;
+        expect(jobInfo).to.have.property('id');
         await isCompleted(`data:upsert:resume --job-id ${jobInfo.id} --json`);
 
         checkBulkStatusHumanResponse(`data:upsert:resume --job-id ${jobInfo.id}`);
@@ -124,7 +126,7 @@ const queryAndBulkDelete = (): BulkResultV2 => {
 
   // Run bulk delete
   const deleteResponse: BulkResultV2 | undefined = execCmd<Awaited<BulkResultV2>>(
-    `data:delete:bulk --sobjecttype Account --csvfile ${idsFile} --json --wait 5`,
+    `data:delete:bulk --sobject Account --file ${idsFile} --json --wait 10`,
     {
       ensureExitCode: 0,
     }
@@ -138,14 +140,13 @@ const queryAndBulkDelete = (): BulkResultV2 => {
 
 /** Bulk upsert 10 accounts */
 const bulkInsertAccounts = (): BulkResultV2 => {
-  const response: BulkResultV2 | undefined = execCmd<BulkResultV2>(
-    `data:upsert:bulk --sobjecttype Account --csvfile ${path.join(
-      '.',
-      'data',
-      'bulkUpsert.csv'
-    )} --externalid Id --json --wait 5`,
-    { ensureExitCode: 0 }
-  ).jsonOutput?.result as BulkResultV2;
+  const cmd = `data:upsert:bulk --sobject Account --file ${path.join(
+    '.',
+    'data',
+    'bulkUpsert.csv'
+  )} --external-id Id --json --wait 10`;
+  const response: BulkResultV2 | undefined = execCmd<BulkResultV2>(cmd, { ensureExitCode: 0 }).jsonOutput
+    ?.result as BulkResultV2;
   if (response) {
     /* eslint-disable @typescript-eslint/no-unsafe-member-access, ,@typescript-eslint/no-unsafe-assignment */
     const records = response.records?.successfulResults;

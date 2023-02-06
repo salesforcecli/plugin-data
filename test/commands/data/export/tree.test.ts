@@ -81,7 +81,7 @@ describe('data:export:tree', () => {
       }
       return Promise.resolve({});
     };
-    const cmd = new Export(['--targetusername', 'test@org.com', '--query', query, '--json'], config);
+    const cmd = new Export(['--target-org', 'test@org.com', '--query', query, '--json'], config);
 
     const result = (await cmd.run()) as unknown as ExportResult;
     expect(result).to.deep.equal({

@@ -8,9 +8,7 @@
 import { resolve } from 'path';
 import * as chai from 'chai';
 import { Config } from '@oclif/core';
-import {
-  OrgConfigProperties,
-} from '@salesforce/core';
+import { OrgConfigProperties } from '@salesforce/core';
 import {
   TestContext,
   MockTestOrgData,
@@ -48,7 +46,9 @@ describe('Execute a SOQL statement', (): void => {
       beforeEach(() => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        soqlQuerySpy = $$.SANDBOX.stub(DataSoqlQueryCommand.prototype, 'runSoqlQuery').resolves(soqlQueryExemplars.emptyQuery.soqlQueryResult);
+        soqlQuerySpy = $$.SANDBOX.stub(DataSoqlQueryCommand.prototype, 'runSoqlQuery').resolves(
+          soqlQueryExemplars.emptyQuery.soqlQueryResult
+        );
         stdoutSpy = $$.SANDBOX.stub(process.stdout, 'write');
       });
       afterEach(() => {
@@ -56,7 +56,7 @@ describe('Execute a SOQL statement', (): void => {
       });
 
       it('should have empty results', async () => {
-        const cmd = new DataSoqlQueryCommand(['--targetusername', 'test@org.com', '--query', 'select '], config);
+        const cmd = new DataSoqlQueryCommand(['--target-org', 'test@org.com', '--query', 'select '], config);
         // without cmd._run(), ConfigAggregator, project, etc are not set on the class
         // eslint-disable-next-line no-underscore-dangle
         const result = await cmd._run();
@@ -81,7 +81,7 @@ describe('Execute a SOQL statement', (): void => {
 
       it('should have csv results', async () => {
         await DataSoqlQueryCommand.run(
-          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'csv'],
+          ['--target-org', 'test@org.com', '--query', 'select ', '--result-format', 'csv'],
           config
         );
         sinon.assert.calledOnce(soqlQuerySpy);
@@ -92,7 +92,7 @@ describe('Execute a SOQL statement', (): void => {
       });
       it('should have json results', async () => {
         const cmd = new DataSoqlQueryCommand(
-          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'json'],
+          ['--target-org', 'test@org.com', '--query', 'select ', '--result-format', 'json'],
           config
         );
         // eslint-disable-next-line no-underscore-dangle
@@ -106,7 +106,7 @@ describe('Execute a SOQL statement', (): void => {
 
       it('should have human results', async () => {
         await DataSoqlQueryCommand.run(
-          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'human'],
+          ['--target-org', 'test@org.com', '--query', 'select ', '--result-format', 'human'],
           config
         );
         sinon.assert.calledOnce(soqlQuerySpy);
@@ -134,7 +134,7 @@ describe('Execute a SOQL statement', (): void => {
       it('should have human results for a complex subquery', async () => {
         await DataSoqlQueryCommand.run(
           [
-            '--targetusername',
+            '--target-org',
             'test@org.com',
             '--query',
             'SELECT Amount, Id, Name,StageName, CloseDate, (SELECT Id,  ListPrice, PriceBookEntry.UnitPrice, PricebookEntry.Name, PricebookEntry.Id, PricebookEntry.product2.Family FROM OpportunityLineItems) FROM Opportunity',
@@ -176,7 +176,7 @@ describe('Execute a SOQL statement', (): void => {
       //
       it('should have json results', async () => {
         const cmd = new DataSoqlQueryCommand(
-          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'json'],
+          ['--target-org', 'test@org.com', '--query', 'select ', '--result-format', 'json'],
           config
         );
         // eslint-disable-next-line no-underscore-dangle
@@ -190,7 +190,7 @@ describe('Execute a SOQL statement', (): void => {
 
       it('should have human results', async () => {
         await DataSoqlQueryCommand.run(
-          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'human'],
+          ['--target-org', 'test@org.com', '--query', 'select ', '--result-format', 'human'],
           config
         );
 

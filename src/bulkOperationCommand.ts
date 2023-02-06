@@ -6,22 +6,21 @@
  */
 import * as fs from 'fs';
 import { ReadStream } from 'fs';
-import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
+import { Flags } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
-import { Connection, Lifecycle, Messages } from '@salesforce/core';
-import { BulkOperation, IngestJobV2, IngestOperation, JobInfoV2, JobStateV2 } from 'jsforce/api/bulk';
+import { Connection, Messages } from '@salesforce/core';
+import { BulkOperation, IngestJobV2, IngestOperation, JobInfoV2 } from 'jsforce/api/bulk';
 import { Schema } from 'jsforce';
-import { capitalCase } from 'change-case';
 import { orgFlags } from './flags';
 import { BulkDataRequestCache } from './bulkDataRequestCache';
 import { BulkResultV2 } from './types';
 import { isBulkV2RequestDone, transformResults, waitOrTimeout } from './bulkUtils';
-import { getResultMessage } from './reporters';
+import { BulkBaseCommand } from './BulkBaseCommand';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.operation.command');
 
-export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
+export abstract class BulkOperationCommand extends BulkBaseCommand {
   public static readonly baseFlags = {
     ...orgFlags,
     file: Flags.file({
@@ -54,19 +53,6 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
       exclusive: ['wait'],
     }),
   };
-
-  protected lifeCycle = Lifecycle.getInstance();
-  protected job!: IngestJobV2<Schema, IngestOperation>;
-  protected connection: Connection | undefined;
-  protected cache: BulkDataRequestCache | undefined;
-  private numberRecordsProcessed = 0;
-  private numberRecordsFailed = 0;
-  private numberRecordSuceeded = 0;
-  private isAsync = false;
-  private operation!: BulkOperation;
-  private endWaitTime = 0;
-  private wait = 0;
-  private timeout = false;
 
   /**
    * create and execute batches based on the record arrays; wait for completion response if -w flag is set with > 0 minutes
@@ -143,89 +129,6 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
     } finally {
       this.spinner.stop();
     }
-  }
-
-  private displayBulkV2Result(jobInfo: JobInfoV2): void {
-    if (this.isAsync) {
-      this.logSuccess(messages.getMessage('success', [this.operation, jobInfo.id]));
-      this.info(
-        messages.getMessage('checkStatus', [
-          this.config.bin,
-          this.operation,
-          jobInfo.id,
-          this.connection?.getUsername(),
-        ])
-      );
-    } else {
-      this.log();
-      this.info(getResultMessage(jobInfo));
-      if ((jobInfo.numberRecordsFailed ?? 0) > 0) {
-        this.info(messages.getMessage('checkJobViaUi', [this.config.bin, this.connection?.getUsername(), jobInfo.id]));
-      }
-      if (jobInfo.state === 'InProgress' || jobInfo.state === 'Open') {
-        this.info(
-          messages.getMessage('checkStatus', [
-            this.config.bin,
-            this.operation,
-            jobInfo.id,
-            this.connection?.getUsername(),
-          ])
-        );
-      }
-    }
-  }
-
-  private setupLifecycleListeners(): void {
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this.job.on('jobProgress', async () => {
-      const jobInfo = await this.job.check();
-      this.numberRecordsProcessed = jobInfo.numberRecordsProcessed ?? 0;
-      this.numberRecordsFailed = jobInfo.numberRecordsFailed ?? 0;
-      this.numberRecordSuceeded = this.numberRecordsProcessed - this.numberRecordsFailed;
-      this.spinner.status = `${this.getRemainingTimeStatus()}${this.getStage(
-        jobInfo.state
-      )}${this.getRemainingRecordsStatus()}`;
-    });
-
-    this.job.on('error', (message: string) => {
-      try {
-        this.error(message);
-      } finally {
-        this.spinner.stop();
-      }
-    });
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this.job.on('jobTimeout', async () => {
-      if (!this.timeout) {
-        this.timeout = true;
-        await this.cache?.createCacheEntryForRequest(
-          this.job.id ?? '',
-          this.connection?.getUsername(),
-          this.connection?.getApiVersion()
-        );
-        this.displayBulkV2Result(await this.job.check());
-      }
-    });
-  }
-
-  private getRemainingTimeStatus(): string {
-    return this.isAsync
-      ? ''
-      : messages.getMessage('remainingTimeStatus', [Duration.milliseconds(this.endWaitTime - Date.now()).minutes]);
-  }
-
-  private getRemainingRecordsStatus(): string {
-    // the leading space is intentional
-    return ` ${messages.getMessage('remainingRecordsStatus', [
-      this.numberRecordSuceeded,
-      this.numberRecordsFailed,
-      this.numberRecordsProcessed,
-    ])}`;
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  private getStage(state: JobStateV2): string {
-    return ` Stage: ${capitalCase(state)}.`;
   }
 
   protected abstract getCache(): Promise<BulkDataRequestCache>;
