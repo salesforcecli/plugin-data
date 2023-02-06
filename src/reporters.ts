@@ -176,11 +176,11 @@ export class HumanReporter extends QueryReporter {
                   Object.entries(record as never).forEach(([key, value]) => {
                     if (!index) {
                       Reflect.defineProperty(result, `${child.toString()}.${key}`, {
-                        value: value ? value : chalk.bold('null'),
+                        value: value ?? chalk.bold('null'),
                       });
                     } else {
                       Reflect.defineProperty(newResult, `${child.toString()}.${key}`, {
-                        value: value ? value : chalk.bold('null'),
+                        value: value ?? chalk.bold('null'),
                       });
                     }
                   });
@@ -351,10 +351,10 @@ const prepColumns = (columns: Array<Optional<string>>): ux.Table.table.Columns<R
           get: (row): string => {
             // first test if key exists, if so, return value
             if (Reflect.has(row, field)) {
-              return (Reflect.get(row, field) as string) || '';
+              return (Reflect.get(row, field) as string) ?? '';
             } else {
               // if not, try to find it query
-              return (get(row, field) as string) || '';
+              return (get(row, field) as string) ?? '';
             }
           },
         })
