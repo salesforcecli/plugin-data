@@ -10,6 +10,10 @@ Use the ID of the most recently-run bulk job.
 
 Org alias or username to use for the target org.
 
+# flags.wait.summary
+
+Number of minutes to wait for the command to complete before displaying the results.
+
 # checkStatus
 
 Run command %s data %s resume -i %s -o %s to check status.

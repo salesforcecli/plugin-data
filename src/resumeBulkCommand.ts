@@ -9,8 +9,9 @@ import { IngestJobV2, IngestOperation } from 'jsforce/lib/api/bulk';
 import { Messages } from '@salesforce/core';
 import { JobInfoV2 } from 'jsforce/api/bulk';
 import { Schema } from 'jsforce';
+import { Duration } from '@salesforce/kit';
 import { BulkResultV2, ResumeOptions } from './types';
-import { didBulkV2RequestJobFail, isBulkV2RequestDone, transformResults } from './bulkUtils';
+import { didBulkV2RequestJobFail, isBulkV2RequestDone, transformResults, waitOrTimeout } from './bulkUtils';
 import { getResultMessage } from './reporters';
 
 Messages.importMessagesDirectory(__dirname);
@@ -32,6 +33,12 @@ export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
       default: true,
       exclusive: ['job-id'],
     }),
+    wait: Flags.duration({
+      summary: messages.getMessage('flags.wait.summary'),
+      unit: 'minutes',
+      min: 0,
+      default: Duration.minutes(0),
+    }),
     'api-version': Flags.orgApiVersion(),
     loglevel,
   };
@@ -39,7 +46,7 @@ export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
   protected job!: IngestJobV2<Schema, IngestOperation>;
   private username: string | undefined;
 
-  protected async resume(resumeOptions: ResumeOptions): Promise<BulkResultV2> {
+  protected async resume(resumeOptions: ResumeOptions, wait: Duration): Promise<BulkResultV2> {
     this.spinner.start('Getting status');
     const conn = resumeOptions.options.connection;
     this.username = resumeOptions.options.connection.getUsername();
@@ -48,6 +55,7 @@ export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
 
     // view job status
     const jobInfo = await job.check();
+    await waitOrTimeout(job, wait.milliseconds);
     this.spinner.stop();
     this.displayResult(jobInfo);
     const result = { jobInfo } as BulkResultV2;

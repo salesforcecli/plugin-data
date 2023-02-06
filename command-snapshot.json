@@ -30,7 +30,7 @@
   {
     "command": "data:delete:resume",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["api-version", "job-id", "json", "loglevel", "target-org", "use-most-recent"],
+    "flags": ["api-version", "job-id", "json", "loglevel", "target-org", "use-most-recent", "wait"],
     "alias": []
   },
   {
@@ -118,7 +118,7 @@
   {
     "command": "data:upsert:resume",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["api-version", "job-id", "json", "loglevel", "target-org", "use-most-recent"],
+    "flags": ["api-version", "job-id", "json", "loglevel", "target-org", "use-most-recent", "wait"],
     "alias": []
   },
   {

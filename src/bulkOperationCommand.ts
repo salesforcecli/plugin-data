@@ -15,13 +15,11 @@ import { capitalCase } from 'change-case';
 import { orgFlags } from './flags';
 import { BulkDataRequestCache } from './bulkDataRequestCache';
 import { BulkResultV2 } from './types';
-import { isBulkV2RequestDone, transformResults } from './bulkUtils';
+import { isBulkV2RequestDone, transformResults, waitOrTimeout } from './bulkUtils';
 import { getResultMessage } from './reporters';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.operation.command');
-
-const POLL_FREQUENCY_MS = 5000;
 
 export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
   public static readonly baseFlags = {
@@ -95,27 +93,10 @@ export abstract class BulkOperationCommand extends SfCommand<BulkResultV2> {
     await job.close();
     if (remainingTime > 0) {
       job.emit('startPolling');
-      await BulkOperationCommand.waitOrTimeout(job, remainingTime);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      await waitOrTimeout(job, remainingTime);
     }
     return job.check();
-  }
-
-  private static async waitOrTimeout(job: IngestJobV2<Schema, IngestOperation>, wait: number): Promise<void> {
-    let waitCountDown = wait;
-    const progress = setInterval(() => {
-      const remainingTime = (waitCountDown -= POLL_FREQUENCY_MS);
-      job.emit('jobProgress', { remainingTime, stage: 'polling' });
-    }, POLL_FREQUENCY_MS);
-    const timeout = setTimeout(() => {
-      clearInterval(progress);
-      job.emit('jobTimeout');
-    }, wait ?? 0);
-    try {
-      await job.poll(POLL_FREQUENCY_MS, wait);
-    } finally {
-      clearInterval(progress);
-      clearTimeout(timeout);
-    }
   }
 
   public async runBulkOperation(

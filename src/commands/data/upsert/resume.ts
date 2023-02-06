@@ -27,7 +27,7 @@ export default class UpsertResume extends ResumeBulkCommand {
       flags['target-org'],
       flags['api-version']
     );
-    const resumeResults = await this.resume(resumeOptions);
+    const resumeResults = await this.resume(resumeOptions, flags.wait);
     if (isBulkV2RequestDone(resumeResults.jobInfo)) {
       await BulkUpsertRequestCache.unset(resumeOptions.jobInfo.id);
     }
