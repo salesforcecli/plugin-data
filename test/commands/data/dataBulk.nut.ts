@@ -145,9 +145,10 @@ const bulkInsertAccounts = (): BulkResultV2 => {
     'data',
     'bulkUpsert.csv'
   )} --external-id Id --json --wait 10`;
-  const response: BulkResultV2 | undefined = execCmd<BulkResultV2>(cmd, { ensureExitCode: 0 }).jsonOutput
-    ?.result as BulkResultV2;
-  if (response) {
+  const response: BulkResultV2 | undefined = execCmd<BulkResultV2>(cmd).jsonOutput?.result as BulkResultV2;
+  // eslint-disable-next-line no-console
+  console.error(JSON.stringify(response, null, 2));
+  if (response?.records) {
     /* eslint-disable @typescript-eslint/no-unsafe-member-access, ,@typescript-eslint/no-unsafe-assignment */
     const records = response.records?.successfulResults;
     assert.equal(records?.length, 10);
