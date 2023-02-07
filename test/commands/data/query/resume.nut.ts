@@ -29,7 +29,7 @@ const isCompleted = async (cmd: string): Promise<void> => {
   }
 };
 
-describe('data:soql:bulk:report command', () => {
+describe('data:query:resume command', () => {
   let testSession: TestSession;
 
   before(async () => {
@@ -50,7 +50,7 @@ describe('data:soql:bulk:report command', () => {
     });
 
     // Import data to the default org.
-    execCmd(`force:data:tree:import --plan ${path.join('.', 'data', 'accounts-contacts-plan.json')}`, {
+    execCmd(`data:import:tree --plan ${path.join('.', 'data', 'accounts-contacts-plan.json')}`, {
       ensureExitCode: 0,
     });
   });
@@ -59,29 +59,29 @@ describe('data:soql:bulk:report command', () => {
     await testSession?.clean();
   });
 
-  describe('data:soql:bulk:report', () => {
+  describe('data:query:resume', () => {
     it('should return Lead.owner.name (multi-level relationships)', async () => {
-      execCmd('force:data:record:create -s Lead -v "Company=Salesforce LastName=Astro"', { ensureExitCode: 0 });
+      execCmd('data:create:record -s Lead -v "Company=Salesforce LastName=Astro"', { ensureExitCode: 0 });
       const profileId = execCmd<QueryResult<{ Id: string }>>(
-        'force:data:soql:query -q "SELECT ID FROM Profile WHERE Name=\'System Administrator\'" --json'
+        'data:query -q "SELECT ID FROM Profile WHERE Name=\'System Administrator\'" --json'
       ).jsonOutput?.result.records[0].Id;
       const bulkQueryId = execCmd<{ id: string }>(
-        'force:data:soql:query -q "SELECT owner.Profile.Name, owner.Profile.Id, Title, Name FROM lead LIMIT 1" --bulk --json --wait 0',
+        'data:query -q "SELECT owner.Profile.Name, owner.Profile.Id, Title, Name FROM lead LIMIT 1" --bulk --json --wait 0',
         {
           ensureExitCode: 0,
         }
       ).jsonOutput?.result?.id;
 
-      await isCompleted(`force:data:soql:bulk:report -i ${bulkQueryId} --json`);
+      await isCompleted(`data:query:resume -i ${bulkQueryId} --json`);
 
-      const result = execCmd(`force:data:soql:bulk:report -i ${bulkQueryId}`, { ensureExitCode: 0 }).shellOutput.stdout;
+      const result = execCmd(`data:query:resume -i ${bulkQueryId}`, { ensureExitCode: 0 }).shellOutput.stdout;
       expect(result).to.not.include('[object Object]');
       expect(result).to.include('System Administrator');
       expect(result).to.include('Astro');
       expect(result).to.include(profileId);
 
-      const queryResultCSV = execCmd(`force:data:soql:bulk:report -i ${bulkQueryId} -r csv`, { ensureExitCode: 0 })
-        .shellOutput.stdout;
+      const queryResultCSV = execCmd(`data:query:resume -i ${bulkQueryId} -r csv`, { ensureExitCode: 0 }).shellOutput
+        .stdout;
       expect(queryResultCSV).to.not.include('[object Object]');
       expect(queryResultCSV).to.include('System Administrator');
       expect(queryResultCSV).to.include(profileId);
@@ -91,44 +91,37 @@ describe('data:soql:bulk:report command', () => {
 
     it('should return account records', async () => {
       const bulkQueryId = execCmd<{ id: string }>(
-        'force:data:soql:query -q "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry FROM Account WHERE Name LIKE \'SampleAccount%\' limit 1" --bulk --json --wait 0',
+        'data:query -q "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry FROM Account WHERE Name LIKE \'SampleAccount%\' limit 1" --bulk --json --wait 0',
         {
           ensureExitCode: 0,
         }
       ).jsonOutput?.result?.id;
-      await isCompleted(`force:data:soql:bulk:report -i ${bulkQueryId} --json`);
+      await isCompleted(`data:query:resume -i ${bulkQueryId} --json`);
 
-      const result = execCmd(`force:data:soql:bulk:report -i ${bulkQueryId}`, { ensureExitCode: 0 }).shellOutput.stdout;
+      const result = execCmd(`data:query:resume -i ${bulkQueryId}`, { ensureExitCode: 0 }).shellOutput.stdout;
       expect(result).to.match(/ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY/g);
       expect(result).to.match(/Total number of records retrieved: 1\./g);
     });
 
     it('should display results correctly', async () => {
-      const bulkQueryId = execCmd<{ id: string }>(
-        'force:data:soql:query -q "SELECT id from User" --bulk --json --wait 0',
-        {
-          ensureExitCode: 0,
-        }
-      ).jsonOutput?.result?.id;
-      await isCompleted(`force:data:soql:bulk:report -i ${bulkQueryId} --json`);
+      const bulkQueryId = execCmd<{ id: string }>('data:query -q "SELECT id from User" --bulk --json --wait 0', {
+        ensureExitCode: 0,
+      }).jsonOutput?.result?.id;
+      await isCompleted(`data:query:resume -i ${bulkQueryId} --json`);
 
-      const result = execCmd(`force:data:soql:bulk:report -i ${bulkQueryId}`, { ensureExitCode: 0 }).shellOutput.stdout;
+      const result = execCmd(`data:query:resume -i ${bulkQueryId}`, { ensureExitCode: 0 }).shellOutput.stdout;
       expect(result).to.match(/Total number of records retrieved: \d/g);
       expect(result).to.include('ID');
     });
 
     it('should print JSON (-r json) output correctly', async () => {
-      const bulkQueryId = execCmd<{ id: string }>(
-        'force:data:soql:query -q "SELECT id, Name FROM User" --bulk --json --wait 0',
-        {
-          ensureExitCode: 0,
-        }
-      ).jsonOutput?.result?.id;
+      const bulkQueryId = execCmd<{ id: string }>('data:query -q "SELECT id, Name FROM User" --bulk --json --wait 0', {
+        ensureExitCode: 0,
+      }).jsonOutput?.result?.id;
 
-      await isCompleted(`force:data:soql:bulk:report -i ${bulkQueryId} --json`);
+      await isCompleted(`data:query:resume -i ${bulkQueryId} --json`);
 
-      const result = execCmd(`force:data:soql:bulk:report -i ${bulkQueryId} -r json`, { ensureExitCode: 0 }).shellOutput
-        .stdout;
+      const result = execCmd(`data:query:resume -i ${bulkQueryId} -r json`, { ensureExitCode: 0 }).shellOutput.stdout;
       // the Metadata object parsed correctly
       expect(result).to.include('Id');
       expect(result).to.include('Name');
