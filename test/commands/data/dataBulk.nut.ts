@@ -65,7 +65,7 @@ const checkBulkStatusHumanResponse = (statusCommand: string): void => {
   expect(jobState).to.include('Job Complete');
 };
 
-describe.only('data:bulk commands', () => {
+describe('data:bulk commands', () => {
   before(async () => {
     testSession = await TestSession.create({
       scratchOrgs: [
