@@ -66,6 +66,41 @@ describe('Execute a SOQL statement', (): void => {
         expect(stdoutSpy.args.flat().join('')).to.include('Total number of records retrieved: 0');
       });
     });
+
+    describe('handle results with value 0', () => {
+      beforeEach(() => {
+        soqlQuerySpy = $$.SANDBOX.stub(query, 'runSoqlQuery').resolves(
+          soqlQueryExemplars.queryWithZeroFields.soqlQueryResult
+        );
+        stdoutSpy = $$.SANDBOX.stub(process.stdout, 'write');
+      });
+
+      afterEach(() => {
+        $$.SANDBOX.restore();
+      });
+
+      it('should have csv results', async () => {
+        await DataSoqlQueryCommand.run(
+          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'csv'],
+          config
+        );
+        sinon.assert.calledOnce(soqlQuerySpy);
+        // test for expected snippet in output
+        expect(stdoutSpy.args.flat().join('')).to.include('Dickenson Mobile Generators,0,1,0');
+      });
+
+      it('should have human results', async () => {
+        await DataSoqlQueryCommand.run(
+          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'human'],
+          config
+        );
+        sinon.assert.calledOnce(soqlQuerySpy);
+        // test for expected snippet in output
+        const stdout = stdoutSpy.args.flat().join('');
+        expect(/.*?Dickenson Mobile Generators.*?0.*?0.*?/.test(stdout)).to.be.true;
+      });
+    });
+
     describe('reporters produce the correct results for subquery', () => {
       beforeEach(() => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -182,10 +217,23 @@ describe('Execute a SOQL statement', (): void => {
         // eslint-disable-next-line no-underscore-dangle
         const result = await cmd._run();
         sinon.assert.calledOnce(soqlQuerySpy);
-        expect(result as SoqlQueryResult['result']).to.have.property('totalSize', 16);
+        expect(result as SoqlQueryResult['result']).to.have.property('totalSize', 17);
         expect((result as SoqlQueryResult['result']).records.length).to.be.equal(
           (result as SoqlQueryResult['result']).totalSize
         );
+      });
+
+      it('should have csv results', async () => {
+        await DataSoqlQueryCommand.run(
+          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'csv'],
+          config
+        );
+
+        sinon.assert.calledOnce(soqlQuerySpy);
+        const stdout = stdoutSpy.args.flat().join('');
+
+        expect(/.*?United Oil & Gas Corp\.,5600000000.*/.test(stdout)).to.be.true;
+        expect(/.*?bar,?0.*/.test(stdout)).to.be.true;
       });
 
       it('should have human results', async () => {
@@ -197,8 +245,9 @@ describe('Execute a SOQL statement', (): void => {
         sinon.assert.calledOnce(soqlQuerySpy);
         const stdout = stdoutSpy.args.flat().join('');
 
-        expect(/.*?United Oil & Gas Corp..*?5600000000.*/.test(stdout)).to.be.true;
-        expect(stdout).to.include('records retrieved: 16');
+        expect(/.*?United Oil & Gas Corp\..*?5600000000.*/.test(stdout)).to.be.true;
+        expect(/.*?bar.*?0.*/.test(stdout)).to.be.true;
+        expect(stdout).to.include('records retrieved: 17');
       });
     });
   });

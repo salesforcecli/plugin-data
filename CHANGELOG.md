@@ -1,3 +1,9 @@
+## [2.2.1](https://github.com/salesforcecli/plugin-data/compare/2.2.0...2.2.1) (2023-02-06)
+
+### Bug Fixes
+
+- output zero when displaying human results ([#470](https://github.com/salesforcecli/plugin-data/issues/470)) ([3563d7d](https://github.com/salesforcecli/plugin-data/commit/3563d7d4023c1c4e69b77f211e7d27e8ac42a772))
+
 # [2.2.0](https://github.com/salesforcecli/plugin-data/compare/2.1.24...2.2.0) (2023-02-02)
 
 ### Features
