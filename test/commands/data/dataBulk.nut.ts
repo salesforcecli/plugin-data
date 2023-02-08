@@ -7,6 +7,7 @@
 import * as path from 'path';
 import { strict as assert } from 'node:assert/strict';
 import * as fs from 'fs';
+import * as os from 'os';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { sleep } from '@salesforce/kit';
@@ -108,7 +109,7 @@ describe('data:bulk commands', () => {
 
 const queryAccountRecords = () => {
   const queryResponse = execCmd<QueryResult>(
-    'data:query --query "select id from Account where phone=\'415-555-0000\'" --json',
+    `data:query --query "select id from Account where phone='${'415-555-0000'.toString()}'" --json`,
     {
       ensureExitCode: 0,
     }
@@ -122,7 +123,7 @@ const queryAndBulkDelete = (): BulkResultV2 => {
 
   const accountIds = records.map((account) => account.Id);
   const idsFile = path.join(testSession.project?.dir ?? '.', 'data', 'deleteAccounts.csv');
-  fs.writeFileSync(idsFile, `Id\n${accountIds.join('\n')}\n`);
+  fs.writeFileSync(idsFile, `Id${os.EOL}${accountIds.join(os.EOL)}${os.EOL}`);
 
   // Run bulk delete
   const deleteResponse: BulkResultV2 | undefined = execCmd<Awaited<BulkResultV2>>(
