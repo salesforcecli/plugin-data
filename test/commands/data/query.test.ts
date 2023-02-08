@@ -69,7 +69,9 @@ describe('Execute a SOQL statement', (): void => {
 
     describe('handle results with value 0', () => {
       beforeEach(() => {
-        soqlQuerySpy = $$.SANDBOX.stub(query, 'runSoqlQuery').resolves(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        soqlQuerySpy = $$.SANDBOX.stub(DataSoqlQueryCommand.prototype, 'runSoqlQuery').resolves(
           soqlQueryExemplars.queryWithZeroFields.soqlQueryResult
         );
         stdoutSpy = $$.SANDBOX.stub(process.stdout, 'write');
