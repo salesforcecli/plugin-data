@@ -73,13 +73,6 @@ export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
       )}${this.getRemainingRecordsStatus()}`;
     });
 
-    // this.job.on('error', (message: string) => {
-    //   try {
-    //     this.error(message);
-    //   } finally {
-    //     this.spinner.stop();
-    //   }
-    // });
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this.job.on('jobTimeout', async () => {
       if (!this.timeout) {

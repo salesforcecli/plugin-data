@@ -6,6 +6,7 @@
  */
 import * as fs from 'fs';
 import { ReadStream } from 'fs';
+import * as os from 'os';
 import { Flags } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
 import { Connection, Messages } from '@salesforce/core';
@@ -102,7 +103,17 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
       this.spinner.start(`Running ${this.isAsync ? 'async ' : ''}bulk ${operation} request`);
       this.endWaitTime = Date.now() + Duration.minutes(this.wait).milliseconds;
       this.spinner.status = this.getRemainingTimeStatus();
-      this.job = connection.bulk2.createJob({ object: sobject, operation, externalIdFieldName: options?.extIdField });
+      const createJobOptions = {
+        object: sobject,
+        operation,
+        externalIdFieldName: options?.extIdField,
+      };
+      if (os.platform() === 'win32') {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        createJobOptions['lineEnding'] = 'CRLF';
+      }
+      this.job = connection.bulk2.createJob(createJobOptions);
       this.connection = connection;
 
       this.setupLifecycleListeners();
