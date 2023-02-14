@@ -99,7 +99,7 @@
     "test:command-reference": "./bin/dev commandreference:generate --erroronwarnings",
     "test:deprecation-policy": "./bin/dev snapshot:compare",
     "test:json-schema": "./bin/dev schema:compare",
-    "test:nuts": "nyc mocha \"./test/**/dataBulk.nut.ts\" --slow 4500 --timeout 600000 --parallel",
+    "test:nuts": "nyc mocha \"./test/**/*.nut.ts\" --slow 4500 --timeout 600000 --parallel",
     "version": "oclif readme"
   },
   "dependencies": {
@@ -113,7 +113,7 @@
     "csv-parse": "^4.16.3",
     "csv-stringify": "^6.2.3",
     "fs-extra": "^10.0.1",
-    "jsforce": "^2.0.0-beta.19",
+    "jsforce": "2.0.0-beta.19",
     "tslib": "^2"
   },
   "devDependencies": {

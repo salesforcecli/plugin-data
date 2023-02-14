@@ -18,3 +18,7 @@ Remaining time: %d minutes.
 # remainingRecordsStatus
 
 %d/%d/%d records successful/failed/processed.
+
+# bulkJobFailed
+
+The bulk job %s failed. Check the job status for more information.

@@ -45,7 +45,7 @@ export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
     } else {
       this.log();
       this.info(getResultMessage(jobInfo));
-      if ((jobInfo.numberRecordsFailed ?? 0) > 0) {
+      if ((jobInfo.numberRecordsFailed ?? 0) > 0 || jobInfo.state === 'Failed') {
         this.info(messages.getMessage('checkJobViaUi', [this.config.bin, this.connection?.getUsername(), jobInfo.id]));
       }
       if (jobInfo.state === 'InProgress' || jobInfo.state === 'Open') {
@@ -57,6 +57,9 @@ export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
             this.connection?.getUsername(),
           ])
         );
+      }
+      if (jobInfo.state === 'Failed') {
+        throw messages.createError('bulkJobFailed', [jobInfo.id]);
       }
     }
   }
@@ -71,6 +74,14 @@ export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
       this.spinner.status = `${this.getRemainingTimeStatus()}${this.getStage(
         jobInfo.state
       )}${this.getRemainingRecordsStatus()}`;
+    });
+
+    this.job.on('error', (message: string) => {
+      try {
+        this.error(message);
+      } finally {
+        this.spinner.stop();
+      }
     });
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises

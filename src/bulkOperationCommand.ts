@@ -21,6 +21,13 @@ import { BulkBaseCommand } from './BulkBaseCommand';
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.operation.command');
 
+type CreateJobOptions = {
+  object: string;
+  operation: BulkOperation;
+  externalIdFieldName?: string;
+  lineEnding?: 'CRLF';
+};
+
 export abstract class BulkOperationCommand extends BulkBaseCommand {
   public static readonly baseFlags = {
     ...orgFlags,
@@ -103,15 +110,13 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
       this.spinner.start(`Running ${this.isAsync ? 'async ' : ''}bulk ${operation} request`);
       this.endWaitTime = Date.now() + Duration.minutes(this.wait).milliseconds;
       this.spinner.status = this.getRemainingTimeStatus();
-      const createJobOptions = {
+      const createJobOptions: CreateJobOptions = {
         object: sobject,
         operation,
         externalIdFieldName: options?.extIdField,
       };
       if (os.platform() === 'win32') {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        createJobOptions['lineEnding'] = 'CRLF';
+        createJobOptions.lineEnding = 'CRLF';
       }
       this.job = connection.bulk2.createJob(createJobOptions);
       this.connection = connection;
