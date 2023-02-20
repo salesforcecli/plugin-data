@@ -31,8 +31,10 @@ export default class Update extends SfCommand<SaveResult> {
       aliases: ['sobjecttype'],
       deprecateAliases: true,
     }),
+    // eslint-disable-next-line sf-plugin/id-flag-suggestions
     'record-id': Flags.salesforceId({
       char: 'i',
+      length: 'both',
       summary: messages.getMessage('flags.recordId'),
       exactlyOne: ['where', 'record-id'],
       aliases: ['sobjectid'],

@@ -23,9 +23,24 @@
       "@salesforce/plugin-command-reference"
     ],
     "topics": {
+      "force": {
+        "description": "manipulate data in your orgs using Bulk API V1",
+        "subtopics": {
+          "data": {
+            "description": "manipulate records in your org",
+            "longDescription": "Use the data commands to insert and delete data in your orgs using V1 of Bulk API, using CSV files as input.",
+            "subtopics": {
+              "bulk": {
+                "description": "manipulate records in your org using Bulk API V1",
+                "longDescription": "Use the data commands to insert and delete data in your orgs using V1 of Bulk API, using CSV files as input."
+              }
+            }
+          }
+        }
+      },
       "data": {
         "description": "manipulate records in your org",
-        "longDescription": "Use the data commands to manipulate records in your org. Commands are available to help you work with various APIs. Import CSV files with the Bulk API. Export and import data with the SObject Tree Save API. Perform simple CRUD operations on individual records with the REST API.",
+        "longDescription": "Use the data commands to manipulate records in your org. Commands are available to help you work with various APIs. Import CSV files with the Bulk API V2. Export and import data with the SObject Tree Save API. Perform simple CRUD operations on individual records with the REST API.",
         "subtopics": {
           "create": {
             "description": "create a record"
@@ -89,16 +104,16 @@
   },
   "dependencies": {
     "@oclif/core": "^2.0.7",
-    "@salesforce/core": "^3.32.12",
-    "@salesforce/kit": "^1.8.3",
+    "@salesforce/core": "^3.32.13",
+    "@salesforce/kit": "^1.8.4",
     "@salesforce/sf-plugins-core": "^2.0.1",
-    "@salesforce/ts-types": "^1.7.2",
+    "@salesforce/ts-types": "^1.7.3",
     "@types/fs-extra": "^9.0.13",
     "chalk": "^4.1.0",
     "csv-parse": "^4.16.3",
     "csv-stringify": "^6.2.3",
     "fs-extra": "^10.0.1",
-    "jsforce": "^2.0.0-beta.19",
+    "jsforce": "2.0.0-beta.20",
     "tslib": "^2"
   },
   "devDependencies": {
@@ -106,25 +121,25 @@
     "@salesforce/cli-plugins-testkit": "^3.2.20",
     "@salesforce/dev-config": "^3.0.1",
     "@salesforce/dev-scripts": "^3.1.1",
-    "@salesforce/plugin-command-reference": "^2.2.8",
+    "@salesforce/plugin-command-reference": "^2.2.9",
     "@salesforce/prettier-config": "^0.0.2",
-    "@salesforce/ts-sinon": "^1.4.4",
-    "@swc/core": "^1.3.24",
+    "@salesforce/ts-sinon": "^1.4.5",
+    "@swc/core": "^1.3.31",
     "@types/chai-as-promised": "^7.1.3",
     "@types/graceful-fs": "^4.1.6",
     "@types/shelljs": "^0.8.10",
     "@typescript-eslint/eslint-plugin": "^5.52.0",
-    "@typescript-eslint/parser": "^5.48.2",
+    "@typescript-eslint/parser": "^5.49.0",
     "chai": "^4.3.7",
     "chai-as-promised": "^7.1.1",
-    "eslint": "^8.21.0",
+    "eslint": "^8.33.0",
     "eslint-config-prettier": "^8.6.0",
-    "eslint-config-salesforce": "^1.1.0",
+    "eslint-config-salesforce": "^1.1.1",
     "eslint-config-salesforce-license": "^0.2.0",
     "eslint-config-salesforce-typescript": "^1.1.1",
     "eslint-plugin-header": "^3.1.1",
-    "eslint-plugin-import": "2.27.4",
-    "eslint-plugin-jsdoc": "^39.6.7",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-jsdoc": "^39.7.4",
     "eslint-plugin-sf-plugin": "^1.8.0",
     "fast-xml-parser": "^3.20.3",
     "husky": "^7.0.4",

@@ -15,3 +15,7 @@ Run this command using the job ID returned from the "<%= config.bin %> data quer
 # flags.bulkQueryId
 
 Job ID of the bulk query.
+
+# flags.useMostRecent.summary
+
+Use the most recent bulk query ID from cache.

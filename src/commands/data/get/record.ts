@@ -31,7 +31,9 @@ export default class Get extends SfCommand<Record> {
       aliases: ['sobjecttype'],
       deprecateAliases: true,
     }),
+    // eslint-disable-next-line sf-plugin/id-flag-suggestions
     'record-id': Flags.salesforceId({
+      length: 'both',
       char: 'i',
       summary: messages.getMessage('flags.recordId'),
       exactlyOne: ['where', 'record-id'],

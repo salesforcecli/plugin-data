@@ -17,7 +17,7 @@ import Delete from '../../../../src/commands/data/delete/record';
 
 const sObjectId = '0011100001zhhyUAAQ';
 
-describe('force:data:record:delete', () => {
+describe('data:delete:record', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   const config = new Config({ root: resolve(__dirname, '../../../package.json') });
@@ -53,9 +53,9 @@ describe('force:data:record:delete', () => {
     $$.restore();
   });
 
-  it('should delete the sobject by sobjectid', async () => {
+  it('should delete the sobject by record-id', async () => {
     const cmd = new Delete(
-      ['--targetusername', 'test@org.com', '--sobjecttype', 'Account', '--sobjectid', sObjectId, '--json'],
+      ['--target-org', 'test@org.com', '--sobject', 'Account', '--record-id', sObjectId, '--json'],
       config
     );
     const result = (await cmd.run()) as unknown as SaveResult;
@@ -65,11 +65,11 @@ describe('force:data:record:delete', () => {
   it('should throw an error if both --where and --record-id are provided', async () => {
     const cmd = new Delete(
       [
-        '--targetusername',
+        '--target-org',
         'test@org.com',
-        '--sobjecttype',
+        '--sobject',
         'Account',
-        '--sobjectid',
+        '--record-id',
         sObjectId,
         '--where',
         '"Name=Acme"',
@@ -88,7 +88,7 @@ describe('force:data:record:delete', () => {
 
   it('should throw an error if the where flag returns nothing', async () => {
     const cmd = new Delete(
-      ['--targetusername', 'test@org.com', '--sobjecttype', 'Contact', '--where', '"Name=Acme"', '--json'],
+      ['--target-org', 'test@org.com', '--sobject', 'Contact', '--where', '"Name=Acme"', '--json'],
       config
     );
     try {

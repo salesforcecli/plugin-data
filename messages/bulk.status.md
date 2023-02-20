@@ -1,20 +1,20 @@
 # summary
 
-View the status of a bulk data load job or batch.
+View the status of a bulk data load job or batch. Uses Bulk API 1.0.
 
 # description
 
-Run this command using the job ID or batch ID returned from the "<%= config.bin %> data delete bulk" or "<%= config.bin %> data upsert bulk" commands.
+Run this command using the job ID or batch ID returned from the "<%= config.bin %> force data bulk delete" or "<%= config.bin %> force data bulk upsert" commands.
 
 # examples
 
-- View the status of a bulk load job:
+- View the status of a bulk load job in your default org:
 
   <%= config.bin %> <%= command.id %> --job-id 750xx000000005sAAA
 
-- View the status of a bulk load job and a specific batches:
+- View the status of a bulk load job and a specific batches in an org with alias my-scratch:
 
-  <%= config.bin %> <%= command.id %> --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA
+  <%= config.bin %> <%= command.id %> --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA --target-org my-scratch
 
 # flags.jobid
 

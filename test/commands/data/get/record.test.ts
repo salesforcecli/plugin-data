@@ -18,7 +18,7 @@ const sObjectId = '0011100001zhhyUAAQ';
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
-describe('force:data:record:get', () => {
+describe('data:get:record', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   const config = new Config({ root: resolve(__dirname, '../../../package.json') });
@@ -56,9 +56,9 @@ describe('force:data:record:get', () => {
     $$.restore();
   });
 
-  it('returns record for provided sobjectid', async () => {
+  it('returns record for provided record-id', async () => {
     const cmd = new Get(
-      ['--targetusername', 'test@org.com', '--sobjecttype', 'Account', '--sobjectid', sObjectId, '--json'],
+      ['--target-org', 'test@org.com', '--sobject', 'Account', '--record-id', sObjectId, '--json'],
       config
     );
 
@@ -69,7 +69,7 @@ describe('force:data:record:get', () => {
 
   it('should throw an error if values provided to where flag are invalid', async () => {
     const cmd = new Get(
-      ['--targetusername', 'test@org.com', '--sobjecttype', 'Account', '--where', '"Name"', '--json'],
+      ['--target-org', 'test@org.com', '--sobject', 'Account', '--where', '"Name"', '--json'],
       config
     );
     try {

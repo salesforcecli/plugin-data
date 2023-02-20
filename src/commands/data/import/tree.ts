@@ -62,7 +62,11 @@ export default class Import extends SfCommand<ImportResult[] | JsonMap> {
   public async run(): Promise<ImportResult[] | JsonMap> {
     const { flags } = await this.parse(Import);
     const logger = await Logger.child('Import');
-    const importApi = new ImportApi(flags['target-org']);
+    const importApi = new ImportApi(
+      flags['target-org'],
+      this.config.bin,
+      this.config.pjson.oclif.topicSeparator ?? ':'
+    );
 
     if (flags['config-help']) {
       // Display config help and return

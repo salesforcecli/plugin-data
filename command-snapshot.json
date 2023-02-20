@@ -8,8 +8,8 @@
   {
     "command": "data:delete:bulk",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["api-version", "file", "json", "loglevel", "sobject", "target-org", "wait"],
-    "alias": ["force:data:bulk:delete"]
+    "flags": ["api-version", "async", "file", "json", "loglevel", "sobject", "target-org", "wait"],
+    "alias": []
   },
   {
     "command": "data:delete:record",
@@ -26,6 +26,12 @@
       "where"
     ],
     "alias": ["force:data:record:delete"]
+  },
+  {
+    "command": "data:delete:resume",
+    "plugin": "@salesforce/plugin-data",
+    "flags": ["api-version", "job-id", "json", "loglevel", "target-org", "use-most-recent", "wait"],
+    "alias": []
   },
   {
     "command": "data:export:tree",
@@ -77,14 +83,14 @@
   {
     "command": "data:query:resume",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["api-version", "bulk-query-id", "json", "loglevel", "result-format", "target-org"],
+    "flags": ["api-version", "bulk-query-id", "json", "loglevel", "result-format", "target-org", "use-most-recent"],
     "alias": ["force:data:soql:bulk:report"]
   },
   {
     "command": "data:resume",
     "plugin": "@salesforce/plugin-data",
     "flags": ["api-version", "batch-id", "job-id", "json", "loglevel", "target-org"],
-    "alias": ["force:data:bulk:status"]
+    "alias": []
   },
   {
     "command": "data:update:record",
@@ -106,7 +112,31 @@
   {
     "command": "data:upsert:bulk",
     "plugin": "@salesforce/plugin-data",
+    "flags": ["api-version", "async", "external-id", "file", "json", "loglevel", "sobject", "target-org", "wait"],
+    "alias": []
+  },
+  {
+    "command": "data:upsert:resume",
+    "plugin": "@salesforce/plugin-data",
+    "flags": ["api-version", "job-id", "json", "loglevel", "target-org", "use-most-recent", "wait"],
+    "alias": []
+  },
+  {
+    "command": "force:data:bulk:delete",
+    "plugin": "@salesforce/plugin-data",
+    "flags": ["api-version", "file", "json", "loglevel", "sobject", "target-org", "wait"],
+    "alias": []
+  },
+  {
+    "command": "force:data:bulk:status",
+    "plugin": "@salesforce/plugin-data",
+    "flags": ["api-version", "batch-id", "job-id", "json", "loglevel", "target-org"],
+    "alias": []
+  },
+  {
+    "command": "force:data:bulk:upsert",
+    "plugin": "@salesforce/plugin-data",
     "flags": ["api-version", "external-id", "file", "json", "loglevel", "serial", "sobject", "target-org", "wait"],
-    "alias": ["force:data:bulk:upsert"]
+    "alias": []
   }
 ]

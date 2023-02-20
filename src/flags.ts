@@ -13,7 +13,12 @@ import {
 } from '@salesforce/sf-plugins-core';
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.load('@salesforce/plugin-data', 'messages', ['perfLogLevelOption', 'perfLogLevelOptionLong']);
+const messages = Messages.load('@salesforce/plugin-data', 'messages', [
+  'perfLogLevelOption',
+  'perfLogLevelOptionLong',
+  'flags.resultFormat',
+  'flags.targetOrg.summary',
+]);
 
 export const perflogFlag = Flags.boolean({
   summary: messages.getMessage('perfLogLevelOption'),
@@ -25,7 +30,16 @@ export const perflogFlag = Flags.boolean({
 });
 
 export const orgFlags = {
-  'target-org': requiredOrgFlagWithDeprecations,
+  'target-org': { ...requiredOrgFlagWithDeprecations, summary: messages.getMessage('flags.targetOrg.summary') },
   'api-version': orgApiVersionFlagWithDeprecations,
   loglevel,
 };
+
+export const resultFormatFlag = Flags.string({
+  char: 'r',
+  summary: messages.getMessage('flags.resultFormat'),
+  options: ['human', 'json', 'csv'],
+  default: 'human',
+  aliases: ['resultformat'],
+  deprecateAliases: true,
+});

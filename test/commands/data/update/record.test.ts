@@ -16,7 +16,7 @@ import Update from '../../../../src/commands/data/update/record';
 
 const sObjectId = '0011100001zhhyUAAQ';
 
-describe('force:data:record:update', () => {
+describe('data:update:record', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   const config = new Config({ root: resolve(__dirname, '../../../package.json') });
@@ -54,11 +54,11 @@ describe('force:data:record:update', () => {
     };
     const cmd = new Update(
       [
-        '--targetusername',
+        '--target-org',
         'test@org.com',
-        '--sobjecttype',
+        '--sobject',
         'Account',
-        '--sobjectid',
+        '--record-id',
         sObjectId,
         '-v',
         '"Name=NewName"',
@@ -85,11 +85,11 @@ describe('force:data:record:update', () => {
 
     const cmd = new Update(
       [
-        '--targetusername',
+        '--target-org',
         'test@org.com',
-        '--sobjecttype',
+        '--sobject',
         'Account',
-        '--sobjectid',
+        '--record-id',
         sObjectId,
         '-v',
         '"Name=Xavier"',
@@ -108,14 +108,14 @@ describe('force:data:record:update', () => {
     }
   });
 
-  it('should throw an error if both --where and --sobjectid are provided', async () => {
+  it('should throw an error if both --where and --record-id are provided', async () => {
     const cmd = new Update(
       [
         '--target-org',
         'test@org.com',
-        '--sobjecttype',
+        '--sobject',
         'Account',
-        '--sobjectid',
+        '--record-id',
         sObjectId,
         '--where',
         '"Name=Acme"',

@@ -52,9 +52,9 @@ Use Bulk API 2.0, but don't wait for the job to complete.
 
 Time to wait for the command to finish, in minutes.
 
-# flags.resultFormat
+# flags.targetOrg.summary
 
-Format to display the results; the --json flag overrides this flag.
+Org alias or username to use for the target org.
 
 # displayQueryRecordsRetrieved
 

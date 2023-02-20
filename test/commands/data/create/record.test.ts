@@ -14,7 +14,7 @@ import Create from '../../../../src/commands/data/create/record';
 
 const sObjectId = '0011100001zhhyUAAQ';
 
-describe('force:data:record:create', () => {
+describe('data:create:record', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   const config = new Config({ root: resolve(__dirname, '../../../package.json') });
@@ -37,7 +37,7 @@ describe('force:data:record:create', () => {
 
   it('should create a new sobject', async () => {
     const cmd = new Create(
-      ['--targetusername', 'test@org.com', '--sobjecttype', 'Account', '-v', '"Name=Acme"', '--json'],
+      ['--target-org', 'test@org.com', '--sobject', 'Account', '-v', '"Name=Acme"', '--json'],
       config
     );
 

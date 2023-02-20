@@ -40,7 +40,7 @@ const expectedImportResult = [
   },
 ];
 
-describe('force:data:tree:import', () => {
+describe('data:tree:import', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   const config = new Config({ root: resolve(__dirname, '../../../package.json') });
@@ -73,7 +73,7 @@ describe('force:data:tree:import', () => {
   it('returns 4 reference entries for an import file', async () => {
     const cmd = new Import(
       [
-        '--targetusername',
+        '--target-org',
         'test@org.com',
         '--files',
         pathJoin(__dirname, '..', '..', '..', 'api', 'data', 'tree', 'test-files', 'accounts-contacts-tree.json'),
@@ -89,7 +89,7 @@ describe('force:data:tree:import', () => {
   it('returns 4 reference entries for an import plan', async () => {
     const cmd = new Import(
       [
-        '--targetusername',
+        '--target-org',
         'test@org.com',
         '--plan',
         pathJoin(__dirname, '..', '..', '..', 'api', 'data', 'tree', 'test-files', 'accounts-contacts-plan.json'),
@@ -103,13 +103,13 @@ describe('force:data:tree:import', () => {
   });
 
   it('should return the schema with --confighelp param', async () => {
-    const cmd = new Import(['--targetusername', 'test@org.com', '--config-help', '--json'], config);
+    const cmd = new Import(['--target-org', 'test@org.com', '--config-help', '--json'], config);
     const result = await cmd.run();
     expect(result).to.deep.equal(dataImportPlanSchema);
   });
 
   it('should throw an error if data plan or file is not provided', async () => {
-    const cmd = new Import(['--targetusername', 'test@org.com', '--json'], config);
+    const cmd = new Import(['--target-org', 'test@org.com', '--json'], config);
     try {
       await shouldThrow(cmd.run());
     } catch (e) {

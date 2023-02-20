@@ -4,80 +4,32 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import * as fs from 'fs';
-import { ReadStream } from 'fs';
-import { Connection, Messages, SfError } from '@salesforce/core';
-import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
-import { Duration } from '@salesforce/kit';
-import { orgFlags } from '../../../flags';
-import { Batcher, BatcherReturnType } from '../../../batcher';
+import { Messages } from '@salesforce/core';
+import { BulkDeleteRequestCache } from '../../../bulkDataRequestCache';
+import { BulkOperationCommand } from '../../../bulkOperationCommand';
+import { BulkResultV2 } from '../../../types';
+import { validateSobjectType } from '../../../bulkUtils';
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.load('@salesforce/plugin-data', 'bulk.delete', [
-  'examples',
-  'summary',
-  'description',
-  'flags.csvfile',
-  'flags.sobjecttype',
-  'flags.wait',
-]);
+const messages = Messages.load('@salesforce/plugin-data', 'bulkv2.delete', ['examples', 'summary', 'description']);
 
-export default class Delete extends SfCommand<BatcherReturnType> {
+export default class Delete extends BulkOperationCommand {
   public static readonly examples = messages.getMessages('examples');
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
-  public static readonly aliases = ['force:data:bulk:delete'];
-  public static readonly deprecateAliases = true;
 
-  public static readonly flags = {
-    ...orgFlags,
-    file: Flags.file({
-      char: 'f',
-      summary: messages.getMessage('flags.csvfile'),
-      required: true,
-      exists: true,
-      aliases: ['csvfile'],
-      deprecateAliases: true,
-    }),
-    sobject: Flags.string({
-      char: 's',
-      summary: messages.getMessage('flags.sobjecttype'),
-      required: true,
-      aliases: ['sobjecttype'],
-      deprecateAliases: true,
-    }),
-    wait: Flags.duration({
-      char: 'w',
-      unit: 'minutes',
-      summary: messages.getMessage('flags.wait'),
-      min: 0,
-      default: Duration.minutes(0),
-    }),
-  };
-
-  public async run(): Promise<BatcherReturnType> {
+  public async run(): Promise<BulkResultV2> {
     const { flags } = await this.parse(Delete);
-    let result: BatcherReturnType;
 
-    try {
-      const conn: Connection = flags['target-org'].getConnection(flags['api-version']);
-      this.spinner.start('Bulk Delete');
+    const conn = flags['target-org'].getConnection(flags['api-version']);
 
-      const csvRecords: ReadStream = fs.createReadStream(flags.file, { encoding: 'utf-8' });
-      const job = conn.bulk.createJob<'delete'>(flags.sobject, 'delete');
+    await validateSobjectType(flags.sobject, conn);
 
-      const batcher: Batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
+    return this.runBulkOperation(flags.sobject, flags.file, conn, flags.async ? 0 : flags.wait?.minutes, 'delete');
+  }
 
-      result = await batcher.createAndExecuteBatches(job, csvRecords, flags.sobject, flags.wait?.minutes);
-
-      this.spinner.stop();
-      return result;
-    } catch (e) {
-      this.spinner.stop('error');
-      if (!(e instanceof Error)) {
-        throw e;
-      }
-      throw SfError.wrap(e);
-    }
+  // eslint-disable-next-line class-methods-use-this
+  protected async getCache(): Promise<BulkDeleteRequestCache> {
+    return BulkDeleteRequestCache.create();
   }
 }

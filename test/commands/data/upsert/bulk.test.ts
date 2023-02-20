@@ -13,7 +13,7 @@ import { Config } from '@oclif/core';
 import { expect } from 'chai';
 import Upsert from '../../../../src/commands/data/upsert/bulk';
 
-describe('force:data:bulk:upsert', () => {
+describe('data:upsert:bulk', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   let config: Config;
@@ -37,11 +37,11 @@ describe('force:data:bulk:upsert', () => {
   it('should fail correctly with error message', async () => {
     const cmd = new Upsert(
       [
-        '--targetusername',
+        '--target-org',
         'test@org.com',
-        '--sobjecttype',
+        '--sobject',
         'custom__c',
-        '--csvfile',
+        '--file',
         'fileToUpsert.csv',
         '--externalid',
         'field__c',

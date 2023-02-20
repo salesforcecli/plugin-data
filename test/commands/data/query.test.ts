@@ -5,15 +5,10 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-// import { strict as assert } from 'assert';
 import { resolve } from 'path';
 import * as chai from 'chai';
 import { Config } from '@oclif/core';
-import {
-  OrgConfigProperties,
-  // ConfigAggregator
-} from '@salesforce/core';
-// import { AnyJson, ensureJsonMap, ensureString } from '@salesforce/ts-types';
+import { OrgConfigProperties } from '@salesforce/core';
 import {
   TestContext,
   MockTestOrgData,
@@ -24,19 +19,11 @@ import * as chaiAsPromised from 'chai-as-promised';
 import { describe } from 'mocha';
 import sinon = require('sinon');
 import { expect } from 'chai';
-import * as query from '../../../src/commands/data/query';
 import { soqlQueryExemplars } from '../../test-files/soqlQuery.exemplars';
 import { DataSoqlQueryCommand } from '../../../src/commands/data/query';
 import { SoqlQueryResult } from '../../../src/dataSoqlQueryTypes';
 
 chai.use(chaiAsPromised);
-
-// const QUERY_COMMAND = 'force:data:soql:query';
-
-// interface QueryResult {
-//   status: string;
-//   result: { totalSize: number; records: [] };
-// }
 
 describe('Execute a SOQL statement', (): void => {
   const $$ = new TestContext();
@@ -46,9 +33,6 @@ describe('Execute a SOQL statement', (): void => {
   beforeEach(async () => {
     await $$.stubAuths(testOrg);
     await $$.stubConfig({ [OrgConfigProperties.ORG_MAX_QUERY_LIMIT]: '2000' });
-    // $$.SANDBOX.stub(ConfigAggregator.prototype, 'getInfo')
-    //   .withArgs(OrgConfigProperties.ORG_MAX_QUERY_LIMIT)
-    //   .returns({ value: '2000', isGlobal: () => true, key: OrgConfigProperties.ORG_MAX_QUERY_LIMIT });
     await config.load();
   });
   afterEach(async () => {
@@ -60,7 +44,11 @@ describe('Execute a SOQL statement', (): void => {
     let stdoutSpy: sinon.SinonSpy;
     describe('handle empty results', () => {
       beforeEach(() => {
-        soqlQuerySpy = $$.SANDBOX.stub(query, 'runSoqlQuery').resolves(soqlQueryExemplars.emptyQuery.soqlQueryResult);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        soqlQuerySpy = $$.SANDBOX.stub(DataSoqlQueryCommand.prototype, 'runSoqlQuery').resolves(
+          soqlQueryExemplars.emptyQuery.soqlQueryResult
+        );
         stdoutSpy = $$.SANDBOX.stub(process.stdout, 'write');
       });
       afterEach(() => {
@@ -68,7 +56,7 @@ describe('Execute a SOQL statement', (): void => {
       });
 
       it('should have empty results', async () => {
-        const cmd = new DataSoqlQueryCommand(['--targetusername', 'test@org.com', '--query', 'select '], config);
+        const cmd = new DataSoqlQueryCommand(['--target-org', 'test@org.com', '--query', 'select '], config);
         // without cmd._run(), ConfigAggregator, project, etc are not set on the class
         // eslint-disable-next-line no-underscore-dangle
         const result = await cmd._run();
@@ -81,7 +69,9 @@ describe('Execute a SOQL statement', (): void => {
 
     describe('handle results with value 0', () => {
       beforeEach(() => {
-        soqlQuerySpy = $$.SANDBOX.stub(query, 'runSoqlQuery').resolves(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        soqlQuerySpy = $$.SANDBOX.stub(DataSoqlQueryCommand.prototype, 'runSoqlQuery').resolves(
           soqlQueryExemplars.queryWithZeroFields.soqlQueryResult
         );
         stdoutSpy = $$.SANDBOX.stub(process.stdout, 'write');
@@ -115,7 +105,9 @@ describe('Execute a SOQL statement', (): void => {
 
     describe('reporters produce the correct results for subquery', () => {
       beforeEach(() => {
-        soqlQuerySpy = $$.SANDBOX.stub(query, 'runSoqlQuery').callsFake(() =>
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        soqlQuerySpy = $$.SANDBOX.stub(DataSoqlQueryCommand.prototype, 'runSoqlQuery').callsFake(() =>
           Promise.resolve(soqlQueryExemplars.subqueryAccountsAndContacts.soqlQueryResult)
         );
         stdoutSpy = $$.SANDBOX.stub(process.stdout, 'write');
@@ -126,7 +118,7 @@ describe('Execute a SOQL statement', (): void => {
 
       it('should have csv results', async () => {
         await DataSoqlQueryCommand.run(
-          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'csv'],
+          ['--target-org', 'test@org.com', '--query', 'select ', '--result-format', 'csv'],
           config
         );
         sinon.assert.calledOnce(soqlQuerySpy);
@@ -137,7 +129,7 @@ describe('Execute a SOQL statement', (): void => {
       });
       it('should have json results', async () => {
         const cmd = new DataSoqlQueryCommand(
-          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'json'],
+          ['--target-org', 'test@org.com', '--query', 'select ', '--result-format', 'json'],
           config
         );
         // eslint-disable-next-line no-underscore-dangle
@@ -151,7 +143,7 @@ describe('Execute a SOQL statement', (): void => {
 
       it('should have human results', async () => {
         await DataSoqlQueryCommand.run(
-          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'human'],
+          ['--target-org', 'test@org.com', '--query', 'select ', '--result-format', 'human'],
           config
         );
         sinon.assert.calledOnce(soqlQuerySpy);
@@ -164,7 +156,9 @@ describe('Execute a SOQL statement', (): void => {
 
     describe('human readable output for complex subqueries', () => {
       beforeEach(() => {
-        soqlQuerySpy = $$.SANDBOX.stub(query, 'runSoqlQuery').resolves(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        soqlQuerySpy = $$.SANDBOX.stub(DataSoqlQueryCommand.prototype, 'runSoqlQuery').resolves(
           soqlQueryExemplars.complexSubQuery.soqlQueryResult
         );
         stdoutSpy = $$.SANDBOX.stub(process.stdout, 'write');
@@ -177,7 +171,7 @@ describe('Execute a SOQL statement', (): void => {
       it('should have human results for a complex subquery', async () => {
         await DataSoqlQueryCommand.run(
           [
-            '--targetusername',
+            '--target-org',
             'test@org.com',
             '--query',
             'SELECT Amount, Id, Name,StageName, CloseDate, (SELECT Id,  ListPrice, PriceBookEntry.UnitPrice, PricebookEntry.Name, PricebookEntry.Id, PricebookEntry.product2.Family FROM OpportunityLineItems) FROM Opportunity',
@@ -206,7 +200,9 @@ describe('Execute a SOQL statement', (): void => {
 
     describe('reporters produce the correct aggregate query', () => {
       beforeEach(() => {
-        soqlQuerySpy = $$.SANDBOX.stub(query, 'runSoqlQuery')
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        soqlQuerySpy = $$.SANDBOX.stub(DataSoqlQueryCommand.prototype, 'runSoqlQuery')
           // aggregate query types are wrong in jsforce
           .resolves(soqlQueryExemplars.queryWithAggregates.soqlQueryResult as unknown as SoqlQueryResult);
         stdoutSpy = $$.SANDBOX.stub(process.stdout, 'write');
@@ -217,7 +213,7 @@ describe('Execute a SOQL statement', (): void => {
       //
       it('should have json results', async () => {
         const cmd = new DataSoqlQueryCommand(
-          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'json'],
+          ['--target-org', 'test@org.com', '--query', 'select ', '--result-format', 'json'],
           config
         );
         // eslint-disable-next-line no-underscore-dangle
@@ -244,7 +240,7 @@ describe('Execute a SOQL statement', (): void => {
 
       it('should have human results', async () => {
         await DataSoqlQueryCommand.run(
-          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'human'],
+          ['--target-org', 'test@org.com', '--query', 'select ', '--result-format', 'human'],
           config
         );
 

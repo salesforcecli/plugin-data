@@ -19,10 +19,12 @@ import {
   toJsonMap,
 } from '@salesforce/ts-types';
 import { Duration } from '@salesforce/kit';
-import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
-import { orgFlags, perflogFlag } from '../../flags';
-import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from '../../reporters';
+import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
+import { orgFlags, perflogFlag, resultFormatFlag } from '../../flags';
 import { Field, FieldType, SoqlQueryResult } from '../../dataSoqlQueryTypes';
+import { displayResults, transformBulkResults } from '../../queryUtils';
+import { FormatTypes } from '../../reporters';
+import { BulkQueryRequestCache } from '../../bulkDataRequestCache';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
@@ -73,15 +75,7 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
       dependsOn: ['bulk'],
       exclusive: ['wait'],
     }),
-    // TODO: use union type from
-    'result-format': Flags.custom<'human' | 'json' | 'csv'>({
-      char: 'r',
-      summary: messages.getMessage('flags.resultFormat'),
-      options: ['human', 'json', 'csv'],
-      default: 'human',
-      aliases: ['resultformat'],
-      deprecateAliases: true,
-    })(),
+    'result-format': resultFormatFlag,
     perflog: perflogFlag,
   };
 
@@ -107,101 +101,90 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
     const flags = (await this.parse(DataSoqlQueryCommand)).flags;
 
     try {
-      // soqlqueryfile will be be present if flags.query isn't. Oclif exactlyOne isn't quite that clever
+      // soqlqueryfile will be present if flags.query isn't. Oclif exactlyOne isn't quite that clever
       const queryString = flags.query ?? fs.readFileSync(flags.file as string, 'utf8');
       const conn = flags['target-org'].getConnection(flags['api-version']);
-      const ux = new Ux({ jsonEnabled: this.jsonEnabled() });
       if (flags['result-format'] !== 'json') this.spinner.start(messages.getMessage('queryRunningMessage'));
       const queryResult = flags.bulk
-        ? await runBulkSoqlQuery(conn, queryString, flags.async ? Duration.minutes(0) : flags.wait, ux)
-        : await runSoqlQuery(
+        ? await this.runBulkSoqlQuery(
+            conn,
+            queryString,
+            flags.async ? Duration.minutes(0) : flags.wait ?? Duration.minutes(0)
+          )
+        : await this.runSoqlQuery(
             flags['use-tooling-api'] ? conn.tooling : conn,
             queryString,
             this.logger,
-            ux,
             this.configAggregator.getInfo('org-max-query-limit').value as number
           );
       if (!this.jsonEnabled()) {
-        // TODO: make the enum or string/options work correctly
-        displayResults({ ...queryResult }, flags['result-format'] as keyof typeof FormatTypes);
+        displayResults({ ...queryResult }, flags['result-format'] as FormatTypes);
       }
       return queryResult.result;
     } finally {
       if (flags['result-format'] !== 'json') this.spinner.stop();
     }
   }
-}
-
-export const displayResults = (queryResult: SoqlQueryResult, resultFormat: keyof typeof FormatTypes): void => {
-  let reporter: HumanReporter | JsonReporter | CsvReporter;
-  switch (resultFormat) {
-    case 'human':
-      reporter = new HumanReporter(queryResult, queryResult.columns);
-      break;
-    case 'json':
-      reporter = new JsonReporter(queryResult, queryResult.columns);
-      break;
-    case 'csv':
-      reporter = new CsvReporter(queryResult, queryResult.columns);
-      break;
-  }
-  // delegate to selected reporter
-  reporter.display();
-};
-
-/**
- * transforms Bulk 2.0 results to match the SOQL query results
- *
- * @param results results object
- * @param query query string
- */
-export const transformBulkResults = (results: Record[], query: string): SoqlQueryResult => {
-  /*
-    bulk queries return a different payload, it's a [{column: data}, {column: data}]
-    so we just need to grab the first object, find the keys (columns) and create the columns
-     */
-  const columns: Field[] = Object.keys(results[0] ?? {}).map((name) => ({
-    fieldType: FieldType.field,
-    name,
-  }));
-
-  return {
-    columns,
-    result: { done: true, records: results, totalSize: results.length },
-    query,
-  };
-};
-
-/**
- * Executs a SOQL query using the bulk 2.0 API
- *
- * @param connection
- * @param query
- * @param timeout
- * @param jsonEnabled
- */
-const runBulkSoqlQuery = async (
-  connection: Connection,
-  query: string,
-  timeout: Duration = Duration.seconds(10),
-  ux: Ux
-): Promise<SoqlQueryResult> => {
-  connection.bulk2.pollTimeout = timeout.milliseconds ?? Duration.minutes(5).milliseconds;
-  let res: Record[];
-  try {
-    res = (await connection.bulk2.query(query)) ?? [];
-    return transformBulkResults(res, query);
-  } catch (e) {
-    const err = e as Error & { jobId: string };
-    if (timeout.minutes === 0 && err.message.includes('Polling time out')) {
-      // async query, so we can't throw an error, suggest force:data:query:report --queryid <id>
-      ux.log(messages.getMessage('bulkQueryTimeout', [err.jobId, err.jobId, connection.getUsername()]));
-      return { columns: [], result: { done: false, records: [], totalSize: 0, id: err.jobId }, query };
-    } else {
-      throw SfError.wrap(err);
+  /**
+   * Executes a SOQL query using the bulk 2.0 API
+   *
+   * @param connection
+   * @param query
+   * @param timeout
+   */
+  private async runBulkSoqlQuery(connection: Connection, query: string, timeout: Duration): Promise<SoqlQueryResult> {
+    connection.bulk2.pollTimeout = timeout.milliseconds ?? Duration.minutes(5).milliseconds;
+    let res: Record[];
+    try {
+      res = (await connection.bulk2.query(query)) ?? [];
+      return transformBulkResults(res, query);
+    } catch (e) {
+      const err = e as Error & { jobId: string };
+      if (timeout.minutes === 0 && err.message.includes('Polling time out')) {
+        // async query, so we can't throw an error, suggest data:query:resume --queryid <id>
+        const cache = await BulkQueryRequestCache.create();
+        await cache.createCacheEntryForRequest(err.jobId, connection.getUsername(), connection.getApiVersion());
+        this.log(messages.getMessage('bulkQueryTimeout', [err.jobId, err.jobId, connection.getUsername()]));
+        return { columns: [], result: { done: false, records: [], totalSize: 0, id: err.jobId }, query };
+      } else {
+        throw SfError.wrap(err);
+      }
     }
   }
-};
+  private async runSoqlQuery(
+    connection: Connection | Connection['tooling'],
+    query: string,
+    logger: Logger,
+    maxFetch: number | undefined
+  ): Promise<SoqlQueryResult> {
+    logger.debug('running query');
+
+    const options = {
+      autoFetch: true,
+      maxFetch: maxFetch ?? 50_000,
+    };
+    const result = await connection.query(query, options);
+    if (result.records.length && result.totalSize > result.records.length) {
+      this.warn(
+        `The query result is missing ${
+          result.totalSize - result.records.length
+        } records due to a ${maxFetch} record limit. Increase the number of records returned by setting the config value "org-max-query-limit" or the environment variable "SF_ORG_MAX_QUERY_LIMIT" to ${
+          result.totalSize
+        } or greater than ${maxFetch}.`
+      );
+    }
+
+    logger.debug(`Query complete with ${result.totalSize} records returned`);
+
+    const columns = result.totalSize ? await retrieveColumns(connection, query, logger) : [];
+
+    return {
+      query,
+      columns,
+      result,
+    };
+  }
+}
 
 const searchSubColumnsRecursively = (parent: AnyJson): string[] => {
   const column = ensureJsonMap(parent);
@@ -219,6 +202,7 @@ const searchSubColumnsRecursively = (parent: AnyJson): string[] => {
  *
  * @param connection
  * @param query
+ * @param logger
  */
 
 export const retrieveColumns = async (
@@ -286,39 +270,4 @@ const recursivelyFindColumns = (data: JsonArray): Field[] => {
     }
   }
   return columns;
-};
-
-export const runSoqlQuery = async (
-  connection: Connection | Connection['tooling'],
-  query: string,
-  logger: Logger,
-  ux: Ux,
-  maxFetch = 50000
-): Promise<SoqlQueryResult> => {
-  logger.debug('running query');
-
-  const options = {
-    autoFetch: true,
-    maxFetch,
-  };
-  const result = await connection.query(query, options);
-  if (result.records.length && result.totalSize > result.records.length) {
-    ux.warn(
-      `The query result is missing ${
-        result.totalSize - result.records.length
-      } records due to a ${maxFetch} record limit. Increase the number of records returned by setting the config value "org-max-query-limit" or the environment variable "SF_ORG_MAX_QUERY_LIMIT" to ${
-        result.totalSize
-      } or greater than ${maxFetch}.`
-    );
-  }
-
-  logger.debug(`Query complete with ${result.totalSize} records returned`);
-
-  const columns = result.totalSize ? await retrieveColumns(connection, query, logger) : [];
-
-  return {
-    query,
-    columns,
-    result,
-  };
 };
