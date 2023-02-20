@@ -89,7 +89,7 @@ export class ImportApi {
   private config!: ImportConfig;
   private importPlanConfig: DataPlanPart[] = [];
 
-  public constructor(private readonly org: Org) {
+  public constructor(private readonly org: Org, private readonly cli: string, private readonly separator: string) {
     this.logger = Logger.childFromRoot(this.constructor.name);
     this.schemaValidator = new SchemaValidator(this.logger, importPlanSchemaFile);
   }
@@ -293,7 +293,14 @@ export class ImportApi {
           throw new SfError(
             messages.getMessage('dataPlanValidationError', [planPath, error.message]),
             INVALID_DATA_IMPORT_ERR_NAME,
-            messages.getMessages('dataPlanValidationErrorActions')
+            messages.getMessages('dataPlanValidationErrorActions', [
+              this.cli,
+              this.separator,
+              this.separator,
+              this.cli,
+              this.separator,
+              this.separator,
+            ])
           );
         }
         throw SfError.wrap(error);

@@ -29,13 +29,7 @@ const isCompleted = async (cmd: string): Promise<void> => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (result.jsonOutput.result.jobInfo.state === 'JobComplete') {
         complete = true;
-      } else {
-        // eslint-disable-next-line no-console
-        console.log(result);
       }
-    } else {
-      // eslint-disable-next-line no-console
-      console.log(result);
     }
   }
 };

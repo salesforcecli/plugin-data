@@ -6,7 +6,7 @@
  */
 import { BatchInfo } from 'jsforce/api/bulk';
 import { Messages, SfError } from '@salesforce/core';
-import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
+import { Flags, SfCommand, Ux } from '@salesforce/sf-plugins-core';
 import { orgFlags } from '../../../../flags';
 import { Batcher } from '../../../../batcher';
 import { StatusResult } from '../../../../types';
@@ -21,14 +21,16 @@ export default class Status extends SfCommand<StatusResult> {
 
   public static readonly flags = {
     ...orgFlags,
-    'batch-id': Flags.salesforceId({length: 18,
+    'batch-id': Flags.salesforceId({
+      length: 18,
       char: 'b',
       startsWith: '751',
       summary: messages.getMessage('flags.batchid'),
       aliases: ['batchid'],
       deprecateAliases: true,
     }),
-    'job-id': Flags.salesforceId({length: 18,
+    'job-id': Flags.salesforceId({
+      length: 18,
       char: 'i',
       startsWith: '750',
       summary: messages.getMessage('flags.jobid'),
@@ -42,7 +44,12 @@ export default class Status extends SfCommand<StatusResult> {
     const { flags } = await this.parse(Status);
     this.spinner.start('Getting Status');
     const conn = flags['target-org'].getConnection(flags['api-version']);
-    const batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
+    const batcher = new Batcher(
+      conn,
+      new Ux({ jsonEnabled: this.jsonEnabled() }),
+      this.config.bin,
+      this.config.pjson.oclif.topicSeparator ?? ':'
+    );
     if (flags['job-id'] && flags['batch-id']) {
       // view batch status
       const job = conn.bulk.job(flags['job-id']);

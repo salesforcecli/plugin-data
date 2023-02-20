@@ -6,7 +6,7 @@
  */
 import * as fs from 'fs';
 import { Messages } from '@salesforce/core';
-import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
+import { Flags, SfCommand, Ux } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
 import { orgFlags } from '../../../../flags';
 import { Batcher, BatcherReturnType } from '../../../../batcher';
@@ -65,7 +65,12 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
 
     await validateSobjectType(flags.sobject, conn);
 
-    const batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
+    const batcher = new Batcher(
+      conn,
+      new Ux({ jsonEnabled: this.jsonEnabled() }),
+      this.config.bin,
+      this.config.pjson.oclif.topicSeparator ?? ':'
+    );
     const csvStream = fs.createReadStream(flags.file, { encoding: 'utf-8' });
 
     const concurrencyMode = flags.serial ? 'Serial' : 'Parallel';

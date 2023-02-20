@@ -49,7 +49,12 @@ export default class Status extends SfCommand<StatusResult> {
     const { flags } = await this.parse(Status);
     this.spinner.start('Getting Status');
     const conn = flags['target-org'].getConnection(flags['api-version']);
-    const batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
+    const batcher = new Batcher(
+      conn,
+      new Ux({ jsonEnabled: this.jsonEnabled() }),
+      this.config.bin,
+      this.config.pjson.oclif.topicSeparator ?? ':'
+    );
     if (flags['job-id'] && flags['batch-id']) {
       // view batch status
       const job = conn.bulk.job(flags['job-id']);

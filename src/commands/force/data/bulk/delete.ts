@@ -64,7 +64,12 @@ export default class Delete extends SfCommand<BatcherReturnType> {
 
     const csvRecords: ReadStream = fs.createReadStream(flags.file, { encoding: 'utf-8' });
     const job = conn.bulk.createJob<'delete'>(flags.sobject, 'delete');
-    const batcher: Batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
+    const batcher: Batcher = new Batcher(
+      conn,
+      new Ux({ jsonEnabled: this.jsonEnabled() }),
+      this.config.bin,
+      this.config.pjson.oclif.topicSeparator ?? ':'
+    );
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
     return new Promise(async (resolve, reject) => {

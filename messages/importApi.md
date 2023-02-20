@@ -40,11 +40,11 @@ Data plan file %s did not validate against the schema. Errors: %s.
 
 # dataPlanValidationErrorActions
 
-- Did you run the "sfdx data export tree" command with the --plan flag?
+- Did you run the "%s data%sexport%stree" command with the --plan flag?
 
 - Make sure you're importing a plan definition file.
 
-- Get help with the import plan schema by running "sfdx data import tree --config-help".
+- Get help with the import plan schema by running "%s data%simport%stree --config-help".
 
 # FlsError
 
