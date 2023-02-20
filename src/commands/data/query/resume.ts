@@ -59,7 +59,7 @@ export class BulkQueryReport extends SfCommand<unknown> {
       flags['target-org'],
       flags['api-version']
     );
-    const job = new QueryJobV2(resumeOptions.options);
+    const job = new QueryJobV2({ ...resumeOptions.options, operation: 'query' });
     job.jobInfo = resumeOptions.jobInfo;
     const results = await job.getResults();
     const queryResult = transformBulkResults(results, '');

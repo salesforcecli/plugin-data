@@ -11,7 +11,6 @@ import { ResumeOptions } from './types';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
-export type BulkOperation = 'query' | 'upsert' | 'delete';
 
 export type BulkDataCacheConfig = {
   username: string;
@@ -54,12 +53,12 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
   }
 
   public async resolveResumeOptionsFromCache(
-    bulkQueryId: string | undefined,
+    bulkJobId: string | undefined,
     useMostRecent: boolean,
     org: Org | undefined,
     apiVersion: string | undefined
   ): Promise<ResumeOptions> {
-    if (!useMostRecent && !bulkQueryId) {
+    if (!useMostRecent && !bulkJobId) {
       throw messages.createError('bulkRequestIdRequiredWhenNotUsingMostRecent');
     }
     const resumeOptions = {
@@ -81,8 +80,8 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
         return resumeOptions;
       }
     }
-    if (bulkQueryId) {
-      const entry = this.get(bulkQueryId);
+    if (bulkJobId) {
+      const entry = this.get(bulkJobId);
       if (entry) {
         resumeOptions.options.connection = (await Org.create({ aliasOrUsername: entry.username })).getConnection(
           apiVersion
@@ -91,7 +90,7 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
         return resumeOptions;
       } else if (org) {
         resumeOptions.options.connection = org.getConnection(apiVersion);
-        resumeOptions.jobInfo = { id: bulkQueryId };
+        resumeOptions.jobInfo = { id: bulkJobId };
         return resumeOptions;
       } else {
         throw messages.createError('cannotCreateResumeOptionsWithoutAnOrg');

@@ -4,9 +4,8 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { BatchInfo, JobInfo, QueryOperation } from 'jsforce/lib/api/bulk';
+import { JobInfoV2, BatchInfo, JobInfo } from 'jsforce/lib/api/bulk';
 import { Connection } from '@salesforce/core';
-import { JobInfoV2 } from 'jsforce/api/bulk';
 
 export type BulkProcessedRecordV2 = {
   sf__Created: 'true' | 'false';
@@ -21,9 +20,11 @@ export type BulkRecordsV2 = {
 
 export type StatusResult = BatchInfo[] | JobInfo;
 
+export type BulkOperation = 'query' | 'upsert' | 'delete';
+
 export type ResumeOptions = {
   options: {
-    operation: QueryOperation;
+    operation: BulkOperation;
     pollingOptions: { pollTimeout: number; pollInterval: number };
     query: string;
     connection: Connection;
@@ -35,4 +36,3 @@ export type BulkResultV2 = {
   jobInfo: JobInfoV2;
   records?: BulkRecordsV2;
 };
-
