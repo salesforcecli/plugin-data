@@ -14,14 +14,7 @@ import { Batcher, BatcherReturnType } from '../../../../batcher';
 import { validateSobjectType } from '../../../../bulkUtils';
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.load('@salesforce/plugin-data', 'bulk.delete', [
-  'examples',
-  'summary',
-  'description',
-  'flags.csvfile',
-  'flags.sobjecttype',
-  'flags.wait',
-]);
+const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.delete');
 
 export default class Delete extends SfCommand<BatcherReturnType> {
   public static readonly examples = messages.getMessages('examples');
