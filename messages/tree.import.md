@@ -4,7 +4,7 @@ Import data from one or more JSON files into an org.
 
 # description
 
-The JSON files that contain the data are in sObject tree format, which is a collection of nested, parent-child records with a single root record. Use the "<%= config.bin %> data export tree" command to generate these JSON files.
+The JSON files that contain the data are in sObject tree format, which is a collection of nested, parent-child records with a single root record. Use the "sf data export tree" command to generate these JSON files.
 
 If you used the --plan flag when exporting the data to generate a plan definition file, use the --plan flag to reference the file when you import. If you're not using a plan, use the --files flag to list the files. If you specify multiple JSON files that depend on each other in a parent-child relationship, be sure you list them in the correct order.
 
