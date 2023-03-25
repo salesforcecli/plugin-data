@@ -4,6 +4,13 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+
+import * as fs from 'fs';
+import * as path from 'path';
+import { Transform, Readable } from 'stream';
+import { pipeline } from 'node:stream/promises';
+import { json2csv } from 'json-2-csv';
+
 import { IngestJobV2, IngestJobV2Results, IngestOperation, JobInfoV2 } from 'jsforce/lib/api/bulk';
 import { Schema } from 'jsforce';
 import { Connection, Messages } from '@salesforce/core';
@@ -52,3 +59,57 @@ export const waitOrTimeout = async (job: IngestJobV2<Schema, IngestOperation>, w
     }
   }
 };
+
+async function createJsonFile(readStream: Readable, filePath: string): Promise<void> {
+  // create an initialize array
+  fs.writeFileSync(filePath, '[', { encoding: 'utf-8' });
+  const writeStream = fs.createWriteStream(filePath, { flags: 'a' });
+
+  // transform record objects into strings
+  let batchCounter = 0;
+  const jsonTransformer = new Transform({
+    writableObjectMode: true,
+    transform(records, encoding, callback): void {
+      const jsonString = JSON.stringify(records)
+        .replace('[', batchCounter ? ',' : '')
+        .replace(']', '');
+      this.push(jsonString);
+      batchCounter++;
+      callback();
+    },
+  });
+
+  // add records to file
+  await pipeline(readStream, jsonTransformer, writeStream);
+
+  // close array
+  fs.writeFileSync(filePath, ']', { encoding: 'utf-8', flag: 'a' });
+}
+
+async function createCsvFile(readStream: Readable, filePath: string): Promise<void> {
+  // create csv file
+  const writeStream = fs.createWriteStream(filePath);
+
+  // transform records into csv lines
+  let batchCounter = 0;
+  const csvTransformer = new Transform({
+    writableObjectMode: true,
+    async transform(records: object[], encoding, callback): Promise<void> {
+      const csvString = await json2csv(records, {
+        prependHeader: !batchCounter,
+      });
+      this.push(csvString.concat('\n'));
+      batchCounter++;
+      callback();
+    },
+  });
+
+  // add records to file
+  await pipeline(readStream, csvTransformer, writeStream);
+}
+
+export async function createFile(readStream: Readable, filePath: string): Promise<void> {
+  const fileExtension = path.extname(filePath);
+  const fileCreator = fileExtension === '.json' ? createJsonFile : createCsvFile;
+  await fileCreator(readStream, filePath);
+}

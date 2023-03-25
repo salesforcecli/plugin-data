@@ -110,6 +110,7 @@
     "csv-stringify": "^6.3.0",
     "fs-extra": "^10.0.1",
     "jsforce": "2.0.0-beta.20",
+    "json-2-csv": "^4.0.0",
     "tslib": "^2"
   },
   "devDependencies": {
