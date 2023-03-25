@@ -40,14 +40,6 @@ Use Tooling API so you can run queries on Tooling API objects.
 
 File that contains the SOQL query.
 
-# flags.bulk
-
-Use Bulk API 2.0 to run the query.
-
-# flags.async
-
-Use Bulk API 2.0, but don't wait for the job to complete.
-
 # flags.wait
 
 Time to wait for the command to finish, in minutes.
@@ -63,10 +55,3 @@ Total number of records retrieved: %s.
 # queryRunningMessage
 
 Querying Data
-
-# bulkQueryTimeout
-
-Query ID: %s
-Query is in progress.
-
-Run "data query resume -i %s -o %s" to get the latest status and results.

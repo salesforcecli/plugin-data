@@ -6,7 +6,7 @@
  */
 
 import * as fs from 'fs';
-import { Connection, Logger, Messages, SfError } from '@salesforce/core';
+import { Connection, Logger, Messages } from '@salesforce/core';
 import { Record } from 'jsforce';
 import {
   AnyJson,
@@ -18,13 +18,11 @@ import {
   JsonArray,
   toJsonMap,
 } from '@salesforce/ts-types';
-import { Duration } from '@salesforce/kit';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { orgFlags, perflogFlag, resultFormatFlag } from '../../flags';
 import { Field, FieldType, SoqlQueryResult } from '../../dataSoqlQueryTypes';
-import { displayResults, transformBulkResults } from '../../queryUtils';
+import { displayResults } from '../../queryUtils';
 import { FormatTypes } from '../../reporters';
-import { BulkQueryRequestCache } from '../../bulkDataRequestCache';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
@@ -57,23 +55,10 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
       aliases: ['usetoolingapi'],
       deprecateAliases: true,
     }),
-    bulk: Flags.boolean({
-      char: 'b',
-      default: false,
-      summary: messages.getMessage('flags.bulk'),
-      exclusive: ['use-tooling-api'],
-    }),
     wait: Flags.duration({
       unit: 'minutes',
       char: 'w',
       summary: messages.getMessage('flags.wait'),
-      dependsOn: ['bulk'],
-      exclusive: ['async'],
-    }),
-    async: Flags.boolean({
-      summary: messages.getMessage('flags.async'),
-      dependsOn: ['bulk'],
-      exclusive: ['wait'],
     }),
     'result-format': resultFormatFlag,
     perflog: perflogFlag,
@@ -102,55 +87,27 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
 
     try {
       // soqlqueryfile will be present if flags.query isn't. Oclif exactlyOne isn't quite that clever
-      const queryString = flags.query ?? fs.readFileSync(flags.file as string, 'utf8');
+      const query = flags.query ?? fs.readFileSync(flags.file as string, 'utf8');
       const conn = flags['target-org'].getConnection(flags['api-version']);
       if (flags['result-format'] !== 'json') this.spinner.start(messages.getMessage('queryRunningMessage'));
-      const queryResult = flags.bulk
-        ? await this.runBulkSoqlQuery(
-            conn,
-            queryString,
-            flags.async ? Duration.minutes(0) : flags.wait ?? Duration.minutes(0)
-          )
-        : await this.runSoqlQuery(
-            flags['use-tooling-api'] ? conn.tooling : conn,
-            queryString,
-            this.logger,
-            this.configAggregator.getInfo('org-max-query-limit').value as number
-          );
+
+      const queryResult = await this.runSoqlQuery(
+        flags['use-tooling-api'] ? conn.tooling : conn,
+        query,
+        this.logger,
+        this.configAggregator.getInfo('org-max-query-limit').value as number
+      );
+
       if (!this.jsonEnabled()) {
         displayResults({ ...queryResult }, flags['result-format'] as FormatTypes);
       }
+
       return queryResult.result;
     } finally {
       if (flags['result-format'] !== 'json') this.spinner.stop();
     }
   }
-  /**
-   * Executes a SOQL query using the bulk 2.0 API
-   *
-   * @param connection
-   * @param query
-   * @param timeout
-   */
-  private async runBulkSoqlQuery(connection: Connection, query: string, timeout: Duration): Promise<SoqlQueryResult> {
-    connection.bulk2.pollTimeout = timeout.milliseconds ?? Duration.minutes(5).milliseconds;
-    let res: Record[];
-    try {
-      res = (await connection.bulk2.query(query)) ?? [];
-      return transformBulkResults(res, query);
-    } catch (e) {
-      const err = e as Error & { jobId: string };
-      if (timeout.minutes === 0 && err.message.includes('Polling time out')) {
-        // async query, so we can't throw an error, suggest data:query:resume --queryid <id>
-        const cache = await BulkQueryRequestCache.create();
-        await cache.createCacheEntryForRequest(err.jobId, connection.getUsername(), connection.getApiVersion());
-        this.log(messages.getMessage('bulkQueryTimeout', [err.jobId, err.jobId, connection.getUsername()]));
-        return { columns: [], result: { done: false, records: [], totalSize: 0, id: err.jobId }, query };
-      } else {
-        throw SfError.wrap(err);
-      }
-    }
-  }
+
   private async runSoqlQuery(
     connection: Connection | Connection['tooling'],
     query: string,

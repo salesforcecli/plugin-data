@@ -29,11 +29,24 @@ export interface Field {
  */
 export type SoqlQueryResult = {
   query: string;
+  result: QueryResult<Record>;
+  columns: Field[];
+};
+
+/**
+ * Type to define Bulk SOQL Query results
+ */
+export type BulkSoqlQueryResult = {
+  query: string;
   // an id can be present when a bulk query times out
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore jsforce v2 types are too strict for running general queries
-  result: QueryResult<Record> & { id?: string };
-  columns: Field[];
+  result: {
+    done: boolean;
+    totalSize: number;
+    filePath: string;
+    id?: string;
+  };
 };
 
 export type BasicRecord = {
