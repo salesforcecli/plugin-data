@@ -24,7 +24,7 @@
     ],
     "topics": {
       "force": {
-        "description": "manipulate data in your orgs using Bulk API V1",
+        "description": "Legacy commands for backward compatibility.",
         "subtopics": {
           "data": {
             "description": "manipulate records in your org",
