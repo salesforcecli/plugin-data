@@ -27,11 +27,11 @@
         "description": "Legacy commands for backward compatibility.",
         "subtopics": {
           "data": {
-            "description": "manipulate records in your org",
+            "description": "Manage records in your org using Bulk API V1.",
             "longDescription": "Use the data commands to insert and delete data in your orgs using V1 of Bulk API, using CSV files as input.",
             "subtopics": {
               "bulk": {
-                "description": "manipulate records in your org using Bulk API V1",
+                "description": "Bulk manage records in your org using Bulk API V1",
                 "longDescription": "Use the data commands to insert and delete data in your orgs using V1 of Bulk API, using CSV files as input."
               }
             }
@@ -39,32 +39,32 @@
         }
       },
       "data": {
-        "description": "manipulate records in your org",
+        "description": "Manage records in your org.",
         "longDescription": "Use the data commands to manipulate records in your org. Commands are available to help you work with various APIs. Import CSV files with the Bulk API V2. Export and import data with the SObject Tree Save API. Perform simple CRUD operations on individual records with the REST API.",
         "subtopics": {
           "create": {
-            "description": "create a record"
+            "description": "Create a record."
           },
           "delete": {
-            "description": "delete a single record or multiple records in bulk"
+            "description": "Delete a single record or multiple records in bulk."
           },
           "export": {
-            "description": "export data from your org"
+            "description": "Export data from your org."
           },
           "get": {
-            "description": "get a single record"
+            "description": "Get a single record."
           },
           "import": {
-            "description": "import data via the tree api"
+            "description": "Import data to your org."
           },
           "query": {
-            "description": "query records"
+            "description": "Query records."
           },
           "update": {
-            "description": "update a single record"
+            "description": "Update a single record."
           },
           "upsert": {
-            "description": "upsert many records via the bulk API"
+            "description": "Upsert many records."
           }
         }
       }
