@@ -19,7 +19,7 @@ export default class Get extends SfCommand<Record> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
-  public static aliases = ['force:data:record:get'];
+  public static readonly aliases = ['force:data:record:get'];
   public static readonly deprecateAliases = true;
 
   public static readonly flags = {
