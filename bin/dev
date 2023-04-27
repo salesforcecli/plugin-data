@@ -18,4 +18,12 @@ const g = (global.oclif = global.oclif || {});
 global.oclif.debug = true;
 
 // Start the CLI
-oclif.run().then(require('@oclif/core/flush')).catch(require('@oclif/core/handle'));
+// oclif.run().then(require('@oclif/core/flush')).catch(require('@oclif/core/handle'));
+oclif
+  .run()
+  .then(function (result) {
+    require('@oclif/core/flush')();
+  })
+  .catch(function (err) {
+    require('@oclif/core/handle')(err);
+  });
