@@ -37,16 +37,21 @@ const isCompleted = async (cmd: string): Promise<void> => {
       ) {
         complete = true;
       } else {
-        // eslint-disable-next-line no-console
-        console.log(result);
+        logUnifiedResults(result.jsonOutput.result);
       }
     } else {
       // eslint-disable-next-line no-console
-      console.log(result);
+      console.log(`dataBulkNut got an unexpected nonzero result ${result.jsonError?.message}`);
     }
   }
 };
 
+const logUnifiedResults = (result: StatusResult): void => {
+  if (!Array.isArray(result)) {
+    // eslint-disable-next-line no-console
+    console.log(`DataBulk.nut.ts is polling for completion.  Job ${result.id} is ${result.state}`);
+  }
+};
 /* Check the status of the bulk upsert job using json output to determine progress
  * The four states of a job are Queued, Completed, InProgress, and Aborted. If Aborted, the test will fail
  * Otherwise run status until job is Completed
