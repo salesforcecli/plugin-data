@@ -3,6 +3,10 @@
   "include": ["./**/*.ts"],
   "compilerOptions": {
     "skipLibCheck": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "baseUrl": "..",
+    "paths": {
+      "@salesforce/kit": ["node_modules/@salesforce/kit"]
+    }
   }
 }
