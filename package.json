@@ -106,7 +106,7 @@
     "@salesforce/core": "^4.0.1",
     "@salesforce/kit": "^3.0.2",
     "@salesforce/sf-plugins-core": "^3.0.2",
-    "@salesforce/ts-types": "^2.0.2",
+    "@salesforce/ts-types": "^2.0.3",
     "chalk": "^4.1.0",
     "csv-parse": "^4.16.3",
     "csv-stringify": "^6.4.0",
