@@ -1,3 +1,12 @@
+## [2.3.21](https://github.com/salesforcecli/plugin-data/compare/2.3.20...2.3.21) (2023-06-05)
+
+
+### Bug Fixes
+
+* bump and dedup ts-types ([#587](https://github.com/salesforcecli/plugin-data/issues/587)) ([025c909](https://github.com/salesforcecli/plugin-data/commit/025c909f83603ea8287c85a4f1b9874a0709f820))
+
+
+
 ## [2.3.20](https://github.com/salesforcecli/plugin-data/compare/2.3.19...2.3.20) (2023-05-29)
 
 
