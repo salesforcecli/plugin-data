@@ -1,3 +1,12 @@
+## [2.3.22](https://github.com/salesforcecli/plugin-data/compare/2.3.21...2.3.22) (2023-06-06)
+
+
+### Bug Fixes
+
+* remove duplicate short char ([30e7275](https://github.com/salesforcecli/plugin-data/commit/30e7275ba07b99977962f0148de6b99949b2ae76))
+
+
+
 ## [2.3.21](https://github.com/salesforcecli/plugin-data/compare/2.3.20...2.3.21) (2023-06-05)
 
 
