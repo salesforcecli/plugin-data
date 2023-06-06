@@ -44,7 +44,6 @@ export class BulkQueryReport extends SfCommand<unknown> {
       deprecateAliases: true,
     }),
     'use-most-recent': Flags.boolean({
-      char: 'r',
       summary: reportMessages.getMessage('flags.useMostRecent.summary'),
       exclusive: ['bulk-query-id'],
     }),
