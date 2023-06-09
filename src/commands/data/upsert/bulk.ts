@@ -112,24 +112,30 @@ export default class Upsert extends BulkOperationCommand {
     const firstLine = lines[0];
     const rest = lines.splice(10);
     const chunks = [];
+    const results: BulkResultV2[] = [];
     for (let i = 0; i < rest.length; i += 10) {
       const chunk = [firstLine, ...rest.slice(i, i + 10)];
       chunks.push(chunk.join(os.EOL));
       fs.writeFileSync(`temp${i / 10}.csv`, chunk.join(os.EOL));
-      // eslint-disable-next-line no-await-in-loop
-      await this.runBulkOperation(
-        options.sobject,
-        `temp${i / 10}.csv`,
-        options.conn,
-        options.async ? 0 : options.wait?.minutes,
-        'upsert',
-        {
-          extIdField: options.externalId,
-        }
+      results.push(
+        // eslint-disable-next-line no-await-in-loop
+        await this.runBulkOperation(
+          options.sobject,
+          `temp${i / 10}.csv`,
+          options.conn,
+          options.async ? 0 : options.wait?.minutes,
+          'upsert',
+          {
+            extIdField: options.externalId,
+          }
+        )
       );
       fs.unlinkSync(`temp${i / 10}.csv`);
     }
 
-    return {} as BulkResultV2;
+    return {
+      jobInfo: results[results.length - 1].jobInfo,
+      records: results.flatMap((r) => r.records)[0],
+    } as BulkResultV2;
   }
 }
