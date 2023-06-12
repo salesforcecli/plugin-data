@@ -65,7 +65,6 @@ describe('data:bulk commands', () => {
     testSession = await TestSession.create({
       scratchOrgs: [
         {
-          executable: 'sfdx',
           config: 'config/project-scratch-def.json',
           setDefault: true,
         },
@@ -82,7 +81,7 @@ describe('data:bulk commands', () => {
   describe('data:bulk verify json and human responses', () => {
     describe('data:upsert:bulk then data:upsert:resume then soql:query and data:delete:bulk', () => {
       it('should upsert, query, and delete 10 accounts', async () => {
-        const bulkUpsertResult: BulkResultV2 = bulkInsertAccounts();
+        const bulkUpsertResult = bulkInsertAccounts();
         let jobInfo = bulkUpsertResult.jobInfo;
         expect(jobInfo).to.have.property('id');
         await isCompleted(`data:upsert:resume --job-id ${jobInfo.id} --json`);
@@ -103,7 +102,7 @@ describe('data:bulk commands', () => {
 
 const queryAccountRecords = () => {
   const queryResponse = execCmd<QueryResult>(
-    `data:query --query "select id from Account where phone='${'415-555-0000'.toString()}'" --json`,
+    'data:query --query "select id from Account where phone=\'415-555-0000\'" --json',
     {
       ensureExitCode: 0,
     }
@@ -145,14 +144,12 @@ const bulkInsertAccounts = (): BulkResultV2 => {
   console.error(`rawResponse: ${JSON.stringify(rawResponse, null, 2)}`);
   const response: BulkResultV2 | undefined = rawResponse.jsonOutput?.result as BulkResultV2;
   if (response?.records) {
-    /* eslint-disable @typescript-eslint/no-unsafe-member-access, ,@typescript-eslint/no-unsafe-assignment */
     const records = response.records?.successfulResults;
     assert.equal(records?.length, 10);
     const bulkUpsertResult = response.records?.successfulResults[0];
     assert(Object.keys(ensurePlainObject(bulkUpsertResult)).includes('sf__Id'));
     const jobInfo = response.jobInfo;
     assert('id' in jobInfo);
-    /* eslint-enable @typescript-eslint/no-unsafe-member-access, ,@typescript-eslint/no-unsafe-assignment */
   }
   return response;
 };

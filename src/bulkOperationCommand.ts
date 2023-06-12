@@ -106,6 +106,7 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
     this.operation = operation;
     this.wait = wait;
     try {
+      const csvRecords: ReadStream = fs.createReadStream(csvFileName, { encoding: 'utf-8' });
       this.spinner.start(`Running ${this.isAsync ? 'async ' : ''}bulk ${operation} request`);
       this.endWaitTime = Date.now() + Duration.minutes(this.wait).milliseconds;
       this.spinner.status = this.getRemainingTimeStatus();
@@ -122,7 +123,6 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
 
       this.setupLifecycleListeners();
       try {
-        const csvRecords: ReadStream = fs.createReadStream(csvFileName, { encoding: 'utf-8' });
         const jobInfo = await BulkOperationCommand.executeBulkV2DataRequest(this.job, csvRecords, sobject, this.wait);
         if (this.isAsync) {
           await this.cache?.createCacheEntryForRequest(

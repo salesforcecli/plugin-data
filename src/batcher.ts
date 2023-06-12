@@ -5,6 +5,8 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { ReadStream } from 'fs';
+import * as fs from 'fs';
+import { EOL } from 'os';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { Ux } from '@salesforce/sf-plugins-core';
 import { BulkIngestBatchResult, Job, JobInfo, Batch, BatchInfo, BulkOperation } from 'jsforce/api/bulk';
@@ -344,4 +346,42 @@ export const splitIntoBatches = async (readStream: ReadStream): Promise<Batches>
       resolve(batches);
     });
   });
+};
+
+/**
+ * Unfortunately we have to read the whole file into memory and break it up apart line by line
+ * to guarantee that it continues to match csv format once it's broken up into batches
+ *
+ * @param {string} data - raw string data from a file
+ * @returns {string[]} - array of batches
+ */
+export const writeBatches = (data: string): string[] => {
+  const batches: string[] = [];
+  let batchIndex = 0;
+  let batchSize = 0;
+  const lines = data.split(EOL);
+  const header = lines[0];
+  const headerBytes = Buffer.byteLength(header + EOL, 'utf8');
+  batches[batchIndex] = header + EOL;
+  batchSize += headerBytes;
+  delete lines[0];
+  lines.map((line, i) => {
+    // 150 mb limit
+    if (batchSize + Buffer.byteLength(line + EOL, 'utf8') > 150000000) {
+      fs.writeFileSync(`batch${batchIndex}.csv`, batches[batchIndex]);
+
+      // new batch
+      batchIndex++;
+      batches[batchIndex] = header;
+      batchSize = headerBytes;
+    }
+    batches[batchIndex] += line + EOL;
+    batchSize += Buffer.byteLength(line + EOL, 'utf8');
+    if (i === lines.length - 1) {
+      // we're done, write last file
+      fs.writeFileSync(`batch${batchIndex}.csv`, batches[batchIndex]);
+    }
+  });
+
+  return batches;
 };
