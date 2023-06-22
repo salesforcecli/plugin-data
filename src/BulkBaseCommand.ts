@@ -47,6 +47,7 @@ export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
       this.info(getResultMessage(jobInfo));
       if ((jobInfo.numberRecordsFailed ?? 0) > 0 || jobInfo.state === 'Failed') {
         this.info(messages.getMessage('checkJobViaUi', [this.config.bin, this.connection?.getUsername(), jobInfo.id]));
+        process.exitCode = 1;
       }
       if (jobInfo.state === 'InProgress' || jobInfo.state === 'Open') {
         this.info(
