@@ -75,6 +75,9 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
       dependsOn: ['bulk'],
       exclusive: ['wait'],
     }),
+    'all-rows': Flags.boolean({
+      summary: messages.getMessage('flags.all-rows.summary'),
+    }),
     'result-format': resultFormatFlag,
     perflog: perflogFlag,
   };
@@ -115,7 +118,8 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
             flags['use-tooling-api'] ? conn.tooling : conn,
             queryString,
             this.logger,
-            this.configAggregator.getInfo('org-max-query-limit').value as number
+            this.configAggregator.getInfo('org-max-query-limit').value as number,
+            flags['all-rows']
           );
       if (!this.jsonEnabled()) {
         displayResults({ ...queryResult }, flags['result-format'] as FormatTypes);
@@ -132,11 +136,16 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
    * @param query
    * @param timeout
    */
-  private async runBulkSoqlQuery(connection: Connection, query: string, timeout: Duration): Promise<SoqlQueryResult> {
+  private async runBulkSoqlQuery(
+    connection: Connection,
+    query: string,
+    timeout: Duration,
+    allRows: boolean | undefined = false
+  ): Promise<SoqlQueryResult> {
     connection.bulk2.pollTimeout = timeout.milliseconds ?? Duration.minutes(5).milliseconds;
     let res: Record[];
     try {
-      res = (await connection.bulk2.query(query)) ?? [];
+      res = (await connection.bulk2.query(query, allRows ? { scanAll: true } : {})) ?? [];
       return transformBulkResults(res, query);
     } catch (e) {
       const err = e as Error & { jobId: string };
@@ -155,15 +164,16 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
     connection: Connection | Connection['tooling'],
     query: string,
     logger: Logger,
-    maxFetch: number | undefined
+    maxFetch: number | undefined,
+    allRows: boolean | undefined = false
   ): Promise<SoqlQueryResult> {
     logger.debug('running query');
 
-    const options = {
+    const result = await connection.query(query, {
       autoFetch: true,
       maxFetch: maxFetch ?? 50_000,
-    };
-    const result = await connection.query(query, options);
+      scanAll: allRows,
+    });
     if (result.records.length && result.totalSize > result.records.length) {
       this.warn(
         `The query result is missing ${

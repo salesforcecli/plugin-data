@@ -48,6 +48,10 @@ Use Bulk API 2.0 to run the query.
 
 Use Bulk API 2.0, but don't wait for the job to complete.
 
+# flags.all-rows.summary
+
+Include deleted records. By default, deleted records are not returned.
+
 # flags.wait
 
 Time to wait for the command to finish, in minutes.
