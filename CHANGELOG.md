@@ -1,3 +1,12 @@
+## [2.3.27](https://github.com/salesforcecli/plugin-data/compare/2.3.26...2.3.27) (2023-06-25)
+
+
+### Bug Fixes
+
+* **deps:** bump jsforce from 2.0.0-beta.24 to 2.0.0-beta.27 ([f79aca0](https://github.com/salesforcecli/plugin-data/commit/f79aca0de04785dc39478cd9f708273b1f602bdf))
+
+
+
 ## [2.3.26](https://github.com/salesforcecli/plugin-data/compare/2.3.25...2.3.26) (2023-06-18)
 
 
