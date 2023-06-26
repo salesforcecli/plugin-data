@@ -1,3 +1,12 @@
+## [2.3.28](https://github.com/salesforcecli/plugin-data/compare/2.3.27...2.3.28) (2023-06-26)
+
+
+### Bug Fixes
+
+* ** to __ ([#566](https://github.com/salesforcecli/plugin-data/issues/566)) ([432a3af](https://github.com/salesforcecli/plugin-data/commit/432a3afa62c440580fd5b24dcd48c7cad5623423))
+
+
+
 ## [2.3.27](https://github.com/salesforcecli/plugin-data/compare/2.3.26...2.3.27) (2023-06-25)
 
 
