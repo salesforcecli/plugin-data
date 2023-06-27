@@ -79,6 +79,7 @@
     "command": "data:query",
     "plugin": "@salesforce/plugin-data",
     "flags": [
+      "all-rows",
       "api-version",
       "async",
       "bulk",
