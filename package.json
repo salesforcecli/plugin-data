@@ -103,14 +103,14 @@
   },
   "dependencies": {
     "@oclif/core": "^2.8.7",
-    "@salesforce/core": "^4.0.1",
+    "@salesforce/core": "^4.3.3",
     "@salesforce/kit": "^3.0.3",
     "@salesforce/sf-plugins-core": "^3.1.1",
     "@salesforce/ts-types": "^2.0.3",
     "chalk": "^4.1.0",
     "csv-parse": "^4.16.3",
     "csv-stringify": "^6.4.0",
-    "jsforce": "^2.0.0-beta.24",
+    "jsforce": "^2.0.0-beta.27",
     "tslib": "^2"
   },
   "devDependencies": {
