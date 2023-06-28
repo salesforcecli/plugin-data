@@ -112,7 +112,8 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
         ? await this.runBulkSoqlQuery(
             conn,
             queryString,
-            flags.async ? Duration.minutes(0) : flags.wait ?? Duration.minutes(0)
+            flags.async ? Duration.minutes(0) : flags.wait ?? Duration.minutes(0),
+            flags['all-rows'] === true
           )
         : await this.runSoqlQuery(
             flags['use-tooling-api'] ? conn.tooling : conn,
