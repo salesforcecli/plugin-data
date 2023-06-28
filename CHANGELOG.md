@@ -1,3 +1,12 @@
+## [2.4.1](https://github.com/salesforcecli/plugin-data/compare/2.4.0...2.4.1) (2023-06-28)
+
+
+### Bug Fixes
+
+* exit 1 when any batch/record fails ([#601](https://github.com/salesforcecli/plugin-data/issues/601)) ([154f18d](https://github.com/salesforcecli/plugin-data/commit/154f18d3c25a1ea8b2dfb9a2bf14abb9b13a8bd5))
+
+
+
 # [2.4.0](https://github.com/salesforcecli/plugin-data/compare/2.3.28...2.4.0) (2023-06-27)
 
 
