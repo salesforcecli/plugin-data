@@ -1,3 +1,12 @@
+## [2.4.2](https://github.com/salesforcecli/plugin-data/compare/2.4.1...2.4.2) (2023-06-28)
+
+
+### Bug Fixes
+
+* actually pass the all-rows flag to the bulk api query ([e413f2b](https://github.com/salesforcecli/plugin-data/commit/e413f2be0b777b1fcc5793348ba9c955d9134779))
+
+
+
 ## [2.4.1](https://github.com/salesforcecli/plugin-data/compare/2.4.0...2.4.1) (2023-06-28)
 
 
