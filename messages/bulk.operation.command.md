@@ -13,3 +13,7 @@ Number of minutes to wait for the command to complete before displaying the resu
 # flags.async.summary
 
 Run the command asynchronously.
+
+# flags.verbose
+
+Print verbose output of failed records if result is available.

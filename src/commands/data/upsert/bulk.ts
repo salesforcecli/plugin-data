@@ -35,7 +35,7 @@ export default class Upsert extends BulkOperationCommand {
 
     await validateSobjectType(flags.sobject, conn);
 
-    return this.runBulkOperation(flags.sobject, flags.file, conn, flags.async ? 0 : flags.wait?.minutes, 'upsert', {
+    return this.runBulkOperation(flags.sobject, flags.file, conn, flags.async ? 0 : flags.wait?.minutes, flags.verbose, 'upsert', {
       extIdField: flags['external-id'],
     });
   }

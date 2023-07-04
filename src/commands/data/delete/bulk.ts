@@ -25,7 +25,7 @@ export default class Delete extends BulkOperationCommand {
 
     await validateSobjectType(flags.sobject, conn);
 
-    return this.runBulkOperation(flags.sobject, flags.file, conn, flags.async ? 0 : flags.wait?.minutes, 'delete');
+    return this.runBulkOperation(flags.sobject, flags.file, conn, flags.async ? 0 : flags.wait?.minutes, flags.verbose, 'delete');
   }
 
   // eslint-disable-next-line class-methods-use-this
