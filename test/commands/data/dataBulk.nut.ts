@@ -8,12 +8,15 @@ import * as path from 'path';
 import { strict as assert } from 'node:assert/strict';
 import * as fs from 'fs';
 import * as os from 'os';
-import { expect } from 'chai';
+import { expect, config as chaiConfig } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { sleep } from '@salesforce/kit';
 import { ensurePlainObject } from '@salesforce/ts-types';
+import { SaveResult } from 'jsforce';
 import { BulkResultV2 } from '../../../src/types';
 import { QueryResult } from './dataSoqlQuery.nut';
+
+chaiConfig.truncateThreshold = 0;
 
 let testSession: TestSession;
 
@@ -24,9 +27,7 @@ const isCompleted = async (cmd: string): Promise<void> => {
     // eslint-disable-next-line no-await-in-loop
     await sleep(2000);
     const result = execCmd<BulkResultV2>(cmd);
-    // eslint-disable-next-line no-console
     if (result.jsonOutput?.status === 0) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (result.jsonOutput.result.jobInfo.state === 'JobComplete') {
         complete = true;
       }
@@ -42,9 +43,7 @@ const checkBulkResumeJsonResponse = (jobId: string, operation: 'delete' | 'upser
   const statusResponse = execCmd<BulkResultV2>(`data:${operation}:resume --job-id ${jobId} --json`, {
     ensureExitCode: 0,
   }).jsonOutput?.result;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   expect(statusResponse?.jobInfo.state).to.equal('JobComplete');
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   expect(statusResponse?.records?.successfulResults).to.be.an('array').with.lengthOf(10);
 };
 
@@ -55,7 +54,7 @@ const checkBulkResumeJsonResponse = (jobId: string, operation: 'delete' | 'upser
 const checkBulkStatusHumanResponse = (statusCommand: string): void => {
   const statusResponse = execCmd(statusCommand, {
     ensureExitCode: 0,
-  }).shellOutput.stdout.split('\n');
+  }).shellOutput.stdout.split(os.EOL);
   const jobState = statusResponse.find((line) => line.includes('Status'));
   expect(jobState).to.include('Job Complete');
 };
@@ -65,7 +64,6 @@ describe('data:bulk commands', () => {
     testSession = await TestSession.create({
       scratchOrgs: [
         {
-          executable: 'sfdx',
           config: 'config/project-scratch-def.json',
           setDefault: true,
         },
@@ -76,7 +74,7 @@ describe('data:bulk commands', () => {
   });
 
   after(async () => {
-    await testSession?.clean();
+    // await testSession?.clean();
   });
 
   describe('data:bulk verify json and human responses', () => {
@@ -97,6 +95,108 @@ describe('data:bulk commands', () => {
         checkBulkStatusHumanResponse(`data:delete:resume --job-id ${jobInfo.id}`);
         checkBulkResumeJsonResponse(jobInfo.id, 'upsert');
       });
+    });
+  });
+
+  describe('bulk data commands with --verbose', () => {
+    it('should print table because of --verbose and errors', () => {
+      fs.writeFileSync(path.join(testSession.project.dir, 'data.csv'), `Id${os.EOL}001000000000000AAA`);
+
+      const result = execCmd('data:delete:bulk --sobject Account --file data.csv --wait 10 --verbose', {
+        ensureExitCode: 1,
+      }).shellOutput;
+      // Bulk Failures [1]
+      // ==========================================================================
+      // | Id                 Sf_Id Error
+      // | ────────────────── ───── ───────────────────────────────────────────────
+      // | 001000000000000AAA       MALFORMED_ID:malformed id 001000000000000AAA:--
+
+      expect(result).to.include('Bulk Failures [1]');
+      expect(result).to.include('Id');
+      expect(result).to.include('Sf_Id');
+      expect(result).to.include('Error');
+      expect(result).to.include('INVALID_CROSS_REFERENCE_KEY:invalid cross reference id');
+      // expect(result).to.include('MALFORMED_ID:bad id')
+    });
+
+    it('should not print table because of errors and missing --verbose', () => {
+      fs.writeFileSync(path.join(testSession.project.dir, 'data.csv'), `Id${os.EOL}001000000000000AAA`);
+
+      const result = execCmd('data:delete:bulk --sobject Account --file data.csv --wait 10', { ensureExitCode: 1 })
+        .shellOutput.stdout;
+
+      expect(result).to.not.include('Bulk Failures [1]');
+    });
+
+    it('should not print error table when there are no errors', () => {
+      // insert account
+      const accountId = execCmd<SaveResult>('data:create:record -s Account  --values Name=test --json', {
+        ensureExitCode: 0,
+      }).jsonOutput?.result.id;
+      fs.writeFileSync(path.join(testSession.project.dir, 'account.csv'), `Id${os.EOL}${accountId}`);
+      const result = execCmd('data:delete:bulk --sobject Account --file account.csv --wait 10 --verbose', {
+        ensureExitCode: 0,
+      }).shellOutput.stdout; // eslint-disable-next-line no-console
+      expect(result).to.include('Status Job Complete Records processed 1. Records failed 0.');
+    });
+
+    it('should have information in --json', () => {
+      fs.writeFileSync(path.join(testSession.project.dir, 'data.csv'), `Id${os.EOL}001000000000000AAA`);
+
+      const result = execCmd<BulkResultV2>(
+        'data:delete:bulk --sobject Account --file data.csv --wait 10 --verbose --json',
+        { ensureExitCode: 1 }
+      ).jsonOutput?.result.records;
+      /*
+        {
+          "status": 1,
+          "result": {
+            "jobInfo": {
+              "id": "<ID>",
+              "operation": "delete",
+              "object": "Account",
+              // ...
+            },
+            "records": {
+              "successfulResults": [],
+              "failedResults": [
+                {
+                  "sf__Id": "",
+                  "sf__Error": "MALFORMED_ID:malformed id 001000000000000AAA:--",
+                  "Id": "001000000000000AAA"
+
+              ],
+              "unprocessedRecords": []
+            }
+          },
+          "warnings": []
+        }
+      */
+
+      expect(result?.failedResults[0]).to.have.all.keys('sf__Id', 'sf__Error', 'Id');
+      expect(result?.failedResults[0].sf__Id).to.equal('001000000000000AAA');
+      expect(result?.failedResults[0].sf__Error).to.equal('INVALID_CROSS_REFERENCE_KEY:invalid cross reference id:--');
+      // expect(result?.failedResults[0].sf__Error).to.equal('MALFORMED_ID:bad id       001000000000000AAA:--')
+      expect(result?.failedResults[0].Id).to.equal('001000000000000AAA');
+      expect(result?.successfulResults.length).to.equal(0);
+    });
+
+    it('should print verbose success with json', () => {
+      // insert account
+      const accountId = execCmd<SaveResult>('data:create:record -s Account --values Name=test --json', {
+        ensureExitCode: 0,
+      }).jsonOutput?.result.id;
+      fs.writeFileSync(path.join(testSession.project.dir, 'account.csv'), `Id${os.EOL}${accountId}`);
+
+      const result = execCmd<BulkResultV2>(
+        'data:delete:bulk --sobject Account --file account.csv --wait 10 --verbose --json',
+        { ensureExitCode: 0 }
+      ).jsonOutput?.result.records;
+      expect(result?.successfulResults[0]).to.have.all.keys('sf__Id', 'sf__Created', 'Id');
+      expect(result?.successfulResults[0].sf__Id).to.equal(accountId);
+      expect(result?.successfulResults[0].sf__Created).to.equal('false');
+      expect(result?.successfulResults[0].Id).to.equal(accountId);
+      expect(result?.failedResults.length).to.equal(0);
     });
   });
 });
@@ -141,18 +241,14 @@ const bulkInsertAccounts = (): BulkResultV2 => {
     'bulkUpsert.csv'
   )} --external-id Id --json --wait 10`;
   const rawResponse = execCmd(cmd);
-  // eslint-disable-next-line no-console
-  console.error(`rawResponse: ${JSON.stringify(rawResponse, null, 2)}`);
   const response: BulkResultV2 | undefined = rawResponse.jsonOutput?.result as BulkResultV2;
   if (response?.records) {
-    /* eslint-disable @typescript-eslint/no-unsafe-member-access, ,@typescript-eslint/no-unsafe-assignment */
     const records = response.records?.successfulResults;
     assert.equal(records?.length, 10);
     const bulkUpsertResult = response.records?.successfulResults[0];
     assert(Object.keys(ensurePlainObject(bulkUpsertResult)).includes('sf__Id'));
     const jobInfo = response.jobInfo;
     assert('id' in jobInfo);
-    /* eslint-enable @typescript-eslint/no-unsafe-member-access, ,@typescript-eslint/no-unsafe-assignment */
   }
   return response;
 };

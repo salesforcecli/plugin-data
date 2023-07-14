@@ -10,7 +10,7 @@
   {
     "command": "data:delete:bulk",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["api-version", "async", "file", "json", "loglevel", "sobject", "target-org", "wait"],
+    "flags": ["api-version", "async", "file", "json", "loglevel", "sobject", "target-org", "verbose", "wait"],
     "alias": [],
     "flagChars": ["a", "f", "o", "s", "w"],
     "flagAliases": ["apiversion", "csvfile", "sobjecttype", "targetusername", "u"]
@@ -135,7 +135,18 @@
   {
     "command": "data:upsert:bulk",
     "plugin": "@salesforce/plugin-data",
-    "flags": ["api-version", "async", "external-id", "file", "json", "loglevel", "sobject", "target-org", "wait"],
+    "flags": [
+      "api-version",
+      "async",
+      "external-id",
+      "file",
+      "json",
+      "loglevel",
+      "sobject",
+      "target-org",
+      "verbose",
+      "wait"
+    ],
     "alias": [],
     "flagChars": ["a", "f", "i", "o", "s", "w"],
     "flagAliases": ["apiversion", "csvfile", "externalid", "sobjecttype", "targetusername", "u"]

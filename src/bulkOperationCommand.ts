@@ -10,7 +10,8 @@ import * as os from 'os';
 import { Flags } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
 import { Connection, Messages } from '@salesforce/core';
-import { BulkOperation, IngestJobV2, IngestOperation, JobInfoV2 } from 'jsforce/api/bulk';
+import { ux } from '@oclif/core';
+import { BulkOperation, IngestJobV2, IngestJobV2FailedResults, IngestOperation, JobInfoV2 } from 'jsforce/api/bulk';
 import { Schema } from 'jsforce';
 import { orgFlags } from './flags';
 import { BulkDataRequestCache } from './bulkDataRequestCache';
@@ -57,8 +58,10 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
     async: Flags.boolean({
       char: 'a',
       summary: messages.getMessage('flags.async.summary'),
-      default: false,
       exclusive: ['wait'],
+    }),
+    verbose: Flags.boolean({
+      summary: messages.getMessage('flags.verbose'),
     }),
   };
 
@@ -93,11 +96,27 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
     return job.check();
   }
 
+  private static printBulkErrors(failedResults: IngestJobV2FailedResults<Schema>): void {
+    const columns = {
+      id: { header: 'Id' },
+      sfId: { header: 'Sf_Id' },
+      error: { header: 'Error' },
+    };
+    const options = { title: `Bulk Failures [${failedResults.length}]` };
+    ux.log();
+    ux.table(
+      failedResults.map((f) => ({ id: 'Id' in f ? f.Id : '', sfId: f.sf__Id, error: f.sf__Error })),
+      columns,
+      options
+    );
+  }
+
   public async runBulkOperation(
     sobject: string,
     csvFileName: string,
     connection: Connection,
     wait: number,
+    verbose: boolean,
     operation: BulkOperation,
     options?: { extIdField: string }
   ): Promise<BulkResultV2> {
@@ -133,10 +152,20 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
         }
         this.displayBulkV2Result(jobInfo);
         const result = { jobInfo } as BulkResultV2;
-        if (!isBulkV2RequestDone(jobInfo) || !this.jsonEnabled()) {
+        if (!isBulkV2RequestDone(jobInfo)) {
           return result;
         }
-        result.records = transformResults(await this.job.getAllResults());
+        if (this.jsonEnabled()) {
+          result.records = transformResults(await this.job.getAllResults());
+        }
+        // We only print human readable error outputs if --json is not specified.
+        // The JSON result itself will already contain the error information (see above).
+        else if (verbose) {
+          const records = await this.job.getAllResults();
+          if (records?.failedResults?.length > 0) {
+            BulkOperationCommand.printBulkErrors(records.failedResults);
+          }
+        }
         return result;
       } catch (err) {
         this.spinner.stop();
