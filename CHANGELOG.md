@@ -1,3 +1,12 @@
+# [2.5.0](https://github.com/salesforcecli/plugin-data/compare/2.4.7...2.5.0) (2023-07-14)
+
+
+### Features
+
+* add verbose flag to bulk delete and upsert ([#615](https://github.com/salesforcecli/plugin-data/issues/615)) ([1b52226](https://github.com/salesforcecli/plugin-data/commit/1b52226d881ffc512f5a13344639176b423ff3fa))
+
+
+
 ## [2.4.7](https://github.com/salesforcecli/plugin-data/compare/2.4.6...2.4.7) (2023-07-11)
 
 
