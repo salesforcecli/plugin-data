@@ -58,12 +58,10 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
     async: Flags.boolean({
       char: 'a',
       summary: messages.getMessage('flags.async.summary'),
-      default: false,
       exclusive: ['wait'],
     }),
     verbose: Flags.boolean({
       summary: messages.getMessage('flags.verbose'),
-      default: false,
     }),
   };
 
@@ -98,15 +96,16 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
     return job.check();
   }
 
-  private printBulkErrors(failedResults: IngestJobV2FailedResults<Schema>): void {
+  private static printBulkErrors(failedResults: IngestJobV2FailedResults<Schema>): void {
     const columns = {
       id: { header: 'Id' },
+      sfId: { header: 'Sf_Id' },
       error: { header: 'Error' },
     };
     const options = { title: `Bulk Failures [${failedResults.length}]` };
     ux.log();
     ux.table(
-      failedResults.map((f) => ({ id: f.sf__Id, error: f.sf__Error })),
+      failedResults.map((f) => ({ id: 'Id' in f ? f.Id : '', sfId: f.sf__Id, error: f.sf__Error })),
       columns,
       options
     );
@@ -156,17 +155,17 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
         if (!isBulkV2RequestDone(jobInfo)) {
           return result;
         }
-        let records = null;
-        if (verbose) {
-          records = await this.job.getAllResults();
+        if (this.jsonEnabled()) {
+          result.records = transformResults(await this.job.getAllResults());
+        }
+        // We only print human readable error outputs if --json is not specified.
+        // The JSON result itself will already contain the error information (see above).
+        else if (verbose) {
+          const records = await this.job.getAllResults();
           if (records?.failedResults?.length > 0) {
-            this.printBulkErrors(records.failedResults);
+            BulkOperationCommand.printBulkErrors(records.failedResults);
           }
         }
-        if (!this.jsonEnabled()) {
-          return result;
-        }
-        result.records = transformResults(records ?? await this.job.getAllResults());
         return result;
       } catch (err) {
         this.spinner.stop();

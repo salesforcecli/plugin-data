@@ -12,7 +12,7 @@ import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { sleep } from '@salesforce/kit';
 import { ensurePlainObject } from '@salesforce/ts-types';
-import {SaveResult} from 'jsforce';
+import { SaveResult } from 'jsforce';
 import { BulkResultV2 } from '../../../src/types';
 import { QueryResult } from './dataSoqlQuery.nut';
 
@@ -101,57 +101,88 @@ describe('data:bulk commands', () => {
     });
   });
 
-  describe('bulk data commands with --verbose', ()=>{
-    it('should print table because of --verbose an errors',  ()=>{
+  describe('bulk data commands with --verbose', () => {
+    it('should print table because of --verbose and errors', () => {
       fs.writeFileSync('data.csv', `Id
       001000000000000AAA`)
 
-      const result = execCmd('data:delete:bulk --sobject Account --file data.csv --wait 10 --verbose', {ensureExitCode: 1}).shellOutput.stdout;
+      const result = execCmd('data:delete:bulk --sobject Account --file data.csv --wait 10 --verbose', { ensureExitCode: 1 }).shellOutput.stdout;
       // Bulk Failures [1]
-      // ====================================================
-      // | Id Error
-      // | ── ───────────────────────────────────────────────
-      // |    MALFORMED_ID:malformed id 001000000000000AAA:--
+      // ==========================================================================
+      // | Id                 Sf_Id Error
+      // | ────────────────── ───── ─────────────────────────────────────────────── 
+      // | 001000000000000AAA       MALFORMED_ID:malformed id 001000000000000AAA:--
 
       expect(result).to.include('Bulk Failures [1]')
+      expect(result).to.include('Id')
+      expect(result).to.include('Sf_Id')
+      expect(result).to.include('Error')
       expect(result).to.include('MALFORMED_ID:malformed id 001000000000000AAA:--')
-
+      expect(result).to.include(' 001000000000000AAA ')
     })
 
-    it('should not print error table when there are no errors',  ()=>{
+    it('should not print table because of errors and missing --verbose', () => {
+      fs.writeFileSync('data.csv', `Id
+      001000000000000AAA`)
+
+      const result = execCmd('data:delete:bulk --sobject Account --file data.csv --wait 10', { ensureExitCode: 1 }).shellOutput.stdout;
+
+      expect(result).to.not.include('Bulk Failures [1]')
+    })
+
+    it('should not print error table when there are no errors', () => {
       // insert account
-      const accountId= execCmd<SaveResult>('data create record -s Account  --values Name=test --json', {ensureExitCode: 0}).jsonOutput?.result.id;
+      const accountId = execCmd<SaveResult>('data create record -s Account  --values Name=test --json', { ensureExitCode: 0 }).jsonOutput?.result.id;
       fs.writeFileSync('account.csv', `Id
      ${accountId}`)
-      const result = execCmd('data:delete:bulk --sobject Account --file account.csv --wait 10 --verbose', {ensureExitCode: 0}).shellOutput.stdout;
+      const result = execCmd('data:delete:bulk --sobject Account --file account.csv --wait 10 --verbose', { ensureExitCode: 0 }).shellOutput.stdout;
       expect(result).to.include('Status Job Complete Records processed 1. Records failed 0.')
     })
 
-    it('should have information in --json',  ()=>{
+    it('should have information in --json', () => {
       fs.writeFileSync('data.csv', `Id
       001000000000000AAA`)
 
-      const result = execCmd<BulkResultV2>('data:delete:bulk --sobject Account --file data.csv --wait 10 --verbose --json', {ensureExitCode: 1}).jsonOutput?.result.records;
-      // Bulk Failures [1]
-      // ====================================================
-      // | Id Error
-      // | ── ───────────────────────────────────────────────
-      // |    MALFORMED_ID:malformed id 001000000000000AAA:--
+      const result = execCmd<BulkResultV2>('data:delete:bulk --sobject Account --file data.csv --wait 10 --verbose --json', { ensureExitCode: 1 }).jsonOutput?.result.records;
+      /*
+        {
+          "status": 1,
+          "result": {
+            "jobInfo": {
+              "id": "<ID>",
+              "operation": "delete",
+              "object": "Account",
+              // ...
+            },
+            "records": {
+              "successfulResults": [],
+              "failedResults": [
+                {
+                  "sf__Id": "",
+                  "sf__Error": "MALFORMED_ID:malformed id 001000000000000AAA:--",
+                  "Id": "001000000000000AAA"
+                }
+              ],
+              "unprocessedRecords": []
+            }
+          },
+          "warnings": []
+        }
+      */
 
       expect(result?.failedResults[0]).to.have.all.keys('sf__Id', 'sf__Error', 'Id')
       expect(result?.failedResults[0].sf__Id).to.equal('')
       expect(result?.failedResults[0].sf__Error).to.equal('MALFORMED_ID:malformed id 001000000000000AAA:--')
       expect(result?.failedResults[0].Id).to.equal('001000000000000AAA')
       expect(result?.successfulResults.length).to.equal(0);
-
     })
 
-    it('should print verbose success with json',  ()=>{
+    it('should print verbose success with json', () => {
       // insert account
-      const accountId= execCmd<SaveResult>('data create record -s Account  --values Name=test --json', {ensureExitCode: 0}).jsonOutput?.result.id;
+      const accountId = execCmd<SaveResult>('data create record -s Account  --values Name=test --json', { ensureExitCode: 0 }).jsonOutput?.result.id;
       fs.writeFileSync('account.csv', `Id
      ${accountId}`)
-      const result = execCmd<BulkResultV2>('data:delete:bulk --sobject Account --file account.csv --wait 10 --verbose --json', {ensureExitCode: 0}).jsonOutput?.result.records;
+      const result = execCmd<BulkResultV2>('data:delete:bulk --sobject Account --file account.csv --wait 10 --verbose --json', { ensureExitCode: 0 }).jsonOutput?.result.records;
       expect(result?.successfulResults[0]).to.have.all.keys('sf__Id', 'sf__Created', 'Id')
       expect(result?.successfulResults[0].sf__Id).to.equal(accountId)
       expect(result?.successfulResults[0].sf__Created).to.equal('false')
