@@ -54,7 +54,7 @@ const checkBulkResumeJsonResponse = (jobId: string, operation: 'delete' | 'upser
 const checkBulkStatusHumanResponse = (statusCommand: string): void => {
   const statusResponse = execCmd(statusCommand, {
     ensureExitCode: 0,
-  }).shellOutput.stdout.split('\n');
+  }).shellOutput.stdout.split('os.EOL');
   const jobState = statusResponse.find((line) => line.includes('Status'));
   expect(jobState).to.include('Job Complete');
 };
@@ -100,7 +100,7 @@ describe('data:bulk commands', () => {
 
   describe('bulk data commands with --verbose', () => {
     it('should print table because of --verbose and errors', () => {
-      fs.writeFileSync(path.join(testSession.project.dir, 'data.csv'), 'Id\n001000000000000AAA');
+      fs.writeFileSync(path.join(testSession.project.dir, 'data.csv'), 'Idos.EOL001000000000000AAA');
 
       const result = execCmd('data:delete:bulk --sobject Account --file data.csv --wait 10 --verbose', {
         ensureExitCode: 1,
@@ -120,7 +120,7 @@ describe('data:bulk commands', () => {
     });
 
     it('should not print table because of errors and missing --verbose', () => {
-      fs.writeFileSync(path.join(testSession.project.dir, 'data.csv'), 'Id\n001000000000000AAA');
+      fs.writeFileSync(path.join(testSession.project.dir, 'data.csv'), 'Idos.EOL001000000000000AAA');
 
       const result = execCmd('data:delete:bulk --sobject Account --file data.csv --wait 10', { ensureExitCode: 1 })
         .shellOutput.stdout;
@@ -133,7 +133,7 @@ describe('data:bulk commands', () => {
       const accountId = execCmd<SaveResult>('data:create:record -s Account  --values Name=test --json', {
         ensureExitCode: 0,
       }).jsonOutput?.result.id;
-      fs.writeFileSync(path.join(testSession.project.dir, 'account.csv'), `Id\n${accountId}`);
+      fs.writeFileSync(path.join(testSession.project.dir, 'account.csv'), `Idos.EOL${accountId}`);
       const result = execCmd('data:delete:bulk --sobject Account --file account.csv --wait 10 --verbose', {
         ensureExitCode: 0,
       }).shellOutput.stdout; // eslint-disable-next-line no-console
@@ -141,7 +141,7 @@ describe('data:bulk commands', () => {
     });
 
     it('should have information in --json', () => {
-      fs.writeFileSync(path.join(testSession.project.dir, 'data.csv'), 'Id\n001000000000000AAA');
+      fs.writeFileSync(path.join(testSession.project.dir, 'data.csv'), 'Idos.EOL001000000000000AAA');
 
       const result = execCmd<BulkResultV2>(
         'data:delete:bulk --sobject Account --file data.csv --wait 10 --verbose --json',
@@ -186,7 +186,7 @@ describe('data:bulk commands', () => {
       const accountId = execCmd<SaveResult>('data:create:record -s Account --values Name=test --json', {
         ensureExitCode: 0,
       }).jsonOutput?.result.id;
-      fs.writeFileSync(path.join(testSession.project.dir, 'account.csv'), `Id\n${accountId}`);
+      fs.writeFileSync(path.join(testSession.project.dir, 'account.csv'), `Idos.EOL${accountId}`);
 
       const result = execCmd<BulkResultV2>(
         'data:delete:bulk --sobject Account --file account.csv --wait 10 --verbose --json',
