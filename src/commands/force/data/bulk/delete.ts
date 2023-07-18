@@ -25,7 +25,7 @@ export default class Delete extends SfCommand<BatcherReturnType> {
     ...orgFlags,
     file: Flags.file({
       char: 'f',
-      summary: messages.getMessage('flags.csvfile'),
+      summary: messages.getMessage('flags.file.summary'),
       required: true,
       exists: true,
       aliases: ['csvfile'],
@@ -33,7 +33,7 @@ export default class Delete extends SfCommand<BatcherReturnType> {
     }),
     sobject: Flags.string({
       char: 's',
-      summary: messages.getMessage('flags.sobjecttype'),
+      summary: messages.getMessage('flags.sobject.summary'),
       required: true,
       aliases: ['sobjecttype'],
       deprecateAliases: true,
@@ -41,7 +41,7 @@ export default class Delete extends SfCommand<BatcherReturnType> {
     wait: Flags.duration({
       char: 'w',
       unit: 'minutes',
-      summary: messages.getMessage('flags.wait'),
+      summary: messages.getMessage('flags.wait.summary'),
       min: 0,
       default: Duration.minutes(0),
     }),

@@ -28,23 +28,23 @@ When using --bulk, the command waits 3 minutes by default for the query to compl
 
   <%= config.bin %> <%= command.id %> --query "SELECT Id FROM Contact" --bulk --wait 0
 
-# flags.queryToExecute
+# flags.query.summary
 
 SOQL query to execute.
 
-# flags.useToolingApi
+# flags.use-tooling-api.summary
 
 Use Tooling API so you can run queries on Tooling API objects.
 
-# flags.file
+# flags.file.summary
 
 File that contains the SOQL query.
 
-# flags.bulk
+# flags.bulk.summary
 
 Use Bulk API 2.0 to run the query.
 
-# flags.async
+# flags.async.summary
 
 Use Bulk API 2.0, but don't wait for the job to complete.
 
@@ -52,7 +52,7 @@ Use Bulk API 2.0, but don't wait for the job to complete.
 
 Include deleted records. By default, deleted records are not returned.
 
-# flags.wait
+# flags.wait.summary
 
 Time to wait for the command to finish, in minutes.
 

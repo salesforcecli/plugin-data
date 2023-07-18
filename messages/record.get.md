@@ -12,19 +12,19 @@ The command displays all the record's fields and their values, one field per ter
 
 This command retrieves a record from Salesforce objects by default. Use the --use-tooling-api flag to retrieve from a Tooling API object.
 
-# flags.sobject
+# flags.sobject.summary
 
 API name of the Salesforce or Tooling API object that you're retrieving a record from.
 
-# flags.recordId
+# flags.record-id.summary
 
 ID of the record you’re retrieving.
 
-# flags.where
+# flags.where.summary
 
 List of <fieldName>=<value> pairs that identify the record you want to display.
 
-# flags.useToolingApi
+# flags.useToolingApi.summary
 
 Use Tooling API so you can retrieve a record from a Tooling API object.
 

@@ -20,6 +20,6 @@ See "Prepare CSV Files" in the Bulk API Developer Guide for details on formattin
 
   <%= config.bin %> <%= command.id %> --sobject MyObject**c --file files/file.csv --external-id MyField**c --wait 5 --target-org my-scratch
 
-# flags.externalid
+# flags.external-id.summary
 
 Name of the external ID field, or the Id field.

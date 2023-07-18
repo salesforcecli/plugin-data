@@ -10,19 +10,19 @@ If your SOQL query references multiple objects, the command generates a single J
 
 The SOQL query can return a maximum of 2,000 records. For more information, see the REST API Developer Guide. (https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobject_tree.htm).
 
-# flags.query
+# flags.query.summary
 
 SOQL query, or filepath of a file that contains the query, to retrieve records.
 
-# flags.plan
+# flags.plan.summary
 
 Generate multiple sObject tree files and a plan definition file for aggregated import.
 
-# flags.prefix
+# flags.prefix.summary
 
 Prefix of generated files.
 
-# flags.outputdir
+# flags.output-dir.summary
 
 Directory in which to generate the JSON files; default is current directory.
 
@@ -30,7 +30,7 @@ Directory in which to generate the JSON files; default is current directory.
 
 - Export records retrieved with the specified SOQL query into a single JSON file in the current directory; the command uses your default org:
 
-  <%= config.bin %> <%= command.id %> --query "SELECT Id, Name, (SELECT Name, Address__c FROM Properties__r) FROM Broker__c"
+  <%= config.bin %> <%= command.id %> --query "SELECT Id, Name, (SELECT Name, Address**c FROM Properties**r) FROM Broker\_\_c"
 
 - Export data using a SOQL query in the "query.txt" file and generate JSON files for each object and a plan that aggregates them:
 

@@ -32,7 +32,7 @@ export const orgFlags = {
 
 export const resultFormatFlag = Flags.string({
   char: 'r',
-  summary: messages.getMessage('flags.resultFormat'),
+  summary: messages.getMessage('flags.resultFormat.summary'),
   options: ['human', 'json', 'csv'],
   default: 'human',
   aliases: ['resultformat'],

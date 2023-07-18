@@ -24,7 +24,7 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
     ...orgFlags,
     'external-id': Flags.string({
       char: 'i',
-      summary: messages.getMessage('flags.externalid'),
+      summary: messages.getMessage('flags.externalid.summary'),
       required: true,
       aliases: ['externalid'],
       deprecateAliases: true,
@@ -32,14 +32,14 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
     file: Flags.file({
       exists: true,
       char: 'f',
-      summary: messages.getMessage('flags.csvfile'),
+      summary: messages.getMessage('flags.file.summary'),
       required: true,
       aliases: ['csvfile'],
       deprecateAliases: true,
     }),
     sobject: Flags.string({
       char: 's',
-      summary: messages.getMessage('flags.sobjecttype'),
+      summary: messages.getMessage('flags.sobject.summary'),
       required: true,
       aliases: ['sobjecttype'],
       deprecateAliases: true,
@@ -47,13 +47,13 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
     wait: Flags.duration({
       char: 'w',
       unit: 'minutes',
-      summary: messages.getMessage('flags.wait'),
+      summary: messages.getMessage('flags.wait.summary'),
       min: 0,
       default: Duration.minutes(0),
     }),
     serial: Flags.boolean({
       char: 'r',
-      summary: messages.getMessage('flags.serial'),
+      summary: messages.getMessage('flags.serial.summary'),
       default: false,
     }),
   };

@@ -10,19 +10,19 @@ When specifying field-value pairs, use the format <fieldName>=<value>. Enclose a
 
 This command deletes a record from Salesforce objects by default. Use the --use-tooling-api flag to delete from a Tooling API object.
 
-# flags.sobject
+# flags.sobject.summary
 
 API name of the Salesforce or Tooling API object that you're deleting a record from.
 
-# flags.recordId
+# flags.record-id.summary
 
 ID of the record you’re deleting.
 
-# flags.where
+# flags.where.summary
 
 List of <fieldName>=<value> pairs that identify the record you want to delete.
 
-# flags.useToolingApi
+# flags.use-tooling-api.summary
 
 Use Tooling API so you can delete a record from a Tooling API object.
 

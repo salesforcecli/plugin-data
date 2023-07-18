@@ -1,12 +1,12 @@
-# flags.sobjecttype
+# flags.sobject.summary
 
 API name of the Salesforce object, either standard or custom, that you want to delete records from.
 
-# flags.csvfile
+# flags.csvfile.summary
 
 CSV file that contains the IDs of the records to delete.
 
-# flags.wait
+# flags.wait.summary
 
 Number of minutes to wait for the command to complete before displaying the results.
 
@@ -14,6 +14,6 @@ Number of minutes to wait for the command to complete before displaying the resu
 
 Run the command asynchronously.
 
-# flags.verbose
+# flags.verbose.summary
 
 Print verbose output of failed records if result is available.

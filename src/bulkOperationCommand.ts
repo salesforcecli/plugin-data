@@ -34,7 +34,7 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
     ...orgFlags,
     file: Flags.file({
       char: 'f',
-      summary: messages.getMessage('flags.csvfile'),
+      summary: messages.getMessage('flags.csvfile.summary'),
       required: true,
       exists: true,
       aliases: ['csvfile'],
@@ -42,7 +42,7 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
     }),
     sobject: Flags.string({
       char: 's',
-      summary: messages.getMessage('flags.sobjecttype'),
+      summary: messages.getMessage('flags.sobject.summary'),
       required: true,
       aliases: ['sobjecttype'],
       deprecateAliases: true,
@@ -50,7 +50,7 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
     wait: Flags.duration({
       char: 'w',
       unit: 'minutes',
-      summary: messages.getMessage('flags.wait'),
+      summary: messages.getMessage('flags.wait.summary'),
       min: 0,
       default: Duration.minutes(0),
       exclusive: ['async'],
@@ -61,7 +61,7 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
       exclusive: ['wait'],
     }),
     verbose: Flags.boolean({
-      summary: messages.getMessage('flags.verbose'),
+      summary: messages.getMessage('flags.verbose.summary'),
     }),
   };
 

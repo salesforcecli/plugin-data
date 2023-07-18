@@ -25,18 +25,18 @@ export default class Create extends SfCommand<SaveResult> {
     sobject: Flags.string({
       char: 's',
       required: true,
-      summary: messages.getMessage('flags.sobject'),
+      summary: messages.getMessage('flags.sobject.summary'),
       aliases: ['sobjecttype'],
       deprecateAliases: true,
     }),
     values: Flags.string({
       char: 'v',
       required: true,
-      summary: messages.getMessage('flags.values'),
+      summary: messages.getMessage('flags.values.summary'),
     }),
     'use-tooling-api': Flags.boolean({
       char: 't',
-      summary: messages.getMessage('flags.useToolingApi'),
+      summary: messages.getMessage('flags.use-tooling-api.summary'),
       aliases: ['usetoolingapi'],
       deprecateAliases: true,
     }),

@@ -25,20 +25,20 @@ export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileCo
     ...orgFlags,
     query: Flags.string({
       char: 'q',
-      summary: messages.getMessage('flags.query'),
+      summary: messages.getMessage('flags.query.summary'),
       required: true,
     }),
     plan: Flags.boolean({
       char: 'p',
-      summary: messages.getMessage('flags.plan'),
+      summary: messages.getMessage('flags.plan.summary'),
     }),
     prefix: Flags.string({
       char: 'x',
-      summary: messages.getMessage('flags.prefix'),
+      summary: messages.getMessage('flags.prefix.summary'),
     }),
     'output-dir': Flags.directory({
       char: 'd',
-      summary: messages.getMessage('flags.outputdir'),
+      summary: messages.getMessage('flags.output-dir.summary'),
       aliases: ['outputdir'],
       deprecateAliases: true,
     }),

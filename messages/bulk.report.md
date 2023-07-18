@@ -12,7 +12,7 @@ Run this command using the job ID returned from the "<%= config.bin %> data quer
 
   <%= config.bin %> <%= command.id %> --bulk-query-id 7500x000005BdFzXXX
 
-# flags.bulkQueryId
+# flags.bulkQueryId.summary
 
 Job ID of the bulk query.
 
