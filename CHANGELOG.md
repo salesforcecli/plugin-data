@@ -1,3 +1,12 @@
+## [2.5.3](https://github.com/salesforcecli/plugin-data/compare/2.5.2...2.5.3) (2023-07-23)
+
+
+### Bug Fixes
+
+* **deps:** bump @salesforce/kit from 3.0.5 to 3.0.6 ([ed1aded](https://github.com/salesforcecli/plugin-data/commit/ed1aded6af7371c4b616f4955bc2c427c29e0a45))
+
+
+
 ## [2.5.2](https://github.com/salesforcecli/plugin-data/compare/2.5.1...2.5.2) (2023-07-19)
 
 
