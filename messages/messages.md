@@ -19,7 +19,7 @@ Retrieve only one record by making your --where clause more specific.
 
 Malformed key=value pair for value: %s.
 
-# flags.resultFormat
+# flags.resultFormat.summary
 
 Format to display the results; the --json flag overrides this flag.
 

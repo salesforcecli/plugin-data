@@ -26,7 +26,7 @@ export default class Delete extends SfCommand<SaveResult> {
     sobject: Flags.string({
       char: 's',
       required: true,
-      summary: messages.getMessage('flags.sobject'),
+      summary: messages.getMessage('flags.sobject.summary'),
       aliases: ['sobjecttype'],
       deprecateAliases: true,
     }),
@@ -34,19 +34,19 @@ export default class Delete extends SfCommand<SaveResult> {
     'record-id': Flags.salesforceId({
       length: 'both',
       char: 'i',
-      summary: messages.getMessage('flags.recordId'),
+      summary: messages.getMessage('flags.record-id.summary'),
       exactlyOne: ['where', 'record-id'],
       aliases: ['sobjectid'],
       deprecateAliases: true,
     }),
     where: Flags.string({
       char: 'w',
-      summary: messages.getMessage('flags.where'),
+      summary: messages.getMessage('flags.where.summary'),
       exactlyOne: ['where', 'record-id'],
     }),
     'use-tooling-api': Flags.boolean({
       char: 't',
-      summary: messages.getMessage('flags.useToolingApi'),
+      summary: messages.getMessage('flags.use-tooling-api.summary'),
       aliases: ['usetoolingapi'],
       deprecateAliases: true,
     }),

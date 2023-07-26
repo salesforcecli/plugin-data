@@ -16,11 +16,11 @@ Run this command using the job ID or batch ID returned from the "<%= config.bin 
 
   <%= config.bin %> <%= command.id %> --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA --target-org my-scratch
 
-# flags.jobid
+# flags.job-id.summary
 
 ID of the job whose status you want to view.
 
-# flags.batchid
+# flags.batch-id.summary
 
 ID of the batch whose status you want to view; you must also specify the job ID.
 

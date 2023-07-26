@@ -10,23 +10,23 @@ When using field-value pairs for both identifying the record and specifiyng the 
 
 This command updates a record in Salesforce objects by default. Use the --use-tooling-api flag to update a Tooling API object.
 
-# flags.sobject
+# flags.sobject.summary
 
 API name of the Salesforce or Tooling API object that contains the record you're updating.
 
-# flags.recordId
+# flags.record-id.summary
 
 ID of the record you’re updating.
 
-# flags.where
+# flags.where.summary
 
 List of <fieldName>=<value> pairs that identify the record you want to update.
 
-# flags.useToolingApi
+# flags.use-tooling-api.summary
 
 Use Tooling API so you can update a record in a Tooling API object.
 
-# flags.values
+# flags.values.summary
 
 Fields that you're updating, in the format of <fieldName>=<value> pairs.
 

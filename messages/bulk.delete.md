@@ -18,14 +18,14 @@ When you execute this command, it starts a job and one or more batches, displays
 
   <%= config.bin %> <%= command.id %> --sobject MyObject__c --file files/delete.csv --wait 5 --target-org my-scratch
 
-# flags.sobjecttype
+# flags.sobject.summary
 
 API name of the Salesforce object, either standard or custom, that you want to delete records from.
 
-# flags.csvfile
+# flags.file.summary
 
 CSV file that contains the IDs of the records to delete.
 
-# flags.wait
+# flags.wait.summary
 
 Number of minutes to wait for the command to complete before displaying the results.

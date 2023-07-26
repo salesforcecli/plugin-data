@@ -22,7 +22,7 @@ export default class Upsert extends BulkOperationCommand {
   public static readonly flags = {
     'external-id': Flags.string({
       char: 'i',
-      summary: messages.getMessage('flags.externalid'),
+      summary: messages.getMessage('flags.external-id.summary'),
       required: true,
       aliases: ['externalid'],
       deprecateAliases: true,
@@ -35,9 +35,17 @@ export default class Upsert extends BulkOperationCommand {
 
     await validateSobjectType(flags.sobject, conn);
 
-    return this.runBulkOperation(flags.sobject, flags.file, conn, flags.async ? 0 : flags.wait?.minutes, flags.verbose, 'upsert', {
-      extIdField: flags['external-id'],
-    });
+    return this.runBulkOperation(
+      flags.sobject,
+      flags.file,
+      conn,
+      flags.async ? 0 : flags.wait?.minutes,
+      flags.verbose,
+      'upsert',
+      {
+        extIdField: flags['external-id'],
+      }
+    );
   }
 
   // eslint-disable-next-line class-methods-use-this

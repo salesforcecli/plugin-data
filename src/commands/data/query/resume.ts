@@ -39,7 +39,7 @@ export class BulkQueryReport extends SfCommand<unknown> {
       length: 18,
       char: 'i',
       startsWith: '750',
-      summary: reportMessages.getMessage('flags.bulkQueryId'),
+      summary: reportMessages.getMessage('flags.bulkQueryId.summary'),
       aliases: ['bulkqueryid'],
       deprecateAliases: true,
     }),

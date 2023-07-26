@@ -10,15 +10,15 @@ When specifying fields, use the format <fieldName>=<value>. Enclose all field-va
 
 This command inserts a record into Salesforce objects by default. Use the --use-tooling-api flag to insert into a Tooling API object.
 
-# flags.sobject
+# flags.sobject.summary
 
 API name of the Salesforce or Tooling API object that you're inserting a record into.
 
-# flags.values
+# flags.values.summary
 
 Values for the flags in the form <fieldName>=<value>, separate multiple pairs with spaces.
 
-# flags.useToolingApi
+# flags.use-tooling-api.summary
 
 Use Tooling API so you can insert a record in a Tooling API object.
 

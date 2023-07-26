@@ -22,22 +22,22 @@ By default, the job runs the batches in parallel, which we recommend. You can ru
 
   <%= config.bin %> <%= command.id %> --sobject MyObject__c --file files/file.csv --external-id MyField__c --wait 5 --target-org my-scratch
 
-# flags.sobjecttype
+# flags.sobject.summary
 
 API name of the Salesforce object, either standard or custom, that you want to upsert records to.
 
-# flags.csvfile
+# flags.file.summary
 
 CSV file that contains the records to upsert.
 
-# flags.externalid
+# flags.external-id.summary
 
 Name of the external ID field, or the Id field.
 
-# flags.wait
+# flags.wait.summary
 
 Number of minutes to wait for the command to complete before displaying the results.
 
-# flags.serial
+# flags.serial.summary
 
 Run batches in serial mode.

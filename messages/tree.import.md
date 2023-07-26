@@ -10,19 +10,19 @@ If you used the --plan flag when exporting the data to generate a plan definitio
 
 The sObject Tree API supports requests that contain up to 200 records. For more information, see the REST API Developer Guide. (https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobject_tree.htm)
 
-# flags.files
+# flags.files.summary
 
 Comma-separated and in-order JSON files that contain the records, in sObject tree format, that you want to insert.
 
-# flags.plan
+# flags.plan.summary
 
 Plan definition file to insert multiple data files.
 
-# flags.contenttype
+# flags.content-type.summary
 
 Content type of import files if their extention is not .json.
 
-# flags.confighelp
+# flags.config-help.summary
 
 Display schema information for the --plan configuration file to stdout; if you specify this flag, all other flags except --json are ignored.
 
