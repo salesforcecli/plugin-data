@@ -24,7 +24,7 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
     ...orgFlags,
     'external-id': Flags.string({
       char: 'i',
-      summary: messages.getMessage('flags.externalid.summary'),
+      summary: messages.getMessage('flags.external-id.summary'),
       required: true,
       aliases: ['externalid'],
       deprecateAliases: true,

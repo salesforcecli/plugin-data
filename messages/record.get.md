@@ -24,7 +24,7 @@ ID of the record you’re retrieving.
 
 List of <fieldName>=<value> pairs that identify the record you want to display.
 
-# flags.useToolingApi.summary
+# flags.use-tooling-api.summary
 
 Use Tooling API so you can retrieve a record from a Tooling API object.
 

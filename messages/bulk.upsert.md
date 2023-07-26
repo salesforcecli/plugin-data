@@ -30,7 +30,7 @@ API name of the Salesforce object, either standard or custom, that you want to u
 
 CSV file that contains the records to upsert.
 
-# flags.externalid.summary
+# flags.external-id.summary
 
 Name of the external ID field, or the Id field.
 

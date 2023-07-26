@@ -47,7 +47,7 @@ export default class Get extends SfCommand<Record> {
     }),
     'use-tooling-api': Flags.boolean({
       char: 't',
-      summary: messages.getMessage('flags.useToolingApi.summary'),
+      summary: messages.getMessage('flags.use-tooling-api.summary'),
       aliases: ['usetoolingapi'],
       deprecateAliases: true,
     }),
