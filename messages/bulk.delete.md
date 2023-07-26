@@ -16,7 +16,7 @@ When you execute this command, it starts a job and one or more batches, displays
 
 - Bulk delete records from a custom object in an org with alias my-scratch and wait 5 minutes for the command to complete:
 
-  <%= config.bin %> <%= command.id %> --sobject MyObject\_\_c --file files/delete.csv --wait 5 --target-org my-scratch
+  <%= config.bin %> <%= command.id %> --sobject MyObject__c --file files/delete.csv --wait 5 --target-org my-scratch
 
 # flags.sobject.summary
 
