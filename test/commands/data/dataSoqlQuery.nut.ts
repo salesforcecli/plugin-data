@@ -69,7 +69,6 @@ describe('data:query command', () => {
     testSession = await TestSession.create({
       scratchOrgs: [
         {
-          executable: 'sfdx',
           config: 'config/project-scratch-def.json',
           setDefault: true,
         },
@@ -100,7 +99,7 @@ describe('data:query command', () => {
   describe('data:query respects maxQueryLimit config', () => {
     it('should return 1 account record', () => {
       // set maxQueryLimit to 1 globally
-      execCmd('config:set maxQueryLimit=1 --global', { ensureExitCode: 0, cli: 'sfdx' });
+      execCmd('config:set maxQueryLimit=1 --global', { ensureExitCode: 0 });
 
       const result = runQuery('SELECT Id, Name, Phone FROM Account', { json: true }) as QueryResult;
 
@@ -110,7 +109,7 @@ describe('data:query command', () => {
 
     it('should return 3756 ScratchOrgInfo records', () => {
       // set maxQueryLimit to 3756 globally
-      execCmd('config:set maxQueryLimit=3756 --global', { ensureExitCode: 0, cli: 'sfdx' });
+      execCmd('config:set maxQueryLimit=3756 --global', { ensureExitCode: 0 });
 
       const soqlQuery = 'SELECT Id FROM ScratchOrgInfo';
       const queryCmd = `data:query --query "${soqlQuery}" --json --target-org ${hubOrgUsername}`;

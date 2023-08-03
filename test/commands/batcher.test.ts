@@ -31,7 +31,7 @@ describe('batcher', () => {
       styledHeaderSpy = $$.stub(ux, 'styledHeader');
       logSpy = $$.stub(ux, 'log');
 
-      batcher = new Batcher(conn, ux, 'sfdx', ':');
+      batcher = new Batcher(conn, ux, 'sf', ':');
     });
 
     afterEach(() => {
