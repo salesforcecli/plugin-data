@@ -50,6 +50,7 @@ describe('data:record commands', () => {
     });
     execCmd('force:user:permset:assign -n TestPerm', {
       ensureExitCode: 0,
+      cli: 'sf',
     });
   });
 
