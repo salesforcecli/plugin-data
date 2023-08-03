@@ -17,12 +17,10 @@ describe('data:tree commands', () => {
     testSession = await TestSession.create({
       scratchOrgs: [
         {
-          executable: 'sfdx',
           config: 'config/project-scratch-def.json',
           setDefault: true,
         },
         {
-          executable: 'sfdx',
           config: 'config/project-scratch-def.json',
           setDefault: false,
           alias: 'importOrg',

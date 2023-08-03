@@ -37,7 +37,6 @@ describe('data:record commands', () => {
     testSession = await TestSession.create({
       scratchOrgs: [
         {
-          executable: 'sfdx',
           config: 'config/project-scratch-def.json',
           setDefault: true,
         },
@@ -45,13 +44,13 @@ describe('data:record commands', () => {
       project: { sourceDir: path.join('test', 'test-files', 'data-project') },
       devhubAuthStrategy: 'AUTO',
     });
-    execCmd('force:source:push', {
+    execCmd('project:deploy:start', {
       ensureExitCode: 0,
-      cli: 'sfdx',
+      cli: 'sf',
     });
     execCmd('force:user:permset:assign -n TestPerm', {
       ensureExitCode: 0,
-      cli: 'sfdx',
+      cli: 'sf',
     });
   });
 
