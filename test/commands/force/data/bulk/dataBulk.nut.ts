@@ -84,7 +84,6 @@ describe('force:data:bulk commands', () => {
     testSession = await TestSession.create({
       scratchOrgs: [
         {
-          executable: 'sfdx',
           config: 'config/project-scratch-def.json',
           setDefault: true,
         },

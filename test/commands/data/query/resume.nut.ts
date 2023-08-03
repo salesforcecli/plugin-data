@@ -36,7 +36,6 @@ describe('data:query:resume command', () => {
     testSession = await TestSession.create({
       scratchOrgs: [
         {
-          executable: 'sfdx',
           config: 'config/project-scratch-def.json',
           setDefault: true,
         },
@@ -46,7 +45,6 @@ describe('data:query:resume command', () => {
     });
     execCmd('force:source:push', {
       ensureExitCode: 0,
-      cli: 'sfdx',
     });
 
     // Import data to the default org.

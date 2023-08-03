@@ -37,7 +37,6 @@ describe('data:record commands', () => {
     testSession = await TestSession.create({
       scratchOrgs: [
         {
-          executable: 'sfdx',
           config: 'config/project-scratch-def.json',
           setDefault: true,
         },
@@ -47,11 +46,9 @@ describe('data:record commands', () => {
     });
     execCmd('force:source:push', {
       ensureExitCode: 0,
-      cli: 'sfdx',
     });
     execCmd('force:user:permset:assign -n TestPerm', {
       ensureExitCode: 0,
-      cli: 'sfdx',
     });
   });
 
