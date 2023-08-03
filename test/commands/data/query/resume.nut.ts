@@ -43,8 +43,9 @@ describe('data:query:resume command', () => {
       project: { sourceDir: path.join('test', 'test-files', 'data-project') },
       devhubAuthStrategy: 'AUTO',
     });
-    execCmd('force:source:push', {
+    execCmd('project:deploy:start', {
       ensureExitCode: 0,
+      cli: 'sf',
     });
 
     // Import data to the default org.

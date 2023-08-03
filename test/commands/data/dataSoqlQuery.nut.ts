@@ -82,9 +82,9 @@ describe('data:query command', () => {
     if (!hubOrgUsername) {
       throw new Error('No default devhub username found');
     }
-    execCmd('force:source:push', {
+    execCmd('project:deploy:start', {
       ensureExitCode: 0,
-      cli: 'sfdx',
+      cli: 'sf',
     });
 
     // Import data to the default org.

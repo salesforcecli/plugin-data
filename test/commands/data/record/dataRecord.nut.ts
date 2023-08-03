@@ -44,8 +44,9 @@ describe('data:record commands', () => {
       project: { sourceDir: path.join('test', 'test-files', 'data-project') },
       devhubAuthStrategy: 'AUTO',
     });
-    execCmd('force:source:push', {
+    execCmd('project:deploy:start', {
       ensureExitCode: 0,
+      cli: 'sf',
     });
     execCmd('force:user:permset:assign -n TestPerm', {
       ensureExitCode: 0,
