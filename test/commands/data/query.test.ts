@@ -83,7 +83,7 @@ describe('Execute a SOQL statement', (): void => {
 
       it('should have csv results', async () => {
         await DataSoqlQueryCommand.run(
-          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'csv'],
+          ['--target-org', 'test@org.com', '--query', 'select ', '--result-format', 'csv'],
           config
         );
         sinon.assert.calledOnce(soqlQuerySpy);
@@ -93,7 +93,7 @@ describe('Execute a SOQL statement', (): void => {
 
       it('should have human results', async () => {
         await DataSoqlQueryCommand.run(
-          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'human'],
+          ['--target-org', 'test@org.com', '--query', 'select ', '--result-format', 'human'],
           config
         );
         sinon.assert.calledOnce(soqlQuerySpy);
@@ -227,7 +227,7 @@ describe('Execute a SOQL statement', (): void => {
 
       it('should have csv results', async () => {
         await DataSoqlQueryCommand.run(
-          ['--targetusername', 'test@org.com', '--query', 'select ', '--resultformat', 'csv'],
+          ['--target-org', 'test@org.com', '--query', 'select ', '--result-format', 'csv'],
           config
         );
 
