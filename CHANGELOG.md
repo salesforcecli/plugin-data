@@ -1,3 +1,12 @@
+## [2.5.5](https://github.com/salesforcecli/plugin-data/compare/2.5.4...2.5.5) (2023-08-07)
+
+
+### Bug Fixes
+
+* **deps:** core 5 ([1ab270a](https://github.com/salesforcecli/plugin-data/commit/1ab270ab0ebe99c17055854a8440b8894e0b4bfb))
+
+
+
 ## [2.5.4](https://github.com/salesforcecli/plugin-data/compare/2.5.3...2.5.4) (2023-07-30)
 
 
