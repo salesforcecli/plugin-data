@@ -1,3 +1,12 @@
+## [2.5.6](https://github.com/salesforcecli/plugin-data/compare/2.5.5...2.5.6) (2023-08-09)
+
+
+### Bug Fixes
+
+* small messages update ([#657](https://github.com/salesforcecli/plugin-data/issues/657)) ([dbf6ff7](https://github.com/salesforcecli/plugin-data/commit/dbf6ff7cbf0307f654c81d6ede3b5f0c139f5134))
+
+
+
 ## [2.5.5](https://github.com/salesforcecli/plugin-data/compare/2.5.4...2.5.5) (2023-08-07)
 
 
