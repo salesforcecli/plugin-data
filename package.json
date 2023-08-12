@@ -103,7 +103,7 @@
     "version": "oclif readme"
   },
   "dependencies": {
-    "@oclif/core": "^2.11.7",
+    "@oclif/core": "^2.11.8",
     "@salesforce/core": "^5.2.0",
     "@salesforce/kit": "^3.0.9",
     "@salesforce/sf-plugins-core": "^3.1.14",
