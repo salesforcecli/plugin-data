@@ -640,7 +640,7 @@ describe('ImportApi', () => {
   describe('getSchema', () => {
     it('should return the schema', () => {
       const org = new Org({ aliasOrUsername: 'import@test.org' });
-      const importApi = new ImportApi(org, 'sfdx', ':');
+      const importApi = new ImportApi(org, 'sf', ':');
       expect(importApi.getSchema()).to.deep.equal(dataImportPlanSchema);
     });
   });
