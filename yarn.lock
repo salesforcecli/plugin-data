@@ -1028,15 +1028,15 @@
     "@salesforce/ts-types" "^2.0.7"
     tslib "^2.6.2"
 
-"@salesforce/plugin-command-reference@^3.0.25":
-  version "3.0.27"
-  resolved "https://registry.yarnpkg.com/@salesforce/plugin-command-reference/-/plugin-command-reference-3.0.27.tgz#8fbba7ceb719749e95835482ea5fae7b61a36ba3"
-  integrity sha512-gFmsmRfnS+SPJxS2P/zOLsw3FvB1BPaHlJRo7IfwtVJn3Wr5EwQvRuXuZeoXc0k6Vxesl0UIdsznhWbutJ7Usw==
+"@salesforce/plugin-command-reference@^3.0.29":
+  version "3.0.29"
+  resolved "https://registry.yarnpkg.com/@salesforce/plugin-command-reference/-/plugin-command-reference-3.0.29.tgz#3daa647f642344922f20677072d5ea06948b8a3e"
+  integrity sha512-d4mnsvmN+z3S2Wdkf2ZYyunAGn+dYwKQg2djc7YzQivtcONP0bS6xeIA8A+aivPPJsEkt2nCD9slCcggKNksYw==
   dependencies:
     "@oclif/core" "^2.11.7"
-    "@salesforce/core" "^5.2.0"
+    "@salesforce/core" "^5.2.1"
     "@salesforce/kit" "^3.0.9"
-    "@salesforce/sf-plugins-core" "^3.1.15"
+    "@salesforce/sf-plugins-core" "^3.1.18"
     "@salesforce/ts-types" "^2.0.7"
     chalk "^4"
     handlebars "^4.7.8"
