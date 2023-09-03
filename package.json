@@ -105,7 +105,7 @@
     "version": "oclif readme"
   },
   "dependencies": {
-    "@oclif/core": "^2.11.7",
+    "@oclif/core": "^2.15.0",
     "@salesforce/core": "^5.2.0",
     "@salesforce/kit": "^3.0.9",
     "@salesforce/sf-plugins-core": "^3.1.20",
@@ -117,12 +117,12 @@
     "tslib": "^2"
   },
   "devDependencies": {
-    "@salesforce/plugin-settings": "^1.4.27",
     "@oclif/plugin-command-snapshot": "^4.0.13",
     "@salesforce/cli-plugins-testkit": "^4.3.1",
     "@salesforce/dev-config": "^4.0.1",
-    "@salesforce/dev-scripts": "^5.7.0",
+    "@salesforce/dev-scripts": "^5.10.0",
     "@salesforce/plugin-command-reference": "^3.0.25",
+    "@salesforce/plugin-settings": "^1.4.27",
     "@salesforce/prettier-config": "^0.0.3",
     "@salesforce/ts-sinon": "^1.4.14",
     "@swc/core": "1.3.31",
@@ -144,7 +144,7 @@
     "husky": "^7.0.4",
     "mocha": "^9.1.3",
     "nyc": "^15.1.0",
-    "oclif": "^3.11.3",
+    "oclif": "^3.14.0",
     "prettier": "^2.8.8",
     "pretty-quick": "^3.1.0",
     "shelljs": "~0.8.4",
