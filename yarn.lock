@@ -936,20 +936,20 @@
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@salesforce/cli-plugins-testkit@^4.3.1":
-  version "4.3.1"
-  resolved "https://registry.yarnpkg.com/@salesforce/cli-plugins-testkit/-/cli-plugins-testkit-4.3.1.tgz#cc22eec56c3663f5f1687b525f7e35b356b21ade"
-  integrity sha512-/oNBXFA1hBZlKR+6TrUVgTEPLxpP61Le4D+HoGRofF4e+pQgGn8zdVKFHPAHMmRT95mJovPwMT+hwF0zVF1S/Q==
+"@salesforce/cli-plugins-testkit@^4.3.4":
+  version "4.3.4"
+  resolved "https://registry.yarnpkg.com/@salesforce/cli-plugins-testkit/-/cli-plugins-testkit-4.3.4.tgz#c79df959261d9b7c6360869ba937158d75d31934"
+  integrity sha512-QcUV83trR9O/uWZApNdPBtBjAWAU4o23FKHpapvfChfqd+1ldgVTFSzipLy3k2eMD8tsOziBQ1Fw0xuiRM+HOQ==
   dependencies:
-    "@salesforce/core" "^5.2.1"
-    "@salesforce/kit" "^3.0.9"
+    "@salesforce/core" "^5.2.5"
+    "@salesforce/kit" "^3.0.11"
     "@salesforce/ts-types" "^2.0.6"
     "@types/shelljs" "^0.8.12"
     debug "^4.3.1"
     jszip "^3.10.1"
     shelljs "^0.8.4"
     strip-ansi "6.0.1"
-    ts-retry-promise "^0.7.0"
+    ts-retry-promise "^0.7.1"
 
 "@salesforce/core@^5.2.0", "@salesforce/core@^5.2.1", "@salesforce/core@^5.2.5":
   version "5.2.6"
@@ -7222,10 +7222,10 @@ ts-node@^10.0.0, ts-node@^10.4.0, ts-node@^10.8.1, ts-node@^10.9.1:
     v8-compile-cache-lib "^3.0.1"
     yn "3.1.1"
 
-ts-retry-promise@^0.7.0:
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/ts-retry-promise/-/ts-retry-promise-0.7.0.tgz#08f2dcbbf5d2981495841cb63389a268324e8147"
-  integrity sha512-x6yWZXC4BfXy4UyMweOFvbS1yJ/Y5biSz/mEPiILtJZLrqD3ZxIpzVOGGgifHHdaSe3WxzFRtsRbychI6zofOg==
+ts-retry-promise@^0.7.0, ts-retry-promise@^0.7.1:
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/ts-retry-promise/-/ts-retry-promise-0.7.1.tgz#176d6eee6415f07b6c7c286d3657355e284a6906"
+  integrity sha512-NhHOCZ2AQORvH42hOPO5UZxShlcuiRtm7P2jIq2L2RY3PBxw2mLnUsEdHrIslVBFya1v5aZmrR55lWkzo13LrQ==
 
 tsconfig-paths@^3.14.2:
   version "3.14.2"
