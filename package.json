@@ -108,7 +108,7 @@
     "@oclif/core": "^2.15.0",
     "@salesforce/core": "^5.2.0",
     "@salesforce/kit": "^3.0.9",
-    "@salesforce/sf-plugins-core": "^3.1.20",
+    "@salesforce/sf-plugins-core": "^3.1.22",
     "@salesforce/ts-types": "^2.0.6",
     "chalk": "^4.1.0",
     "csv-parse": "^4.16.3",
