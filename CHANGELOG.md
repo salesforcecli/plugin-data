@@ -1,3 +1,9 @@
+## [2.5.12](https://github.com/salesforcecli/plugin-data/compare/2.5.11...2.5.12) (2023-09-25)
+
+### Bug Fixes
+
+- assert flag type ([#697](https://github.com/salesforcecli/plugin-data/issues/697)) ([284d9a9](https://github.com/salesforcecli/plugin-data/commit/284d9a951a124e2ace561dfd4c8aec497e0e8f19))
+
 ## [2.5.11](https://github.com/salesforcecli/plugin-data/compare/2.5.10...2.5.11) (2023-09-24)
 
 ### Bug Fixes
