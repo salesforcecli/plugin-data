@@ -4,7 +4,8 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { Messages } from '@salesforce/core';
+import { Interfaces } from '@oclif/core';
+import { Messages, Org } from '@salesforce/core';
 import {
   Flags,
   loglevel,
@@ -24,8 +25,17 @@ export const perflogFlag = Flags.boolean({
   },
 });
 
+// Modifying a custom flag is an anti-pattern. Creating a new
+// custom flag is the preferred approach. But if it must be done,
+// then the type must be asserted so that @oclif/core can properly
+// parse the flag's type.
+const targetOrg = {
+  ...requiredOrgFlagWithDeprecations,
+  summary: messages.getMessage('flags.targetOrg.summary'),
+} as Interfaces.OptionFlag<Org>;
+
 export const orgFlags = {
-  'target-org': { ...requiredOrgFlagWithDeprecations, summary: messages.getMessage('flags.targetOrg.summary') },
+  'target-org': targetOrg,
   'api-version': orgApiVersionFlagWithDeprecations,
   loglevel,
 };
