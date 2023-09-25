@@ -25,7 +25,7 @@ export const perflogFlag = Flags.boolean({
 });
 
 export const orgFlags = {
-  'target-org': { ...requiredOrgFlagWithDeprecations, summary: messages.getMessage('flags.targetOrg.summary') },
+  'target-org': requiredOrgFlagWithDeprecations,
   'api-version': orgApiVersionFlagWithDeprecations,
   loglevel,
 };
