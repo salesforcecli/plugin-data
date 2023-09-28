@@ -1,3 +1,9 @@
+## [2.5.13](https://github.com/salesforcecli/plugin-data/compare/2.5.12...2.5.13) (2023-09-28)
+
+### Bug Fixes
+
+- **deps:** bump get-func-name from 2.0.0 to 2.0.2 ([49c86b9](https://github.com/salesforcecli/plugin-data/commit/49c86b965d4d0a421c3ea3797d7280da54f90421))
+
 ## [2.5.12](https://github.com/salesforcecli/plugin-data/compare/2.5.11...2.5.12) (2023-09-25)
 
 ### Bug Fixes
