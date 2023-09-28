@@ -1,3 +1,9 @@
+## [2.5.14](https://github.com/salesforcecli/plugin-data/compare/2.5.13...2.5.14) (2023-09-28)
+
+### Bug Fixes
+
+- change "\*\*" back to "\_\_" in example ([#699](https://github.com/salesforcecli/plugin-data/issues/699)) ([142c7a9](https://github.com/salesforcecli/plugin-data/commit/142c7a96e78b7997c1003709ae15ea901066272b))
+
 ## [2.5.13](https://github.com/salesforcecli/plugin-data/compare/2.5.12...2.5.13) (2023-09-28)
 
 ### Bug Fixes
