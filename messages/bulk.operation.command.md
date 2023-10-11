@@ -1,10 +1,10 @@
 # flags.sobject.summary
 
-API name of the Salesforce object, either standard or custom, that you want to delete records from.
+API name of the Salesforce object, either standard or custom, that you want to update or delete records from.
 
 # flags.csvfile.summary
 
-CSV file that contains the IDs of the records to delete.
+CSV file that contains the IDs of the records to update or delete.
 
 # flags.wait.summary
 
