@@ -1,3 +1,9 @@
+## [2.5.17](https://github.com/salesforcecli/plugin-data/compare/2.5.16...2.5.17) (2023-10-11)
+
+### Bug Fixes
+
+- bulk update/upsert commands mention "delete" ([b546d2c](https://github.com/salesforcecli/plugin-data/commit/b546d2c6c746f4ddc186df88bd6d3c0fa6a02b66))
+
 ## [2.5.16](https://github.com/salesforcecli/plugin-data/compare/2.5.15...2.5.16) (2023-10-08)
 
 ### Bug Fixes

@@ -1,6 +1,6 @@
 {
   "name": "@salesforce/plugin-data",
-  "version": "2.5.16",
+  "version": "2.5.17",
   "description": "Plugin for salesforce data commands",
   "author": "Salesforce",
   "main": "lib/index.js",

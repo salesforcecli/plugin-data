@@ -951,7 +951,7 @@
     strip-ansi "6.0.1"
     ts-retry-promise "^0.7.1"
 
-"@salesforce/core@^5.2.10", "@salesforce/core@^5.2.7", "@salesforce/core@^5.2.9", "@salesforce/core@^5.3.1", "@salesforce/core@^5.3.5":
+"@salesforce/core@^5.2.10", "@salesforce/core@^5.2.7", "@salesforce/core@^5.3.1", "@salesforce/core@^5.3.5":
   version "5.3.5"
   resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-5.3.5.tgz#0e662420998c56abcf341fc496c6fd1d4e543a34"
   integrity sha512-XqlUBBBfDLHeM6MOZP5GFK7vNoES8C7bTXe3y0KbZ/tWzBq4vl9KIpSsyYvsHwjb4AmUDgx0SJhH60dPVqYJzg==
@@ -1019,15 +1019,7 @@
     typescript "^4.9.5"
     wireit "^0.9.5"
 
-"@salesforce/kit@^3.0.11", "@salesforce/kit@^3.0.13", "@salesforce/kit@^3.0.9":
-  version "3.0.13"
-  resolved "https://registry.yarnpkg.com/@salesforce/kit/-/kit-3.0.13.tgz#10b47ad6e0e27c3a9f97eb6a5cdcfffa9ba1f163"
-  integrity sha512-HLQ5L5bBi0tsMeH5ZHJAhHUpvNUNPQoNJt2O82Jf6C60GGsrlzwzQ5ONAHGNBgKSZ7HLr0UGL5xaA+hE9uOcgw==
-  dependencies:
-    "@salesforce/ts-types" "^2.0.8"
-    tslib "^2.6.2"
-
-"@salesforce/kit@^3.0.12", "@salesforce/kit@^3.0.13":
+"@salesforce/kit@^3.0.12", "@salesforce/kit@^3.0.13", "@salesforce/kit@^3.0.9":
   version "3.0.13"
   resolved "https://registry.yarnpkg.com/@salesforce/kit/-/kit-3.0.13.tgz#10b47ad6e0e27c3a9f97eb6a5cdcfffa9ba1f163"
   integrity sha512-HLQ5L5bBi0tsMeH5ZHJAhHUpvNUNPQoNJt2O82Jf6C60GGsrlzwzQ5ONAHGNBgKSZ7HLr0UGL5xaA+hE9uOcgw==
