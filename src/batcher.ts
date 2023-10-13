@@ -7,8 +7,8 @@
 import { ReadStream } from 'fs';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { Ux } from '@salesforce/sf-plugins-core';
-import { BulkIngestBatchResult, Job, JobInfo, Batch, BatchInfo, BulkOperation } from 'jsforce/api/bulk';
-import { Schema } from 'jsforce';
+import type { BulkIngestBatchResult, Job, JobInfo, Batch, BatchInfo, BulkOperation } from 'jsforce/api/bulk';
+import type { Schema } from 'jsforce';
 import { stringify } from 'csv-stringify/sync';
 import parse = require('csv-parse');
 

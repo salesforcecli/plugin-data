@@ -11,7 +11,13 @@ import { Flags } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
 import { Connection, Messages } from '@salesforce/core';
 import { ux } from '@oclif/core';
-import { BulkOperation, IngestJobV2, IngestJobV2FailedResults, IngestOperation, JobInfoV2 } from 'jsforce/api/bulk';
+import type {
+  BulkOperation,
+  IngestJobV2,
+  IngestJobV2FailedResults,
+  IngestOperation,
+  JobInfoV2,
+} from 'jsforce/api/bulk';
 import { Schema } from 'jsforce';
 import { orgFlags } from './flags';
 import { BulkDataRequestCache } from './bulkDataRequestCache';

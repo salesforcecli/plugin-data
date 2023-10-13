@@ -7,7 +7,7 @@
 
 import * as fs from 'fs';
 import { Connection, Logger, Messages, SfError } from '@salesforce/core';
-import { Record } from 'jsforce';
+import type { Record } from 'jsforce';
 import {
   AnyJson,
   ensureJsonArray,

@@ -5,11 +5,11 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import { BulkOperation, IngestJobV2, IngestOperation, JobInfoV2, JobStateV2 } from 'jsforce/lib/api/bulk';
+import type { BulkOperation, IngestJobV2, IngestOperation, JobInfoV2, JobStateV2 } from 'jsforce/lib/api/bulk';
 import { Duration } from '@salesforce/kit';
 import { capitalCase } from 'change-case';
 import { Connection, Lifecycle, Messages } from '@salesforce/core';
-import { Schema } from 'jsforce';
+import type { Schema } from 'jsforce';
 import { getResultMessage } from './reporters';
 import { BulkResultV2 } from './types';
 import { BulkDataRequestCache } from './bulkDataRequestCache';
@@ -28,7 +28,7 @@ export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
   protected wait = 0;
   private numberRecordsProcessed = 0;
   private numberRecordsFailed = 0;
-  private numberRecordSuceeded = 0;
+  private numberRecordSucceeded = 0;
   private timeout = false;
 
   protected displayBulkV2Result(jobInfo: JobInfoV2): void {
@@ -71,7 +71,7 @@ export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
       const jobInfo = await this.job.check();
       this.numberRecordsProcessed = jobInfo.numberRecordsProcessed ?? 0;
       this.numberRecordsFailed = jobInfo.numberRecordsFailed ?? 0;
-      this.numberRecordSuceeded = this.numberRecordsProcessed - this.numberRecordsFailed;
+      this.numberRecordSucceeded = this.numberRecordsProcessed - this.numberRecordsFailed;
       this.spinner.status = `${this.getRemainingTimeStatus()}${this.getStage(
         jobInfo.state
       )}${this.getRemainingRecordsStatus()}`;
@@ -108,7 +108,7 @@ export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
   protected getRemainingRecordsStatus(): string {
     // the leading space is intentional
     return ` ${messages.getMessage('remainingRecordsStatus', [
-      this.numberRecordSuceeded,
+      this.numberRecordSucceeded,
       this.numberRecordsFailed,
       this.numberRecordsProcessed,
     ])}`;

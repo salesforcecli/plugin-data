@@ -6,7 +6,7 @@
  */
 
 import { Connection, Messages, SfError } from '@salesforce/core';
-import { Record as jsforceRecord, SaveResult } from 'jsforce';
+import type { Record as jsforceRecord, SaveResult } from 'jsforce';
 
 import { ux } from '@oclif/core';
 Messages.importMessagesDirectory(__dirname);

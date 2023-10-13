@@ -6,7 +6,7 @@
  */
 import { TTLConfig, Global, Logger, Messages, Org } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
-import { QueryOperation } from 'jsforce/lib/api/bulk';
+import type { QueryOperation } from 'jsforce/lib/api/bulk';
 import { ResumeOptions } from './types';
 
 Messages.importMessagesDirectory(__dirname);

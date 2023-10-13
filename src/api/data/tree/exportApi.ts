@@ -8,7 +8,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import { Logger, Messages, Org, SfError, Lifecycle } from '@salesforce/core';
-import { DescribeSObjectResult, QueryResult } from 'jsforce';
+import type { DescribeSObjectResult, QueryResult } from 'jsforce';
 import { Ux } from '@salesforce/sf-plugins-core';
 import {
   BasicRecord,
