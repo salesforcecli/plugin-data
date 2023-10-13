@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { Flags, loglevel, optionalOrgFlagWithDeprecations } from '@salesforce/sf-plugins-core';
-import type { IngestJobV2, IngestOperation } from 'jsforce/lib/api/bulk';
+import type { IngestJobV2, IngestOperation } from 'jsforce/api/bulk';
 import { Messages } from '@salesforce/core';
 import type { Schema } from 'jsforce';
 import { Duration } from '@salesforce/kit';

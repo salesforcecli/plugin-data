@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { Messages } from '@salesforce/core';
-import { QueryJobV2 } from 'jsforce/lib/api/bulk';
+import { QueryJobV2 } from 'jsforce/api/bulk';
 import {
   Flags,
   loglevel,

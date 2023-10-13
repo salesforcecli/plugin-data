@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import type { BulkOperation, IngestJobV2, IngestOperation, JobInfoV2, JobStateV2 } from 'jsforce/lib/api/bulk';
+import type { BulkOperation, IngestJobV2, IngestOperation, JobInfoV2, JobStateV2 } from 'jsforce/api/bulk';
 import { Duration } from '@salesforce/kit';
 import { capitalCase } from 'change-case';
 import { Connection, Lifecycle, Messages } from '@salesforce/core';

@@ -7,10 +7,9 @@
 import { EOL } from 'os';
 import { Logger, Messages } from '@salesforce/core';
 import { ux } from '@oclif/core';
-import * as chalk from 'chalk';
+import { bold } from 'chalk';
 import { get, getArray, getNumber, isString, Optional } from '@salesforce/ts-types';
-import type { BatchInfo, IngestJobV2Results, JobInfoV2 } from 'jsforce/lib/api/bulk';
-import type { BatchState } from 'jsforce/api/bulk';
+import type { BatchState, BatchInfo, IngestJobV2Results, JobInfoV2 } from 'jsforce/api/bulk';
 import type { Schema } from 'jsforce';
 import { capitalCase } from 'change-case';
 import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes';
@@ -99,7 +98,7 @@ export class HumanReporter extends QueryReporter {
   ): void {
     this.prepNullValues(records);
     ux.table(records, prepColumns(columns));
-    ux.log(chalk.bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
+    ux.log(bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
   }
 
   public prepNullValues(records: unknown[]): void {
@@ -112,7 +111,7 @@ export class HumanReporter extends QueryReporter {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const value = Reflect.get(recordAsObject, propertyKey);
             if (value === null) {
-              Reflect.set(recordAsObject, propertyKey, chalk.bold('null'));
+              Reflect.set(recordAsObject, propertyKey, bold('null'));
             } else if (typeof value === 'object') {
               this.prepNullValues([value]);
             }
@@ -181,11 +180,11 @@ export class HumanReporter extends QueryReporter {
                   Object.entries(record as never).forEach(([key, value]) => {
                     if (!index) {
                       Reflect.defineProperty(result, `${child.toString()}.${key}`, {
-                        value: value ?? chalk.bold('null'),
+                        value: value ?? bold('null'),
                       });
                     } else {
                       Reflect.defineProperty(newResult, `${child.toString()}.${key}`, {
-                        value: value ?? chalk.bold('null'),
+                        value: value ?? bold('null'),
                       });
                     }
                   });
