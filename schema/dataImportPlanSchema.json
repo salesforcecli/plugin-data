@@ -3,7 +3,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "array",
   "title": "Data Import Plan",
-  "description": "Schema for SFDX Toolbelt's data import plan JSON.",
+  "description": "Schema for data import plan JSON.",
   "items": {
     "type": "object",
     "title": "SObject Type",
