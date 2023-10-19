@@ -35,3 +35,14 @@ Display schema information for the --plan configuration file to stdout; if you s
 - Import records using a plan definition file into your default org:
 
   <%= config.bin %> <%= command.id %> --plan Account-Contact-plan.json
+
+# schema-help
+
+schema(array) - Data Import Plan: Schema for SFDX Toolbelt's data import plan JSON.
+
+- items(object) - SObject Type: Definition of records to be insert per SObject Type
+  - sobject(string) - Name of SObject: Child file references must have SObject roots of this type
+  - saveRefs(boolean) - Save References: Post-save, save references (Name/ID) to be used for reference replacement in subsequent saves. Applies to all data files for this SObject type.
+  - resolveRefs(boolean) - Resolve References: Pre-save, replace @<reference> with ID from previous save. Applies to all data files for this SObject type.
+  - files(array) - Files: An array of files paths to load
+  - items(string|object) - Filepath: Filepath string or object to point to a JSON or XML file having data defined in SObject Tree format.

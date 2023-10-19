@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { Logger, Messages, SchemaPrinter } from '@salesforce/core';
+import { Messages } from '@salesforce/core';
 import { getString, JsonMap } from '@salesforce/ts-types';
 import { SfCommand, Flags, arrayWithDeprecation } from '@salesforce/sf-plugins-core';
 import { ImportApi, ImportConfig } from '../../../api/data/tree/importApi';
@@ -61,7 +61,6 @@ export default class Import extends SfCommand<ImportResult[] | JsonMap> {
 
   public async run(): Promise<ImportResult[] | JsonMap> {
     const { flags } = await this.parse(Import);
-    const logger = await Logger.child('Import');
     const importApi = new ImportApi(
       flags['target-org'],
       this.config.bin,
@@ -71,9 +70,7 @@ export default class Import extends SfCommand<ImportResult[] | JsonMap> {
     if (flags['config-help']) {
       // Display config help and return
       const schema = importApi.getSchema();
-      if (!this.jsonEnabled()) {
-        new SchemaPrinter(logger, schema).getLines().forEach((line) => this.log(line));
-      }
+      this.log(messages.getMessage('schema-help'));
 
       return schema;
     }
