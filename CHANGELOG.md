@@ -1,3 +1,9 @@
+# [2.6.0](https://github.com/salesforcecli/plugin-data/compare/2.5.19...2.6.0) (2023-10-19)
+
+### Features
+
+- static import schema help ([#721](https://github.com/salesforcecli/plugin-data/issues/721)) ([e07332b](https://github.com/salesforcecli/plugin-data/commit/e07332b8e51b51376178bed9154998479251a075))
+
 ## [2.5.19](https://github.com/salesforcecli/plugin-data/compare/2.5.18...2.5.19) (2023-10-17)
 
 ### Bug Fixes
