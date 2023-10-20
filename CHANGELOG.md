@@ -1,3 +1,33 @@
+# [2.6.0](https://github.com/salesforcecli/plugin-data/compare/2.5.19...2.6.0) (2023-10-19)
+
+### Features
+
+- static import schema help ([#721](https://github.com/salesforcecli/plugin-data/issues/721)) ([e07332b](https://github.com/salesforcecli/plugin-data/commit/e07332b8e51b51376178bed9154998479251a075))
+
+## [2.5.19](https://github.com/salesforcecli/plugin-data/compare/2.5.18...2.5.19) (2023-10-17)
+
+### Bug Fixes
+
+- **deps:** bump @babel/traverse from 7.22.10 to 7.23.2 ([4586fef](https://github.com/salesforcecli/plugin-data/commit/4586fefd361bc7784d952e05842a5deec40c913a))
+
+## [2.5.18](https://github.com/salesforcecli/plugin-data/compare/2.5.17...2.5.18) (2023-10-17)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/core from 5.3.5 to 5.3.9 ([3444dc5](https://github.com/salesforcecli/plugin-data/commit/3444dc57d977c03890c3ccc4a5ae011350fa7819))
+
+## [2.5.17](https://github.com/salesforcecli/plugin-data/compare/2.5.16...2.5.17) (2023-10-11)
+
+### Bug Fixes
+
+- bulk update/upsert commands mention "delete" ([b546d2c](https://github.com/salesforcecli/plugin-data/commit/b546d2c6c746f4ddc186df88bd6d3c0fa6a02b66))
+
+## [2.5.16](https://github.com/salesforcecli/plugin-data/compare/2.5.15...2.5.16) (2023-10-08)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/ts-types from 2.0.7 to 2.0.8 ([dac18d7](https://github.com/salesforcecli/plugin-data/commit/dac18d75ec2dd97b3a37e709f93cf8f20366d6b2))
+
 ## [2.5.15](https://github.com/salesforcecli/plugin-data/compare/2.5.14...2.5.15) (2023-10-01)
 
 ### Bug Fixes
