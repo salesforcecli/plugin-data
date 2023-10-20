@@ -1,3 +1,9 @@
+## [2.6.1](https://github.com/salesforcecli/plugin-data/compare/2.6.0...2.6.1) (2023-10-20)
+
+### Bug Fixes
+
+- **bulk v2:** catch job errors while polling ([#705](https://github.com/salesforcecli/plugin-data/issues/705)) ([74a245e](https://github.com/salesforcecli/plugin-data/commit/74a245e7f802937485b5fad2ed3a674d873015a5))
+
 # [2.6.0](https://github.com/salesforcecli/plugin-data/compare/2.5.19...2.6.0) (2023-10-19)
 
 ### Features
