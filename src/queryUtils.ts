@@ -47,4 +47,3 @@ export const transformBulkResults = (results: Record[], query: string): SoqlQuer
     query,
   };
 };
-

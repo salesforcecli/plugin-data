@@ -77,6 +77,14 @@ export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
       )}${this.getRemainingRecordsStatus()}`;
     });
 
+    this.job.on('failed', (err: Error) => {
+      try {
+        this.error(err);
+      } finally {
+        this.spinner.stop();
+      }
+    });
+
     this.job.on('error', (message: string) => {
       try {
         this.error(message);
