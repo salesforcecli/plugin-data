@@ -141,7 +141,7 @@ export class Batcher {
                 err.message = messages.getMessage('ExternalIdRequired', [sobjectType]);
                 job.emit('error', err);
               }
-              if (err.message.startsWith('Polling time out')) {
+              if (err.name === 'PollingTimeout') {
                 err.message = this.parseTimeOutError(err);
                 // using the reject method for all of the promises wasn't handling errors properly
                 // so emit a 'error' on the job.
