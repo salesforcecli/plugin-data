@@ -150,7 +150,7 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
       return transformBulkResults(res, query);
     } catch (e) {
       const err = e as Error & { jobId: string };
-      if (timeout.minutes === 0 && err.message.includes('Polling time out')) {
+      if (timeout.minutes === 0 && err.message.includes('Polling timed out')) {
         // async query, so we can't throw an error, suggest data:query:resume --queryid <id>
         const cache = await BulkQueryRequestCache.create();
         await cache.createCacheEntryForRequest(err.jobId, connection.getUsername(), connection.getApiVersion());
