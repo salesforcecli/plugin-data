@@ -4,7 +4,7 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { ReadStream } from 'fs';
+import { ReadStream } from 'node:fs';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { Ux } from '@salesforce/sf-plugins-core';
 import { BulkIngestBatchResult, Job, JobInfo, Batch, BatchInfo, BulkOperation } from 'jsforce/api/bulk';

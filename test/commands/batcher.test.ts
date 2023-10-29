@@ -4,9 +4,9 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { Readable } from 'stream';
-import { ReadStream } from 'fs';
-import * as os from 'os';
+import { Readable } from 'node:stream';
+import { ReadStream } from 'node:fs';
+import * as os from 'node:os';
 import { expect } from 'chai';
 import { Ux } from '@salesforce/sf-plugins-core';
 import { Connection, SfError } from '@salesforce/core';
