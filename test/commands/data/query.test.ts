@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import * as chai from 'chai';
 import { Config } from '@oclif/core';
 import { OrgConfigProperties } from '@salesforce/core';

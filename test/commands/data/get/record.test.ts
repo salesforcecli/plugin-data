@@ -4,8 +4,8 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { resolve } from 'path';
-import { strict as assert } from 'assert';
+import { resolve } from 'node:path';
+import { strict as assert } from 'node:assert';
 import { Messages } from '@salesforce/core';
 import { ensureJsonMap, ensureString, AnyJson } from '@salesforce/ts-types';
 import { expect } from 'chai';

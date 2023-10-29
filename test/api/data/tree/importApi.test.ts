@@ -13,8 +13,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 
-import * as path from 'path';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { Messages, Org } from '@salesforce/core';

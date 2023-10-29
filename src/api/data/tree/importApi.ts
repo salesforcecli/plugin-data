@@ -5,9 +5,9 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import * as path from 'path';
-import * as util from 'util';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as util from 'node:util';
+import * as fs from 'node:fs';
 import { AnyJson, Dictionary, getString, JsonMap } from '@salesforce/ts-types';
 import { Logger, Messages, Org, SchemaValidator, SfError } from '@salesforce/core';
 import { DataPlanPart, hasNestedRecords, isAttributesElement, SObjectTreeInput } from '../../../dataSoqlQueryTypes';
