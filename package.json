@@ -122,7 +122,6 @@
     "@salesforce/dev-scripts": "^6.0.3",
     "@salesforce/plugin-command-reference": "^3.0.44",
     "@salesforce/plugin-settings": "^1.4.37",
-    "@salesforce/ts-sinon": "^1.4.19",
     "@swc/core": "1.3.31",
     "@types/chai-as-promised": "^7.1.7",
     "@types/shelljs": "^0.8.13",
