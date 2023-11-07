@@ -6,7 +6,6 @@
  */
 import * as path from 'node:path';
 import * as fs from 'node:fs';
-import { stubMethod } from '@salesforce/ts-sinon';
 import { SfError } from '@salesforce/core';
 import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup';
 import { Config } from '@oclif/core';
@@ -27,7 +26,8 @@ describe('force:data:bulk:upsert', () => {
     await $$.stubAuths(testOrg);
     $$.SANDBOX.stub(fs, 'existsSync').returns(true);
     $$.SANDBOX.stub(fs, 'createReadStream').throws(new SfError('Error'));
-    stubMethod($$.SANDBOX, fs.promises, 'stat').resolves({ isFile: () => true });
+    // @ts-expect-error only stubbing a very small part
+    $$.SANDBOX.stub(fs.promises, 'stat').resolves({ isFile: () => true });
   });
 
   afterEach(async () => {

@@ -37,7 +37,7 @@ export type SoqlQueryResult = {
 };
 
 export type BasicRecord = {
-  [index: string]: { records: BasicRecord[] } | unknown;
+  [index: string]: unknown;
   attributes: {
     type: string;
     url: string;
@@ -57,17 +57,15 @@ export type SObjectTreeInput = {
     referenceId: string;
   };
 } & {
-  [index: string]: { records: SObjectTreeInput[] } | unknown;
+  [index: string]: unknown;
 };
 
 export type SObjectTreeFileContents = {
   records: SObjectTreeInput[];
 };
 
-export const hasNestedRecords = <T>(element: { records: T[] } | unknown): element is { records: T[] } =>
+export const hasNestedRecords = <T>(element: unknown): element is { records: T[] } =>
   Array.isArray((element as { records: T[] })?.records);
 
-export const isAttributesElement = (
-  element: SObjectTreeInput['attributes'] | unknown
-): element is SObjectTreeInput['attributes'] =>
+export const isAttributesElement = (element: unknown): element is SObjectTreeInput['attributes'] =>
   !!(element as SObjectTreeInput['attributes']).referenceId && !!(element as SObjectTreeInput['attributes']).type;

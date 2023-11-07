@@ -219,8 +219,8 @@ export class ImportApi {
     // REVIEWME: support both files and plan in same invocation?
     const importPlanRootPath = path.dirname(plan);
     for (const sobjectConfig of this.importPlanConfig) {
-      const globalSaveRefs = sobjectConfig.saveRefs != null ? sobjectConfig.saveRefs : false;
-      const globalResolveRefs = sobjectConfig.resolveRefs != null ? sobjectConfig.resolveRefs : false;
+      const globalSaveRefs = sobjectConfig.saveRefs ?? false;
+      const globalResolveRefs = sobjectConfig.resolveRefs ?? false;
       for (const fileDef of sobjectConfig.files) {
         let filepath: string;
         let saveRefs = globalSaveRefs;
@@ -234,10 +234,10 @@ export class ImportApi {
           filepath = fileDef.file;
 
           // override save references, if set
-          saveRefs = fileDef.saveRefs == null ? globalSaveRefs : fileDef.saveRefs;
+          saveRefs = fileDef.saveRefs ?? globalSaveRefs;
 
           // override resolve references, if set
-          resolveRefs = fileDef.resolveRefs == null ? globalResolveRefs : fileDef.resolveRefs;
+          resolveRefs = fileDef.resolveRefs ?? globalResolveRefs;
         } else {
           throw new SfError('file definition format unknown.', 'InvalidDataImportPlan');
         }
