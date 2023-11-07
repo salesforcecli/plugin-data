@@ -6,14 +6,14 @@
  */
 import { resolve } from 'node:path';
 import { strict as assert } from 'node:assert';
-import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup';
+import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup.js';
 
 import { ensureJsonMap, ensureString, AnyJson } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { Config } from '@oclif/core';
 
 import { SaveResult } from 'jsforce';
-import Delete from '../../../../src/commands/data/delete/record';
+import Delete from '../../../../src/commands/data/delete/record.js';
 
 const sObjectId = '0011100001zhhyUAAQ';
 

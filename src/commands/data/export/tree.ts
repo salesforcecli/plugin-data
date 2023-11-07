@@ -7,9 +7,9 @@
 
 import { Messages } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
-import { orgFlags } from '../../../flags';
-import { ExportApi, ExportConfig } from '../../../api/data/tree/exportApi';
-import { DataPlanPart, SObjectTreeFileContents } from '../../../dataSoqlQueryTypes';
+import { orgFlags } from '../../../flags.js';
+import { ExportApi, ExportConfig } from '../../../api/data/tree/exportApi.js';
+import { DataPlanPart, SObjectTreeFileContents } from '../../../dataSoqlQueryTypes.js';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.export');

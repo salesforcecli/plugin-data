@@ -8,8 +8,8 @@
 import { Messages } from '@salesforce/core';
 import { getString, JsonMap } from '@salesforce/ts-types';
 import { SfCommand, Flags, arrayWithDeprecation } from '@salesforce/sf-plugins-core';
-import { ImportApi, ImportConfig } from '../../../api/data/tree/importApi';
-import { orgFlags } from '../../../flags';
+import { ImportApi, ImportConfig } from '../../../api/data/tree/importApi.js';
+import { orgFlags } from '../../../flags.js';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.import');

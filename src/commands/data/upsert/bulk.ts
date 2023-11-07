@@ -6,10 +6,10 @@
  */
 import { Messages } from '@salesforce/core';
 import { Flags } from '@salesforce/sf-plugins-core';
-import { BulkUpsertRequestCache } from '../../../bulkDataRequestCache';
-import { BulkOperationCommand } from '../../../bulkOperationCommand';
-import { BulkResultV2 } from '../../../types';
-import { validateSobjectType } from '../../../bulkUtils';
+import { BulkUpsertRequestCache } from '../../../bulkDataRequestCache.js';
+import { BulkOperationCommand } from '../../../bulkOperationCommand.js';
+import { BulkResultV2 } from '../../../types.js';
+import { validateSobjectType } from '../../../bulkUtils.js';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulkv2.upsert');

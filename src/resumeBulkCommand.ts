@@ -5,13 +5,13 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { Flags, loglevel, optionalOrgFlagWithDeprecations } from '@salesforce/sf-plugins-core';
-import { IngestJobV2, IngestOperation } from 'jsforce/lib/api/bulk';
+import { IngestJobV2, IngestOperation } from 'jsforce/lib/api/bulk.js';
 import { Messages } from '@salesforce/core';
 import { Schema } from 'jsforce';
 import { Duration } from '@salesforce/kit';
-import { BulkResultV2, ResumeOptions } from './types';
-import { isBulkV2RequestDone, transformResults, waitOrTimeout } from './bulkUtils';
-import { BulkBaseCommand } from './BulkBaseCommand';
+import { BulkResultV2, ResumeOptions } from './types.js';
+import { isBulkV2RequestDone, transformResults, waitOrTimeout } from './bulkUtils.js';
+import { BulkBaseCommand } from './BulkBaseCommand.js';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.resume.command');
@@ -42,7 +42,7 @@ export abstract class ResumeBulkCommand extends BulkBaseCommand {
     loglevel,
   };
 
-  protected job!: IngestJobV2<Schema, IngestOperation>;
+  protected declare job: IngestJobV2<Schema, IngestOperation>;
 
   protected async resume(resumeOptions: ResumeOptions, wait: Duration): Promise<BulkResultV2> {
     this.spinner.start('Getting status');

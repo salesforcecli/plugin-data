@@ -4,17 +4,17 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import * as path from 'node:path';
+import path from 'node:path';
 import { strict as assert } from 'node:assert/strict';
-import * as fs from 'node:fs';
-import * as os from 'node:os';
+import fs from 'node:fs';
+import os from 'node:os';
 import { expect, config as chaiConfig } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { sleep } from '@salesforce/kit';
 import { ensurePlainObject } from '@salesforce/ts-types';
 import { SaveResult } from 'jsforce';
-import { BulkResultV2 } from '../../../src/types';
-import { QueryResult } from './dataSoqlQuery.nut';
+import { BulkResultV2 } from '../../../src/types.js';
+import { QueryResult } from './dataSoqlQuery.nut.js';
 
 chaiConfig.truncateThreshold = 0;
 

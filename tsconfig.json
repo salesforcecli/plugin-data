@@ -1,5 +1,5 @@
 {
-  "extends": "@salesforce/dev-config/tsconfig-strict",
+  "extends": "@salesforce/dev-config/tsconfig-strict-esm",
   "compilerOptions": {
     "outDir": "lib",
     "rootDir": "src",
@@ -7,8 +7,12 @@
     "declaration": false,
     "baseUrl": ".",
     "paths": {
-      "@salesforce/kit": ["node_modules/@salesforce/kit"]
+      "@salesforce/kit": [
+        "node_modules/@salesforce/kit"
+      ]
     }
   },
-  "include": ["./src/**/*.ts"]
+  "include": [
+    "./src/**/*.ts"
+  ]
 }

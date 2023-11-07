@@ -9,8 +9,8 @@ import { Messages, SfError } from '@salesforce/core';
 import { Record } from 'jsforce';
 import { toAnyJson } from '@salesforce/ts-types';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { orgFlags, perflogFlag } from '../../../flags';
-import { query, logNestedObject } from '../../../dataCommand';
+import { orgFlags, perflogFlag } from '../../../flags.js';
+import { query, logNestedObject } from '../../../dataCommand.js';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'record.get');

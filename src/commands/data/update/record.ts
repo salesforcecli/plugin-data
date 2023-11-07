@@ -8,8 +8,8 @@
 import { Messages, SfError } from '@salesforce/core';
 import { SaveError, SaveResult } from 'jsforce';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { orgFlags } from '../../../flags';
-import { collectErrorMessages, query, stringToDictionary } from '../../../dataCommand';
+import { orgFlags } from '../../../flags.js';
+import { collectErrorMessages, query, stringToDictionary } from '../../../dataCommand.js';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'record.update');

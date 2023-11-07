@@ -7,13 +7,13 @@
 
 import { expect, use as chaiUse } from 'chai';
 
-import * as chaiAsPromised from 'chai-as-promised';
+import chaiAsPromised from 'chai-as-promised';
 import { get, getPlainObject } from '@salesforce/ts-types';
 import { createSandbox } from 'sinon';
 import { ux } from '@oclif/core';
-import { Field, SoqlQueryResult } from '../src/dataSoqlQueryTypes';
-import { CsvReporter, HumanReporter, escape } from '../src/reporters';
-import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars';
+import { Field, SoqlQueryResult } from '../src/dataSoqlQueryTypes.js';
+import { CsvReporter, HumanReporter, escape } from '../src/reporters.js';
+import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars.js';
 
 chaiUse(chaiAsPromised);
 

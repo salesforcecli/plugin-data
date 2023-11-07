@@ -4,14 +4,14 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import * as path from 'node:path';
-import * as fs from 'node:fs';
+import path from 'node:path';
+import fs from 'node:fs';
 import { stubMethod } from '@salesforce/ts-sinon';
 import { SfError } from '@salesforce/core';
-import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup';
+import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup.js';
 import { Config } from '@oclif/core';
 import { expect } from 'chai';
-import Upsert from '../../../../../src/commands/force/data/bulk/upsert';
+import Upsert from '../../../../../src/commands/force/data/bulk/upsert.js';
 
 describe('force:data:bulk:upsert', () => {
   const $$ = new TestContext();

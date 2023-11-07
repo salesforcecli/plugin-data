@@ -7,10 +7,10 @@
 import { ReadStream } from 'node:fs';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { Ux } from '@salesforce/sf-plugins-core';
-import { BulkIngestBatchResult, Job, JobInfo, Batch, BatchInfo, BulkOperation } from 'jsforce/api/bulk';
 import { Schema } from 'jsforce';
 import { stringify } from 'csv-stringify/sync';
 import parse = require('csv-parse');
+import { Batch, BatchInfo, BulkIngestBatchResult, BulkOperation, Job, JobInfo } from 'jsforce/lib/api/bulk.js';
 
 // max rows per file in Bulk 1.0
 const BATCH_RECORDS_LIMIT = 10000;

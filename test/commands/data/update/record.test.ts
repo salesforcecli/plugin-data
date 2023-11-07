@@ -8,11 +8,11 @@ import { resolve } from 'node:path';
 import { strict as assert } from 'node:assert';
 import { AnyJson, ensureJsonMap, ensureString } from '@salesforce/ts-types';
 import { expect } from 'chai';
-import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup';
+import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup.js';
 import { Config } from '@oclif/core';
 import { SfError } from '@salesforce/core';
 import { SaveResult } from 'jsforce';
-import Update from '../../../../src/commands/data/update/record';
+import Update from '../../../../src/commands/data/update/record.js';
 
 const sObjectId = '0011100001zhhyUAAQ';
 

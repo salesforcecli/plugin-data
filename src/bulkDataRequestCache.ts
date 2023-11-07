@@ -6,8 +6,8 @@
  */
 import { TTLConfig, Global, Logger, Messages, Org } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
-import { QueryOperation } from 'jsforce/lib/api/bulk';
-import { ResumeOptions } from './types';
+import { QueryOperation } from 'jsforce/lib/api/bulk.js';
+import { ResumeOptions } from './types.js';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');

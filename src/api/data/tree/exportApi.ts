@@ -5,8 +5,8 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import * as path from 'node:path';
-import * as fs from 'node:fs';
+import path from 'node:path';
+import fs from 'node:fs';
 import { Logger, Messages, Org, SfError, Lifecycle } from '@salesforce/core';
 import { DescribeSObjectResult, QueryResult } from 'jsforce';
 import { Ux } from '@salesforce/sf-plugins-core';
@@ -16,7 +16,7 @@ import {
   hasNestedRecords,
   SObjectTreeFileContents,
   SObjectTreeInput,
-} from '../../../dataSoqlQueryTypes';
+} from '../../../dataSoqlQueryTypes.js';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'exportApi');

@@ -4,20 +4,26 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import * as fs from 'node:fs';
+import fs from 'node:fs';
 import { ReadStream } from 'node:fs';
-import * as os from 'node:os';
+import os from 'node:os';
 import { Flags } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
 import { Connection, Messages } from '@salesforce/core';
 import { ux } from '@oclif/core';
-import { BulkOperation, IngestJobV2, IngestJobV2FailedResults, IngestOperation, JobInfoV2 } from 'jsforce/api/bulk';
 import { Schema } from 'jsforce';
-import { orgFlags } from './flags';
-import { BulkDataRequestCache } from './bulkDataRequestCache';
-import { BulkResultV2 } from './types';
-import { isBulkV2RequestDone, transformResults, waitOrTimeout } from './bulkUtils';
-import { BulkBaseCommand } from './BulkBaseCommand';
+import {
+  BulkOperation,
+  IngestJobV2,
+  IngestJobV2FailedResults,
+  IngestOperation,
+  JobInfoV2,
+} from 'jsforce/lib/api/bulk.js';
+import { orgFlags } from './flags.js';
+import { BulkDataRequestCache } from './bulkDataRequestCache.js';
+import { BulkResultV2 } from './types.js';
+import { isBulkV2RequestDone, transformResults, waitOrTimeout } from './bulkUtils.js';
+import { BulkBaseCommand } from './BulkBaseCommand.js';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.operation.command');

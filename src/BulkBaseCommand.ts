@@ -5,14 +5,14 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import { BulkOperation, IngestJobV2, IngestOperation, JobInfoV2, JobStateV2 } from 'jsforce/lib/api/bulk';
+import { BulkOperation, IngestJobV2, IngestOperation, JobInfoV2, JobStateV2 } from 'jsforce/lib/api/bulk.js';
 import { Duration } from '@salesforce/kit';
 import { capitalCase } from 'change-case';
 import { Connection, Lifecycle, Messages } from '@salesforce/core';
 import { Schema } from 'jsforce';
-import { getResultMessage } from './reporters';
-import { BulkResultV2 } from './types';
-import { BulkDataRequestCache } from './bulkDataRequestCache';
+import { getResultMessage } from './reporters.js';
+import { BulkResultV2 } from './types.js';
+import { BulkDataRequestCache } from './bulkDataRequestCache.js';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.base.command');

@@ -5,10 +5,10 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { Messages } from '@salesforce/core';
-import { BulkDeleteRequestCache } from '../../../bulkDataRequestCache';
-import { BulkOperationCommand } from '../../../bulkOperationCommand';
-import { BulkResultV2 } from '../../../types';
-import { validateSobjectType } from '../../../bulkUtils';
+import { BulkDeleteRequestCache } from '../../../bulkDataRequestCache.js';
+import { BulkOperationCommand } from '../../../bulkOperationCommand.js';
+import { BulkResultV2 } from '../../../types.js';
+import { validateSobjectType } from '../../../bulkUtils.js';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulkv2.delete');

@@ -8,8 +8,8 @@
 import { Messages } from '@salesforce/core';
 import { SaveResult } from 'jsforce';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { orgFlags, perflogFlag } from '../../../flags';
-import { stringToDictionary, collectErrorMessages } from '../../../dataCommand';
+import { orgFlags, perflogFlag } from '../../../flags.js';
+import { stringToDictionary, collectErrorMessages } from '../../../dataCommand.js';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'record.create');

@@ -11,13 +11,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import * as fs from 'node:fs';
-import * as sinon from 'sinon';
+import fs from 'node:fs';
+import sinon from 'sinon';
 import { Connection, Messages, Org } from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
 import { Ux } from '@salesforce/sf-plugins-core';
 import { assert, expect } from 'chai';
-import { ExportApi } from '../../../../src/api/data/tree/exportApi';
+import { ExportApi } from '../../../../src/api/data/tree/exportApi.js';
 
 //
 //  TEST DATA

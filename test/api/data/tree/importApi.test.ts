@@ -13,12 +13,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 
-import * as path from 'node:path';
-import * as fs from 'node:fs';
+import path from 'node:path';
+import fs from 'node:fs';
 import { expect } from 'chai';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import { Messages, Org } from '@salesforce/core';
-import { ImportApi, ImportConfig } from '../../../../src/api/data/tree/importApi';
+import { ImportApi, ImportConfig } from '../../../../src/api/data/tree/importApi.js';
 
 // Json files
 const dataImportPlanSchema = require('../../../../schema/dataImportPlanSchema.json');

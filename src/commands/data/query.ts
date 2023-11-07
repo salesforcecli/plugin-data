@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import * as fs from 'node:fs';
+import fs from 'node:fs';
 import { Connection, Logger, Messages, SfError } from '@salesforce/core';
 import { Record } from 'jsforce';
 import {
@@ -20,11 +20,11 @@ import {
 } from '@salesforce/ts-types';
 import { Duration } from '@salesforce/kit';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { orgFlags, perflogFlag, resultFormatFlag } from '../../flags';
-import { Field, FieldType, SoqlQueryResult } from '../../dataSoqlQueryTypes';
-import { displayResults, transformBulkResults } from '../../queryUtils';
-import { FormatTypes } from '../../reporters';
-import { BulkQueryRequestCache } from '../../bulkDataRequestCache';
+import { orgFlags, perflogFlag, resultFormatFlag } from '../../flags.js';
+import { Field, FieldType, SoqlQueryResult } from '../../dataSoqlQueryTypes.js';
+import { displayResults, transformBulkResults } from '../../queryUtils.js';
+import { FormatTypes } from '../../reporters.js';
+import { BulkQueryRequestCache } from '../../bulkDataRequestCache.js';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');

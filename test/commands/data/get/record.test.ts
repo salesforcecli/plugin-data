@@ -9,10 +9,10 @@ import { strict as assert } from 'node:assert';
 import { Messages } from '@salesforce/core';
 import { ensureJsonMap, ensureString, AnyJson } from '@salesforce/ts-types';
 import { expect } from 'chai';
-import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup';
+import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup.js';
 
 import { Config } from '@oclif/core';
-import Get from '../../../../src/commands/data/get/record';
+import Get from '../../../../src/commands/data/get/record.js';
 
 const sObjectId = '0011100001zhhyUAAQ';
 Messages.importMessagesDirectory(__dirname);

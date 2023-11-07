@@ -7,13 +7,12 @@
 import { EOL } from 'node:os';
 import { Logger, Messages } from '@salesforce/core';
 import { ux } from '@oclif/core';
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 import { get, getArray, getNumber, isString, Optional } from '@salesforce/ts-types';
-import { BatchInfo, IngestJobV2Results, JobInfoV2 } from 'jsforce/lib/api/bulk';
-import { BatchState } from 'jsforce/api/bulk';
+import { BatchInfo, BatchState, IngestJobV2Results, JobInfoV2 } from 'jsforce/lib/api/bulk.js';
 import { Schema } from 'jsforce';
 import { capitalCase } from 'change-case';
-import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes';
+import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes.js';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');

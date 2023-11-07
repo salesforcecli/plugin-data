@@ -4,12 +4,12 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { BatchInfo } from 'jsforce/api/bulk';
+import { BatchInfo } from 'jsforce/lib/api/bulk.js';
 import { Messages, SfError } from '@salesforce/core';
 import { Flags, SfCommand, Ux } from '@salesforce/sf-plugins-core';
-import { orgFlags } from '../../../../flags';
-import { Batcher } from '../../../../batcher';
-import { StatusResult } from '../../../../types';
+import { orgFlags } from '../../../../flags.js';
+import { Batcher } from '../../../../batcher.js';
+import { StatusResult } from '../../../../types.js';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.status');

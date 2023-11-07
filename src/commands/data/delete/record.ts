@@ -8,8 +8,8 @@
 import { Messages, SfError } from '@salesforce/core';
 import { SaveResult } from 'jsforce';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { orgFlags, perflogFlag } from '../../../flags';
-import { collectErrorMessages, query } from '../../../dataCommand';
+import { orgFlags, perflogFlag } from '../../../flags.js';
+import { collectErrorMessages, query } from '../../../dataCommand.js';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'record.delete');
