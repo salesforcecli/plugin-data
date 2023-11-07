@@ -189,8 +189,11 @@ const bulkInsertAccounts = () => {
     { ensureExitCode: 0 }
   ).jsonOutput?.result;
   assert.equal(response?.length, 1);
-  const bulkUpsertResult = response[0];
-  assert(bulkUpsertResult.id);
-  assert('jobId' in bulkUpsertResult);
-  return bulkUpsertResult;
+  if (response.length > 1) {
+    // guaranteed by the assertion, done for ts
+    const bulkUpsertResult = response[0];
+    assert(bulkUpsertResult.id);
+    assert('jobId' in bulkUpsertResult);
+    return bulkUpsertResult;
+  }
 };

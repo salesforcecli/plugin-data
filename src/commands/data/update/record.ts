@@ -100,6 +100,7 @@ export default class Update extends SfCommand<SaveResult> {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 const isSaveResult = (error: SaveError | Error | unknown): error is SaveError => {
   const se = error as SaveError;
   return Boolean(se.fields && se.errorCode && se.message);

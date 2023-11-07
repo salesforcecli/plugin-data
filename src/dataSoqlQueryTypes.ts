@@ -37,6 +37,7 @@ export type SoqlQueryResult = {
 };
 
 export type BasicRecord = {
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   [index: string]: { records: BasicRecord[] } | unknown;
   attributes: {
     type: string;
@@ -57,6 +58,7 @@ export type SObjectTreeInput = {
     referenceId: string;
   };
 } & {
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   [index: string]: { records: SObjectTreeInput[] } | unknown;
 };
 
@@ -64,10 +66,12 @@ export type SObjectTreeFileContents = {
   records: SObjectTreeInput[];
 };
 
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export const hasNestedRecords = <T>(element: { records: T[] } | unknown): element is { records: T[] } =>
   Array.isArray((element as { records: T[] })?.records);
 
 export const isAttributesElement = (
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   element: SObjectTreeInput['attributes'] | unknown
 ): element is SObjectTreeInput['attributes'] =>
   !!(element as SObjectTreeInput['attributes']).referenceId && !!(element as SObjectTreeInput['attributes']).type;
