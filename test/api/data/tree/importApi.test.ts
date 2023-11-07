@@ -22,7 +22,7 @@ import { Messages, Org } from '@salesforce/core';
 import { ImportApi, ImportConfig } from '../../../../src/api/data/tree/importApi.js';
 // Json files
 const accountsContactsTreeJSON = JSON.parse(
-  fs.readFileSync('test/api/data/tree/test-files/accounts-contacts-plan.json', 'utf-8')
+  fs.readFileSync('test/api/data/tree/test-files/accounts-contacts-tree.json', 'utf-8')
 );
 const accountsContactsPlanJSON = JSON.parse(
   fs.readFileSync('test/api/data/tree/test-files/accounts-contacts-plan.json', 'utf-8')
@@ -250,7 +250,6 @@ describe('ImportApi', () => {
     });
 
     it('should set this.sobjectTypes using JSON data', () => {
-      // private method
       // @ts-ignore
       ImportApi.prototype.createSObjectTypeMap.call(context, contentStr, true);
       expect(context.sobjectTypes).to.eql(sampleSObjectTypes);
@@ -665,3 +664,134 @@ describe('ImportApi', () => {
     });
   });
 });
+
+/**
+ * Use these as the basis for integration tests.
+ */
+// describe('data:import', () => {
+//   let force;
+//   let org;
+
+//   before(() => {
+//     workspace = new TestWorkspace();
+//     org = new Org();
+//     force = org.force;
+
+//     sandbox.stub(force, 'describeData').callsFake(() => Promise.resolve());
+
+//     // copy data files to workspace
+//     fse.copySync(path.join(dir, 'data'), path.join(workspace.getWorkspacePath(), 'data'));
+
+//     // Some test require a scratch org config in the workspace
+//     return workspace
+//       .configureHubOrg()
+//       .then(() => org.saveConfig(orgConfig))
+//       .then(() => workspace.configureWorkspaceScratchOrg());
+//   });
+
+//   after(() => {
+//     workspace.clean();
+//   });
+
+//   afterEach(() => {
+//     sandbox.restore();
+//   });
+
+//   describe('DataTreeImportCommand run()', () => {
+//     it('should output the plan schema when confighelp flag specified', async () => {
+//       const context = {
+//         flags: {
+//           confighelp: true,
+//           json: true
+//         },
+//         org: new Org()
+//       };
+//       const dataTreeImportCommand = new DataTreeImportCommand([], null);
+//       set(dataTreeImportCommand, 'ux', { log: sandbox.spy() });
+//       sandbox.stub(dataTreeImportCommand as any, 'resolveLegacyContext').callsFake(() => Promise.resolve(context));
+
+//       const outputJson = await dataTreeImportCommand.run();
+//       expect(outputJson).to.deep.equal(dataImportPlanSchema);
+//     });
+//   });
+
+//   // Test importing a single data file
+//   describe('#File', () => {
+//     beforeEach(() => {
+//       sandbox.stub(force, 'request').callsFake(() =>
+//         Promise.resolve({
+//           hasErrors: false,
+//           results: sampleResponseData
+//         })
+//       );
+//     });
+
+//     it('API: Should insert Accounts and child Contacts', () => {
+//       const dataImportCmd = new DataImportApi(org);
+//       const config = {
+//         json: true,
+//         username,
+//         sobjecttreefiles: './data/accounts-contacts-tree.json'
+//       };
+
+//       return dataImportCmd.execute(config).then(result => {
+//         expect(result).to.eql(sampleDisplayData);
+//       });
+//     });
+//   });
+
+//   // test importing via plan
+//   describe('#Plan', () => {
+//     const contactsOnly1 = [
+//       { referenceId: 'FrontDeskRef', id: '003xx000004TtqwAAC' },
+//       { referenceId: 'ManagerRef', id: '003xx000004TtqxAAC' }
+//     ];
+//     const contactsOnly2 = [
+//       { referenceId: 'JanitorRef', id: '003xx000004Ttr1AAC' },
+//       { referenceId: 'DeveloperRef', id: '003xx000004Ttr2AAC' }
+//     ];
+
+//     const sampleDisplayContacts1 = [
+//       { refId: 'FrontDeskRef', type: 'Contact', id: '003xx000004TtqwAAC' },
+//       { refId: 'ManagerRef', type: 'Contact', id: '003xx000004TtqxAAC' }
+//     ];
+
+//     const sampleDisplayContacts2 = [
+//       { refId: 'JanitorRef', type: 'Contact', id: '003xx000004Ttr1AAC' },
+//       { refId: 'DeveloperRef', type: 'Contact', id: '003xx000004Ttr2AAC' }
+//     ];
+
+//     let requestStub;
+
+//     beforeEach(() => {
+//       requestStub = sandbox.stub(force, 'request');
+//       requestStub.onCall(0).returns(Promise.resolve({ hasErrors: false, results: sampleResponseData }));
+//       requestStub.onCall(1).returns(Promise.resolve({ hasErrors: false, results: contactsOnly1 }));
+//       requestStub.onCall(2).returns(Promise.resolve({ hasErrors: false, results: contactsOnly2 }));
+//     });
+
+//     it('API: Should insert Accounts and child Contacts', () => {
+//       const dataImportCmd = new DataImportApi(org);
+//       const config = {
+//         json: true,
+//         username,
+//         plan: './data/accounts-contacts-plan.json',
+//         importPlanConfig: accountsContactsPlanJSON
+//       };
+//       const expected = [...sampleDisplayData, ...sampleDisplayContacts1, ...sampleDisplayContacts2];
+
+//       return dataImportCmd.execute(config).then(result => {
+//         expect(result).to.eql(expected);
+//       });
+//     });
+//   });
+
+//   describe('DataImportConfigHelpCommand', () => {
+//     it('should return the schema', () => {
+//       const dataImportConfigHelpCommand = new DataImportConfigHelpCommand();
+//       return dataImportConfigHelpCommand.execute({ org }).then(result => {
+//         expect(result).to.deep.equal(dataImportPlanSchema);
+//       });
+//     });
+//   });
+// });
