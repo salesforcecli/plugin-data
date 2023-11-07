@@ -8,7 +8,7 @@
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 
-import sinon = require('sinon');
+import sinon from 'sinon';
 import { retrieveColumns } from '../src/commands/data/query.js';
 import { queryFieldsExemplars } from './test-files/queryFields.exemplars.js';
 import { createFakeConnection } from './testUtil.js';

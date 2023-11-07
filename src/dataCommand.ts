@@ -5,11 +5,13 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
+import url from 'node:url';
+import path from 'node:path';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { Record as jsforceRecord, SaveResult } from 'jsforce';
 
 import { ux } from '@oclif/core';
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectory(path.dirname(url.fileURLToPath(import.meta.url)));
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
 export const logNestedObject = (obj: Record<string, unknown>, indentation = 0): void => {

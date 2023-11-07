@@ -6,6 +6,8 @@
  */
 
 import fs from 'node:fs';
+import url from 'node:url';
+import path from 'node:path';
 import { Connection, Logger, Messages, SfError } from '@salesforce/core';
 import { Record } from 'jsforce';
 import {
@@ -26,7 +28,7 @@ import { displayResults, transformBulkResults } from '../../queryUtils.js';
 import { FormatTypes } from '../../reporters.js';
 import { BulkQueryRequestCache } from '../../bulkDataRequestCache.js';
 
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectory(path.dirname(url.fileURLToPath(import.meta.url)));
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
 
 export class DataSoqlQueryCommand extends SfCommand<unknown> {

@@ -8,14 +8,23 @@
 import path from 'node:path';
 import util from 'node:util';
 import fs from 'node:fs';
+import url from 'node:url';
 import { AnyJson, Dictionary, getString, JsonMap } from '@salesforce/ts-types';
 import { Logger, Messages, Org, SchemaValidator, SfError } from '@salesforce/core';
 import { DataPlanPart, hasNestedRecords, isAttributesElement, SObjectTreeInput } from '../../../dataSoqlQueryTypes.js';
 
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectory(path.dirname(url.fileURLToPath(import.meta.url)));
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
-const importPlanSchemaFile = path.join(__dirname, '..', '..', '..', '..', 'schema', 'dataImportPlanSchema.json');
+const importPlanSchemaFile = path.join(
+  path.dirname(url.fileURLToPath(import.meta.url)),
+  '..',
+  '..',
+  '..',
+  '..',
+  'schema',
+  'dataImportPlanSchema.json'
+);
 
 const sobjectTreeApiPartPattern = '%s/services/data/v%s/composite/tree/%s';
 const jsonContentType = 'application/json';

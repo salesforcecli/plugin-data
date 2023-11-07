@@ -5,13 +5,15 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
+import url from 'node:url';
+import path from 'node:path';
 import { Messages } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
 import { orgFlags } from '../../../flags.js';
 import { ExportApi, ExportConfig } from '../../../api/data/tree/exportApi.js';
 import { DataPlanPart, SObjectTreeFileContents } from '../../../dataSoqlQueryTypes.js';
 
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectory(path.dirname(url.fileURLToPath(import.meta.url)));
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.export');
 
 export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileContents> {

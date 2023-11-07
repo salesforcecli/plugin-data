@@ -6,8 +6,9 @@
  */
 import { resolve } from 'node:path';
 import { strict as assert } from 'node:assert';
+import url from 'node:url';
+import path from 'node:path';
 import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup.js';
-
 import { ensureJsonMap, ensureString, AnyJson } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { Config } from '@oclif/core';
@@ -20,7 +21,9 @@ const sObjectId = '0011100001zhhyUAAQ';
 describe('data:delete:record', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
-  const config = new Config({ root: resolve(__dirname, '../../../package.json') });
+  const config = new Config({
+    root: resolve(path.dirname(url.fileURLToPath(import.meta.url)), '../../../package.json'),
+  });
 
   beforeEach(async () => {
     await $$.stubAuths(testOrg);

@@ -13,17 +13,21 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 
-import path from 'node:path';
 import fs from 'node:fs';
+import url from 'node:url';
+import path from 'node:path';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import { Messages, Org } from '@salesforce/core';
 import { ImportApi, ImportConfig } from '../../../../src/api/data/tree/importApi.js';
-
 // Json files
-const dataImportPlanSchema = require('../../../../schema/dataImportPlanSchema.json');
-const accountsContactsTreeJSON = require('./test-files/accounts-contacts-tree.json');
-const accountsContactsPlanJSON = require('./test-files/accounts-contacts-plan.json');
+const accountsContactsTreeJSON = JSON.parse(
+  fs.readFileSync('test/api/data/tree/test-files/accounts-contacts-plan.json', 'utf-8')
+);
+const accountsContactsPlanJSON = JSON.parse(
+  fs.readFileSync('test/api/data/tree/test-files/accounts-contacts-plan.json', 'utf-8')
+);
+const dataImportPlanSchema = JSON.parse(fs.readFileSync('schema/dataImportPlanSchema.json', 'utf-8'));
 
 // Sample response data
 // const sampleResponseData = [
@@ -52,7 +56,8 @@ const jsonRefRegex = /[.]*["|'][A-Z0-9_]*["|'][ ]*:[ ]*["|']@([A-Z0-9_]*)["|'][.
 
 describe('ImportApi', () => {
   const sandbox = sinon.createSandbox();
-  Messages.importMessagesDirectory(__dirname);
+
+  Messages.importMessagesDirectory(path.dirname(url.fileURLToPath(import.meta.url)));
   const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
   afterEach(() => {
@@ -106,7 +111,7 @@ describe('ImportApi', () => {
 
     it('should validate a plan', async () => {
       config = {
-        plan: path.join(__dirname, 'test-files', 'accounts-contacts-plan.json'),
+        plan: path.join(path.dirname(url.fileURLToPath(import.meta.url)), 'test-files', 'accounts-contacts-plan.json'),
       };
       context.schemaValidator.validate.returns(Promise.resolve());
       // @ts-ignore
@@ -135,7 +140,9 @@ describe('ImportApi', () => {
 
     it('should return a promise resolved with config with data file as input', async () => {
       config = {
-        sobjectTreeFiles: [path.join(__dirname, 'test-files', 'accounts-contacts-tree.json')],
+        sobjectTreeFiles: [
+          path.join(path.dirname(url.fileURLToPath(import.meta.url)), 'test-files', 'accounts-contacts-tree.json'),
+        ],
       };
       // @ts-ignore
       const opts = await ImportApi.prototype.validate.call(context, config);
@@ -144,7 +151,7 @@ describe('ImportApi', () => {
 
     it('should return a promise resolved with config with plan file as input', async () => {
       config = {
-        plan: path.join(__dirname, 'test-files', 'accounts-contacts-plan.json'),
+        plan: path.join(path.dirname(url.fileURLToPath(import.meta.url)), 'test-files', 'accounts-contacts-plan.json'),
       };
       context.schemaValidator.validate.returns(Promise.resolve());
       // @ts-ignore
@@ -243,6 +250,7 @@ describe('ImportApi', () => {
     });
 
     it('should set this.sobjectTypes using JSON data', () => {
+      // private method
       // @ts-ignore
       ImportApi.prototype.createSObjectTypeMap.call(context, contentStr, true);
       expect(context.sobjectTypes).to.eql(sampleSObjectTypes);
@@ -265,7 +273,11 @@ describe('ImportApi', () => {
           'content-type': 'application/json',
         },
       };
-      const filepath = path.join(__dirname, 'test-files', 'contacts-only-2.json');
+      const filepath = path.join(
+        path.dirname(url.fileURLToPath(import.meta.url)),
+        'test-files',
+        'contacts-only-2.json'
+      );
       const rv = ImportApi.prototype.getSObjectTreeFileMeta(filepath);
       expect(rv).to.eql(expectedMeta);
     });
@@ -278,13 +290,17 @@ describe('ImportApi', () => {
           'content-type': 'application/json',
         },
       };
-      const filepath = path.join(__dirname, 'test-files', 'contacts-only-2.sdx');
+      const filepath = path.join(path.dirname(url.fileURLToPath(import.meta.url)), 'test-files', 'contacts-only-2.sdx');
       const rv = ImportApi.prototype.getSObjectTreeFileMeta(filepath, 'json');
       expect(rv).to.eql(expectedMeta);
     });
 
     it('should throw an InvalidDataImport error with invalid path to data file', () => {
-      const filepath = path.join(__dirname, 'test-files', 'invalid-data-file.json');
+      const filepath = path.join(
+        path.dirname(url.fileURLToPath(import.meta.url)),
+        'test-files',
+        'invalid-data-file.json'
+      );
       try {
         const rv = ImportApi.prototype.getSObjectTreeFileMeta(filepath);
         // this should never execute but if it does it will cause the test to fail
@@ -297,7 +313,7 @@ describe('ImportApi', () => {
     });
 
     it('should throw an InvalidDataImport error with unknown data file extention and no content-type', () => {
-      const filepath = path.join(__dirname, 'test-files', 'contacts-only-2.sdx');
+      const filepath = path.join(path.dirname(url.fileURLToPath(import.meta.url)), 'test-files', 'contacts-only-2.sdx');
       try {
         const rv = ImportApi.prototype.getSObjectTreeFileMeta(filepath);
         // this should never execute but if it does it will cause the test to fail
@@ -310,7 +326,7 @@ describe('ImportApi', () => {
     });
 
     it('should throw an InvalidDataImport error with unknown data file extension and unsupported content-type', () => {
-      const filepath = path.join(__dirname, 'test-files', 'contacts-only-2.sdx');
+      const filepath = path.join(path.dirname(url.fileURLToPath(import.meta.url)), 'test-files', 'contacts-only-2.sdx');
       try {
         const rv = ImportApi.prototype.getSObjectTreeFileMeta(filepath, 'txt');
         // this should never execute but if it does it will cause the test to fail
@@ -338,7 +354,11 @@ describe('ImportApi', () => {
     let refMap: any;
 
     beforeEach(() => {
-      filepath = path.join(__dirname, 'test-files', 'accounts-contacts-tree.json');
+      filepath = path.join(
+        path.dirname(url.fileURLToPath(import.meta.url)),
+        'test-files',
+        'accounts-contacts-tree.json'
+      );
       isJson = true;
       refRegex = jsonRefRegex;
       resolveRefs = false;
@@ -382,7 +402,7 @@ describe('ImportApi', () => {
 
     it('should resolve saved references', () => {
       resolveRefs = true;
-      filepath = path.join(__dirname, 'test-files', 'contacts-only-1.json');
+      filepath = path.join(path.dirname(url.fileURLToPath(import.meta.url)), 'test-files', 'contacts-only-1.json');
       refMap.set('sampleaccountref', 'test_account_id1');
       refMap.set('sampleacct2ref', 'test_account_id2');
       // @ts-ignore
@@ -645,134 +665,3 @@ describe('ImportApi', () => {
     });
   });
 });
-
-/**
- * Use these as the basis for integration tests.
- */
-// describe('data:import', () => {
-//   let force;
-//   let org;
-
-//   before(() => {
-//     workspace = new TestWorkspace();
-//     org = new Org();
-//     force = org.force;
-
-//     sandbox.stub(force, 'describeData').callsFake(() => Promise.resolve());
-
-//     // copy data files to workspace
-//     fse.copySync(path.join(dir, 'data'), path.join(workspace.getWorkspacePath(), 'data'));
-
-//     // Some test require a scratch org config in the workspace
-//     return workspace
-//       .configureHubOrg()
-//       .then(() => org.saveConfig(orgConfig))
-//       .then(() => workspace.configureWorkspaceScratchOrg());
-//   });
-
-//   after(() => {
-//     workspace.clean();
-//   });
-
-//   afterEach(() => {
-//     sandbox.restore();
-//   });
-
-//   describe('DataTreeImportCommand run()', () => {
-//     it('should output the plan schema when confighelp flag specified', async () => {
-//       const context = {
-//         flags: {
-//           confighelp: true,
-//           json: true
-//         },
-//         org: new Org()
-//       };
-//       const dataTreeImportCommand = new DataTreeImportCommand([], null);
-//       set(dataTreeImportCommand, 'ux', { log: sandbox.spy() });
-//       sandbox.stub(dataTreeImportCommand as any, 'resolveLegacyContext').callsFake(() => Promise.resolve(context));
-
-//       const outputJson = await dataTreeImportCommand.run();
-//       expect(outputJson).to.deep.equal(dataImportPlanSchema);
-//     });
-//   });
-
-//   // Test importing a single data file
-//   describe('#File', () => {
-//     beforeEach(() => {
-//       sandbox.stub(force, 'request').callsFake(() =>
-//         Promise.resolve({
-//           hasErrors: false,
-//           results: sampleResponseData
-//         })
-//       );
-//     });
-
-//     it('API: Should insert Accounts and child Contacts', () => {
-//       const dataImportCmd = new DataImportApi(org);
-//       const config = {
-//         json: true,
-//         username,
-//         sobjecttreefiles: './data/accounts-contacts-tree.json'
-//       };
-
-//       return dataImportCmd.execute(config).then(result => {
-//         expect(result).to.eql(sampleDisplayData);
-//       });
-//     });
-//   });
-
-//   // test importing via plan
-//   describe('#Plan', () => {
-//     const contactsOnly1 = [
-//       { referenceId: 'FrontDeskRef', id: '003xx000004TtqwAAC' },
-//       { referenceId: 'ManagerRef', id: '003xx000004TtqxAAC' }
-//     ];
-//     const contactsOnly2 = [
-//       { referenceId: 'JanitorRef', id: '003xx000004Ttr1AAC' },
-//       { referenceId: 'DeveloperRef', id: '003xx000004Ttr2AAC' }
-//     ];
-
-//     const sampleDisplayContacts1 = [
-//       { refId: 'FrontDeskRef', type: 'Contact', id: '003xx000004TtqwAAC' },
-//       { refId: 'ManagerRef', type: 'Contact', id: '003xx000004TtqxAAC' }
-//     ];
-
-//     const sampleDisplayContacts2 = [
-//       { refId: 'JanitorRef', type: 'Contact', id: '003xx000004Ttr1AAC' },
-//       { refId: 'DeveloperRef', type: 'Contact', id: '003xx000004Ttr2AAC' }
-//     ];
-
-//     let requestStub;
-
-//     beforeEach(() => {
-//       requestStub = sandbox.stub(force, 'request');
-//       requestStub.onCall(0).returns(Promise.resolve({ hasErrors: false, results: sampleResponseData }));
-//       requestStub.onCall(1).returns(Promise.resolve({ hasErrors: false, results: contactsOnly1 }));
-//       requestStub.onCall(2).returns(Promise.resolve({ hasErrors: false, results: contactsOnly2 }));
-//     });
-
-//     it('API: Should insert Accounts and child Contacts', () => {
-//       const dataImportCmd = new DataImportApi(org);
-//       const config = {
-//         json: true,
-//         username,
-//         plan: './data/accounts-contacts-plan.json',
-//         importPlanConfig: accountsContactsPlanJSON
-//       };
-//       const expected = [...sampleDisplayData, ...sampleDisplayContacts1, ...sampleDisplayContacts2];
-
-//       return dataImportCmd.execute(config).then(result => {
-//         expect(result).to.eql(expected);
-//       });
-//     });
-//   });
-
-//   describe('DataImportConfigHelpCommand', () => {
-//     it('should return the schema', () => {
-//       const dataImportConfigHelpCommand = new DataImportConfigHelpCommand();
-//       return dataImportConfigHelpCommand.execute({ org }).then(result => {
-//         expect(result).to.deep.equal(dataImportPlanSchema);
-//       });
-//     });
-//   });
-// });

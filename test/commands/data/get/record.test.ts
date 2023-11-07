@@ -6,6 +6,8 @@
  */
 import { resolve } from 'node:path';
 import { strict as assert } from 'node:assert';
+import path from 'node:path';
+import url from 'node:url';
 import { Messages } from '@salesforce/core';
 import { ensureJsonMap, ensureString, AnyJson } from '@salesforce/ts-types';
 import { expect } from 'chai';
@@ -15,13 +17,15 @@ import { Config } from '@oclif/core';
 import Get from '../../../../src/commands/data/get/record.js';
 
 const sObjectId = '0011100001zhhyUAAQ';
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectory(path.dirname(url.fileURLToPath(import.meta.url)));
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
 describe('data:get:record', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
-  const config = new Config({ root: resolve(__dirname, '../../../package.json') });
+  const config = new Config({
+    root: resolve(path.dirname(url.fileURLToPath(import.meta.url)), '../../../package.json'),
+  });
 
   beforeEach(async () => {
     await $$.stubAuths(testOrg);

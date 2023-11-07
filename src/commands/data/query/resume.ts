@@ -4,6 +4,8 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+import url from 'node:url';
+import path from 'node:path';
 import { Messages } from '@salesforce/core';
 import { QueryJobV2 } from 'jsforce/lib/api/bulk.js';
 import {
@@ -18,7 +20,7 @@ import { displayResults, transformBulkResults } from '../../../queryUtils.js';
 import { FormatTypes } from '../../../reporters.js';
 import { BulkQueryRequestCache } from '../../../bulkDataRequestCache.js';
 
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectory(path.dirname(url.fileURLToPath(import.meta.url)));
 const reportMessages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.report');
 // needed by the flags loaded from the other command
 const queryMessages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');

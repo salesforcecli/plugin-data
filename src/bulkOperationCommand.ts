@@ -7,6 +7,8 @@
 import fs from 'node:fs';
 import { ReadStream } from 'node:fs';
 import os from 'node:os';
+import url from 'node:url';
+import path from 'node:path';
 import { Flags } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
 import { Connection, Messages } from '@salesforce/core';
@@ -25,7 +27,7 @@ import { BulkResultV2 } from './types.js';
 import { isBulkV2RequestDone, transformResults, waitOrTimeout } from './bulkUtils.js';
 import { BulkBaseCommand } from './BulkBaseCommand.js';
 
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectory(path.dirname(url.fileURLToPath(import.meta.url)));
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.operation.command');
 
 type CreateJobOptions = {

@@ -5,20 +5,21 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { ReadStream } from 'node:fs';
+import url from 'node:url';
+import path from 'node:path';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { Ux } from '@salesforce/sf-plugins-core';
 import { Schema } from 'jsforce';
 import { stringify } from 'csv-stringify/sync';
-import parse = require('csv-parse');
+import parse from 'csv-parse';
 import { Batch, BatchInfo, BulkIngestBatchResult, BulkOperation, Job, JobInfo } from 'jsforce/lib/api/bulk.js';
-
 // max rows per file in Bulk 1.0
 const BATCH_RECORDS_LIMIT = 10000;
 /// max characters/bytes per file in Bulk 1.0
 const BATCH_BYTES_LIMIT = 10000000;
 const POLL_FREQUENCY_MS = 5000;
 
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectory(path.dirname(url.fileURLToPath(import.meta.url)));
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'batcher');
 
 type BatchEntry = Record<string, string>;

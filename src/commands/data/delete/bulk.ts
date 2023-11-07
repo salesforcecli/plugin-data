@@ -4,13 +4,15 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+import url from 'node:url';
+import path from 'node:path';
 import { Messages } from '@salesforce/core';
 import { BulkDeleteRequestCache } from '../../../bulkDataRequestCache.js';
 import { BulkOperationCommand } from '../../../bulkOperationCommand.js';
 import { BulkResultV2 } from '../../../types.js';
 import { validateSobjectType } from '../../../bulkUtils.js';
 
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectory(path.dirname(url.fileURLToPath(import.meta.url)));
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulkv2.delete');
 
 export default class Delete extends BulkOperationCommand {

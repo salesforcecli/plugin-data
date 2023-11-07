@@ -6,20 +6,20 @@
  */
 import path from 'node:path';
 import fs from 'node:fs';
+import url from 'node:url';
 import { stubMethod } from '@salesforce/ts-sinon';
 import { SfError } from '@salesforce/core';
 import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup.js';
 import { Config } from '@oclif/core';
 import { expect } from 'chai';
 import Upsert from '../../../../../src/commands/force/data/bulk/upsert.js';
-
 describe('force:data:bulk:upsert', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   let config: Config;
 
   before(async () => {
-    config = new Config({ root: path.resolve(__dirname, '../../../..') });
+    config = new Config({ root: path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), '../../../..') });
     await config.load();
   });
 

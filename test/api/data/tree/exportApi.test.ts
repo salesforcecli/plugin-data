@@ -12,13 +12,14 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import fs from 'node:fs';
+import url from 'node:url';
+import path from 'node:path';
 import sinon from 'sinon';
 import { Connection, Messages, Org } from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
 import { Ux } from '@salesforce/sf-plugins-core';
 import { assert, expect } from 'chai';
 import { ExportApi } from '../../../../src/api/data/tree/exportApi.js';
-
 //
 //  TEST DATA
 //
@@ -220,7 +221,8 @@ function deepClone(obj: AnyJson) {
 
 describe('Export API', () => {
   const sandbox = sinon.createSandbox();
-  Messages.importMessagesDirectory(__dirname);
+
+  Messages.importMessagesDirectory(path.dirname(url.fileURLToPath(import.meta.url)));
   const messages = Messages.loadMessages('@salesforce/plugin-data', 'exportApi');
   const testUsername = 'user@my.test';
 

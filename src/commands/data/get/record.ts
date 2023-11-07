@@ -5,6 +5,8 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
+import url from 'node:url';
+import path from 'node:path';
 import { Messages, SfError } from '@salesforce/core';
 import { Record } from 'jsforce';
 import { toAnyJson } from '@salesforce/ts-types';
@@ -12,7 +14,7 @@ import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { orgFlags, perflogFlag } from '../../../flags.js';
 import { query, logNestedObject } from '../../../dataCommand.js';
 
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectory(path.dirname(url.fileURLToPath(import.meta.url)));
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'record.get');
 
 export default class Get extends SfCommand<Record> {
