@@ -20,6 +20,7 @@ Messages.importMessagesDirectory(path.dirname(url.fileURLToPath(import.meta.url)
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.base.command');
 
 export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
+  public static readonly enableJsonFlag = true;
   protected lifeCycle = Lifecycle.getInstance();
   protected job!: IngestJobV2<Schema, IngestOperation>;
   protected connection: Connection | undefined;
