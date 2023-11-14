@@ -5,19 +5,19 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import path from 'node:path';
 import util from 'node:util';
 import fs from 'node:fs';
-import url from 'node:url';
+import path, { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { AnyJson, Dictionary, getString, JsonMap } from '@salesforce/ts-types';
 import { Logger, Messages, Org, SchemaValidator, SfError } from '@salesforce/core';
 import { DataPlanPart, hasNestedRecords, isAttributesElement, SObjectTreeInput } from '../../../dataSoqlQueryTypes.js';
 
-Messages.importMessagesDirectory(path.dirname(url.fileURLToPath(import.meta.url)));
+Messages.importMessagesDirectory(dirname(fileURLToPath(import.meta.url)));
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
 const importPlanSchemaFile = path.join(
-  path.dirname(url.fileURLToPath(import.meta.url)),
+  dirname(fileURLToPath(import.meta.url)),
   '..',
   '..',
   '..',
@@ -226,7 +226,7 @@ export class ImportApi {
     instanceUrl: string;
   }): Promise<void> {
     // REVIEWME: support both files and plan in same invocation?
-    const importPlanRootPath = path.dirname(plan);
+    const importPlanRootPath = dirname(plan);
     for (const sobjectConfig of this.importPlanConfig) {
       const globalSaveRefs = sobjectConfig.saveRefs ?? false;
       const globalResolveRefs = sobjectConfig.resolveRefs ?? false;

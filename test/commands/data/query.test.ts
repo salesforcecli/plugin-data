@@ -6,8 +6,8 @@
  */
 
 import { resolve } from 'node:path';
-import url from 'node:url';
-import path from 'node:path';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import chai from 'chai';
 import { Config } from '@oclif/core';
 import { OrgConfigProperties } from '@salesforce/core';
@@ -30,7 +30,7 @@ describe('Execute a SOQL statement', (): void => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   const config = new Config({
-    root: resolve(path.dirname(url.fileURLToPath(import.meta.url)), '../../../package.json'),
+    root: resolve(dirname(fileURLToPath(import.meta.url)), '../../../package.json'),
   });
 
   beforeEach(async () => {

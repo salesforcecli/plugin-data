@@ -4,8 +4,8 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import url from 'node:url';
-import path from 'node:path';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Messages } from '@salesforce/core';
 import { Flags } from '@salesforce/sf-plugins-core';
 import { BulkUpsertRequestCache } from '../../../bulkDataRequestCache.js';
@@ -13,7 +13,7 @@ import { BulkOperationCommand } from '../../../bulkOperationCommand.js';
 import { BulkResultV2 } from '../../../types.js';
 import { validateSobjectType } from '../../../bulkUtils.js';
 
-Messages.importMessagesDirectory(path.dirname(url.fileURLToPath(import.meta.url)));
+Messages.importMessagesDirectory(dirname(fileURLToPath(import.meta.url)));
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulkv2.upsert');
 
 export default class Upsert extends BulkOperationCommand {

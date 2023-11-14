@@ -5,8 +5,8 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { EOL } from 'node:os';
-import url from 'node:url';
-import path from 'node:path';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Logger, Messages } from '@salesforce/core';
 import { ux } from '@oclif/core';
 import chalk from 'chalk';
@@ -16,7 +16,7 @@ import { Schema } from 'jsforce';
 import { capitalCase } from 'change-case';
 import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes.js';
 
-Messages.importMessagesDirectory(path.dirname(url.fileURLToPath(import.meta.url)));
+Messages.importMessagesDirectory(dirname(fileURLToPath(import.meta.url)));
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
 const reporterMessages = Messages.loadMessages('@salesforce/plugin-data', 'reporter');
 

@@ -6,8 +6,8 @@
  */
 import fs from 'node:fs';
 import { resolve } from 'node:path';
-import url from 'node:url';
-import path from 'node:path';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { AnyJson, ensureJsonMap, ensureString, isString } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { TestContext, MockTestOrgData } from '@salesforce/core/lib/testSetup.js';
@@ -59,7 +59,7 @@ describe('data:export:tree', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   const config = new Config({
-    root: resolve(path.dirname(url.fileURLToPath(import.meta.url)), '../../../package.json'),
+    root: resolve(dirname(fileURLToPath(import.meta.url)), '../../../package.json'),
   });
 
   beforeEach(async () => {

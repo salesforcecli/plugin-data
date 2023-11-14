@@ -7,7 +7,7 @@
 
 import { join as pathJoin, resolve, dirname } from 'node:path';
 import { strict as assert } from 'node:assert';
-import url from 'node:url';
+import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import { AnyJson, ensureJsonMap, ensureString } from '@salesforce/ts-types';
 import { expect } from 'chai';
@@ -44,7 +44,7 @@ describe('data:tree:import', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   const config = new Config({
-    root: resolve(dirname(url.fileURLToPath(import.meta.url)), '../../../package.json'),
+    root: resolve(dirname(fileURLToPath(import.meta.url)), '../../../package.json'),
   });
 
   beforeEach(async () => {
@@ -79,7 +79,7 @@ describe('data:tree:import', () => {
         'test@org.com',
         '--files',
         pathJoin(
-          dirname(url.fileURLToPath(import.meta.url)),
+          dirname(fileURLToPath(import.meta.url)),
           '..',
           '..',
           '..',
@@ -105,7 +105,7 @@ describe('data:tree:import', () => {
         'test@org.com',
         '--plan',
         pathJoin(
-          dirname(url.fileURLToPath(import.meta.url)),
+          dirname(fileURLToPath(import.meta.url)),
           '..',
           '..',
           '..',

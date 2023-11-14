@@ -4,9 +4,10 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import path from 'node:path';
+
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
-import url from 'node:url';
 import { SfError } from '@salesforce/core';
 import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup.js';
 import { Config } from '@oclif/core';
@@ -19,7 +20,7 @@ describe('data:upsert:bulk', () => {
   let config: Config;
 
   before(async () => {
-    config = new Config({ root: path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), '../../../..') });
+    config = new Config({ root: resolve(dirname(fileURLToPath(import.meta.url)), '../../../..') });
     await config.load();
   });
 
