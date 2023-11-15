@@ -76,30 +76,30 @@ sf plugins
 
 <!-- commands -->
 
-- [`sf data:create:record`](#sf-datacreaterecord)
-- [`sf data:delete:bulk`](#sf-datadeletebulk)
-- [`sf data:delete:record`](#sf-datadeleterecord)
-- [`sf data:delete:resume`](#sf-datadeleteresume)
-- [`sf data:export:tree`](#sf-dataexporttree)
-- [`sf data:get:record`](#sf-datagetrecord)
-- [`sf data:import:tree`](#sf-dataimporttree)
-- [`sf data:query`](#sf-dataquery)
-- [`sf data:query:resume`](#sf-dataqueryresume)
-- [`sf data:resume`](#sf-dataresume)
-- [`sf data:update:record`](#sf-dataupdaterecord)
-- [`sf data:upsert:bulk`](#sf-dataupsertbulk)
-- [`sf data:upsert:resume`](#sf-dataupsertresume)
-- [`sf force:data:bulk:delete`](#sf-forcedatabulkdelete)
-- [`sf force:data:bulk:status`](#sf-forcedatabulkstatus)
-- [`sf force:data:bulk:upsert`](#sf-forcedatabulkupsert)
+- [`sf data create record`](#sf-data-create-record)
+- [`sf data delete bulk`](#sf-data-delete-bulk)
+- [`sf data delete record`](#sf-data-delete-record)
+- [`sf data delete resume`](#sf-data-delete-resume)
+- [`sf data export tree`](#sf-data-export-tree)
+- [`sf data get record`](#sf-data-get-record)
+- [`sf data import tree`](#sf-data-import-tree)
+- [`sf data query`](#sf-data-query)
+- [`sf data query resume`](#sf-data-query-resume)
+- [`sf data resume`](#sf-data-resume)
+- [`sf data update record`](#sf-data-update-record)
+- [`sf data upsert bulk`](#sf-data-upsert-bulk)
+- [`sf data upsert resume`](#sf-data-upsert-resume)
+- [`sf force data bulk delete`](#sf-force-data-bulk-delete)
+- [`sf force data bulk status`](#sf-force-data-bulk-status)
+- [`sf force data bulk upsert`](#sf-force-data-bulk-upsert)
 
-## `sf data:create:record`
+## `sf data create record`
 
 Create and insert a record into a Salesforce or Tooling API object.
 
 ```
 USAGE
-  $ sf data:create:record -o <value> -s <value> -v <value> [--json] [--api-version <value>] [-t]
+  $ sf data create record -o <value> -s <value> -v <value> [--json] [--api-version <value>] [-t]
 
 FLAGS
   -o, --target-org=<value>  (required) Username or alias of the target org.
@@ -125,35 +125,35 @@ DESCRIPTION
   Tooling API object.
 
 ALIASES
-  $ sf force:data:record:create
+  $ sf force data record create
 
 EXAMPLES
   Insert a record into the Account object of your default org; only the required Name field has a value:
 
-    $ sf data:create:record --sobject Account --values "Name=Acme"
+    $ sf data create record --sobject Account --values "Name=Acme"
 
   Insert an Account record with values for two fields, one value contains a space; the command uses the org with alias
   "my-scratch":
 
-    $ sf data:create:record --sobject Account --values "Name='Universal Containers' Website=www.example.com" \
+    $ sf data create record --sobject Account --values "Name='Universal Containers' Website=www.example.com" \
       --target-org my-scratch
 
   Insert a record into the Tooling API object TraceFlag:
 
-    $ sf data:create:record --use-tooling-api --sobject TraceFlag --values "DebugLevelId=7dl170000008U36AAE \
+    $ sf data create record --use-tooling-api --sobject TraceFlag --values "DebugLevelId=7dl170000008U36AAE \
       StartDate=2022-12-15T00:26:04.000+0000 ExpirationDate=2022-12-15T00:56:04.000+0000 LogType=CLASS_TRACING \
       TracedEntityId=01p17000000R6bLAAS"
 ```
 
-_See code: [src/commands/data/create/record.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.3/src/commands/data/create/record.ts)_
+_See code: [src/commands/data/create/record.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/create/record.ts)_
 
-## `sf data:delete:bulk`
+## `sf data delete bulk`
 
 Bulk delete records from an org using a CSV file. Uses Bulk API 2.0.
 
 ```
 USAGE
-  $ sf data:delete:bulk -o <value> -f <value> -s <value> [--json] [--api-version <value>] [-w <value> | -a] [--verbose]
+  $ sf data delete bulk -o <value> -f <value> -s <value> [--json] [--api-version <value>] [-w <value> | -a] [--verbose]
 
 FLAGS
   -a, --async               Run the command asynchronously.
@@ -181,23 +181,23 @@ DESCRIPTION
 EXAMPLES
   Bulk delete Account records from your default org using the list of IDs in the "files/delete.csv" file:
 
-    $ sf data:delete:bulk --sobject Account --file files/delete.csv
+    $ sf data delete bulk --sobject Account --file files/delete.csv
 
   Bulk delete records from a custom object in an org with alias my-scratch and wait 5 minutes for the command to
   complete:
 
-    $ sf data:delete:bulk --sobject MyObject__c --file files/delete.csv --wait 5 --target-org my-scratch
+    $ sf data delete bulk --sobject MyObject__c --file files/delete.csv --wait 5 --target-org my-scratch
 ```
 
-_See code: [src/commands/data/delete/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.3/src/commands/data/delete/bulk.ts)_
+_See code: [src/commands/data/delete/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/delete/bulk.ts)_
 
-## `sf data:delete:record`
+## `sf data delete record`
 
 Deletes a single record from a Salesforce or Tooling API object.
 
 ```
 USAGE
-  $ sf data:delete:record -o <value> -s <value> [--json] [--api-version <value>] [-i <value>] [-w <value>] [-t]
+  $ sf data delete record -o <value> -s <value> [--json] [--api-version <value>] [-i <value>] [-w <value>] [-t]
 
 FLAGS
   -i, --record-id=<value>   ID of the record you’re deleting.
@@ -225,37 +225,37 @@ DESCRIPTION
   Tooling API object.
 
 ALIASES
-  $ sf force:data:record:delete
+  $ sf force data record delete
 
 EXAMPLES
   Delete a record from Account with the specified (truncated) ID:
 
-    $ sf data:delete:record --sobject Account --record-id 00180XX
+    $ sf data delete record --sobject Account --record-id 00180XX
 
   Delete a record from Account whose name equals "Acme":
 
-    $ sf data:delete:record --sobject Account --where "Name=Acme"
+    $ sf data delete record --sobject Account --where "Name=Acme"
 
   Delete a record from Account identified with two field values, one that contains a space; the command uses the org
   with alias "my-scratch":
 
-    $ sf data:delete:record --sobject Account --where "Name='Universal Containers' Phone='(123) 456-7890'" \
+    $ sf data delete record --sobject Account --where "Name='Universal Containers' Phone='(123) 456-7890'" \
       --target-org myscratch
 
   Delete a record from the Tooling API object TraceFlag with the specified (truncated) ID:
 
-    $ sf data:delete:record --use-tooling-api --sobject TraceFlag --record-id 7tf8c
+    $ sf data delete record --use-tooling-api --sobject TraceFlag --record-id 7tf8c
 ```
 
-_See code: [src/commands/data/delete/record.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.3/src/commands/data/delete/record.ts)_
+_See code: [src/commands/data/delete/record.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/delete/record.ts)_
 
-## `sf data:delete:resume`
+## `sf data delete resume`
 
 Resume a bulk delete job that you previously started. Uses Bulk API 2.0.
 
 ```
 USAGE
-  $ sf data:delete:resume [--json] [-o <value>] [--use-most-recent | -i <value>] [--wait <value>] [--api-version
+  $ sf data delete resume [--json] [-o <value>] [--use-most-recent | -i <value>] [--wait <value>] [--api-version
   <value>]
 
 FLAGS
@@ -277,22 +277,22 @@ DESCRIPTION
 EXAMPLES
   Resume a bulk delete job from your default org using an ID:
 
-    $ sf data:delete:resume --job-id 750xx000000005sAAA
+    $ sf data delete resume --job-id 750xx000000005sAAA
 
   Resume the most recently run bulk delete job for an org with alias my-scratch:
 
-    $ sf data:delete:resume --use-most-recent --target-org my-scratch
+    $ sf data delete resume --use-most-recent --target-org my-scratch
 ```
 
-_See code: [src/commands/data/delete/resume.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.3/src/commands/data/delete/resume.ts)_
+_See code: [src/commands/data/delete/resume.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/delete/resume.ts)_
 
-## `sf data:export:tree`
+## `sf data export tree`
 
 Export data from an org into one or more JSON files.
 
 ```
 USAGE
-  $ sf data:export:tree -o <value> -q <value> [--json] [--api-version <value>] [-p] [-x <value>] [-d <value>]
+  $ sf data export tree -o <value> -q <value> [--json] [--api-version <value>] [-p] [-x <value>] [-d <value>]
 
 FLAGS
   -d, --output-dir=<value>  Directory in which to generate the JSON files; default is current directory.
@@ -321,35 +321,35 @@ DESCRIPTION
   (https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobject_tree.htm).
 
 ALIASES
-  $ sf force:data:tree:export
+  $ sf force data tree export
 
 EXAMPLES
   Export records retrieved with the specified SOQL query into a single JSON file in the current directory; the command
   uses your default org:
 
-    $ sf data:export:tree --query "SELECT Id, Name, (SELECT Name, Address__c FROM Properties__r) FROM Broker__c"
+    $ sf data export tree --query "SELECT Id, Name, (SELECT Name, Address__c FROM Properties__r) FROM Broker__c"
 
   Export data using a SOQL query in the "query.txt" file and generate JSON files for each object and a plan that
   aggregates them:
 
-    $ sf data:export:tree --query query.txt --plan
+    $ sf data export tree --query query.txt --plan
 
   Prepend "export-demo" before each generated file and generate the files in the "export-out" directory; run the
   command on the org with alias "my-scratch":
 
-    $ sf data:export:tree --query query.txt --plan --prefix export-demo --output-dir export-out --target-org \
+    $ sf data export tree --query query.txt --plan --prefix export-demo --output-dir export-out --target-org \
       my-scratch
 ```
 
-_See code: [src/commands/data/export/tree.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.3/src/commands/data/export/tree.ts)_
+_See code: [src/commands/data/export/tree.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/export/tree.ts)_
 
-## `sf data:get:record`
+## `sf data get record`
 
 Retrieve and display a single record of a Salesforce or Tooling API object.
 
 ```
 USAGE
-  $ sf data:get:record -o <value> -s <value> [--json] [--api-version <value>] [-i <value>] [-w <value>] [-t]
+  $ sf data get record -o <value> -s <value> [--json] [--api-version <value>] [-i <value>] [-w <value>] [-t]
 
 FLAGS
   -i, --record-id=<value>   ID of the record you’re retrieving.
@@ -380,37 +380,37 @@ DESCRIPTION
   Tooling API object.
 
 ALIASES
-  $ sf force:data:record:get
+  $ sf force data record get
 
 EXAMPLES
   Retrieve and display a record from Account with the specified (truncated) ID:
 
-    $ sf data:get:record --sobject Account --record-id 00180XX
+    $ sf data get record --sobject Account --record-id 00180XX
 
   Retrieve a record from Account whose name equals "Acme":
 
-    $ sf data:get:record --sobject Account --where "Name=Acme"
+    $ sf data get record --sobject Account --where "Name=Acme"
 
   Retrieve a record from Account identified with two field values, one that contains a space; the command uses the org
   with alias "my-scratch":
 
-    $ sf data:get:record --sobject Account --where "Name='Universal Containers' Phone='(123) 456-7890'" --target-org \
+    $ sf data get record --sobject Account --where "Name='Universal Containers' Phone='(123) 456-7890'" --target-org \
       myscratch
 
   Retrieve a record from the Tooling API object TraceFlag with the specified (truncated) ID:
 
-    $ sf data:get:record --use-tooling-api --sobject TraceFlag --record-id 7tf8c
+    $ sf data get record --use-tooling-api --sobject TraceFlag --record-id 7tf8c
 ```
 
-_See code: [src/commands/data/get/record.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.3/src/commands/data/get/record.ts)_
+_See code: [src/commands/data/get/record.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/get/record.ts)_
 
-## `sf data:import:tree`
+## `sf data import tree`
 
 Import data from one or more JSON files into an org.
 
 ```
 USAGE
-  $ sf data:import:tree -o <value> [--json] [--api-version <value>] [-f <value> | -p <value>] [--config-help]
+  $ sf data import tree -o <value> [--json] [--api-version <value>] [-f <value> | -p <value>] [--config-help]
 
 FLAGS
   -f, --files=<value>...    Comma-separated and in-order JSON files that contain the records, in sObject tree format,
@@ -440,27 +440,27 @@ DESCRIPTION
   (https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobject_tree.htm)
 
 ALIASES
-  $ sf force:data:tree:import
+  $ sf force data tree import
 
 EXAMPLES
   Import the records contained in two JSON files into the org with alias "my-scratch":
 
-    $ sf data:import:tree --files Contact.json,Account.json --target-org my-scratch
+    $ sf data import tree --files Contact.json,Account.json --target-org my-scratch
 
   Import records using a plan definition file into your default org:
 
-    $ sf data:import:tree --plan Account-Contact-plan.json
+    $ sf data import tree --plan Account-Contact-plan.json
 ```
 
-_See code: [src/commands/data/import/tree.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.3/src/commands/data/import/tree.ts)_
+_See code: [src/commands/data/import/tree.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/import/tree.ts)_
 
-## `sf data:query`
+## `sf data query`
 
 Execute a SOQL query.
 
 ```
 USAGE
-  $ sf data:query -o <value> [--json] [--api-version <value>] [-q <value>] [-f <value>] [-w <value> [-b | -t]]
+  $ sf data query -o <value> [--json] [--api-version <value>] [-q <value>] [-f <value>] [-w <value> [-b | -t]]
     [--async ] [--all-rows] [-r human|json|csv]
 
 FLAGS
@@ -494,35 +494,35 @@ DESCRIPTION
   "data resume" command to get the job status.
 
 ALIASES
-  $ sf force:data:soql:query
+  $ sf force data soql query
 
 EXAMPLES
   Specify a SOQL query at the command line; the command uses your default org:
 
-    $ sf data:query --query "SELECT Id, Name, Account.Name FROM Contact"
+    $ sf data query --query "SELECT Id, Name, Account.Name FROM Contact"
 
   Read the SOQL query from a file called "query.txt"; the command uses the org with alias "my-scratch":
 
-    $ sf data:query --file query.txt --target-org my-scratch
+    $ sf data query --file query.txt --target-org my-scratch
 
   Use Tooling API to run a query on the ApexTrigger Tooling API object:
 
-    $ sf data:query --query "SELECT Name FROM ApexTrigger" --use-tooling-api
+    $ sf data query --query "SELECT Name FROM ApexTrigger" --use-tooling-api
 
   Use Bulk API 2.0 to run a query that returns many rows, and return control to the terminal immediately:
 
-    $ sf data:query --query "SELECT Id FROM Contact" --bulk --wait 0
+    $ sf data query --query "SELECT Id FROM Contact" --bulk --wait 0
 ```
 
-_See code: [src/commands/data/query.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.3/src/commands/data/query.ts)_
+_See code: [src/commands/data/query.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/query.ts)_
 
-## `sf data:query:resume`
+## `sf data query resume`
 
 View the status of a bulk query.
 
 ```
 USAGE
-  $ sf data:query:resume [--json] [-o <value>] [--api-version <value>] [-r human|json|csv] [--use-most-recent | -i
+  $ sf data query resume [--json] [-o <value>] [--api-version <value>] [-r human|json|csv] [--use-most-recent | -i
     <value>]
 
 FLAGS
@@ -542,23 +542,23 @@ DESCRIPTION
   Run this command using the job ID returned from the "sf data query --bulk" command.
 
 ALIASES
-  $ sf force:data:soql:bulk:report
+  $ sf force data soql bulk report
 
 EXAMPLES
   View the status of a bulk query with the specified ID:
 
-    $ sf data:query:resume --bulk-query-id 7500x000005BdFzXXX
+    $ sf data query resume --bulk-query-id 7500x000005BdFzXXX
 ```
 
-_See code: [src/commands/data/query/resume.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.3/src/commands/data/query/resume.ts)_
+_See code: [src/commands/data/query/resume.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/query/resume.ts)_
 
-## `sf data:resume`
+## `sf data resume`
 
 View the status of a bulk data load job or batch.
 
 ```
 USAGE
-  $ sf data:resume -o <value> -i <value> [--json] [--api-version <value>] [-b <value>]
+  $ sf data resume -o <value> -i <value> [--json] [--api-version <value>] [-b <value>]
 
 FLAGS
   -b, --batch-id=<value>    ID of the batch whose status you want to view; you must also specify the job ID.
@@ -578,22 +578,22 @@ DESCRIPTION
 EXAMPLES
   View the status of a bulk load job:
 
-    $ sf data:resume --job-id 750xx000000005sAAA
+    $ sf data resume --job-id 750xx000000005sAAA
 
   View the status of a bulk load job and a specific batches:
 
-    $ sf data:resume --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA
+    $ sf data resume --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA
 ```
 
-_See code: [src/commands/data/resume.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.3/src/commands/data/resume.ts)_
+_See code: [src/commands/data/resume.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/resume.ts)_
 
-## `sf data:update:record`
+## `sf data update record`
 
 Updates a single record of a Salesforce or Tooling API object.
 
 ```
 USAGE
-  $ sf data:update:record -o <value> -s <value> -v <value> [--json] [--api-version <value>] [-i <value>] [-w <value>]
+  $ sf data update record -o <value> -s <value> -v <value> [--json] [--api-version <value>] [-i <value>] [-w <value>]
     [-t]
 
 FLAGS
@@ -624,36 +624,36 @@ DESCRIPTION
   object.
 
 ALIASES
-  $ sf force:data:record:update
+  $ sf force data record update
 
 EXAMPLES
   Update the Name field of an Account record with the specified (truncated) ID:
 
-    $ sf data:update:record --sobject Account --record-id 001D0 --values "Name=NewAcme"
+    $ sf data update record --sobject Account --record-id 001D0 --values "Name=NewAcme"
 
   Update the Name field of an Account record whose current name is 'Old Acme':
 
-    $ sf data:update:record --sobject Account --where "Name='Old Acme'" --values "Name='New Acme'"
+    $ sf data update record --sobject Account --where "Name='Old Acme'" --values "Name='New Acme'"
 
   Update the Name and Website fields of an Account record with the specified (truncated) ID:
 
-    $ sf data:update:record --sobject Account --record-id 001D0 --values "Name='Acme III' Website=www.example.com"
+    $ sf data update record --sobject Account --record-id 001D0 --values "Name='Acme III' Website=www.example.com"
 
   Update the ExpirationDate field of a record of the Tooling API object TraceFlag using the specified (truncated) ID:
 
-    $ sf data:update:record -t --sobject TraceFlag --record-id 7tf170000009cUBAAY --values \
+    $ sf data update record -t --sobject TraceFlag --record-id 7tf170000009cUBAAY --values \
       "ExpirationDate=2017-12-01T00:58:04.000+0000"
 ```
 
-_See code: [src/commands/data/update/record.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.3/src/commands/data/update/record.ts)_
+_See code: [src/commands/data/update/record.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/update/record.ts)_
 
-## `sf data:upsert:bulk`
+## `sf data upsert bulk`
 
 Bulk upsert records to an org from a CSV file. Uses Bulk API 2.0.
 
 ```
 USAGE
-  $ sf data:upsert:bulk -o <value> -f <value> -s <value> -i <value> [--json] [--api-version <value>] [-w <value> | -a]
+  $ sf data upsert bulk -o <value> -f <value> -s <value> -i <value> [--json] [--api-version <value>] [-w <value> | -a]
     [--verbose]
 
 FLAGS
@@ -687,24 +687,24 @@ DESCRIPTION
 EXAMPLES
   Bulk upsert records to the Contact object in your default org:
 
-    $ sf data:upsert:bulk --sobject Contact --file files/contacts.csv --external-id Id
+    $ sf data upsert bulk --sobject Contact --file files/contacts.csv --external-id Id
 
   Bulk upsert records to a custom object in an org with alias my-scratch and wait 5 minutes for the command to
   complete:
 
-    $ sf data:upsert:bulk --sobject MyObject__c --file files/file.csv --external-id MyField__c --wait 5 --target-org \
+    $ sf data upsert bulk --sobject MyObject__c --file files/file.csv --external-id MyField__c --wait 5 --target-org \
       my-scratch
 ```
 
-_See code: [src/commands/data/upsert/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.3/src/commands/data/upsert/bulk.ts)_
+_See code: [src/commands/data/upsert/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/upsert/bulk.ts)_
 
-## `sf data:upsert:resume`
+## `sf data upsert resume`
 
 Resume a bulk upsert job that you previously started. Uses Bulk API 2.0.
 
 ```
 USAGE
-  $ sf data:upsert:resume [--json] [-o <value>] [--use-most-recent | -i <value>] [--wait <value>] [--api-version
+  $ sf data upsert resume [--json] [-o <value>] [--use-most-recent | -i <value>] [--wait <value>] [--api-version
   <value>]
 
 FLAGS
@@ -726,22 +726,22 @@ DESCRIPTION
 EXAMPLES
   Resume a bulk upsert job from your default org using an ID:
 
-    $ sf data:upsert:resume --job-id 750xx000000005sAAA
+    $ sf data upsert resume --job-id 750xx000000005sAAA
 
   Resume the most recently run bulk upsert job for an org with alias my-scratch:
 
-    $ sf data:upsert:resume --use-most-recent --target-org my-scratch
+    $ sf data upsert resume --use-most-recent --target-org my-scratch
 ```
 
-_See code: [src/commands/data/upsert/resume.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.3/src/commands/data/upsert/resume.ts)_
+_See code: [src/commands/data/upsert/resume.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/upsert/resume.ts)_
 
-## `sf force:data:bulk:delete`
+## `sf force data bulk delete`
 
 Bulk delete records from an org using a CSV file. Uses Bulk API 1.0.
 
 ```
 USAGE
-  $ sf force:data:bulk:delete -o <value> -f <value> -s <value> [--json] [--api-version <value>] [-w <value>]
+  $ sf force data bulk delete -o <value> -f <value> -s <value> [--json] [--api-version <value>] [-w <value>]
 
 FLAGS
   -f, --file=<value>        (required) CSV file that contains the IDs of the records to delete.
@@ -769,23 +769,23 @@ DESCRIPTION
 EXAMPLES
   Bulk delete Account records from your default org using the list of IDs in the "files/delete.csv" file:
 
-    $ sf force:data:bulk:delete --sobject Account --file files/delete.csv
+    $ sf force data bulk delete --sobject Account --file files/delete.csv
 
   Bulk delete records from a custom object in an org with alias my-scratch and wait 5 minutes for the command to
   complete:
 
-    $ sf force:data:bulk:delete --sobject MyObject__c --file files/delete.csv --wait 5 --target-org my-scratch
+    $ sf force data bulk delete --sobject MyObject__c --file files/delete.csv --wait 5 --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.3/src/commands/force/data/bulk/delete.ts)_
+_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/force/data/bulk/delete.ts)_
 
-## `sf force:data:bulk:status`
+## `sf force data bulk status`
 
 View the status of a bulk data load job or batch. Uses Bulk API 1.0.
 
 ```
 USAGE
-  $ sf force:data:bulk:status -o <value> -i <value> [--json] [--api-version <value>] [-b <value>]
+  $ sf force data bulk status -o <value> -i <value> [--json] [--api-version <value>] [-b <value>]
 
 FLAGS
   -b, --batch-id=<value>    ID of the batch whose status you want to view; you must also specify the job ID.
@@ -805,22 +805,22 @@ DESCRIPTION
 EXAMPLES
   View the status of a bulk load job in your default org:
 
-    $ sf force:data:bulk:status --job-id 750xx000000005sAAA
+    $ sf force data bulk status --job-id 750xx000000005sAAA
 
   View the status of a bulk load job and a specific batches in an org with alias my-scratch:
 
-    $ sf force:data:bulk:status --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA --target-org my-scratch
+    $ sf force data bulk status --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.3/src/commands/force/data/bulk/status.ts)_
+_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/force/data/bulk/status.ts)_
 
-## `sf force:data:bulk:upsert`
+## `sf force data bulk upsert`
 
 Bulk upsert records to an org from a CSV file. Uses Bulk API 1.0.
 
 ```
 USAGE
-  $ sf force:data:bulk:upsert -o <value> -i <value> -f <value> -s <value> [--json] [--api-version <value>] [-w <value>]
+  $ sf force data bulk upsert -o <value> -i <value> -f <value> -s <value> [--json] [--api-version <value>] [-w <value>]
   [-r]
 
 FLAGS
@@ -864,10 +864,10 @@ EXAMPLES
   Bulk upsert records to a custom object in an org with alias my-scratch and wait 5 minutes for the command to
   complete:
 
-    $ sf force:data:bulk:upsert --sobject MyObject__c --file files/file.csv --external-id MyField__c --wait 5 \
+    $ sf force data bulk upsert --sobject MyObject__c --file files/file.csv --external-id MyField__c --wait 5 \
       --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.3/src/commands/force/data/bulk/upsert.ts)_
+_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/force/data/bulk/upsert.ts)_
 
 <!-- commandsstop -->
