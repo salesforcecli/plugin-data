@@ -5,17 +5,26 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import * as path from 'node:path';
-import * as util from 'node:util';
-import * as fs from 'node:fs';
+import util from 'node:util';
+import fs from 'node:fs';
+import path, { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { AnyJson, Dictionary, getString, JsonMap } from '@salesforce/ts-types';
 import { Logger, Messages, Org, SchemaValidator, SfError } from '@salesforce/core';
-import { DataPlanPart, hasNestedRecords, isAttributesElement, SObjectTreeInput } from '../../../dataSoqlQueryTypes';
+import { DataPlanPart, hasNestedRecords, isAttributesElement, SObjectTreeInput } from '../../../dataSoqlQueryTypes.js';
 
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectory(dirname(fileURLToPath(import.meta.url)));
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
-const importPlanSchemaFile = path.join(__dirname, '..', '..', '..', '..', 'schema', 'dataImportPlanSchema.json');
+const importPlanSchemaFile = path.join(
+  dirname(fileURLToPath(import.meta.url)),
+  '..',
+  '..',
+  '..',
+  '..',
+  'schema',
+  'dataImportPlanSchema.json'
+);
 
 const sobjectTreeApiPartPattern = '%s/services/data/v%s/composite/tree/%s';
 const jsonContentType = 'application/json';
@@ -217,7 +226,7 @@ export class ImportApi {
     instanceUrl: string;
   }): Promise<void> {
     // REVIEWME: support both files and plan in same invocation?
-    const importPlanRootPath = path.dirname(plan);
+    const importPlanRootPath = dirname(plan);
     for (const sobjectConfig of this.importPlanConfig) {
       const globalSaveRefs = sobjectConfig.saveRefs ?? false;
       const globalResolveRefs = sobjectConfig.resolveRefs ?? false;

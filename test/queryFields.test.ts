@@ -5,20 +5,18 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import * as chai from 'chai';
-import * as chaiAsPromised from 'chai-as-promised';
-import { expect } from 'chai';
+import chai, { expect } from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 
-import sinon = require('sinon');
-import { retrieveColumns } from '../src/commands/data/query';
-import * as TestUtil from './testUtil';
-import { queryFieldsExemplars } from './test-files/queryFields.exemplars';
+import sinon from 'sinon';
+import { retrieveColumns } from '../src/commands/data/query.js';
+import { queryFieldsExemplars } from './test-files/queryFields.exemplars.js';
+import { createFakeConnection } from './testUtil.js';
 
 chai.use(chaiAsPromised);
 
 describe('queryFields tests', () => {
-  const fakeConnection = TestUtil.createFakeConnection();
+  const fakeConnection = createFakeConnection();
   const sandbox = sinon.createSandbox();
   afterEach(() => {
     sandbox.restore();

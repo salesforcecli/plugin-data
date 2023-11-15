@@ -6,29 +6,32 @@
  */
 
 import { resolve } from 'node:path';
-import * as chai from 'chai';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import chai from 'chai';
 import { Config } from '@oclif/core';
 import { OrgConfigProperties } from '@salesforce/core';
 import {
   TestContext,
   MockTestOrgData,
   // shouldThrow
-} from '@salesforce/core/lib/testSetup';
+} from '@salesforce/core/lib/testSetup.js';
 
-import * as chaiAsPromised from 'chai-as-promised';
+import chaiAsPromised from 'chai-as-promised';
 import { describe } from 'mocha';
-import sinon = require('sinon');
+import sinon from 'sinon';
 import { expect } from 'chai';
-import { soqlQueryExemplars } from '../../test-files/soqlQuery.exemplars';
-import { DataSoqlQueryCommand } from '../../../src/commands/data/query';
-import { SoqlQueryResult } from '../../../src/dataSoqlQueryTypes';
-
+import { soqlQueryExemplars } from '../../test-files/soqlQuery.exemplars.js';
+import { DataSoqlQueryCommand } from '../../../src/commands/data/query.js';
+import { SoqlQueryResult } from '../../../src/dataSoqlQueryTypes.js';
 chai.use(chaiAsPromised);
 
 describe('Execute a SOQL statement', (): void => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
-  const config = new Config({ root: resolve(__dirname, '../../../package.json') });
+  const config = new Config({
+    root: resolve(dirname(fileURLToPath(import.meta.url)), '../../../package.json'),
+  });
 
   beforeEach(async () => {
     await $$.stubAuths(testOrg);

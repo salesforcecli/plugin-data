@@ -8,7 +8,7 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
 
-import { stringToDictionary } from '../../../src/dataCommand';
+import { stringToDictionary } from '../../../src/dataCommand.js';
 
 describe('dataCommand', () => {
   it('should transform a "key=value" string into an equivalent object', () => {

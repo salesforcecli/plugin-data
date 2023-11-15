@@ -4,14 +4,15 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import * as fs from 'node:fs';
+import fs from 'node:fs';
 import { resolve } from 'node:path';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { AnyJson, ensureJsonMap, ensureString, isString } from '@salesforce/ts-types';
 import { expect } from 'chai';
-import { TestContext, MockTestOrgData } from '@salesforce/core/lib/testSetup';
+import { TestContext, MockTestOrgData } from '@salesforce/core/lib/testSetup.js';
 import { Config } from '@oclif/core';
-import Export from '../../../../src/commands/data/export/tree';
-
+import Export from '../../../../src/commands/data/export/tree.js';
 const query = 'SELECT Id, Name from Account';
 
 // Query response used by the connection stub.
@@ -57,7 +58,9 @@ interface ExportResult {
 describe('data:export:tree', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
-  const config = new Config({ root: resolve(__dirname, '../../../package.json') });
+  const config = new Config({
+    root: resolve(dirname(fileURLToPath(import.meta.url)), '../../../package.json'),
+  });
 
   beforeEach(async () => {
     await $$.stubAuths(testOrg);

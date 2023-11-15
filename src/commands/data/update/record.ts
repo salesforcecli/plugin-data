@@ -5,13 +5,15 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Messages, SfError } from '@salesforce/core';
 import { SaveError, SaveResult } from 'jsforce';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { orgFlags } from '../../../flags';
-import { collectErrorMessages, query, stringToDictionary } from '../../../dataCommand';
+import { orgFlags } from '../../../flags.js';
+import { collectErrorMessages, query, stringToDictionary } from '../../../dataCommand.js';
 
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectory(dirname(fileURLToPath(import.meta.url)));
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'record.update');
 const commonMessages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 

@@ -5,17 +5,17 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-/* eslint-disable  @typescript-eslint/no-var-requires */
-import { join as pathJoin, resolve } from 'node:path';
+import { join as pathJoin, resolve, dirname } from 'node:path';
 import { strict as assert } from 'node:assert';
+import { fileURLToPath } from 'node:url';
+import fs from 'node:fs';
 import { AnyJson, ensureJsonMap, ensureString } from '@salesforce/ts-types';
 import { expect } from 'chai';
-import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup';
+import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup.js';
 import { Config } from '@oclif/core';
-import Import from '../../../../src/commands/data/import/tree';
-
+import Import from '../../../../src/commands/data/import/tree.js';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-const dataImportPlanSchema = require('../../../../schema/dataImportPlanSchema.json');
+const dataImportPlanSchema = JSON.parse(fs.readFileSync('schema/dataImportPlanSchema.json', 'utf-8'));
 
 const expectedImportResult = [
   {
@@ -43,7 +43,9 @@ const expectedImportResult = [
 describe('data:tree:import', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
-  const config = new Config({ root: resolve(__dirname, '../../../package.json') });
+  const config = new Config({
+    root: resolve(dirname(fileURLToPath(import.meta.url)), '../../../package.json'),
+  });
 
   beforeEach(async () => {
     await $$.stubAuths(testOrg);
@@ -76,7 +78,17 @@ describe('data:tree:import', () => {
         '--target-org',
         'test@org.com',
         '--files',
-        pathJoin(__dirname, '..', '..', '..', 'api', 'data', 'tree', 'test-files', 'accounts-contacts-tree.json'),
+        pathJoin(
+          dirname(fileURLToPath(import.meta.url)),
+          '..',
+          '..',
+          '..',
+          'api',
+          'data',
+          'tree',
+          'test-files',
+          'accounts-contacts-tree.json'
+        ),
         '--json',
       ],
       config
@@ -92,7 +104,17 @@ describe('data:tree:import', () => {
         '--target-org',
         'test@org.com',
         '--plan',
-        pathJoin(__dirname, '..', '..', '..', 'api', 'data', 'tree', 'test-files', 'accounts-contacts-plan.json'),
+        pathJoin(
+          dirname(fileURLToPath(import.meta.url)),
+          '..',
+          '..',
+          '..',
+          'api',
+          'data',
+          'tree',
+          'test-files',
+          'accounts-contacts-plan.json'
+        ),
         '--json',
       ],
       config

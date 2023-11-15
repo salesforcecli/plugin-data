@@ -4,15 +4,15 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import * as path from 'node:path';
+import path from 'node:path';
 import { strict as assert } from 'node:assert/strict';
-import * as fs from 'node:fs';
+import fs from 'node:fs';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { sleep } from '@salesforce/kit';
-import { QueryResult } from '../../../data/dataSoqlQuery.nut';
-import { BatcherReturnType } from '../../../../../src/batcher';
-import { StatusResult } from '../../../../../src/types';
+import { BatcherReturnType } from '../../../../../src/batcher.js';
+import { StatusResult } from '../../../../../src/types.js';
+import { QueryResult } from '../../../data/dataSoqlQuery.nut.js';
 
 let testSession: TestSession;
 
@@ -189,6 +189,7 @@ const bulkInsertAccounts = () => {
     { ensureExitCode: 0 }
   ).jsonOutput?.result;
   assert.equal(response?.length, 1);
+  // guaranteed by the assertion, done for ts
   const bulkUpsertResult = response[0];
   assert(bulkUpsertResult.id);
   assert('jobId' in bulkUpsertResult);

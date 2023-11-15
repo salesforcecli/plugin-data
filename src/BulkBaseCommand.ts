@@ -4,20 +4,23 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import { BulkOperation, IngestJobV2, IngestOperation, JobInfoV2, JobStateV2 } from 'jsforce/lib/api/bulk';
+import { BulkOperation, IngestJobV2, IngestOperation, JobInfoV2, JobStateV2 } from 'jsforce/lib/api/bulk.js';
 import { Duration } from '@salesforce/kit';
 import { capitalCase } from 'change-case';
 import { Connection, Lifecycle, Messages } from '@salesforce/core';
 import { Schema } from 'jsforce';
-import { getResultMessage } from './reporters';
-import { BulkResultV2 } from './types';
-import { BulkDataRequestCache } from './bulkDataRequestCache';
+import { getResultMessage } from './reporters.js';
+import { BulkResultV2 } from './types.js';
+import { BulkDataRequestCache } from './bulkDataRequestCache.js';
 
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectory(dirname(fileURLToPath(import.meta.url)));
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.base.command');
 
 export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
+  public static readonly enableJsonFlag = true;
   protected lifeCycle = Lifecycle.getInstance();
   protected job!: IngestJobV2<Schema, IngestOperation>;
   protected connection: Connection | undefined;

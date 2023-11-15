@@ -4,12 +4,14 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { IngestJobV2, IngestJobV2Results, IngestOperation, JobInfoV2 } from 'jsforce/lib/api/bulk';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { IngestJobV2, IngestJobV2Results, IngestOperation, JobInfoV2 } from 'jsforce/lib/api/bulk.js';
 import { Schema } from 'jsforce';
 import { Connection, Messages } from '@salesforce/core';
-import { BulkProcessedRecordV2, BulkRecordsV2 } from './types';
+import { BulkProcessedRecordV2, BulkRecordsV2 } from './types.js';
 
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectory(dirname(fileURLToPath(import.meta.url)));
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
 export const POLL_FREQUENCY_MS = 5000;

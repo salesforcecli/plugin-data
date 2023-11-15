@@ -4,15 +4,17 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import * as fs from 'node:fs';
+import fs from 'node:fs';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Messages } from '@salesforce/core';
 import { Flags, SfCommand, Ux } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
-import { orgFlags } from '../../../../flags';
-import { Batcher, BatcherReturnType } from '../../../../batcher';
-import { validateSobjectType } from '../../../../bulkUtils';
+import { orgFlags } from '../../../../flags.js';
+import { Batcher, BatcherReturnType } from '../../../../batcher.js';
+import { validateSobjectType } from '../../../../bulkUtils.js';
 
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectory(dirname(fileURLToPath(import.meta.url)));
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.upsert');
 
 export default class Upsert extends SfCommand<BatcherReturnType> {

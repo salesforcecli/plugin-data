@@ -13,17 +13,21 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 
-import * as path from 'node:path';
-import * as fs from 'node:fs';
+import fs from 'node:fs';
+import path, { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { expect } from 'chai';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import { Messages, Org } from '@salesforce/core';
-import { ImportApi, ImportConfig } from '../../../../src/api/data/tree/importApi';
-
+import { ImportApi, ImportConfig } from '../../../../src/api/data/tree/importApi.js';
 // Json files
-const dataImportPlanSchema = require('../../../../schema/dataImportPlanSchema.json');
-const accountsContactsTreeJSON = require('./test-files/accounts-contacts-tree.json');
-const accountsContactsPlanJSON = require('./test-files/accounts-contacts-plan.json');
+const accountsContactsTreeJSON = JSON.parse(
+  fs.readFileSync('test/api/data/tree/test-files/accounts-contacts-tree.json', 'utf-8')
+);
+const accountsContactsPlanJSON = JSON.parse(
+  fs.readFileSync('test/api/data/tree/test-files/accounts-contacts-plan.json', 'utf-8')
+);
+const dataImportPlanSchema = JSON.parse(fs.readFileSync('schema/dataImportPlanSchema.json', 'utf-8'));
 
 // Sample response data
 // const sampleResponseData = [
@@ -52,7 +56,8 @@ const jsonRefRegex = /[.]*["|'][A-Z0-9_]*["|'][ ]*:[ ]*["|']@([A-Z0-9_]*)["|'][.
 
 describe('ImportApi', () => {
   const sandbox = sinon.createSandbox();
-  Messages.importMessagesDirectory(__dirname);
+
+  Messages.importMessagesDirectory(dirname(fileURLToPath(import.meta.url)));
   const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
   afterEach(() => {
@@ -106,7 +111,7 @@ describe('ImportApi', () => {
 
     it('should validate a plan', async () => {
       config = {
-        plan: path.join(__dirname, 'test-files', 'accounts-contacts-plan.json'),
+        plan: path.join(dirname(fileURLToPath(import.meta.url)), 'test-files', 'accounts-contacts-plan.json'),
       };
       context.schemaValidator.validate.returns(Promise.resolve());
       // @ts-ignore
@@ -135,7 +140,9 @@ describe('ImportApi', () => {
 
     it('should return a promise resolved with config with data file as input', async () => {
       config = {
-        sobjectTreeFiles: [path.join(__dirname, 'test-files', 'accounts-contacts-tree.json')],
+        sobjectTreeFiles: [
+          path.join(dirname(fileURLToPath(import.meta.url)), 'test-files', 'accounts-contacts-tree.json'),
+        ],
       };
       // @ts-ignore
       const opts = await ImportApi.prototype.validate.call(context, config);
@@ -144,7 +151,7 @@ describe('ImportApi', () => {
 
     it('should return a promise resolved with config with plan file as input', async () => {
       config = {
-        plan: path.join(__dirname, 'test-files', 'accounts-contacts-plan.json'),
+        plan: path.join(dirname(fileURLToPath(import.meta.url)), 'test-files', 'accounts-contacts-plan.json'),
       };
       context.schemaValidator.validate.returns(Promise.resolve());
       // @ts-ignore
@@ -265,7 +272,7 @@ describe('ImportApi', () => {
           'content-type': 'application/json',
         },
       };
-      const filepath = path.join(__dirname, 'test-files', 'contacts-only-2.json');
+      const filepath = path.join(dirname(fileURLToPath(import.meta.url)), 'test-files', 'contacts-only-2.json');
       const rv = ImportApi.prototype.getSObjectTreeFileMeta(filepath);
       expect(rv).to.eql(expectedMeta);
     });
@@ -278,13 +285,13 @@ describe('ImportApi', () => {
           'content-type': 'application/json',
         },
       };
-      const filepath = path.join(__dirname, 'test-files', 'contacts-only-2.sdx');
+      const filepath = path.join(dirname(fileURLToPath(import.meta.url)), 'test-files', 'contacts-only-2.sdx');
       const rv = ImportApi.prototype.getSObjectTreeFileMeta(filepath, 'json');
       expect(rv).to.eql(expectedMeta);
     });
 
     it('should throw an InvalidDataImport error with invalid path to data file', () => {
-      const filepath = path.join(__dirname, 'test-files', 'invalid-data-file.json');
+      const filepath = path.join(dirname(fileURLToPath(import.meta.url)), 'test-files', 'invalid-data-file.json');
       try {
         const rv = ImportApi.prototype.getSObjectTreeFileMeta(filepath);
         // this should never execute but if it does it will cause the test to fail
@@ -297,7 +304,7 @@ describe('ImportApi', () => {
     });
 
     it('should throw an InvalidDataImport error with unknown data file extention and no content-type', () => {
-      const filepath = path.join(__dirname, 'test-files', 'contacts-only-2.sdx');
+      const filepath = path.join(dirname(fileURLToPath(import.meta.url)), 'test-files', 'contacts-only-2.sdx');
       try {
         const rv = ImportApi.prototype.getSObjectTreeFileMeta(filepath);
         // this should never execute but if it does it will cause the test to fail
@@ -310,7 +317,7 @@ describe('ImportApi', () => {
     });
 
     it('should throw an InvalidDataImport error with unknown data file extension and unsupported content-type', () => {
-      const filepath = path.join(__dirname, 'test-files', 'contacts-only-2.sdx');
+      const filepath = path.join(dirname(fileURLToPath(import.meta.url)), 'test-files', 'contacts-only-2.sdx');
       try {
         const rv = ImportApi.prototype.getSObjectTreeFileMeta(filepath, 'txt');
         // this should never execute but if it does it will cause the test to fail
@@ -338,7 +345,7 @@ describe('ImportApi', () => {
     let refMap: any;
 
     beforeEach(() => {
-      filepath = path.join(__dirname, 'test-files', 'accounts-contacts-tree.json');
+      filepath = path.join(dirname(fileURLToPath(import.meta.url)), 'test-files', 'accounts-contacts-tree.json');
       isJson = true;
       refRegex = jsonRefRegex;
       resolveRefs = false;
@@ -382,7 +389,7 @@ describe('ImportApi', () => {
 
     it('should resolve saved references', () => {
       resolveRefs = true;
-      filepath = path.join(__dirname, 'test-files', 'contacts-only-1.json');
+      filepath = path.join(dirname(fileURLToPath(import.meta.url)), 'test-files', 'contacts-only-1.json');
       refMap.set('sampleaccountref', 'test_account_id1');
       refMap.set('sampleacct2ref', 'test_account_id2');
       // @ts-ignore

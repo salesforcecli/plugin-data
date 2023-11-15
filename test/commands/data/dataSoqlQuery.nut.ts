@@ -4,8 +4,8 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import * as path from 'node:path';
-import * as fs from 'node:fs';
+import path from 'node:path';
+import fs from 'node:fs';
 import { strict as assert } from 'node:assert';
 import { Dictionary, getString } from '@salesforce/ts-types';
 import { config, expect } from 'chai';
@@ -99,7 +99,7 @@ describe('data:query command', () => {
   describe('data:query respects maxQueryLimit config', () => {
     it('should return 1 account record', () => {
       // set maxQueryLimit to 1 globally
-      execCmd('config:set maxQueryLimit=1 --global', { ensureExitCode: 0 });
+      execCmd('config:set maxQueryLimit=1 --global', { ensureExitCode: 0, cli: 'dev' });
 
       const result = runQuery('SELECT Id, Name, Phone FROM Account', { json: true }) as QueryResult;
 
@@ -109,7 +109,7 @@ describe('data:query command', () => {
 
     it('should return 3756 ScratchOrgInfo records', () => {
       // set maxQueryLimit to 3756 globally
-      execCmd('config:set maxQueryLimit=3756 --global', { ensureExitCode: 0 });
+      execCmd('config:set maxQueryLimit=3756 --global', { ensureExitCode: 0, cli: 'dev' });
 
       const soqlQuery = 'SELECT Id FROM ScratchOrgInfo';
       const queryCmd = `data:query --query "${soqlQuery}" --json --target-org ${hubOrgUsername}`;

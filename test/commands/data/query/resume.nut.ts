@@ -4,12 +4,12 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import * as path from 'node:path';
+import path from 'node:path';
 import { expect, config } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { QueryResult, Record } from 'jsforce';
 import { sleep } from '@salesforce/kit';
-import { JobInfoV2 } from 'jsforce/api/bulk';
+import { JobInfoV2 } from 'jsforce/lib/api/bulk.js';
 config.truncateThreshold = 0;
 
 /** Verify that the operation completed successfully and results are available before attempting to do stuff with the results */

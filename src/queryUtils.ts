@@ -5,8 +5,8 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { Record } from 'jsforce';
-import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes';
-import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from './reporters';
+import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes.js';
+import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from './reporters.js';
 
 export const displayResults = (queryResult: SoqlQueryResult, resultFormat: FormatTypes): void => {
   let reporter: HumanReporter | JsonReporter | CsvReporter;

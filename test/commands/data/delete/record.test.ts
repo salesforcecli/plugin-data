@@ -6,21 +6,24 @@
  */
 import { resolve } from 'node:path';
 import { strict as assert } from 'node:assert';
-import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup';
-
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup.js';
 import { ensureJsonMap, ensureString, AnyJson } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { Config } from '@oclif/core';
 
 import { SaveResult } from 'jsforce';
-import Delete from '../../../../src/commands/data/delete/record';
+import Delete from '../../../../src/commands/data/delete/record.js';
 
 const sObjectId = '0011100001zhhyUAAQ';
 
 describe('data:delete:record', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
-  const config = new Config({ root: resolve(__dirname, '../../../package.json') });
+  const config = new Config({
+    root: resolve(dirname(fileURLToPath(import.meta.url)), '../../../package.json'),
+  });
 
   beforeEach(async () => {
     await $$.stubAuths(testOrg);

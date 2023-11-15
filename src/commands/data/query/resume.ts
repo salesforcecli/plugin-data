@@ -4,8 +4,10 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Messages } from '@salesforce/core';
-import { QueryJobV2 } from 'jsforce/lib/api/bulk';
+import { QueryJobV2 } from 'jsforce/lib/api/bulk.js';
 import {
   Flags,
   loglevel,
@@ -13,12 +15,12 @@ import {
   orgApiVersionFlagWithDeprecations,
   SfCommand,
 } from '@salesforce/sf-plugins-core';
-import { resultFormatFlag } from '../../../flags';
-import { displayResults, transformBulkResults } from '../../../queryUtils';
-import { FormatTypes } from '../../../reporters';
-import { BulkQueryRequestCache } from '../../../bulkDataRequestCache';
+import { resultFormatFlag } from '../../../flags.js';
+import { displayResults, transformBulkResults } from '../../../queryUtils.js';
+import { FormatTypes } from '../../../reporters.js';
+import { BulkQueryRequestCache } from '../../../bulkDataRequestCache.js';
 
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectory(dirname(fileURLToPath(import.meta.url)));
 const reportMessages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.report');
 // needed by the flags loaded from the other command
 const queryMessages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');

@@ -4,13 +4,15 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Messages } from '@salesforce/core';
-import { BulkResultV2 } from '../../../types';
-import { BulkUpsertRequestCache } from '../../../bulkDataRequestCache';
-import { ResumeBulkCommand } from '../../../resumeBulkCommand';
-import { isBulkV2RequestDone } from '../../../bulkUtils';
+import { BulkResultV2 } from '../../../types.js';
+import { BulkUpsertRequestCache } from '../../../bulkDataRequestCache.js';
+import { ResumeBulkCommand } from '../../../resumeBulkCommand.js';
+import { isBulkV2RequestDone } from '../../../bulkUtils.js';
 
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectory(dirname(fileURLToPath(import.meta.url)));
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.upsert.resume');
 
 export default class UpsertResume extends ResumeBulkCommand {
