@@ -102,13 +102,13 @@ USAGE
   $ sf data create record -o <value> -s <value> -v <value> [--json] [--api-version <value>] [-t]
 
 FLAGS
-  -o, --target-org=<value>  (required) Username or alias of the target org.
-  -s, --sobject=<value>     (required) API name of the Salesforce or Tooling API object that you're inserting a record
-                            into.
-  -t, --use-tooling-api     Use Tooling API so you can insert a record in a Tooling API object.
-  -v, --values=<value>      (required) Values for the flags in the form <fieldName>=<value>, separate multiple pairs
-                            with spaces.
-  --api-version=<value>     Override the api version used for api requests made by this command
+  -o, --target-org=<value>   (required) Username or alias of the target org.
+  -s, --sobject=<value>      (required) API name of the Salesforce or Tooling API object that you're inserting a record
+                             into.
+  -t, --use-tooling-api      Use Tooling API so you can insert a record in a Tooling API object.
+  -v, --values=<value>       (required) Values for the flags in the form <fieldName>=<value>, separate multiple pairs
+                             with spaces.
+      --api-version=<value>  Override the api version used for api requests made by this command
 
 GLOBAL FLAGS
   --json  Format output as json.
@@ -145,7 +145,7 @@ EXAMPLES
       TracedEntityId=01p17000000R6bLAAS"
 ```
 
-_See code: [src/commands/data/create/record.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/create/record.ts)_
+_See code: [src/commands/data/create/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/create/record.ts)_
 
 ## `sf data delete bulk`
 
@@ -156,15 +156,15 @@ USAGE
   $ sf data delete bulk -o <value> -f <value> -s <value> [--json] [--api-version <value>] [-w <value> | -a] [--verbose]
 
 FLAGS
-  -a, --async               Run the command asynchronously.
-  -f, --file=<value>        (required) CSV file that contains the IDs of the records to update or delete.
-  -o, --target-org=<value>  (required) Username or alias of the target org.
-  -s, --sobject=<value>     (required) API name of the Salesforce object, either standard or custom, that you want to
-                            update or delete records from.
-  -w, --wait=<value>        [default: 0 minutes] Number of minutes to wait for the command to complete before displaying
-                            the results.
-  --api-version=<value>     Override the api version used for api requests made by this command
-  --verbose                 Print verbose output of failed records if result is available.
+  -a, --async                Run the command asynchronously.
+  -f, --file=<value>         (required) CSV file that contains the IDs of the records to update or delete.
+  -o, --target-org=<value>   (required) Username or alias of the target org.
+  -s, --sobject=<value>      (required) API name of the Salesforce object, either standard or custom, that you want to
+                             update or delete records from.
+  -w, --wait=<value>         [default: 0 minutes] Number of minutes to wait for the command to complete before
+                             displaying the results.
+      --api-version=<value>  Override the api version used for api requests made by this command
+      --verbose              Print verbose output of failed records if result is available.
 
 GLOBAL FLAGS
   --json  Format output as json.
@@ -189,7 +189,7 @@ EXAMPLES
     $ sf data delete bulk --sobject MyObject__c --file files/delete.csv --wait 5 --target-org my-scratch
 ```
 
-_See code: [src/commands/data/delete/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/delete/bulk.ts)_
+_See code: [src/commands/data/delete/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/delete/bulk.ts)_
 
 ## `sf data delete record`
 
@@ -200,13 +200,13 @@ USAGE
   $ sf data delete record -o <value> -s <value> [--json] [--api-version <value>] [-i <value>] [-w <value>] [-t]
 
 FLAGS
-  -i, --record-id=<value>   ID of the record you’re deleting.
-  -o, --target-org=<value>  (required) Username or alias of the target org.
-  -s, --sobject=<value>     (required) API name of the Salesforce or Tooling API object that you're deleting a record
-                            from.
-  -t, --use-tooling-api     Use Tooling API so you can delete a record from a Tooling API object.
-  -w, --where=<value>       List of <fieldName>=<value> pairs that identify the record you want to delete.
-  --api-version=<value>     Override the api version used for api requests made by this command
+  -i, --record-id=<value>    ID of the record you’re deleting.
+  -o, --target-org=<value>   (required) Username or alias of the target org.
+  -s, --sobject=<value>      (required) API name of the Salesforce or Tooling API object that you're deleting a record
+                             from.
+  -t, --use-tooling-api      Use Tooling API so you can delete a record from a Tooling API object.
+  -w, --where=<value>        List of <fieldName>=<value> pairs that identify the record you want to delete.
+      --api-version=<value>  Override the api version used for api requests made by this command
 
 GLOBAL FLAGS
   --json  Format output as json.
@@ -247,7 +247,7 @@ EXAMPLES
     $ sf data delete record --use-tooling-api --sobject TraceFlag --record-id 7tf8c
 ```
 
-_See code: [src/commands/data/delete/record.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/delete/record.ts)_
+_See code: [src/commands/data/delete/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/delete/record.ts)_
 
 ## `sf data delete resume`
 
@@ -259,12 +259,12 @@ USAGE
   <value>]
 
 FLAGS
-  -i, --job-id=<value>      ID of the job you want to resume.
-  -o, --target-org=<value>  Org alias or username to use for the target org.
-  --api-version=<value>     Override the api version used for api requests made by this command
-  --use-most-recent         Use the ID of the most recently-run bulk job.
-  --wait=<value>            [default: 0 minutes] Number of minutes to wait for the command to complete before displaying
-                            the results.
+  -i, --job-id=<value>       ID of the job you want to resume.
+  -o, --target-org=<value>   Org alias or username to use for the target org.
+      --api-version=<value>  Override the api version used for api requests made by this command
+      --use-most-recent      Use the ID of the most recently-run bulk job.
+      --wait=<value>         [default: 0 minutes] Number of minutes to wait for the command to complete before
+                             displaying the results.
 
 GLOBAL FLAGS
   --json  Format output as json.
@@ -284,7 +284,7 @@ EXAMPLES
     $ sf data delete resume --use-most-recent --target-org my-scratch
 ```
 
-_See code: [src/commands/data/delete/resume.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/delete/resume.ts)_
+_See code: [src/commands/data/delete/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/delete/resume.ts)_
 
 ## `sf data export tree`
 
@@ -295,12 +295,12 @@ USAGE
   $ sf data export tree -o <value> -q <value> [--json] [--api-version <value>] [-p] [-x <value>] [-d <value>]
 
 FLAGS
-  -d, --output-dir=<value>  Directory in which to generate the JSON files; default is current directory.
-  -o, --target-org=<value>  (required) Username or alias of the target org.
-  -p, --plan                Generate multiple sObject tree files and a plan definition file for aggregated import.
-  -q, --query=<value>       (required) SOQL query, or filepath of a file that contains the query, to retrieve records.
-  -x, --prefix=<value>      Prefix of generated files.
-  --api-version=<value>     Override the api version used for api requests made by this command
+  -d, --output-dir=<value>   Directory in which to generate the JSON files; default is current directory.
+  -o, --target-org=<value>   (required) Username or alias of the target org.
+  -p, --plan                 Generate multiple sObject tree files and a plan definition file for aggregated import.
+  -q, --query=<value>        (required) SOQL query, or filepath of a file that contains the query, to retrieve records.
+  -x, --prefix=<value>       Prefix of generated files.
+      --api-version=<value>  Override the api version used for api requests made by this command
 
 GLOBAL FLAGS
   --json  Format output as json.
@@ -341,7 +341,7 @@ EXAMPLES
       my-scratch
 ```
 
-_See code: [src/commands/data/export/tree.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/export/tree.ts)_
+_See code: [src/commands/data/export/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/export/tree.ts)_
 
 ## `sf data get record`
 
@@ -352,13 +352,13 @@ USAGE
   $ sf data get record -o <value> -s <value> [--json] [--api-version <value>] [-i <value>] [-w <value>] [-t]
 
 FLAGS
-  -i, --record-id=<value>   ID of the record you’re retrieving.
-  -o, --target-org=<value>  (required) Username or alias of the target org.
-  -s, --sobject=<value>     (required) API name of the Salesforce or Tooling API object that you're retrieving a record
-                            from.
-  -t, --use-tooling-api     Use Tooling API so you can retrieve a record from a Tooling API object.
-  -w, --where=<value>       List of <fieldName>=<value> pairs that identify the record you want to display.
-  --api-version=<value>     Override the api version used for api requests made by this command
+  -i, --record-id=<value>    ID of the record you’re retrieving.
+  -o, --target-org=<value>   (required) Username or alias of the target org.
+  -s, --sobject=<value>      (required) API name of the Salesforce or Tooling API object that you're retrieving a record
+                             from.
+  -t, --use-tooling-api      Use Tooling API so you can retrieve a record from a Tooling API object.
+  -w, --where=<value>        List of <fieldName>=<value> pairs that identify the record you want to display.
+      --api-version=<value>  Override the api version used for api requests made by this command
 
 GLOBAL FLAGS
   --json  Format output as json.
@@ -402,7 +402,7 @@ EXAMPLES
     $ sf data get record --use-tooling-api --sobject TraceFlag --record-id 7tf8c
 ```
 
-_See code: [src/commands/data/get/record.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/get/record.ts)_
+_See code: [src/commands/data/get/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/get/record.ts)_
 
 ## `sf data import tree`
 
@@ -413,13 +413,13 @@ USAGE
   $ sf data import tree -o <value> [--json] [--api-version <value>] [-f <value> | -p <value>] [--config-help]
 
 FLAGS
-  -f, --files=<value>...    Comma-separated and in-order JSON files that contain the records, in sObject tree format,
-                            that you want to insert.
-  -o, --target-org=<value>  (required) Username or alias of the target org.
-  -p, --plan=<value>        Plan definition file to insert multiple data files.
-  --api-version=<value>     Override the api version used for api requests made by this command
-  --config-help             Display schema information for the --plan configuration file to stdout; if you specify this
-                            flag, all other flags except --json are ignored.
+  -f, --files=<value>...     Comma-separated and in-order JSON files that contain the records, in sObject tree format,
+                             that you want to insert.
+  -o, --target-org=<value>   (required) Username or alias of the target org.
+  -p, --plan=<value>         Plan definition file to insert multiple data files.
+      --api-version=<value>  Override the api version used for api requests made by this command
+      --config-help          Display schema information for the --plan configuration file to stdout; if you specify this
+                             flag, all other flags except --json are ignored.
 
 GLOBAL FLAGS
   --json  Format output as json.
@@ -452,7 +452,7 @@ EXAMPLES
     $ sf data import tree --plan Account-Contact-plan.json
 ```
 
-_See code: [src/commands/data/import/tree.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/import/tree.ts)_
+_See code: [src/commands/data/import/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/import/tree.ts)_
 
 ## `sf data query`
 
@@ -472,9 +472,9 @@ FLAGS
                                 <options: human|json|csv>
   -t, --use-tooling-api         Use Tooling API so you can run queries on Tooling API objects.
   -w, --wait=<value>            Time to wait for the command to finish, in minutes.
-  --all-rows                    Include deleted records. By default, deleted records are not returned.
-  --api-version=<value>         Override the api version used for api requests made by this command
-  --async                       Use Bulk API 2.0, but don't wait for the job to complete.
+      --all-rows                Include deleted records. By default, deleted records are not returned.
+      --api-version=<value>     Override the api version used for api requests made by this command
+      --async                   Use Bulk API 2.0, but don't wait for the job to complete.
 
 GLOBAL FLAGS
   --json  Format output as json.
@@ -514,7 +514,7 @@ EXAMPLES
     $ sf data query --query "SELECT Id FROM Contact" --bulk --wait 0
 ```
 
-_See code: [src/commands/data/query.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/query.ts)_
+_See code: [src/commands/data/query.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/query.ts)_
 
 ## `sf data query resume`
 
@@ -530,8 +530,8 @@ FLAGS
   -o, --target-org=<value>      Org alias or username to use for the target org.
   -r, --result-format=<option>  [default: human] Format to display the results; the --json flag overrides this flag.
                                 <options: human|json|csv>
-  --api-version=<value>         Override the api version used for api requests made by this command
-  --use-most-recent             Use the most recent bulk query ID from cache.
+      --api-version=<value>     Override the api version used for api requests made by this command
+      --use-most-recent         Use the most recent bulk query ID from cache.
 
 GLOBAL FLAGS
   --json  Format output as json.
@@ -550,7 +550,7 @@ EXAMPLES
     $ sf data query resume --bulk-query-id 7500x000005BdFzXXX
 ```
 
-_See code: [src/commands/data/query/resume.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/query/resume.ts)_
+_See code: [src/commands/data/query/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/query/resume.ts)_
 
 ## `sf data resume`
 
@@ -561,10 +561,10 @@ USAGE
   $ sf data resume -o <value> -i <value> [--json] [--api-version <value>] [-b <value>]
 
 FLAGS
-  -b, --batch-id=<value>    ID of the batch whose status you want to view; you must also specify the job ID.
-  -i, --job-id=<value>      (required) ID of the job whose status you want to view.
-  -o, --target-org=<value>  (required) Username or alias of the target org.
-  --api-version=<value>     Override the api version used for api requests made by this command
+  -b, --batch-id=<value>     ID of the batch whose status you want to view; you must also specify the job ID.
+  -i, --job-id=<value>       (required) ID of the job whose status you want to view.
+  -o, --target-org=<value>   (required) Username or alias of the target org.
+      --api-version=<value>  Override the api version used for api requests made by this command
 
 GLOBAL FLAGS
   --json  Format output as json.
@@ -585,7 +585,7 @@ EXAMPLES
     $ sf data resume --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA
 ```
 
-_See code: [src/commands/data/resume.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/resume.ts)_
+_See code: [src/commands/data/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/resume.ts)_
 
 ## `sf data update record`
 
@@ -597,14 +597,14 @@ USAGE
     [-t]
 
 FLAGS
-  -i, --record-id=<value>   ID of the record you’re updating.
-  -o, --target-org=<value>  (required) Username or alias of the target org.
-  -s, --sobject=<value>     (required) API name of the Salesforce or Tooling API object that contains the record you're
-                            updating.
-  -t, --use-tooling-api     Use Tooling API so you can update a record in a Tooling API object.
-  -v, --values=<value>      (required) Fields that you're updating, in the format of <fieldName>=<value> pairs.
-  -w, --where=<value>       List of <fieldName>=<value> pairs that identify the record you want to update.
-  --api-version=<value>     Override the api version used for api requests made by this command
+  -i, --record-id=<value>    ID of the record you’re updating.
+  -o, --target-org=<value>   (required) Username or alias of the target org.
+  -s, --sobject=<value>      (required) API name of the Salesforce or Tooling API object that contains the record you're
+                             updating.
+  -t, --use-tooling-api      Use Tooling API so you can update a record in a Tooling API object.
+  -v, --values=<value>       (required) Fields that you're updating, in the format of <fieldName>=<value> pairs.
+  -w, --where=<value>        List of <fieldName>=<value> pairs that identify the record you want to update.
+      --api-version=<value>  Override the api version used for api requests made by this command
 
 GLOBAL FLAGS
   --json  Format output as json.
@@ -645,7 +645,7 @@ EXAMPLES
       "ExpirationDate=2017-12-01T00:58:04.000+0000"
 ```
 
-_See code: [src/commands/data/update/record.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/update/record.ts)_
+_See code: [src/commands/data/update/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/update/record.ts)_
 
 ## `sf data upsert bulk`
 
@@ -665,8 +665,8 @@ FLAGS
                              update or delete records from.
   -w, --wait=<value>         [default: 0 minutes] Number of minutes to wait for the command to complete before
                              displaying the results.
-  --api-version=<value>      Override the api version used for api requests made by this command
-  --verbose                  Print verbose output of failed records if result is available.
+      --api-version=<value>  Override the api version used for api requests made by this command
+      --verbose              Print verbose output of failed records if result is available.
 
 GLOBAL FLAGS
   --json  Format output as json.
@@ -696,7 +696,7 @@ EXAMPLES
       my-scratch
 ```
 
-_See code: [src/commands/data/upsert/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/upsert/bulk.ts)_
+_See code: [src/commands/data/upsert/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/upsert/bulk.ts)_
 
 ## `sf data upsert resume`
 
@@ -708,12 +708,12 @@ USAGE
   <value>]
 
 FLAGS
-  -i, --job-id=<value>      ID of the job you want to resume.
-  -o, --target-org=<value>  Org alias or username to use for the target org.
-  --api-version=<value>     Override the api version used for api requests made by this command
-  --use-most-recent         Use the ID of the most recently-run bulk job.
-  --wait=<value>            [default: 0 minutes] Number of minutes to wait for the command to complete before displaying
-                            the results.
+  -i, --job-id=<value>       ID of the job you want to resume.
+  -o, --target-org=<value>   Org alias or username to use for the target org.
+      --api-version=<value>  Override the api version used for api requests made by this command
+      --use-most-recent      Use the ID of the most recently-run bulk job.
+      --wait=<value>         [default: 0 minutes] Number of minutes to wait for the command to complete before
+                             displaying the results.
 
 GLOBAL FLAGS
   --json  Format output as json.
@@ -733,7 +733,7 @@ EXAMPLES
     $ sf data upsert resume --use-most-recent --target-org my-scratch
 ```
 
-_See code: [src/commands/data/upsert/resume.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/data/upsert/resume.ts)_
+_See code: [src/commands/data/upsert/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/upsert/resume.ts)_
 
 ## `sf force data bulk delete`
 
@@ -744,13 +744,13 @@ USAGE
   $ sf force data bulk delete -o <value> -f <value> -s <value> [--json] [--api-version <value>] [-w <value>]
 
 FLAGS
-  -f, --file=<value>        (required) CSV file that contains the IDs of the records to delete.
-  -o, --target-org=<value>  (required) Username or alias of the target org.
-  -s, --sobject=<value>     (required) API name of the Salesforce object, either standard or custom, that you want to
-                            delete records from.
-  -w, --wait=<value>        [default: 0 minutes] Number of minutes to wait for the command to complete before displaying
-                            the results.
-  --api-version=<value>     Override the api version used for api requests made by this command
+  -f, --file=<value>         (required) CSV file that contains the IDs of the records to delete.
+  -o, --target-org=<value>   (required) Username or alias of the target org.
+  -s, --sobject=<value>      (required) API name of the Salesforce object, either standard or custom, that you want to
+                             delete records from.
+  -w, --wait=<value>         [default: 0 minutes] Number of minutes to wait for the command to complete before
+                             displaying the results.
+      --api-version=<value>  Override the api version used for api requests made by this command
 
 GLOBAL FLAGS
   --json  Format output as json.
@@ -777,7 +777,7 @@ EXAMPLES
     $ sf force data bulk delete --sobject MyObject__c --file files/delete.csv --wait 5 --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/force/data/bulk/delete.ts)_
+_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/force/data/bulk/delete.ts)_
 
 ## `sf force data bulk status`
 
@@ -788,10 +788,10 @@ USAGE
   $ sf force data bulk status -o <value> -i <value> [--json] [--api-version <value>] [-b <value>]
 
 FLAGS
-  -b, --batch-id=<value>    ID of the batch whose status you want to view; you must also specify the job ID.
-  -i, --job-id=<value>      (required) ID of the job whose status you want to view.
-  -o, --target-org=<value>  (required) Username or alias of the target org.
-  --api-version=<value>     Override the api version used for api requests made by this command
+  -b, --batch-id=<value>     ID of the batch whose status you want to view; you must also specify the job ID.
+  -i, --job-id=<value>       (required) ID of the job whose status you want to view.
+  -o, --target-org=<value>   (required) Username or alias of the target org.
+      --api-version=<value>  Override the api version used for api requests made by this command
 
 GLOBAL FLAGS
   --json  Format output as json.
@@ -812,7 +812,7 @@ EXAMPLES
     $ sf force data bulk status --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/force/data/bulk/status.ts)_
+_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/force/data/bulk/status.ts)_
 
 ## `sf force data bulk upsert`
 
@@ -832,7 +832,7 @@ FLAGS
                              upsert records to.
   -w, --wait=<value>         [default: 0 minutes] Number of minutes to wait for the command to complete before
                              displaying the results.
-  --api-version=<value>      Override the api version used for api requests made by this command
+      --api-version=<value>  Override the api version used for api requests made by this command
 
 GLOBAL FLAGS
   --json  Format output as json.
@@ -868,6 +868,6 @@ EXAMPLES
       --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/2.6.4-test.0/src/commands/force/data/bulk/upsert.ts)_
+_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/force/data/bulk/upsert.ts)_
 
 <!-- commandsstop -->
