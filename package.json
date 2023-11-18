@@ -119,7 +119,7 @@
     "jsforce": "^2.0.0-beta.28"
   },
   "devDependencies": {
-    "@oclif/plugin-command-snapshot": "^5.0.1",
+    "@oclif/plugin-command-snapshot": "^5.0.2",
     "@salesforce/cli-plugins-testkit": "^5.0.4",
     "@salesforce/dev-scripts": "^7.1.1",
     "@salesforce/plugin-command-reference": "^3.0.46",
