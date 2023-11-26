@@ -102,7 +102,8 @@ USAGE
   $ sf data create record -o <value> -s <value> -v <value> [--json] [--api-version <value>] [-t]
 
 FLAGS
-  -o, --target-org=<value>   (required) Username or alias of the target org.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
   -s, --sobject=<value>      (required) API name of the Salesforce or Tooling API object that you're inserting a record
                              into.
   -t, --use-tooling-api      Use Tooling API so you can insert a record in a Tooling API object.
@@ -145,7 +146,7 @@ EXAMPLES
       TracedEntityId=01p17000000R6bLAAS"
 ```
 
-_See code: [src/commands/data/create/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/create/record.ts)_
+_See code: [src/commands/data/create/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.2/src/commands/data/create/record.ts)_
 
 ## `sf data delete bulk`
 
@@ -158,7 +159,8 @@ USAGE
 FLAGS
   -a, --async                Run the command asynchronously.
   -f, --file=<value>         (required) CSV file that contains the IDs of the records to update or delete.
-  -o, --target-org=<value>   (required) Username or alias of the target org.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
   -s, --sobject=<value>      (required) API name of the Salesforce object, either standard or custom, that you want to
                              update or delete records from.
   -w, --wait=<value>         [default: 0 minutes] Number of minutes to wait for the command to complete before
@@ -189,7 +191,7 @@ EXAMPLES
     $ sf data delete bulk --sobject MyObject__c --file files/delete.csv --wait 5 --target-org my-scratch
 ```
 
-_See code: [src/commands/data/delete/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/delete/bulk.ts)_
+_See code: [src/commands/data/delete/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.2/src/commands/data/delete/bulk.ts)_
 
 ## `sf data delete record`
 
@@ -201,7 +203,8 @@ USAGE
 
 FLAGS
   -i, --record-id=<value>    ID of the record you’re deleting.
-  -o, --target-org=<value>   (required) Username or alias of the target org.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
   -s, --sobject=<value>      (required) API name of the Salesforce or Tooling API object that you're deleting a record
                              from.
   -t, --use-tooling-api      Use Tooling API so you can delete a record from a Tooling API object.
@@ -247,7 +250,7 @@ EXAMPLES
     $ sf data delete record --use-tooling-api --sobject TraceFlag --record-id 7tf8c
 ```
 
-_See code: [src/commands/data/delete/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/delete/record.ts)_
+_See code: [src/commands/data/delete/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.2/src/commands/data/delete/record.ts)_
 
 ## `sf data delete resume`
 
@@ -284,7 +287,7 @@ EXAMPLES
     $ sf data delete resume --use-most-recent --target-org my-scratch
 ```
 
-_See code: [src/commands/data/delete/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/delete/resume.ts)_
+_See code: [src/commands/data/delete/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.2/src/commands/data/delete/resume.ts)_
 
 ## `sf data export tree`
 
@@ -296,7 +299,8 @@ USAGE
 
 FLAGS
   -d, --output-dir=<value>   Directory in which to generate the JSON files; default is current directory.
-  -o, --target-org=<value>   (required) Username or alias of the target org.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
   -p, --plan                 Generate multiple sObject tree files and a plan definition file for aggregated import.
   -q, --query=<value>        (required) SOQL query, or filepath of a file that contains the query, to retrieve records.
   -x, --prefix=<value>       Prefix of generated files.
@@ -341,7 +345,7 @@ EXAMPLES
       my-scratch
 ```
 
-_See code: [src/commands/data/export/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/export/tree.ts)_
+_See code: [src/commands/data/export/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.2/src/commands/data/export/tree.ts)_
 
 ## `sf data get record`
 
@@ -353,7 +357,8 @@ USAGE
 
 FLAGS
   -i, --record-id=<value>    ID of the record you’re retrieving.
-  -o, --target-org=<value>   (required) Username or alias of the target org.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
   -s, --sobject=<value>      (required) API name of the Salesforce or Tooling API object that you're retrieving a record
                              from.
   -t, --use-tooling-api      Use Tooling API so you can retrieve a record from a Tooling API object.
@@ -402,7 +407,7 @@ EXAMPLES
     $ sf data get record --use-tooling-api --sobject TraceFlag --record-id 7tf8c
 ```
 
-_See code: [src/commands/data/get/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/get/record.ts)_
+_See code: [src/commands/data/get/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.2/src/commands/data/get/record.ts)_
 
 ## `sf data import tree`
 
@@ -415,7 +420,8 @@ USAGE
 FLAGS
   -f, --files=<value>...     Comma-separated and in-order JSON files that contain the records, in sObject tree format,
                              that you want to insert.
-  -o, --target-org=<value>   (required) Username or alias of the target org.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
   -p, --plan=<value>         Plan definition file to insert multiple data files.
       --api-version=<value>  Override the api version used for api requests made by this command
       --config-help          Display schema information for the --plan configuration file to stdout; if you specify this
@@ -452,7 +458,7 @@ EXAMPLES
     $ sf data import tree --plan Account-Contact-plan.json
 ```
 
-_See code: [src/commands/data/import/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/import/tree.ts)_
+_See code: [src/commands/data/import/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.2/src/commands/data/import/tree.ts)_
 
 ## `sf data query`
 
@@ -466,7 +472,8 @@ USAGE
 FLAGS
   -b, --bulk                    Use Bulk API 2.0 to run the query.
   -f, --file=<value>            File that contains the SOQL query.
-  -o, --target-org=<value>      (required) Username or alias of the target org.
+  -o, --target-org=<value>      (required) Username or alias of the target org. Not required if the `target-org`
+                                configuration variable is already set.
   -q, --query=<value>           SOQL query to execute.
   -r, --result-format=<option>  [default: human] Format to display the results; the --json flag overrides this flag.
                                 <options: human|json|csv>
@@ -514,7 +521,7 @@ EXAMPLES
     $ sf data query --query "SELECT Id FROM Contact" --bulk --wait 0
 ```
 
-_See code: [src/commands/data/query.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/query.ts)_
+_See code: [src/commands/data/query.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.2/src/commands/data/query.ts)_
 
 ## `sf data query resume`
 
@@ -550,7 +557,7 @@ EXAMPLES
     $ sf data query resume --bulk-query-id 7500x000005BdFzXXX
 ```
 
-_See code: [src/commands/data/query/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/query/resume.ts)_
+_See code: [src/commands/data/query/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.2/src/commands/data/query/resume.ts)_
 
 ## `sf data resume`
 
@@ -563,7 +570,8 @@ USAGE
 FLAGS
   -b, --batch-id=<value>     ID of the batch whose status you want to view; you must also specify the job ID.
   -i, --job-id=<value>       (required) ID of the job whose status you want to view.
-  -o, --target-org=<value>   (required) Username or alias of the target org.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
       --api-version=<value>  Override the api version used for api requests made by this command
 
 GLOBAL FLAGS
@@ -585,7 +593,7 @@ EXAMPLES
     $ sf data resume --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA
 ```
 
-_See code: [src/commands/data/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/resume.ts)_
+_See code: [src/commands/data/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.2/src/commands/data/resume.ts)_
 
 ## `sf data update record`
 
@@ -598,7 +606,8 @@ USAGE
 
 FLAGS
   -i, --record-id=<value>    ID of the record you’re updating.
-  -o, --target-org=<value>   (required) Username or alias of the target org.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
   -s, --sobject=<value>      (required) API name of the Salesforce or Tooling API object that contains the record you're
                              updating.
   -t, --use-tooling-api      Use Tooling API so you can update a record in a Tooling API object.
@@ -645,7 +654,7 @@ EXAMPLES
       "ExpirationDate=2017-12-01T00:58:04.000+0000"
 ```
 
-_See code: [src/commands/data/update/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/update/record.ts)_
+_See code: [src/commands/data/update/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.2/src/commands/data/update/record.ts)_
 
 ## `sf data upsert bulk`
 
@@ -660,7 +669,8 @@ FLAGS
   -a, --async                Run the command asynchronously.
   -f, --file=<value>         (required) CSV file that contains the IDs of the records to update or delete.
   -i, --external-id=<value>  (required) Name of the external ID field, or the Id field.
-  -o, --target-org=<value>   (required) Username or alias of the target org.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
   -s, --sobject=<value>      (required) API name of the Salesforce object, either standard or custom, that you want to
                              update or delete records from.
   -w, --wait=<value>         [default: 0 minutes] Number of minutes to wait for the command to complete before
@@ -696,7 +706,7 @@ EXAMPLES
       my-scratch
 ```
 
-_See code: [src/commands/data/upsert/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/upsert/bulk.ts)_
+_See code: [src/commands/data/upsert/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.2/src/commands/data/upsert/bulk.ts)_
 
 ## `sf data upsert resume`
 
@@ -733,7 +743,7 @@ EXAMPLES
     $ sf data upsert resume --use-most-recent --target-org my-scratch
 ```
 
-_See code: [src/commands/data/upsert/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/data/upsert/resume.ts)_
+_See code: [src/commands/data/upsert/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.2/src/commands/data/upsert/resume.ts)_
 
 ## `sf force data bulk delete`
 
@@ -745,7 +755,8 @@ USAGE
 
 FLAGS
   -f, --file=<value>         (required) CSV file that contains the IDs of the records to delete.
-  -o, --target-org=<value>   (required) Username or alias of the target org.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
   -s, --sobject=<value>      (required) API name of the Salesforce object, either standard or custom, that you want to
                              delete records from.
   -w, --wait=<value>         [default: 0 minutes] Number of minutes to wait for the command to complete before
@@ -777,7 +788,7 @@ EXAMPLES
     $ sf force data bulk delete --sobject MyObject__c --file files/delete.csv --wait 5 --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/force/data/bulk/delete.ts)_
+_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.2/src/commands/force/data/bulk/delete.ts)_
 
 ## `sf force data bulk status`
 
@@ -790,7 +801,8 @@ USAGE
 FLAGS
   -b, --batch-id=<value>     ID of the batch whose status you want to view; you must also specify the job ID.
   -i, --job-id=<value>       (required) ID of the job whose status you want to view.
-  -o, --target-org=<value>   (required) Username or alias of the target org.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
       --api-version=<value>  Override the api version used for api requests made by this command
 
 GLOBAL FLAGS
@@ -812,7 +824,7 @@ EXAMPLES
     $ sf force data bulk status --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/force/data/bulk/status.ts)_
+_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.2/src/commands/force/data/bulk/status.ts)_
 
 ## `sf force data bulk upsert`
 
@@ -826,7 +838,8 @@ USAGE
 FLAGS
   -f, --file=<value>         (required) CSV file that contains the records to upsert.
   -i, --external-id=<value>  (required) Name of the external ID field, or the Id field.
-  -o, --target-org=<value>   (required) Username or alias of the target org.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
   -r, --serial               Run batches in serial mode.
   -s, --sobject=<value>      (required) API name of the Salesforce object, either standard or custom, that you want to
                              upsert records to.
@@ -868,6 +881,6 @@ EXAMPLES
       --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.1/src/commands/force/data/bulk/upsert.ts)_
+_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/3.0.2/src/commands/force/data/bulk/upsert.ts)_
 
 <!-- commandsstop -->
