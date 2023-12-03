@@ -1,3 +1,9 @@
+## [3.0.5](https://github.com/salesforcecli/plugin-data/compare/3.0.4...3.0.5) (2023-12-03)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/sf-plugins-core from 5.0.3 to 5.0.5 ([1807ad5](https://github.com/salesforcecli/plugin-data/commit/1807ad56f0d9f02b2126b79cbb4458223f918643))
+
 ## [3.0.4](https://github.com/salesforcecli/plugin-data/compare/3.0.3...3.0.4) (2023-12-03)
 
 ### Bug Fixes
