@@ -23,7 +23,6 @@
     "bin": "sf",
     "devPlugins": [
       "@oclif/plugin-help",
-      "@salesforce/plugin-settings",
       "@oclif/plugin-command-snapshot",
       "@salesforce/plugin-command-reference"
     ],
@@ -108,7 +107,7 @@
     "version": "oclif readme"
   },
   "dependencies": {
-    "@oclif/core": "^3.13.1",
+    "@oclif/core": "^3.14.0",
     "@salesforce/core": "^6.2.2",
     "@salesforce/kit": "^3.0.15",
     "@salesforce/sf-plugins-core": "^5.0.5",
@@ -116,13 +115,13 @@
     "chalk": "^5.3.0",
     "csv-parse": "^4.16.3",
     "csv-stringify": "^6.4.4",
-    "jsforce": "^2.0.0-beta.28"
+    "jsforce": "^2.0.0-beta.29"
   },
   "devDependencies": {
-    "@oclif/plugin-command-snapshot": "^5.0.2",
+    "@oclif/plugin-command-snapshot": "^5.0.3",
     "@salesforce/cli-plugins-testkit": "^5.1.0",
     "@salesforce/dev-scripts": "^8.0.0",
-    "@salesforce/plugin-command-reference": "^3.0.47",
+    "@salesforce/plugin-command-reference": "^3.0.51",
     "@types/chai-as-promised": "^7.1.8",
     "chai-as-promised": "^7.1.1",
     "eslint-plugin-sf-plugin": "^1.16.15",
