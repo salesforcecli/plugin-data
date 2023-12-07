@@ -60,7 +60,7 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
       unit: 'minutes',
       summary: messages.getMessage('flags.wait.summary'),
       min: 0,
-      default: Duration.minutes(0),
+      defaultValue: 0,
       exclusive: ['async'],
     }),
     async: Flags.boolean({
