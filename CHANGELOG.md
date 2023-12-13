@@ -1,3 +1,9 @@
+## [3.0.6](https://github.com/salesforcecli/plugin-data/compare/3.0.5...3.0.6) (2023-12-10)
+
+### Bug Fixes
+
+- **deps:** bump csv-stringify from 6.4.4 to 6.4.5 ([c7b5121](https://github.com/salesforcecli/plugin-data/commit/c7b51213b7801c56f30428206598d0ff07e17b1c))
+
 ## [3.0.5](https://github.com/salesforcecli/plugin-data/compare/3.0.4...3.0.5) (2023-12-03)
 
 ### Bug Fixes
