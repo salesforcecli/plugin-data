@@ -38,7 +38,7 @@ export abstract class ResumeBulkCommand extends BulkBaseCommand {
       summary: messages.getMessage('flags.wait.summary'),
       unit: 'minutes',
       min: 0,
-      default: Duration.minutes(0),
+      defaultValue: 0,
     }),
     'api-version': Flags.orgApiVersion(),
     loglevel,

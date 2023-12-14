@@ -31,7 +31,7 @@ export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
   protected wait = 0;
   private numberRecordsProcessed = 0;
   private numberRecordsFailed = 0;
-  private numberRecordSuceeded = 0;
+  private numberRecordSucceeded = 0;
   private timeout = false;
 
   protected displayBulkV2Result(jobInfo: JobInfoV2): void {
@@ -74,7 +74,7 @@ export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
       const jobInfo = await this.job.check();
       this.numberRecordsProcessed = jobInfo.numberRecordsProcessed ?? 0;
       this.numberRecordsFailed = jobInfo.numberRecordsFailed ?? 0;
-      this.numberRecordSuceeded = this.numberRecordsProcessed - this.numberRecordsFailed;
+      this.numberRecordSucceeded = this.numberRecordsProcessed - this.numberRecordsFailed;
       this.spinner.status = `${this.getRemainingTimeStatus()}${this.getStage(
         jobInfo.state
       )}${this.getRemainingRecordsStatus()}`;
@@ -119,7 +119,7 @@ export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
   protected getRemainingRecordsStatus(): string {
     // the leading space is intentional
     return ` ${messages.getMessage('remainingRecordsStatus', [
-      this.numberRecordSuceeded,
+      this.numberRecordSucceeded,
       this.numberRecordsFailed,
       this.numberRecordsProcessed,
     ])}`;

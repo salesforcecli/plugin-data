@@ -10,7 +10,6 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Connection, Messages } from '@salesforce/core';
 import { Flags, SfCommand, Ux } from '@salesforce/sf-plugins-core';
-import { Duration } from '@salesforce/kit';
 import { orgFlags } from '../../../../flags.js';
 import { Batcher, BatcherReturnType } from '../../../../batcher.js';
 import { validateSobjectType } from '../../../../bulkUtils.js';
@@ -45,7 +44,7 @@ export default class Delete extends SfCommand<BatcherReturnType> {
       unit: 'minutes',
       summary: messages.getMessage('flags.wait.summary'),
       min: 0,
-      default: Duration.minutes(0),
+      defaultValue: 0,
     }),
   };
 
