@@ -1,3 +1,9 @@
+## [3.0.7](https://github.com/salesforcecli/plugin-data/compare/3.0.6...3.0.7) (2023-12-14)
+
+### Bug Fixes
+
+- default wait ([#763](https://github.com/salesforcecli/plugin-data/issues/763)) ([8d5528b](https://github.com/salesforcecli/plugin-data/commit/8d5528be323d8de3a68e8d855bd42d49080c84a4))
+
 ## [3.0.6](https://github.com/salesforcecli/plugin-data/compare/3.0.5...3.0.6) (2023-12-10)
 
 ### Bug Fixes
