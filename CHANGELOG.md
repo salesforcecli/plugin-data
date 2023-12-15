@@ -1,3 +1,9 @@
+## [3.0.8](https://github.com/salesforcecli/plugin-data/compare/3.0.7...3.0.8) (2023-12-15)
+
+### Bug Fixes
+
+- **deps:** missing dependency ([#772](https://github.com/salesforcecli/plugin-data/issues/772)) ([1996b57](https://github.com/salesforcecli/plugin-data/commit/1996b57cf06a179672e1f3fa6b01a80ecdcee377))
+
 ## [3.0.7](https://github.com/salesforcecli/plugin-data/compare/3.0.6...3.0.7) (2023-12-14)
 
 ### Bug Fixes
