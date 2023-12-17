@@ -121,7 +121,7 @@
   },
   "devDependencies": {
     "@oclif/plugin-command-snapshot": "^5.0.4",
-    "@salesforce/cli-plugins-testkit": "^5.1.1",
+    "@salesforce/cli-plugins-testkit": "^5.1.2",
     "@salesforce/dev-scripts": "^8.1.2",
     "@salesforce/plugin-command-reference": "^3.0.54",
     "@types/chai-as-promised": "^7.1.8",
