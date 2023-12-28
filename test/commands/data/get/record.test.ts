@@ -17,7 +17,7 @@ import { Config } from '@oclif/core';
 import Get from '../../../../src/commands/data/get/record.js';
 
 const sObjectId = '0011100001zhhyUAAQ';
-Messages.importMessagesDirectory(dirname(fileURLToPath(import.meta.url)));
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
 describe('data:get:record', () => {

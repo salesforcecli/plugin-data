@@ -12,8 +12,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import fs from 'node:fs';
-import { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+
+
 import sinon from 'sinon';
 import { Connection, Messages, Org } from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
@@ -222,7 +222,7 @@ function deepClone(obj: AnyJson) {
 describe('Export API', () => {
   const sandbox = sinon.createSandbox();
 
-  Messages.importMessagesDirectory(dirname(fileURLToPath(import.meta.url)));
+  Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
   const messages = Messages.loadMessages('@salesforce/plugin-data', 'exportApi');
   const testUsername = 'user@my.test';
 

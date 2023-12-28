@@ -57,7 +57,7 @@ const jsonRefRegex = /[.]*["|'][A-Z0-9_]*["|'][ ]*:[ ]*["|']@([A-Z0-9_]*)["|'][.
 describe('ImportApi', () => {
   const sandbox = sinon.createSandbox();
 
-  Messages.importMessagesDirectory(dirname(fileURLToPath(import.meta.url)));
+  Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
   const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
   afterEach(() => {

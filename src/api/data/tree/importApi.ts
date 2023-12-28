@@ -13,7 +13,7 @@ import { AnyJson, Dictionary, getString, JsonMap } from '@salesforce/ts-types';
 import { Logger, Messages, Org, SchemaValidator, SfError } from '@salesforce/core';
 import { DataPlanPart, hasNestedRecords, isAttributesElement, SObjectTreeInput } from '../../../dataSoqlQueryTypes.js';
 
-Messages.importMessagesDirectory(dirname(fileURLToPath(import.meta.url)));
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
 const importPlanSchemaFile = path.join(

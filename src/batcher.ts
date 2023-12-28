@@ -4,8 +4,8 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+
+
 import { ReadStream } from 'node:fs';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { Ux } from '@salesforce/sf-plugins-core';
@@ -19,7 +19,7 @@ const BATCH_RECORDS_LIMIT = 10000;
 const BATCH_BYTES_LIMIT = 10000000;
 const POLL_FREQUENCY_MS = 5000;
 
-Messages.importMessagesDirectory(dirname(fileURLToPath(import.meta.url)));
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'batcher');
 
 type BatchEntry = Record<string, string>;
