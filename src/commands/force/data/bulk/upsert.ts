@@ -5,15 +5,15 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import fs from 'node:fs';
-import { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+
+
 import { Messages } from '@salesforce/core';
 import { Flags, SfCommand, Ux } from '@salesforce/sf-plugins-core';
 import { orgFlags } from '../../../../flags.js';
 import { Batcher, BatcherReturnType } from '../../../../batcher.js';
 import { validateSobjectType } from '../../../../bulkUtils.js';
 
-Messages.importMessagesDirectory(dirname(fileURLToPath(import.meta.url)));
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.upsert');
 
 export default class Upsert extends SfCommand<BatcherReturnType> {
