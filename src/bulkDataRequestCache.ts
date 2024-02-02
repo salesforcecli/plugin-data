@@ -5,13 +5,11 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-
 import { TTLConfig, Global, Logger, Messages, Org } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
-import { QueryOperation } from 'jsforce/lib/api/bulk.js';
 import { ResumeOptions } from './types.js';
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
 export type BulkDataCacheConfig = {
@@ -63,37 +61,45 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
     if (!useMostRecent && !bulkJobId) {
       throw messages.createError('bulkRequestIdRequiredWhenNotUsingMostRecent');
     }
-    const resumeOptions = {
-      options: {
-        operation: 'query' as QueryOperation,
-        query: '',
-        pollingOptions: { pollTimeout: 0, pollInterval: 0 },
-      },
-    } as ResumeOptions;
+    const resumeOptionsOptions = {
+      operation: 'query',
+      query: '',
+      pollingOptions: { pollTimeout: 0, pollInterval: 0 },
+    } satisfies Pick<ResumeOptions['options'], 'operation' | 'query' | 'pollingOptions'>;
 
     if (useMostRecent) {
       const key = this.getLatestKey();
       if (key) {
-        const entry = this.get(key);
-        resumeOptions.options.connection = (await Org.create({ aliasOrUsername: entry.username })).getConnection(
-          apiVersion
-        );
-        resumeOptions.jobInfo = { id: entry.jobId };
-        return resumeOptions;
+        // key definitely exists because it came from the cache
+        const entry = this.get(key)!;
+
+        return {
+          jobInfo: { id: entry.jobId },
+          options: {
+            ...resumeOptionsOptions,
+            connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
+          },
+        };
       }
     }
     if (bulkJobId) {
       const entry = this.get(bulkJobId);
       if (entry) {
-        resumeOptions.options.connection = (await Org.create({ aliasOrUsername: entry.username })).getConnection(
-          apiVersion
-        );
-        resumeOptions.jobInfo = { id: entry.jobId };
-        return resumeOptions;
+        return {
+          jobInfo: { id: entry.jobId },
+          options: {
+            ...resumeOptionsOptions,
+            connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
+          },
+        };
       } else if (org) {
-        resumeOptions.options.connection = org.getConnection(apiVersion);
-        resumeOptions.jobInfo = { id: bulkJobId };
-        return resumeOptions;
+        return {
+          jobInfo: { id: bulkJobId },
+          options: {
+            ...resumeOptionsOptions,
+            connection: org.getConnection(apiVersion),
+          },
+        };
       } else {
         throw messages.createError('cannotCreateResumeOptionsWithoutAnOrg');
       }
