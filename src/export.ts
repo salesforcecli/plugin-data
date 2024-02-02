@@ -15,10 +15,11 @@ import { ensure } from '@salesforce/ts-types';
 import {
   BasicRecord,
   DataPlanPart,
-  hasNestedRecords,
+  hasNonEmptyNestedRecords,
   hasNestedRecordsFilter,
   SObjectTreeFileContents,
   SObjectTreeInput,
+  hasNestedRecords,
 } from './dataSoqlQueryTypes.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -36,7 +37,7 @@ export interface ExportConfig {
 }
 
 /** refFromIdByType.get('account').get(someAccountId) => AccountRef1 */
-type RefFromIdByType = Map<string, Map<string, string>>;
+export type RefFromIdByType = Map<string, Map<string, string>>;
 
 /** only used internally, but a more useful structure than the original */
 type PlanFile = Omit<DataPlanPart, 'files'> & { contents: SObjectTreeFileContents; file: string; dir: string };
@@ -60,7 +61,7 @@ export const runExport = async (configInput: ExportConfig): Promise<DataPlanPart
   if (plan) {
     const planMap = reduceByType(
       recordsFromQuery
-        .flatMap(flattenWithChildRelationships(describe)(undefined))
+        .flatMap(flattenWithChildRelationships(describe)())
         .map(addReferenceIdToAttributes(refFromIdByType))
         .map(removeChildren)
         .map(replaceParentReferences(describe)(refFromIdByType))
@@ -100,7 +101,7 @@ export const runExport = async (configInput: ExportConfig): Promise<DataPlanPart
 };
 
 /** for records of an object type, at least one record has a ref to it */
-const shouldSaveRefs = (recordsOfType: SObjectTreeInput[], allRecords: SObjectTreeInput[]): boolean => {
+export const shouldSaveRefs = (recordsOfType: SObjectTreeInput[], allRecords: SObjectTreeInput[]): boolean => {
   const refs = new Set(recordsOfType.map((r) => `@${r.attributes.referenceId}`));
   return allRecords.some((r) => Object.values(r).some((v) => typeof v === 'string' && refs.has(v)));
 };
@@ -147,7 +148,7 @@ const recurseNestedValues =
   (record: BasicRecord): BasicRecord =>
     Object.fromEntries(
       Object.entries(record).map(([key, value]) =>
-        hasNestedRecords<BasicRecord>(value)
+        hasNonEmptyNestedRecords<BasicRecord>(value)
           ? [key, { records: processRecordsForNonPlan(describe)(refFromIdByType)(value.records) }]
           : [key, value]
       )
@@ -187,7 +188,7 @@ const isEmptyRecordsArray = (value: unknown): value is { records: [] } =>
  * pass in a type if you have one to make the search more efficient.
  * otherwise, it'll have to search ALL the refs in all the types
  */
-const maybeConvertIdToRef =
+export const maybeConvertIdToRef =
   (refFromIdByType: RefFromIdByType) =>
   ([id, type]: [id: string, type?: string]): string => {
     const ref = type
@@ -199,7 +200,7 @@ const maybeConvertIdToRef =
   };
 
 /** replace parent references, converting IDs into ref */
-const replaceParentReferences =
+export const replaceParentReferences =
   (describe: Map<string, DescribeSObjectResult>) =>
   (refFromIdByType: RefFromIdByType) =>
   (record: SObjectTreeInput | BasicRecord): SObjectTreeInput => {
@@ -222,7 +223,7 @@ const replaceParentReferences =
 /**
  * Side effect: set it in the refFromIdByType Map if it wasn't already.
  * */
-const buildRefMap =
+export const buildRefMap =
   (refFromIdByType: RefFromIdByType) =>
   (obj: BasicRecord): RefFromIdByType => {
     const [id, type] = [idFromRecord(obj), typeFromRecord(obj)];
@@ -242,13 +243,13 @@ const buildRefMap =
   };
 
 /** * if there is an ID, we'll turn it into a ref in our mapping and add it to the records's attributes. */
-const addReferenceIdToAttributes =
+export const addReferenceIdToAttributes =
   (refFromIdByType: RefFromIdByType) =>
   (obj: BasicRecord): SObjectTreeInput => ({
     ...obj,
     attributes: {
       type: obj.attributes.type,
-      referenceId: refFromIdByType.get(typeFromRecord(obj))?.get(idFromRecord(obj)) ?? '',
+      referenceId: ensure(refFromIdByType.get(typeFromRecord(obj))?.get(idFromRecord(obj))),
     },
   });
 
@@ -299,7 +300,7 @@ const getRelatedToWithMetadata = (metadata: DescribeSObjectResult, fieldName: st
 };
 
 /** turn a record into an array of records, recursively extracting its children if any */
-const flattenNestedRecords = <T extends BasicRecord>(record: T): T[] =>
+export const flattenNestedRecords = <T extends BasicRecord>(record: T): T[] =>
   [record].concat(
     Object.entries(record)
       .filter(hasNestedRecordsFilter<T>)
@@ -308,7 +309,7 @@ const flattenNestedRecords = <T extends BasicRecord>(record: T): T[] =>
   );
 
 /** return a record without the properties that have nested records  */
-const removeChildren = <T extends SObjectTreeInput | BasicRecord>(record: T): T =>
+export const removeChildren = <T extends SObjectTreeInput | BasicRecord>(record: T): T =>
   Object.fromEntries(Object.entries(record).filter(([, value]) => !hasNestedRecords<T>(value))) as T;
 
 type ParentRef = {
@@ -317,7 +318,10 @@ type ParentRef = {
   relationshipName: string;
 };
 
-const flattenWithChildRelationships =
+/** while flattening, pass the parent information in
+ * so that related objects from the parent (ex: Account.Cases)
+ * can be converted to a lookup (ex: Case.AccountId) */
+export const flattenWithChildRelationships =
   (describe: Map<string, DescribeSObjectResult>) =>
   (parent?: ParentRef) =>
   (record: BasicRecord): BasicRecord[] =>
