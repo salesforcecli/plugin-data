@@ -7,9 +7,9 @@
 
 import { Messages } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
-import { orgFlags } from '../../../flags.js';
-import { ExportApi, ExportConfig } from '../../../api/data/tree/exportApi.js';
-import { DataPlanPart, SObjectTreeFileContents } from '../../../dataSoqlQueryTypes.js';
+import { orgFlags } from '../../../../flags.js';
+import { ExportConfig, runExport } from '../../../../export.js';
+import { DataPlanPart, SObjectTreeFileContents } from '../../../../dataSoqlQueryTypes.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.export');
@@ -20,6 +20,7 @@ export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileCo
   public static readonly examples = messages.getMessages('examples');
   public static readonly aliases = ['force:data:tree:export'];
   public static readonly deprecateAliases = true;
+  public static readonly state = 'beta';
 
   public static readonly flags = {
     ...orgFlags,
@@ -45,19 +46,15 @@ export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileCo
   };
 
   public async run(): Promise<DataPlanPart[] | SObjectTreeFileContents> {
-    this.info(
-      'Try the the new "sf data export beta tree" command.  It support SOQL queries with up to 5 levels of objects!'
-    );
-
     const { flags } = await this.parse(Export);
-    const ux = new Ux({ jsonEnabled: this.jsonEnabled() });
-    const exportApi = new ExportApi(flags['target-org'], ux);
     const exportConfig: ExportConfig = {
       outputDir: flags['output-dir'],
       plan: flags.plan,
       prefix: flags.prefix,
       query: flags.query,
+      conn: flags['target-org'].getConnection(flags['api-version']),
+      ux: new Ux({ jsonEnabled: this.jsonEnabled() }),
     };
-    return exportApi.export(exportConfig);
+    return runExport(exportConfig);
   }
 }
