@@ -126,7 +126,7 @@
     "@salesforce/plugin-command-reference": "^3.0.63",
     "@types/chai-as-promised": "^7.1.8",
     "chai-as-promised": "^7.1.1",
-    "eslint-plugin-sf-plugin": "^1.17.2",
+    "eslint-plugin-sf-plugin": "^1.17.3",
     "oclif": "^4.4.2",
     "shx": "^0.3.3",
     "ts-node": "^10.9.2",
