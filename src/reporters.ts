@@ -6,17 +6,16 @@
  */
 import { EOL } from 'node:os';
 
-
 import { Logger, Messages } from '@salesforce/core';
 import { ux } from '@oclif/core';
 import chalk from 'chalk';
 import { get, getArray, getNumber, isString, Optional } from '@salesforce/ts-types';
-import { BatchInfo, BatchState, IngestJobV2Results, JobInfoV2 } from 'jsforce/lib/api/bulk.js';
+import { IngestJobV2Results, JobInfoV2 } from 'jsforce/lib/api/bulk.js';
 import { Schema } from 'jsforce';
 import { capitalCase } from 'change-case';
 import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes.js';
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
 const reporterMessages = Messages.loadMessages('@salesforce/plugin-data', 'reporter');
 
@@ -379,24 +378,6 @@ export const escape = (value: string): string => {
   return value;
 };
 
-export const BatchInfoColumns = {
-  id: { header: 'Batch Id' },
-  state: { header: 'State' },
-  failed: { header: 'Failed' },
-  stateMessage: { header: 'Message' },
-};
-
-export const getBatchTotals = (batches: BatchInfo[]): { total: number; failed: number; success: number } =>
-  batches.reduce(
-    (acc: { total: number; failed: number; success: number }, batch) => {
-      acc.total += parseInt(batch.numberRecordsProcessed, 10);
-      acc.failed += parseInt(batch.numberRecordsFailed, 10);
-      acc.success = acc.total - acc.failed;
-      return acc;
-    },
-    { total: 0, failed: 0, success: 0 }
-  );
-
 export function getBulk2JobTotals<J extends Schema>(
   results: IngestJobV2Results<J>
 ): { total: number; failed: number; success: number; unprocessed: number } {
@@ -410,21 +391,6 @@ export function getBulk2JobTotals<J extends Schema>(
   ttls.unprocessed = Object.keys(results.unprocessedRecords).length;
   return ttls;
 }
-
-export const getFailedBatchesForDisplay = (
-  batches: BatchInfo[]
-): Array<{ id: string; state: BatchState; failed: string; stateMessage: string }> => {
-  const failedBatches = batches.filter((batch) => parseInt(batch.numberRecordsFailed, 10) > 0);
-  const batchesForTable = failedBatches.map((batch) => ({
-    id: batch.id,
-    state: batch.state,
-    failed: `${batch.numberRecordsFailed.toString().padStart(5, ' ')}/${batch.numberRecordsProcessed
-      .toString()
-      .padStart(5, ' ')}`,
-    stateMessage: batch.stateMessage,
-  }));
-  return batchesForTable;
-};
 
 export const getResultMessage = (jobInfo: JobInfoV2): string =>
   reporterMessages.getMessage('bulkV2Result', [
