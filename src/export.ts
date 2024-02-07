@@ -101,7 +101,7 @@ export const runExport = async (configInput: ExportConfig): Promise<DataPlanPart
 };
 
 /** for records of an object type, at least one record has a ref to it */
-export const shouldSaveRefs = (recordsOfType: SObjectTreeInput[], allRecords: SObjectTreeInput[]): boolean => {
+const shouldSaveRefs = (recordsOfType: SObjectTreeInput[], allRecords: SObjectTreeInput[]): boolean => {
   const refs = new Set(recordsOfType.map((r) => `@${r.attributes.referenceId}`));
   return allRecords.some((r) => Object.values(r).some((v) => typeof v === 'string' && refs.has(v)));
 };
@@ -243,7 +243,7 @@ export const buildRefMap =
   };
 
 /** * if there is an ID, we'll turn it into a ref in our mapping and add it to the records's attributes. */
-export const addReferenceIdToAttributes =
+const addReferenceIdToAttributes =
   (refFromIdByType: RefFromIdByType) =>
   (obj: BasicRecord): SObjectTreeInput => ({
     ...obj,

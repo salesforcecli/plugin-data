@@ -10,8 +10,7 @@ import { Logger, Messages } from '@salesforce/core';
 import { ux } from '@oclif/core';
 import chalk from 'chalk';
 import { get, getArray, getNumber, isString, Optional } from '@salesforce/ts-types';
-import { IngestJobV2Results, JobInfoV2 } from 'jsforce/lib/api/bulk.js';
-import { Schema } from 'jsforce';
+import { JobInfoV2 } from 'jsforce/lib/api/bulk.js';
 import { capitalCase } from 'change-case';
 import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes.js';
 
@@ -377,20 +376,6 @@ export const escape = (value: string): string => {
   }
   return value;
 };
-
-export function getBulk2JobTotals<J extends Schema>(
-  results: IngestJobV2Results<J>
-): { total: number; failed: number; success: number; unprocessed: number } {
-  const ttls = { total: 0, failed: 0, success: 0, unprocessed: 0 };
-  ttls.total =
-    Object.keys(results.successfulResults).length +
-    Object.keys(results.failedResults).length +
-    Object.keys(results.unprocessedRecords).length;
-  ttls.failed = Object.keys(results.failedResults).length;
-  ttls.success = Object.keys(results.successfulResults).length;
-  ttls.unprocessed = Object.keys(results.unprocessedRecords).length;
-  return ttls;
-}
 
 export const getResultMessage = (jobInfo: JobInfoV2): string =>
   reporterMessages.getMessage('bulkV2Result', [

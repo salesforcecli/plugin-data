@@ -15,7 +15,7 @@ import { DataPlanPart } from '../../../dataSoqlQueryTypes.js';
  */
 export type TreeResponse = TreeResponseSuccess | TreeResponseError;
 
-export type TreeResponseSuccess = {
+type TreeResponseSuccess = {
   hasErrors: false;
   results: Array<{
     referenceId: string;
@@ -23,7 +23,7 @@ export type TreeResponseSuccess = {
   }>;
 };
 
-export type TreeResponseError = {
+type TreeResponseError = {
   hasErrors: true;
   results: Array<{
     referenceId: string;
@@ -44,11 +44,7 @@ export interface ImportResults {
   sobjectTypes?: Dictionary;
   errors?: string[];
 }
-export interface ImportConfig {
-  contentType?: string;
-  sobjectTreeFiles?: string[];
-  plan?: string;
-}
+
 export type ImportResult = {
   refId: string;
   type: string;

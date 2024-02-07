@@ -13,7 +13,7 @@ import { BulkProcessedRecordV2, BulkRecordsV2 } from './types.js';
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
-export const POLL_FREQUENCY_MS = 5000;
+const POLL_FREQUENCY_MS = 5000;
 
 export const isBulkV2RequestDone = (jobInfo: JobInfoV2): boolean =>
   ['Aborted', 'Failed', 'JobComplete'].includes(jobInfo.state);
