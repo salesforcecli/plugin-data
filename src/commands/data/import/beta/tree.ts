@@ -27,8 +27,9 @@ export default class Import extends SfCommand<ImportResult[]> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
-  public static readonly aliases = ['force:data:tree:import'];
-  public static readonly deprecateAliases = true;
+
+  // TODO: when you remove the beta state, put the force: aliases back in
+  public static readonly state = 'beta';
 
   public static readonly flags = {
     ...orgFlags,

@@ -18,6 +18,8 @@ export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileCo
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+
+  // TODO: when you remove the beta state, put the force: aliases back in
   public static readonly state = 'beta';
 
   public static readonly flags = {
