@@ -300,7 +300,7 @@ const getRelatedToWithMetadata = (metadata: DescribeSObjectResult, fieldName: st
 };
 
 /** turn a record into an array of records, recursively extracting its children if any */
-export const flattenNestedRecords = <T extends BasicRecord>(record: T): T[] =>
+export const flattenNestedRecords = <T extends BasicRecord | SObjectTreeInput>(record: T): T[] =>
   [record].concat(
     Object.entries(record)
       .filter(hasNestedRecordsFilter<T>)

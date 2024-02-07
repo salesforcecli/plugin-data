@@ -5,22 +5,15 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-
-
 import { Messages } from '@salesforce/core';
 import { getString, JsonMap } from '@salesforce/ts-types';
 import { SfCommand, Flags, arrayWithDeprecation } from '@salesforce/sf-plugins-core';
-import { ImportApi, ImportConfig } from '../../../api/data/tree/importApi.js';
+import { ImportResult, ImportConfig } from '../../../api/data/tree/importTypes.js';
+import { ImportApi } from '../../../api/data/tree/importApi.js';
 import { orgFlags } from '../../../flags.js';
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.import');
-
-type ImportResult = {
-  refId: string;
-  type: string;
-  id: string;
-};
 
 /**
  * Command that provides data import capability via the SObject Tree Save API.

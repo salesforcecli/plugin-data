@@ -12,8 +12,11 @@ import { fileURLToPath } from 'node:url';
 import { AnyJson, Dictionary, getString, JsonMap } from '@salesforce/ts-types';
 import { Logger, Messages, Org, SchemaValidator, SfError } from '@salesforce/core';
 import { DataPlanPart, hasNestedRecords, isAttributesElement, SObjectTreeInput } from '../../../dataSoqlQueryTypes.js';
+import { TreeResponse } from './importTypes.js';
+import { ResponseRefs } from './importTypes.js';
+import { ImportResults } from './importTypes.js';
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
 const importPlanSchemaFile = path.join(
@@ -34,26 +37,6 @@ const xmlRefRegex = /[.]*<[A-Z0-9_]*>@([A-Z0-9_]*)<\/[A-Z0-9_]*[ID]>[.]*/gim;
 
 const INVALID_DATA_IMPORT_ERR_NAME = 'InvalidDataImport';
 
-type TreeResponse =
-  | {
-      hasErrors: false;
-      results: Array<{
-        referenceId: string;
-        id: string;
-      }>;
-    }
-  | {
-      hasErrors: true;
-      results: Array<{
-        referenceId: string;
-        errors: Array<{
-          statusCode: string;
-          message: string;
-          fields: string[];
-        }>;
-      }>;
-    };
-
 interface DataImportComponents {
   instanceUrl: string;
   saveRefs?: boolean;
@@ -67,17 +50,6 @@ export interface ImportConfig {
   contentType?: string;
   sobjectTreeFiles?: string[];
   plan?: string;
-}
-
-interface ResponseRefs {
-  referenceId: string;
-  id: string;
-}
-
-export interface ImportResults {
-  responseRefs?: ResponseRefs[];
-  sobjectTypes?: Dictionary;
-  errors?: string[];
 }
 
 interface RequestMeta {

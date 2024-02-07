@@ -77,6 +77,14 @@
   },
   {
     "alias": ["force:data:tree:import"],
+    "command": "data:import:beta:tree",
+    "flagAliases": ["apiversion", "sobjecttreefiles", "targetusername", "u"],
+    "flagChars": ["f", "o", "p"],
+    "flags": ["api-version", "files", "json", "loglevel", "plan", "target-org"],
+    "plugin": "@salesforce/plugin-data"
+  },
+  {
+    "alias": ["force:data:tree:import"],
     "command": "data:import:tree",
     "flagAliases": ["apiversion", "confighelp", "contenttype", "sobjecttreefiles", "targetusername", "u"],
     "flagChars": ["c", "f", "o", "p"],

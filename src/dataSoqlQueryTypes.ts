@@ -60,15 +60,15 @@ export type SObjectTreeFileContents = {
   records: SObjectTreeInput[];
 };
 
-export type ElementWithRecords<T> = { records: T[] };
+type ElementWithRecords<T> = { records: T[] };
 
 /** element: a field value from the sobject.  Empty arrays return true */
-export const hasNestedRecords = <T>(element: unknown): element is { records: T[] } =>
-  Array.isArray((element as { records: T[] })?.records);
+export const hasNestedRecords = <T>(element: unknown): element is ElementWithRecords<T> =>
+  Array.isArray((element as ElementWithRecords<T>)?.records);
 
 /** element: a field value from the sobject.  Empty arrays return false */
 export const hasNonEmptyNestedRecords = <T>(element: unknown): element is ElementWithRecords<T> =>
-  Array.isArray((element as ElementWithRecords<T>)?.records) && (element as ElementWithRecords<T>).records.length > 0;
+  hasNestedRecords(element) && element.records.length > 0;
 
 /** convenience method for array filtering */
 export const hasNestedRecordsFilter = <T>(tuple: [string, unknown]): tuple is [string, ElementWithRecords<T>] =>
@@ -76,3 +76,6 @@ export const hasNestedRecordsFilter = <T>(tuple: [string, unknown]): tuple is [s
 
 export const isAttributesElement = (element: unknown): element is SObjectTreeInput['attributes'] =>
   !!(element as SObjectTreeInput['attributes']).referenceId && !!(element as SObjectTreeInput['attributes']).type;
+
+export const isAttributesEntry = (tuple: [string, unknown]): tuple is ['attributes', SObjectTreeInput['attributes']] =>
+  tuple[0] === 'attributes' && isAttributesElement(tuple[1]);
