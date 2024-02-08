@@ -15,18 +15,15 @@ import { DataPlanPartFilesOnly, ResponseRefs, TreeResponse } from './importTypes
 import { ImportResult } from './importTypes.js';
 import { sendSObjectTreeRequest, treeSaveErrorHandler } from './importCommon.js';
 
-type EnrichedPlanPart = DataPlanPartFilesOnly & {
+// the "new" type for these.  We're ignoring saveRefs/resolveRefs.
+export type EnrichedPlanPart = Omit<DataPlanPartFilesOnly, 'saveRefs' | 'resolveRefs'> & {
   filePath: string;
   sobject: string;
   records: SObjectTreeInput[];
 };
-const refRegex = (object: string): RegExp => new RegExp(`^@${object}Ref\\d+$`, 'gm');
-/*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
- */
+
+const refRegex = (object: string): RegExp => new RegExp(`^@${object}Ref\\d+$`);
+
 export const importFromPlan = async (conn: Connection, planFilePath: string): Promise<ImportResult[]> => {
   const resolvedPlanPath = path.resolve(process.cwd(), planFilePath);
   const logger = Logger.childFromRoot('data:import:tree:importFromPlan');
@@ -89,13 +86,13 @@ const getResults =
   };
 
 /** if the file has more than 200 records, split it into multiple files */
-const fileSplitter = (planPart: EnrichedPlanPart): EnrichedPlanPart[] => {
+export const fileSplitter = (planPart: EnrichedPlanPart): EnrichedPlanPart[] => {
   const head = planPart.records.slice(0, 200);
   const tail = planPart.records.slice(200);
   return tail.length ? [{ ...planPart, records: head }, ...fileSplitter({ ...planPart, records: tail })] : [planPart];
 };
 
-const replaceRefsInTheSameFile =
+export const replaceRefsInTheSameFile =
   (logger: Logger) =>
   (planPart: EnrichedPlanPart): [EnrichedPlanPart] | [EnrichedPlanPart, EnrichedPlanPart] => {
     const unresolvedRefRegex = refRegex(planPart.sobject);
@@ -106,6 +103,7 @@ const replaceRefsInTheSameFile =
       logger.debug(`Not all refs are resolved yet.  Splitting ${planPart.filePath} into two`);
       // have no refs, so they can go in immediately
       const noRefRecords = planPart.records.filter((r) => !Object.values(r).some(matchesRefFilter(unresolvedRefRegex)));
+
       return [
         {
           ...planPart,
@@ -123,7 +121,7 @@ const replaceRefsInTheSameFile =
   };
 
 /* recursively replace the @ref with the id, using the accumulated results objects */
-const replaceRefs =
+export const replaceRefs =
   (refs: ImportResult[]) =>
   (records: SObjectTreeInput[]): SObjectTreeInput[] => {
     if (refs.length === 0) return records;
@@ -167,7 +165,7 @@ const validatePlanContents = async (
   const val = new SchemaValidator(logger, planSchema);
   try {
     await val.validate(planContents as unknown as AnyJson);
-    // TODO: throw (via typeguard) if it's DatPlanPart but not DataPlanPartFilesOnly
+    // TODO: throw (via typeguard) if its DataPlanPart but not DataPlanPartFilesOnly
     return planContents as DataPlanPartFilesOnly[];
   } catch (err) {
     if (err instanceof Error && err.name === 'ValidationSchemaFieldErrors') {

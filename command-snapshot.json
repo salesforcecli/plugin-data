@@ -76,7 +76,7 @@
     "plugin": "@salesforce/plugin-data"
   },
   {
-    "alias": ["force:data:tree:import"],
+    "alias": [],
     "command": "data:import:beta:tree",
     "flagAliases": ["apiversion", "sobjecttreefiles", "targetusername", "u"],
     "flagChars": ["f", "o", "p"],
