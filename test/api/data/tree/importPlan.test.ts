@@ -7,7 +7,6 @@
 /* eslint-disable camelcase */ // for salesforce __c style fields
 
 import { expect } from 'chai';
-import { Logger } from '@salesforce/core';
 import {
   replaceRefsInTheSameFile,
   EnrichedPlanPart,
@@ -17,7 +16,6 @@ import {
 
 describe('importPlan', () => {
   describe('replaceRefsInTheSameFile', () => {
-    const logger = new Logger({ name: 'importPlanTest', useMemoryLogger: true });
     it('returns the ref when there are no unresolved refs', () => {
       const planPart = {
         filePath: 'somePath',
@@ -26,7 +24,7 @@ describe('importPlan', () => {
         files: [],
       } satisfies EnrichedPlanPart;
 
-      expect(replaceRefsInTheSameFile(logger)(planPart)).to.deep.equal([planPart]);
+      expect(replaceRefsInTheSameFile(planPart)).to.deep.equal([planPart]);
     });
     it('splits the ref into two plan "files" if there are unresolved', () => {
       const planPart = {
@@ -40,7 +38,7 @@ describe('importPlan', () => {
         files: [],
       } satisfies EnrichedPlanPart;
 
-      const result = replaceRefsInTheSameFile(logger)(planPart);
+      const result = replaceRefsInTheSameFile(planPart);
       expect(result).to.deep.equal([
         {
           filePath: 'somePath (no refs)',

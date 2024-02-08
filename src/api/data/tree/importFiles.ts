@@ -12,10 +12,8 @@ import { SObjectTreeFileContents, SObjectTreeInput, isAttributesEntry } from '..
 import { sendSObjectTreeRequest, treeSaveErrorHandler } from './importCommon.js';
 import { ImportResult, ResponseRefs, TreeResponse } from './importTypes.js';
 
-export const INVALID_DATA_IMPORT_ERR_NAME = 'InvalidDataImport';
-
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-export const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
+const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
 export const importFromFiles = async (conn: Connection, dataFilePaths: string[]): Promise<ImportResult[]> => {
   const logger = Logger.childFromRoot('data:import:tree:importSObjectTreeFile');

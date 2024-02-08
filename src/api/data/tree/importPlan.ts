@@ -8,12 +8,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import { AnyJson } from '@salesforce/ts-types';
-import { Logger, SchemaValidator, SfError, Connection } from '@salesforce/core';
+import { Logger, SchemaValidator, SfError, Connection, Messages } from '@salesforce/core';
 import { DataPlanPart, SObjectTreeFileContents, SObjectTreeInput } from '../../../dataSoqlQueryTypes.js';
-import { messages, INVALID_DATA_IMPORT_ERR_NAME } from './importFiles.js';
-import { DataPlanPartFilesOnly, ResponseRefs, TreeResponse } from './importTypes.js';
-import { ImportResult } from './importTypes.js';
+import { DataPlanPartFilesOnly, ResponseRefs, TreeResponse, ImportResult } from './importTypes.js';
 import { sendSObjectTreeRequest, treeSaveErrorHandler } from './importCommon.js';
+
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
+export const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
 // the "new" type for these.  We're ignoring saveRefs/resolveRefs.
 export type EnrichedPlanPart = Omit<DataPlanPartFilesOnly, 'saveRefs' | 'resolveRefs'> & {
@@ -54,8 +55,10 @@ const getResults =
   async (planParts: EnrichedPlanPart[]): Promise<ImportResult[]> => {
     const [head, ...tail] = planParts;
     const partWithRefsReplaced = { ...head, records: replaceRefs(resultsSoFar)(head.records) };
-    const [allRefsResolved, stillHasRefs] = replaceRefsInTheSameFile(logger)(partWithRefsReplaced);
+    const [allRefsResolved, stillHasRefs] = replaceRefsInTheSameFile(partWithRefsReplaced);
     if (stillHasRefs) {
+      logger.debug(`Not all refs are resolved yet.  Splitting ${partWithRefsReplaced.filePath} into two`);
+
       // Do the ones without unresolved refs, then the rest, then the other files.  We split the file into 2 parts and start over
       return getResults(conn)(logger)(resultsSoFar)([allRefsResolved, stillHasRefs, ...tail]);
     }
@@ -92,33 +95,32 @@ export const fileSplitter = (planPart: EnrichedPlanPart): EnrichedPlanPart[] => 
   return tail.length ? [{ ...planPart, records: head }, ...fileSplitter({ ...planPart, records: tail })] : [planPart];
 };
 
-export const replaceRefsInTheSameFile =
-  (logger: Logger) =>
-  (planPart: EnrichedPlanPart): [EnrichedPlanPart] | [EnrichedPlanPart, EnrichedPlanPart] => {
-    const unresolvedRefRegex = refRegex(planPart.sobject);
-    // it's possible that a file has records that refer to each other (ex: account/parentId).  So they're not in refs yet.
-    // so we'll parse the JSON and split the records into 2 sets: those with refs and those without, if necessary
-    const refRecords = planPart.records.filter((r) => Object.values(r).some(matchesRefFilter(unresolvedRefRegex)));
-    if (refRecords.length) {
-      logger.debug(`Not all refs are resolved yet.  Splitting ${planPart.filePath} into two`);
-      // have no refs, so they can go in immediately
-      const noRefRecords = planPart.records.filter((r) => !Object.values(r).some(matchesRefFilter(unresolvedRefRegex)));
+export const replaceRefsInTheSameFile = (
+  planPart: EnrichedPlanPart
+): [EnrichedPlanPart] | [EnrichedPlanPart, EnrichedPlanPart] => {
+  const unresolvedRefRegex = refRegex(planPart.sobject);
+  // it's possible that a file has records that refer to each other (ex: account/parentId).  So they're not in refs yet.
+  // so we'll parse the JSON and split the records into 2 sets: those with refs and those without, if necessary
+  const refRecords = planPart.records.filter((r) => Object.values(r).some(matchesRefFilter(unresolvedRefRegex)));
+  if (refRecords.length) {
+    // have no refs, so they can go in immediately
+    const noRefRecords = planPart.records.filter((r) => !Object.values(r).some(matchesRefFilter(unresolvedRefRegex)));
 
-      return [
-        {
-          ...planPart,
-          records: noRefRecords,
-          filePath: `${planPart.filePath} (no refs)`,
-        },
-        {
-          ...planPart,
-          records: refRecords,
-          filePath: `${planPart.filePath} (refs to be resolved)`,
-        },
-      ];
-    }
-    return [planPart];
-  };
+    return [
+      {
+        ...planPart,
+        records: noRefRecords,
+        filePath: `${planPart.filePath} (no refs)`,
+      },
+      {
+        ...planPart,
+        records: refRecords,
+        filePath: `${planPart.filePath} (refs to be resolved)`,
+      },
+    ];
+  }
+  return [planPart];
+};
 
 /* recursively replace the @ref with the id, using the accumulated results objects */
 export const replaceRefs =
@@ -126,7 +128,8 @@ export const replaceRefs =
   (records: SObjectTreeInput[]): SObjectTreeInput[] => {
     if (refs.length === 0) return records;
     const [head, ...tail] = refs;
-    return tail.length ? replaceRefs(tail)(records.map(replaceRefWithId(head))) : records.map(replaceRefWithId(head));
+    const updatedRecords = records.map(replaceRefWithId(head));
+    return tail.length ? replaceRefs(tail)(updatedRecords) : updatedRecords;
   };
 
 // replace 1 record with 1 ref for all of its fields
@@ -169,11 +172,7 @@ const validatePlanContents = async (
     return planContents as DataPlanPartFilesOnly[];
   } catch (err) {
     if (err instanceof Error && err.name === 'ValidationSchemaFieldErrors') {
-      throw new SfError(
-        messages.getMessage('dataPlanValidationError', [planPath, err.message]),
-        INVALID_DATA_IMPORT_ERR_NAME,
-        messages.getMessages('dataPlanValidationErrorActions', ['sf', ' ', ' ', 'sf', ' ', ' '])
-      );
+      throw messages.createError('error.InvalidDataImport', [planPath, err.message]);
     } else if (err instanceof Error) {
       throw SfError.wrap(err);
     }

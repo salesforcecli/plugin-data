@@ -49,3 +49,15 @@ Data plan file %s did not validate against the schema. Errors: %s.
 # FlsError
 
 We couldn't process your request because you don't have access to %s on %s. To learn more about field-level security, visit Tips and Hints for Page Layouts and Field-Level Security in our Developer Documentation.
+
+# error.InvalidDataImport
+
+Data plan file %s did not validate against the schema. Errors: %s.
+
+# error.InvalidDataImport.actions
+
+- Did you run the "sf data export tree" command with the --plan flag?
+
+- Make sure you're importing a plan definition file.
+
+- Get help with the import plan schema by running "sf data import beta tree --help".

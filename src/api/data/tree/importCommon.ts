@@ -4,9 +4,11 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { Connection, SfError } from '@salesforce/core';
+import { Connection, SfError, Messages } from '@salesforce/core';
 import { TreeResponse } from './importTypes.js';
-import { messages } from './importFiles.js';
+
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
+const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
 /** makes the API request */
 export const sendSObjectTreeRequest =
