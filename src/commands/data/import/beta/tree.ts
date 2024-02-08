@@ -10,15 +10,10 @@ import { SfCommand, Flags, arrayWithDeprecation } from '@salesforce/sf-plugins-c
 import { importFromPlan } from '../../../../api/data/tree/importPlan.js';
 import { importFromFiles } from '../../../../api/data/tree/importFiles.js';
 import { orgFlags } from '../../../../flags.js';
+import { ImportResult } from '../../../../api/data/tree/importTypes.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.import');
-
-type ImportResult = {
-  refId: string;
-  type: string;
-  id: string;
-};
+const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.import.beta');
 
 /**
  * Command that provides data import capability via the SObject Tree Save API.
@@ -60,9 +55,6 @@ export default class Import extends SfCommand<ImportResult[]> {
       type: { header: 'Type' },
       id: { header: 'ID' },
     });
-    this.log(
-      'Be sure to check out the new "sf data import beta tree".  It handles more records and objects with lookups to the same object (ex: parent account)'
-    );
     return results;
   }
 }
