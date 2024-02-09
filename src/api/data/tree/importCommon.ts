@@ -6,7 +6,7 @@
  */
 import { Connection, SfError, Messages } from '@salesforce/core';
 import { SObjectTreeInput, SObjectTreeFileContents } from '../../../dataSoqlQueryTypes.js';
-import { TreeResponse } from './importTypes.js';
+import { ResponseRefs, TreeResponse } from './importTypes.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
@@ -46,4 +46,14 @@ export const parseDataFileContents =
       throw messages.createError('dataFileEmpty', [filePath]);
     }
     return (JSON.parse(contents) as SObjectTreeFileContents).records;
+  };
+
+/** look inside the response. If the hasErrors property is true, throw a formatted error.  Otherwise, extract the results property */
+export const getResultsIfNoError =
+  (filePath: string) =>
+  (response: TreeResponse): ResponseRefs[] => {
+    if (response.hasErrors === true) {
+      throw messages.createError('dataImportFailed', [filePath, JSON.stringify(response.results, null, 4)]);
+    }
+    return response.results;
   };

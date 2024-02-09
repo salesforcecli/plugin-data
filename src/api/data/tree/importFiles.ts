@@ -5,15 +5,17 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import fs from 'node:fs';
-import { Logger, Messages, Connection } from '@salesforce/core';
+import { Logger, Connection } from '@salesforce/core';
 import { isFulfilled } from '@salesforce/kit';
 import { flattenNestedRecords } from '../../../export.js';
 import { SObjectTreeInput, isAttributesEntry } from '../../../dataSoqlQueryTypes.js';
-import { sendSObjectTreeRequest, treeSaveErrorHandler, parseDataFileContents } from './importCommon.js';
+import {
+  sendSObjectTreeRequest,
+  treeSaveErrorHandler,
+  parseDataFileContents,
+  getResultsIfNoError,
+} from './importCommon.js';
 import { ImportResult, ResponseRefs, TreeResponse } from './importTypes.js';
-
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
 type FileInfo = {
   rawContents: string;
@@ -37,15 +39,8 @@ const getSuccessOrThrow = (result: PromiseSettledResult<TreeResponse>): PromiseF
 
 const getValueOrThrow =
   (fi: FileInfo[]) =>
-  (response: PromiseFulfilledResult<TreeResponse>, index: number): ResponseRefs[] => {
-    if (response.value.hasErrors === true) {
-      throw messages.createError('dataImportFailed', [
-        fi[index].filePath,
-        JSON.stringify(response.value.results, null, 4),
-      ]);
-    }
-    return response.value.results;
-  };
+  (response: PromiseFulfilledResult<TreeResponse>, index: number): ResponseRefs[] =>
+    getResultsIfNoError(fi[index].filePath)(response.value);
 
 const addObjectTypes =
   (refMap: Map<string, string>) =>

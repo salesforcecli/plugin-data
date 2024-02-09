@@ -10,8 +10,13 @@ import fs from 'node:fs';
 import { AnyJson } from '@salesforce/ts-types';
 import { Logger, SchemaValidator, SfError, Connection, Messages } from '@salesforce/core';
 import { SObjectTreeInput } from '../../../dataSoqlQueryTypes.js';
-import { DataPlanPartFilesOnly, ResponseRefs, TreeResponse, ImportResult } from './importTypes.js';
-import { parseDataFileContents, sendSObjectTreeRequest, treeSaveErrorHandler } from './importCommon.js';
+import { DataPlanPartFilesOnly, ImportResult } from './importTypes.js';
+import {
+  getResultsIfNoError,
+  parseDataFileContents,
+  sendSObjectTreeRequest,
+  treeSaveErrorHandler,
+} from './importCommon.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 export const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
@@ -141,15 +146,6 @@ const replaceRefWithId =
     Object.fromEntries(
       Object.entries(record).map(([k, v]) => [k, v === `@${ref.refId}` ? ref.id : v])
     ) as SObjectTreeInput;
-
-const getResultsIfNoError =
-  (filePath: string) =>
-  (response: TreeResponse): ResponseRefs[] => {
-    if (response.hasErrors === true) {
-      throw messages.createError('dataImportFailed', [filePath, JSON.stringify(response.results, null, 4)]);
-    }
-    return response.results;
-  };
 
 export const validatePlanContents =
   (logger: Logger) =>
