@@ -67,14 +67,7 @@ const parseFile = async (filePath: string): Promise<FileInfo> => {
   return { rawContents, records, filePath, sobject: sobjectType };
 };
 
-/**
- * Create a hash of sobject { ReferenceId: Type } assigned to this.sobjectTypes.
- * Used to display the sobject type in the results.
- *
- * @param content  The content string defined by the file(s).
- * @param isJson
- */
-
+/** Create a hash of sobject { ReferenceId: Type }. */
 export const createSObjectTypeMap = (records: SObjectTreeInput[]): Map<string, string> =>
   new Map(
     records

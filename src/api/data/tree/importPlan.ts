@@ -102,12 +102,15 @@ export const fileSplitter = (planPart: EnrichedPlanPart): EnrichedPlanPart[] => 
   return tail.length ? [{ ...planPart, records: head }, ...fileSplitter({ ...planPart, records: tail })] : [planPart];
 };
 
+/**
+ * it's possible that a file has records that refer to each other (ex: account/parentId).  So they're not in refs yet.
+ * so we'll parse the JSON and split the records into 2 sets: those with refs and those without, if necessary
+ */
 export const replaceRefsInTheSameFile = (
   planPart: EnrichedPlanPart
 ): [EnrichedPlanPart] | [EnrichedPlanPart, EnrichedPlanPart] => {
   const unresolvedRefRegex = refRegex(planPart.sobject);
-  // it's possible that a file has records that refer to each other (ex: account/parentId).  So they're not in refs yet.
-  // so we'll parse the JSON and split the records into 2 sets: those with refs and those without, if necessary
+
   const refRecords = planPart.records.filter((r) => Object.values(r).some(matchesRefFilter(unresolvedRefRegex)));
   if (refRecords.length) {
     // have no refs, so they can go in immediately
