@@ -6,12 +6,15 @@
  */
 /* eslint-disable camelcase */ // for salesforce __c style fields
 
-import { expect } from 'chai';
+import { expect, assert } from 'chai';
+import { shouldThrow } from '@salesforce/core/lib/testSetup.js';
+import { Logger } from '@salesforce/core';
 import {
   replaceRefsInTheSameFile,
   EnrichedPlanPart,
   replaceRefs,
   fileSplitter,
+  validatePlanContents,
 } from '../../../../src/api/data/tree/importPlan.js';
 
 describe('importPlan', () => {
@@ -100,4 +103,84 @@ describe('importPlan', () => {
       expect(result[2].records).to.have.length(100);
     });
   });
+  describe('plan validation', () => {
+    const logger = new Logger({ name: 'importPlanTest', useMemoryLogger: true });
+    afterEach(() => {
+      // @ts-expect-error private stuff
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      logger.memoryLogger.loggedData = [];
+    });
+    const validator = validatePlanContents(logger);
+    it('good plan in classic format', async () => {
+      const plan = [
+        {
+          sobject: 'Account',
+          saveRefs: true,
+          resolveRefs: true,
+          files: ['Account.json'],
+        },
+      ];
+      expect(await validator('some/path', plan)).to.equal(plan);
+      expect(getLogMessages(logger)).to.include('saveRefs');
+    });
+    it('good plan in classic format', async () => {
+      const plan = [
+        {
+          sobject: 'Account',
+          saveRefs: true,
+          resolveRefs: true,
+          files: ['Account.json', 'Account2.json'],
+        },
+      ];
+      expect(await validator('some/path', plan)).to.equal(plan);
+    });
+    it('throws on bad plan (missing the object)', async () => {
+      const plan = [
+        {
+          saveRefs: true,
+          resolveRefs: true,
+          files: ['Account.json', 'Account2.json'],
+        },
+      ];
+      try {
+        await shouldThrow(validator('some/path', plan));
+      } catch (e) {
+        assert(e instanceof Error);
+        expect(e.name).to.equal('InvalidDataImportError');
+      }
+    });
+    // TODO: remove this test when schema moves to simple files only
+    it('throws when files are an object that meets current schema', async () => {
+      const plan = [
+        {
+          sobject: 'Account',
+          saveRefs: true,
+          resolveRefs: true,
+          files: [{ file: 'foo', contentType: 'application/json', saveRefs: true, resolveRefs: true }],
+        },
+      ];
+      try {
+        await shouldThrow(validator('some/path', plan));
+      } catch (e) {
+        assert(e instanceof Error);
+        expect(e.name, JSON.stringify(e)).to.equal('NonStringFilesError');
+      }
+    });
+    it('good plan in new format is valid and produces no warnings', async () => {
+      const plan = [
+        {
+          sobject: 'Account',
+          files: ['Account.json'],
+        },
+      ];
+      expect(await validator('some/path', plan)).to.equal(plan);
+      expect(getLogMessages(logger)).to.not.include('saveRefs');
+    });
+  });
 });
+
+const getLogMessages = (logger: Logger): string =>
+  logger
+    .getBufferedRecords()
+    .map((i) => i.msg)
+    .join('/n');

@@ -100,6 +100,7 @@ export const runExport = async (configInput: ExportConfig): Promise<DataPlanPart
   }
 };
 
+// TODO: remove the saveRefs/resolveRefs from the types and all associated code.  It's not used by the updated `import` command
 /** for records of an object type, at least one record has a ref to it */
 const shouldSaveRefs = (recordsOfType: SObjectTreeInput[], allRecords: SObjectTreeInput[]): boolean => {
   const refs = new Set(recordsOfType.map((r) => `@${r.attributes.referenceId}`));

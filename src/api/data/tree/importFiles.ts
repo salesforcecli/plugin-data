@@ -8,20 +8,24 @@ import fs from 'node:fs';
 import { Logger, Messages, Connection } from '@salesforce/core';
 import { isFulfilled } from '@salesforce/kit';
 import { flattenNestedRecords } from '../../../export.js';
-import { SObjectTreeFileContents, SObjectTreeInput, isAttributesEntry } from '../../../dataSoqlQueryTypes.js';
-import { sendSObjectTreeRequest, treeSaveErrorHandler } from './importCommon.js';
+import { SObjectTreeInput, isAttributesEntry } from '../../../dataSoqlQueryTypes.js';
+import { sendSObjectTreeRequest, treeSaveErrorHandler, parseDataFileContents } from './importCommon.js';
 import { ImportResult, ResponseRefs, TreeResponse } from './importTypes.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
+type FileInfo = {
+  rawContents: string;
+  records: SObjectTreeInput[];
+  filePath: string;
+  sobject: string;
+};
+
 export const importFromFiles = async (conn: Connection, dataFilePaths: string[]): Promise<ImportResult[]> => {
   const logger = Logger.childFromRoot('data:import:tree:importSObjectTreeFile');
   const fileInfos = (await Promise.all(dataFilePaths.map(parseFile))).map(logFileInfo(logger));
-  const refMap = createSObjectTypeMap(fileInfos.flatMap((fi) => fi.parsed.records));
-
-  // TODO: does the logic make sense?  Is it better to send them all in parallel, or fail on the first,
-  // knowing that the rest could have already been saved and the user would have to manually clean up?
+  const refMap = createSObjectTypeMap(fileInfos.flatMap((fi) => fi.records));
   const results = await Promise.allSettled(
     fileInfos.map((fi) => sendSObjectTreeRequest(conn)(fi.sobject)(fi.rawContents))
   );
@@ -33,12 +37,7 @@ const getSuccessOrThrow = (result: PromiseSettledResult<TreeResponse>): PromiseF
 
 const getValueOrThrow =
   (fi: FileInfo[]) =>
-  (
-    response: PromiseFulfilledResult<TreeResponse>,
-    index: number,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    array: Array<PromiseFulfilledResult<TreeResponse>>
-  ): ResponseRefs[] => {
+  (response: PromiseFulfilledResult<TreeResponse>, index: number): ResponseRefs[] => {
     if (response.value.hasErrors === true) {
       throw messages.createError('dataImportFailed', [
         fi[index].filePath,
@@ -56,7 +55,7 @@ const addObjectTypes =
     id: result.id,
   });
 
-const contentsToSobjectType = (contents: SObjectTreeFileContents): string => contents.records[0].attributes.type;
+const contentsToSobjectType = (records: SObjectTreeInput[]): string => records[0].attributes.type;
 
 const logFileInfo =
   (logger: Logger) =>
@@ -65,26 +64,14 @@ const logFileInfo =
     return fileInfo;
   };
 
-type FileInfo = {
-  rawContents: string;
-  parsed: SObjectTreeFileContents;
-  filePath: string;
-  sobject: string;
-};
-
 /** gets information about the file, including the sobject, contents, parsed contents */
 const parseFile = async (filePath: string): Promise<FileInfo> => {
   const rawContents = await fs.promises.readFile(filePath, 'utf8');
-  if (!rawContents) {
-    throw messages.createError('dataFileEmpty', [filePath]);
-  }
-  const parsed = parseDataFileContents(rawContents);
-  const sobjectType = contentsToSobjectType(parsed);
-  return { rawContents, parsed, filePath, sobject: sobjectType };
+  const records = parseDataFileContents(filePath)(rawContents);
+  const sobjectType = contentsToSobjectType(records);
+  return { rawContents, records, filePath, sobject: sobjectType };
 };
 
-const parseDataFileContents = (contents: string): SObjectTreeFileContents =>
-  JSON.parse(contents) as SObjectTreeFileContents;
 /**
  * Create a hash of sobject { ReferenceId: Type } assigned to this.sobjectTypes.
  * Used to display the sobject type in the results.
@@ -93,7 +80,7 @@ const parseDataFileContents = (contents: string): SObjectTreeFileContents =>
  * @param isJson
  */
 
-const createSObjectTypeMap = (records: SObjectTreeInput[]): Map<string, string> =>
+export const createSObjectTypeMap = (records: SObjectTreeInput[]): Map<string, string> =>
   new Map(
     records
       .flatMap(flattenNestedRecords)

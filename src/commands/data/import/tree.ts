@@ -45,12 +45,15 @@ export default class Import extends SfCommand<ImportResult[] | JsonMap> {
       hidden: true,
       aliases: ['contenttype'],
       deprecateAliases: true,
+      deprecated: { message: messages.getMessage('flags.content-type.deprecation') },
     }),
     // displays the schema for a data import plan
     'config-help': Flags.boolean({
       summary: messages.getMessage('flags.config-help.summary'),
       aliases: ['confighelp'],
       deprecateAliases: true,
+      hidden: true,
+      deprecated: { message: messages.getMessage('flags.config-help.deprecation') },
     }),
   };
 

@@ -70,12 +70,13 @@ export const hasNestedRecords = <T>(element: unknown): element is ElementWithRec
 export const hasNonEmptyNestedRecords = <T>(element: unknown): element is ElementWithRecords<T> =>
   hasNestedRecords(element) && element.records.length > 0;
 
-/** convenience method for array filtering */
-export const hasNestedRecordsFilter = <T>(tuple: [string, unknown]): tuple is [string, ElementWithRecords<T>] =>
-  typeof tuple[0] === 'string' && hasNonEmptyNestedRecords(tuple[1]);
+/** convenience method for filtering Object.entries array */
+export const hasNestedRecordsFilter = <T>(entry: [string, unknown]): entry is [string, ElementWithRecords<T>] =>
+  typeof entry[0] === 'string' && hasNonEmptyNestedRecords(entry[1]);
 
 export const isAttributesElement = (element: unknown): element is SObjectTreeInput['attributes'] =>
   !!(element as SObjectTreeInput['attributes']).referenceId && !!(element as SObjectTreeInput['attributes']).type;
 
-export const isAttributesEntry = (tuple: [string, unknown]): tuple is ['attributes', SObjectTreeInput['attributes']] =>
-  tuple[0] === 'attributes' && isAttributesElement(tuple[1]);
+/** convenience method for filtering Object.entries array */
+export const isAttributesEntry = (entry: [string, unknown]): entry is ['attributes', SObjectTreeInput['attributes']] =>
+  entry[0] === 'attributes' && isAttributesElement(entry[1]);

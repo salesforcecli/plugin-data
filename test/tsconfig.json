@@ -1,16 +1,12 @@
 {
   "extends": "@salesforce/dev-config/tsconfig-test-strict-esm",
-  "include": [
-    "./**/*.ts"
-  ],
+  "include": ["./**/*.ts"],
   "compilerOptions": {
     "skipLibCheck": true,
     "sourceMap": true,
     "baseUrl": "..",
     "paths": {
-      "@salesforce/kit": [
-        "node_modules/@salesforce/kit"
-      ]
+      "@salesforce/kit": ["node_modules/@salesforce/kit"]
     }
   }
 }

@@ -22,9 +22,17 @@ Plan definition file to insert multiple data files.
 
 Content type of import files if their extention is not .json.
 
+# flags.content-type.deprecation
+
+The `config-type` flag is deprecated and will be moved to a `legacy` command after July 10, 2024. It will be completely removed after Nov 10, 2024. Use the new `data tree beta import` command.
+
 # flags.config-help.summary
 
 Display schema information for the --plan configuration file to stdout; if you specify this flag, all other flags except --json are ignored.
+
+# flags.config-help.deprecation
+
+The `config-help` flag is deprecated and will be moved to a `legacy` command after July 10, 2024. It will be completely removed after Nov 10, 2024. Use the new `data tree beta import` command.
 
 # examples
 
