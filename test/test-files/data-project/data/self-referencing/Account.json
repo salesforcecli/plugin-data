@@ -1,0 +1,90 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "AccountRef1"
+      },
+      "Name": "Global Media"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "AccountRef2"
+      },
+      "Name": "Acme"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "AccountRef3"
+      },
+      "Name": "salesforce.com"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "AccountRef4"
+      },
+      "Name": "sample"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "AccountRef5"
+      },
+      "Name": "Grandchild",
+      "ParentId": "@AccountRef10"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "AccountRef6"
+      },
+      "Name": "Global Media"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "AccountRef7"
+      },
+      "Name": "Acme"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "AccountRef8"
+      },
+      "Name": "salesforce.com"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "AccountRef9"
+      },
+      "Name": "sample"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "AccountRef10"
+      },
+      "Name": "Child",
+      "ParentId": "@AccountRef11"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "AccountRef11"
+      },
+      "Name": "Original"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "AccountRef12"
+      },
+      "Name": "Sample Account for Entitlements"
+    }
+  ]
+}

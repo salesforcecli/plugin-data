@@ -1,0 +1,75 @@
+/*
+ * Copyright (c) 2020, salesforce.com, inc.
+ * All rights reserved.
+ * Licensed under the BSD 3-Clause license.
+ * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
+import path from 'node:path';
+import { expect } from 'chai';
+import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
+import { QueryResult } from '../dataSoqlQuery.nut.js';
+
+describe('data:tree commands with more than 200 records are batches in safe groups', () => {
+  let testSession: TestSession;
+
+  before(async () => {
+    testSession = await TestSession.create({
+      scratchOrgs: [
+        {
+          config: 'config/project-scratch-def.json',
+          setDefault: true,
+        },
+        {
+          config: 'config/project-scratch-def.json',
+          setDefault: false,
+          alias: 'importOrg',
+        },
+      ],
+      project: { sourceDir: path.join('test', 'test-files', 'data-project') },
+      devhubAuthStrategy: 'AUTO',
+    });
+  });
+
+  after(async () => {
+    await testSession?.clean();
+  });
+
+  it('import -> export -> import round trip should succeed', () => {
+    const query = 'SELECT Id, Name, ParentId FROM Account';
+
+    // Import data to the default org.
+    execCmd(`data:import:beta:tree --plan ${path.join('.', 'data', 'moreThan200', 'Account-plan')} --json`, {
+      ensureExitCode: 0,
+    });
+
+    execCmd(
+      `data:export:beta:tree --query "${query}" --prefix INT --outputdir ${path.join(
+        '.',
+        'export_data'
+      )} --plan --json`,
+      { ensureExitCode: 0 }
+    );
+
+    // Import data to the 2nd org org.
+    execCmd(
+      `data:import:beta:tree --target-org importOrg --plan ${path.join(
+        '.',
+        'export_data',
+        'INT-Account-plan.json'
+      )} --json`,
+      {
+        ensureExitCode: 0,
+      }
+    );
+
+    // query the new org for import verification
+    const queryResults = execCmd<QueryResult>(`data:query --target-org importOrg --query "${query}" --json`, {
+      ensureExitCode: 0,
+    }).jsonOutput;
+
+    expect(queryResults?.result.totalSize).to.equal(
+      12,
+      'Expected 265 Account objects returned by the query to org: importOrg'
+    );
+  });
+});
