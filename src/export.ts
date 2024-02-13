@@ -79,7 +79,7 @@ export const runExport = async (configInput: ExportConfig): Promise<DataPlanPart
       })
     );
     const output = planFiles.map(planFileToDataPartPlan);
-    const planName = [...describe.keys(), DATA_PLAN_FILENAME_PART].join('-');
+    const planName = getPrefixedFileName([...describe.keys(), DATA_PLAN_FILENAME_PART].join('-'), prefix);
     await Promise.all([
       ...planFiles.map(writePlanDataFile(ux)),
       fs.promises.writeFile(path.join(outputDir ?? '', planName), JSON.stringify(output, null, 4)),
