@@ -27,6 +27,7 @@ Export files created by `export beta` are compatible with `import` and `import b
 
 ## Phase 2: GA the new commands, put the old under `legacy`. [July 10 2024]
 
+1. pin an issue when then change goes into RC so people with problems can quickly find legacy commands
 1. move the "old" commands to `legacy` and mark them `hidden` and `deprecated` with the Phase 3 date
 1. move the `force:` aliases to the new commands
 1. move the new commands to not be `beta` but have the `beta` alias. add `deprecateAliases` so people stop using the `beta` thing.
@@ -38,3 +39,4 @@ Export files created by `export beta` are compatible with `import` and `import b
 1. tighten schema to remove the `object` part of `files`, and remove `saveRefs` and `resolveRefs`
 1. check messages for unused messages
 1. remove the `beta` alias from `import|export`
+1. update the pinned issue to reflect these changes
