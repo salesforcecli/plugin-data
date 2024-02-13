@@ -5,22 +5,15 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-
-
 import { Messages } from '@salesforce/core';
 import { getString, JsonMap } from '@salesforce/ts-types';
 import { SfCommand, Flags, arrayWithDeprecation } from '@salesforce/sf-plugins-core';
+import { ImportResult } from '../../../api/data/tree/importTypes.js';
 import { ImportApi, ImportConfig } from '../../../api/data/tree/importApi.js';
 import { orgFlags } from '../../../flags.js';
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.import');
-
-type ImportResult = {
-  refId: string;
-  type: string;
-  id: string;
-};
 
 /**
  * Command that provides data import capability via the SObject Tree Save API.
@@ -52,12 +45,15 @@ export default class Import extends SfCommand<ImportResult[] | JsonMap> {
       hidden: true,
       aliases: ['contenttype'],
       deprecateAliases: true,
+      deprecated: { message: messages.getMessage('flags.content-type.deprecation') },
     }),
     // displays the schema for a data import plan
     'config-help': Flags.boolean({
       summary: messages.getMessage('flags.config-help.summary'),
       aliases: ['confighelp'],
       deprecateAliases: true,
+      hidden: true,
+      deprecated: { message: messages.getMessage('flags.config-help.deprecation') },
     }),
   };
 
@@ -96,6 +92,11 @@ export default class Import extends SfCommand<ImportResult[] | JsonMap> {
       type: { header: 'Type' },
       id: { header: 'ID' },
     });
+
+    this.info(
+      'Be sure to check out the new "sf data import beta tree".  It handles more records and objects with lookups to the same object (ex: parent account)'
+    );
+
     return processedResult;
   }
 }

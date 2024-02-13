@@ -1,0 +1,16 @@
+{
+  "records": [
+    {
+      "attributes": { "type": "Contact", "referenceId": "FrontDeskRef" },
+      "lastname": "Washington",
+      "title": "President",
+      "AccountId": "@SampleAccountRef"
+    },
+    {
+      "attributes": { "type": "Contact", "referenceId": "ManagerRef" },
+      "lastname": "Woods",
+      "title": "Vice President",
+      "AccountId": "@SampleAcct2Ref"
+    }
+  ]
+}

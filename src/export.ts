@@ -79,7 +79,7 @@ export const runExport = async (configInput: ExportConfig): Promise<DataPlanPart
       })
     );
     const output = planFiles.map(planFileToDataPartPlan);
-    const planName = [...describe.keys(), DATA_PLAN_FILENAME_PART].join('-');
+    const planName = getPrefixedFileName([...describe.keys(), DATA_PLAN_FILENAME_PART].join('-'), prefix);
     await Promise.all([
       ...planFiles.map(writePlanDataFile(ux)),
       fs.promises.writeFile(path.join(outputDir ?? '', planName), JSON.stringify(output, null, 4)),
@@ -100,8 +100,9 @@ export const runExport = async (configInput: ExportConfig): Promise<DataPlanPart
   }
 };
 
+// TODO: remove the saveRefs/resolveRefs from the types and all associated code.  It's not used by the updated `import` command
 /** for records of an object type, at least one record has a ref to it */
-export const shouldSaveRefs = (recordsOfType: SObjectTreeInput[], allRecords: SObjectTreeInput[]): boolean => {
+const shouldSaveRefs = (recordsOfType: SObjectTreeInput[], allRecords: SObjectTreeInput[]): boolean => {
   const refs = new Set(recordsOfType.map((r) => `@${r.attributes.referenceId}`));
   return allRecords.some((r) => Object.values(r).some((v) => typeof v === 'string' && refs.has(v)));
 };
@@ -243,7 +244,7 @@ export const buildRefMap =
   };
 
 /** * if there is an ID, we'll turn it into a ref in our mapping and add it to the records's attributes. */
-export const addReferenceIdToAttributes =
+const addReferenceIdToAttributes =
   (refFromIdByType: RefFromIdByType) =>
   (obj: BasicRecord): SObjectTreeInput => ({
     ...obj,
@@ -300,7 +301,7 @@ const getRelatedToWithMetadata = (metadata: DescribeSObjectResult, fieldName: st
 };
 
 /** turn a record into an array of records, recursively extracting its children if any */
-export const flattenNestedRecords = <T extends BasicRecord>(record: T): T[] =>
+export const flattenNestedRecords = <T extends BasicRecord | SObjectTreeInput>(record: T): T[] =>
   [record].concat(
     Object.entries(record)
       .filter(hasNestedRecordsFilter<T>)
