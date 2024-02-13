@@ -7,10 +7,13 @@
 import path from 'node:path';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
+import { ImportResult } from '../../../../src/api/data/tree/importTypes.js';
 import { QueryResult } from '../dataSoqlQuery.nut.js';
 
 describe('data:tree commands with more than 200 records are batches in safe groups', () => {
   let testSession: TestSession;
+  const importAlias = 'importOrgMoreThan200';
+  const prefix = '200';
 
   before(async () => {
     testSession = await TestSession.create({
@@ -22,7 +25,7 @@ describe('data:tree commands with more than 200 records are batches in safe grou
         {
           config: 'config/project-scratch-def.json',
           setDefault: false,
-          alias: 'importOrg',
+          alias: importAlias,
         },
       ],
       project: { sourceDir: path.join('test', 'test-files', 'data-project') },
@@ -35,15 +38,19 @@ describe('data:tree commands with more than 200 records are batches in safe grou
   });
 
   it('import -> export -> import round trip should succeed', () => {
-    const query = 'SELECT Id, Name, ParentId FROM Account';
+    const query = "SELECT Id, Name, ParentId FROM Account where name != 'Sample Account for Entitlements'";
 
     // Import data to the default org.
-    execCmd(`data:import:beta:tree --plan ${path.join('.', 'data', 'moreThan200', 'Account-plan')} --json`, {
-      ensureExitCode: 0,
-    });
+    const importResult = execCmd<ImportResult[]>(
+      `data:import:beta:tree --plan ${path.join('.', 'data', 'moreThan200', 'Account-plan.json')} --json`,
+      {
+        ensureExitCode: 0,
+      }
+    );
+    expect(importResult.jsonOutput?.result.length).to.equal(265, 'Expected 265 records to be imported');
 
     execCmd(
-      `data:export:beta:tree --query "${query}" --prefix INT --outputdir ${path.join(
+      `data:export:beta:tree --query "${query}" --prefix ${prefix} --outputdir ${path.join(
         '.',
         'export_data'
       )} --plan --json`,
@@ -52,10 +59,10 @@ describe('data:tree commands with more than 200 records are batches in safe grou
 
     // Import data to the 2nd org org.
     execCmd(
-      `data:import:beta:tree --target-org importOrg --plan ${path.join(
+      `data:import:beta:tree --target-org ${importAlias} --plan ${path.join(
         '.',
         'export_data',
-        'INT-Account-plan.json'
+        `${prefix}-Account-plan.json`
       )} --json`,
       {
         ensureExitCode: 0,
@@ -63,13 +70,13 @@ describe('data:tree commands with more than 200 records are batches in safe grou
     );
 
     // query the new org for import verification
-    const queryResults = execCmd<QueryResult>(`data:query --target-org importOrg --query "${query}" --json`, {
+    const queryResults = execCmd<QueryResult>(`data:query --target-org ${importAlias} --query "${query}" --json`, {
       ensureExitCode: 0,
     }).jsonOutput;
 
     expect(queryResults?.result.totalSize).to.equal(
-      12,
-      'Expected 265 Account objects returned by the query to org: importOrg'
+      265,
+      `Expected 265 Account objects returned by the query to org: ${importAlias}`
     );
   });
 });

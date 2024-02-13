@@ -35,10 +35,11 @@ describe('data:tree commands with records that refer to other records of the sam
   });
 
   it('import -> export -> import round trip should succeed', () => {
-    const query = 'SELECT Id, Name, ParentId FROM Account';
+    // exclude an account that occurs in many scratch orgs
+    const query = "SELECT Id, Name, ParentId FROM Account where name != 'Sample Account for Entitlements'";
 
     // Import data to the default org.
-    execCmd(`data:import:beta:tree --plan ${path.join('.', 'data', 'self-referencing', 'Account-plan')} --json`, {
+    execCmd(`data:import:beta:tree --plan ${path.join('.', 'data', 'self-referencing', 'Account-plan.json')} --json`, {
       ensureExitCode: 0,
     });
 
@@ -55,7 +56,7 @@ describe('data:tree commands with records that refer to other records of the sam
       `data:import:beta:tree --target-org importOrg --plan ${path.join(
         '.',
         'export_data',
-        'INT-Accountplan.json'
+        'INT-Account-plan.json'
       )} --json`,
       {
         ensureExitCode: 0,

@@ -27,7 +27,7 @@ Export files created by `export beta` are compatible with `import` and `import b
 
 ## Phase 2: GA the new commands, put the old under `legacy`. [July 10 2024]
 
-1. mark the legacy commands `hidden` and `deprecated` with the Phase 3 date
+1. move the "old" commands to `legacy` and mark them `hidden` and `deprecated` with the Phase 3 date
 1. move the `force:` aliases to the new commands
 1. move the new commands to not be `beta` but have the `beta` alias. add `deprecateAliases` so people stop using the `beta` thing.
 1. change `export` with `--json` to warn that it will change json output (stop returning the saveRefs/resolveRefs) after Phase 3 date
