@@ -1,0 +1,14 @@
+[
+  {
+    "sobject": "Account",
+    "saveRefs": true,
+    "resolveRefs": false,
+    "files": ["Account.json"]
+  },
+  {
+    "sobject": "Opportunity",
+    "saveRefs": true,
+    "resolveRefs": true,
+    "files": ["Opportunity.json"]
+  }
+]

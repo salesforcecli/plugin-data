@@ -71,3 +71,9 @@ In the future, the `tree export` command will not produce them.
 # error.NonStringFiles
 
 The `files` property of the plan objects must contain only strings
+
+# error.UnresolvableRefs
+
+There are references in a data file %s that can't be resolved:
+
+%s

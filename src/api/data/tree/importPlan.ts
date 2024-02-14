@@ -5,9 +5,10 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import path from 'node:path';
+import { EOL } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
-import { AnyJson } from '@salesforce/ts-types';
+import { AnyJson, isString } from '@salesforce/ts-types';
 import { Logger, SchemaValidator, SfError, Connection, Messages } from '@salesforce/core';
 import { SObjectTreeInput } from '../../../dataSoqlQueryTypes.js';
 import { DataPlanPartFilesOnly, ImportResult } from './importTypes.js';
@@ -22,11 +23,15 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 export const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
 // the "new" type for these.  We're ignoring saveRefs/resolveRefs
-// TODO: when the legacy commands are removed, we can clean up the types to only provide what's needed
 export type EnrichedPlanPart = Omit<DataPlanPartFilesOnly, 'saveRefs' | 'resolveRefs'> & {
   filePath: string;
   sobject: string;
   records: SObjectTreeInput[];
+};
+/** an accumulator for api results.  Fingerprints exist to break recursion */
+type ResultsSoFar = {
+  results: ImportResult[];
+  fingerprints: Set<string>;
 };
 
 const TREE_API_LIMIT = 200;
@@ -53,7 +58,7 @@ export const importFromPlan = async (conn: Connection, planFilePath: string): Pr
       }))
   );
   // using recursion to sequentially send the requests so we get refs back from each round
-  const results = await getResults(conn)(logger)([])(planContents);
+  const { results } = await getResults(conn)(logger)({ results: [], fingerprints: new Set() })(planContents);
 
   return results;
 };
@@ -62,19 +67,20 @@ export const importFromPlan = async (conn: Connection, planFilePath: string): Pr
 const getResults =
   (conn: Connection) =>
   (logger: Logger) =>
-  (resultsSoFar: ImportResult[]) =>
-  async (planParts: EnrichedPlanPart[]): Promise<ImportResult[]> => {
+  (resultsSoFar: ResultsSoFar) =>
+  async (planParts: EnrichedPlanPart[]): Promise<ResultsSoFar> => {
+    const newResultWithFingerPrints = addFingerprint(resultsSoFar)(planParts);
     const [head, ...tail] = planParts;
-    if (!head.records) {
-      return tail.length ? getResults(conn)(logger)(resultsSoFar)(tail) : resultsSoFar;
+    if (!head.records.length) {
+      return tail.length ? getResults(conn)(logger)(newResultWithFingerPrints)(tail) : resultsSoFar;
     }
-    const partWithRefsReplaced = { ...head, records: replaceRefs(resultsSoFar)(head.records) };
-    const [allRefsResolved, stillHasRefs] = replaceRefsInTheSameFile(partWithRefsReplaced);
-    if (stillHasRefs) {
+    const partWithRefsReplaced = { ...head, records: replaceRefs(resultsSoFar.results)(head.records) };
+    const { ready, notReady } = replaceRefsInTheSameFile(partWithRefsReplaced);
+    if (notReady) {
       logger.debug(`Not all refs are resolved yet.  Splitting ${partWithRefsReplaced.filePath} into two`);
 
       // Do the ones with all refs resolved to ID, then the rest, then the other files.  Essentially, we split the file into 2 parts and start over
-      return getResults(conn)(logger)(resultsSoFar)([allRefsResolved, stillHasRefs, ...tail]);
+      return getResults(conn)(logger)(newResultWithFingerPrints)([ready, notReady, ...tail]);
     }
 
     // We could have refs to records in a file we haven't loaded yet.
@@ -84,10 +90,10 @@ const getResults =
         `Not all refs are resolved yet.  Splitting ${partWithRefsReplaced.filePath} into two with the unresolved refs last`
       );
 
-      return getResults(conn)(logger)(resultsSoFar)([
+      return getResults(conn)(logger)(newResultWithFingerPrints)([
         { ...head, records: resolved },
         ...tail,
-        { ...head, records: unresolved, filePath: `${head.filePath} (deferred)` },
+        { ...head, records: unresolved, filePath: `${head.filePath}` },
       ]);
     }
 
@@ -95,7 +101,7 @@ const getResults =
       logger.debug(
         `There are more than ${TREE_API_LIMIT} records in ${partWithRefsReplaced.filePath}.  Will split into multiple requests.`
       );
-      return getResults(conn)(logger)(resultsSoFar)([...fileSplitter(partWithRefsReplaced), ...tail]);
+      return getResults(conn)(logger)(newResultWithFingerPrints)([...fileSplitter(partWithRefsReplaced), ...tail]);
     }
     logger.debug(
       `Sending ${partWithRefsReplaced.filePath} (${partWithRefsReplaced.records.length} records for ${partWithRefsReplaced.sobject}) to the API`
@@ -105,10 +111,13 @@ const getResults =
       const newResults = getResultsIfNoError(partWithRefsReplaced.filePath)(
         await sendSObjectTreeRequest(conn)(partWithRefsReplaced.sobject)(contents)
       );
-      const output = [
-        ...resultsSoFar,
-        ...newResults.map((r) => ({ refId: r.referenceId, type: partWithRefsReplaced.sobject, id: r.id })),
-      ];
+      const output = {
+        ...newResultWithFingerPrints,
+        results: [
+          ...newResultWithFingerPrints.results,
+          ...newResults.map((r) => ({ refId: r.referenceId, type: partWithRefsReplaced.sobject, id: r.id })),
+        ],
+      };
       return tail.length ? await getResults(conn)(logger)(output)(tail) : output;
     } catch (e) {
       return treeSaveErrorHandler(e);
@@ -128,28 +137,20 @@ export const fileSplitter = (planPart: EnrichedPlanPart): EnrichedPlanPart[] => 
  */
 export const replaceRefsInTheSameFile = (
   planPart: EnrichedPlanPart
-): [EnrichedPlanPart] | [EnrichedPlanPart, EnrichedPlanPart] => {
+): { ready: EnrichedPlanPart; notReady?: EnrichedPlanPart } => {
   const unresolvedRefRegex = refRegex(planPart.sobject);
 
   const refRecords = planPart.records.filter((r) => Object.values(r).some(matchesRefFilter(unresolvedRefRegex)));
-  if (refRecords.length) {
-    // have no refs, so they can go in immediately
-    const noRefRecords = planPart.records.filter((r) => !Object.values(r).some(matchesRefFilter(unresolvedRefRegex)));
-
-    return [
-      {
-        ...planPart,
-        records: noRefRecords,
-        filePath: `${planPart.filePath} (no refs)`,
-      },
-      {
-        ...planPart,
-        records: refRecords,
-        filePath: `${planPart.filePath} (refs to be resolved)`,
-      },
-    ];
-  }
-  return [planPart];
+  return refRecords.length
+    ? {
+        ready: {
+          ...planPart,
+          // have no refs, so they can go in immediately
+          records: planPart.records.filter((r) => !Object.values(r).some(matchesRefFilter(unresolvedRefRegex))),
+        },
+        notReady: { ...planPart, records: refRecords },
+      }
+    : { ready: planPart };
 };
 
 /** recursively replace the `@ref` with the id, using the accumulated results objects */
@@ -218,8 +219,10 @@ const hasOnlySimpleFiles = (planParts: DataPlanPartFilesOnly[]): boolean =>
 const hasRefs = (planParts: DataPlanPartFilesOnly[]): boolean =>
   planParts.some((p) => p.saveRefs !== undefined || p.resolveRefs !== undefined);
 
+const isUnresolvedRef = (v: unknown): boolean => typeof v === 'string' && genericRefRegex.test(v);
+
 const hasUnresolvedRefs = (records: SObjectTreeInput[]): boolean =>
-  records.some((r) => Object.values(r).some((v) => typeof v === 'string' && genericRefRegex.test(v)));
+  records.some((r) => Object.values(r).some(isUnresolvedRef));
 
 // TODO: change this implementation to use Object.groupBy when it's on all supported node versions
 const filterUnresolved = (
@@ -228,3 +231,21 @@ const filterUnresolved = (
   resolved: records.filter((r) => !hasUnresolvedRefs([r])),
   unresolved: records.filter((r) => hasUnresolvedRefs([r])),
 });
+
+/** given the 2 parameters that can change, break the recursion if asked to do an operation that's already been done */
+const addFingerprint =
+  (resultsSoFar: ResultsSoFar) =>
+  (planParts: EnrichedPlanPart[]): ResultsSoFar => {
+    const fingerprint = JSON.stringify({ resultsSoFar, planParts });
+
+    if (resultsSoFar.fingerprints.has(fingerprint)) {
+      const unresolved = planParts[0].records.map(Object.values).flat().filter(isString).filter(isUnresolvedRef);
+      const e = messages.createError('error.UnresolvableRefs', [
+        planParts[0].filePath,
+        unresolved.map((s) => `- ${s}`).join(EOL),
+      ]);
+      e.setData(resultsSoFar.results);
+      throw e;
+    }
+    return { ...resultsSoFar, fingerprints: resultsSoFar.fingerprints.add(fingerprint) };
+  };

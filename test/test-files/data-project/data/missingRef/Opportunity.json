@@ -1,0 +1,14 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "Opportunity",
+        "referenceId": "OpportunityRef1"
+      },
+      "Name": "Oppty With Bad Ref",
+      "StageName": "Qualification",
+      "CloseDate": "2024-02-29",
+      "AccountId": "@AccountRef2000"
+    }
+  ]
+}

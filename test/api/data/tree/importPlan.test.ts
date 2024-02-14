@@ -27,7 +27,8 @@ describe('importPlan', () => {
         files: [],
       } satisfies EnrichedPlanPart;
 
-      expect(replaceRefsInTheSameFile(planPart)).to.deep.equal([planPart]);
+      expect(replaceRefsInTheSameFile(planPart).ready).to.deep.equal(planPart);
+      expect(replaceRefsInTheSameFile(planPart).notReady).to.be.undefined;
     });
     it('splits the ref into two plan "files" if there are unresolved', () => {
       const planPart = {
@@ -42,15 +43,15 @@ describe('importPlan', () => {
       } satisfies EnrichedPlanPart;
 
       const result = replaceRefsInTheSameFile(planPart);
-      expect(result).to.deep.equal([
-        {
-          filePath: 'somePath (no refs)',
+      expect(result).to.deep.equal({
+        ready: {
+          filePath: 'somePath',
           sobject: 'Foo__c',
           records: [{ attributes: { referenceId: 'Foo__cRef1', type: 'Foo__c' } }],
           files: [],
         },
-        {
-          filePath: 'somePath (refs to be resolved)',
+        notReady: {
+          filePath: 'somePath',
           sobject: 'Foo__c',
           records: [
             { attributes: { referenceId: 'Foo__cRef2', type: 'Foo__c' }, lookup__c: '@Foo__cRef1' },
@@ -58,7 +59,7 @@ describe('importPlan', () => {
           ],
           files: [],
         },
-      ]);
+      });
     });
   });
   describe('replaceRefs', () => {
