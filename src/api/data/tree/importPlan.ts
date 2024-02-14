@@ -8,6 +8,8 @@ import path from 'node:path';
 import { EOL } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
+import { createHash } from 'node:crypto';
+
 import { AnyJson, isString } from '@salesforce/ts-types';
 import { Logger, SchemaValidator, SfError, Connection, Messages } from '@salesforce/core';
 import { SObjectTreeInput } from '../../../dataSoqlQueryTypes.js';
@@ -236,7 +238,7 @@ const filterUnresolved = (
 const addFingerprint =
   (resultsSoFar: ResultsSoFar) =>
   (planParts: EnrichedPlanPart[]): ResultsSoFar => {
-    const fingerprint = JSON.stringify({ resultsSoFar, planParts });
+    const fingerprint = hashObject({ resultsSoFar, planParts });
 
     if (resultsSoFar.fingerprints.has(fingerprint)) {
       const unresolved = planParts[0].records.map(Object.values).flat().filter(isString).filter(isUnresolvedRef);
@@ -249,3 +251,8 @@ const addFingerprint =
     }
     return { ...resultsSoFar, fingerprints: resultsSoFar.fingerprints.add(fingerprint) };
   };
+
+const hashObject = (obj: Record<string, unknown>): string =>
+  createHash('sha256')
+    .update(Buffer.from(JSON.stringify(obj)))
+    .digest('hex');
