@@ -15,7 +15,8 @@ Other differences
 
 1. `export --plan` writes Object names as the file name. It used to append an `s` on the end. So the filename is now `Account.json` and `Foo__c.json` instead of `Accounts.json` and the awful `Foo__cs.json`
 1. `export beta` no longer writes empty child objects. Previously, you'd see properties with `{records: []}` that had no effect on imports.
-1. `import beta` does not care about `resolveRefs` and `saveRefs`
+1. `import beta` with `--plan` does not care about `resolveRefs` and `saveRefs`
+1. `import beta` with `--plan` does not care about the order of files in your `plan` file. It'll defer unresolved references until they're resolved.
 1. `export beta` now handles more than 2 levels of child objects in a query using `--plan` (up to 5, that's the SOQL limit)
 1. both `export beta` and `import beta` handle objects that refer to objects of the same type (ex: Account with ParentId, User with Manager)
 1. `import beta` using `--plan` handles more than 200 records. It will batch them into groups of 200 per object. The new record limit is not documented--it most likely comes from your OS call stack depth or other org limits (data storage, api call limits)
