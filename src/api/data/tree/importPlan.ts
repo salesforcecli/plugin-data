@@ -80,11 +80,14 @@ const getResults =
     // We could have refs to records in a file we haven't loaded yet.
     const { resolved, unresolved } = filterUnresolved(partWithRefsReplaced.records);
     if (unresolved.length) {
-      // split the file and put the unresolved stuff last in line
+      logger.debug(
+        `Not all refs are resolved yet.  Splitting ${partWithRefsReplaced.filePath} into two with the unresolved refs last`
+      );
+
       return getResults(conn)(logger)(resultsSoFar)([
         { ...head, records: resolved },
         ...tail,
-        { ...head, records: unresolved },
+        { ...head, records: unresolved, filePath: `${head.filePath} (deferred)` },
       ]);
     }
 
