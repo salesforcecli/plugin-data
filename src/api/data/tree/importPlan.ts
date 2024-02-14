@@ -29,7 +29,10 @@ export type EnrichedPlanPart = Omit<DataPlanPartFilesOnly, 'saveRefs' | 'resolve
   records: SObjectTreeInput[];
 };
 
+const TREE_API_LIMIT = 200;
+
 const refRegex = (object: string): RegExp => new RegExp(`^@${object}Ref\\d+$`);
+const genericRefRegex = new RegExp('^@\\w+Ref\\d+$');
 
 export const importFromPlan = async (conn: Connection, planFilePath: string): Promise<ImportResult[]> => {
   const resolvedPlanPath = path.resolve(process.cwd(), planFilePath);
@@ -62,6 +65,9 @@ const getResults =
   (resultsSoFar: ImportResult[]) =>
   async (planParts: EnrichedPlanPart[]): Promise<ImportResult[]> => {
     const [head, ...tail] = planParts;
+    if (!head.records) {
+      return tail.length ? getResults(conn)(logger)(resultsSoFar)(tail) : resultsSoFar;
+    }
     const partWithRefsReplaced = { ...head, records: replaceRefs(resultsSoFar)(head.records) };
     const [allRefsResolved, stillHasRefs] = replaceRefsInTheSameFile(partWithRefsReplaced);
     if (stillHasRefs) {
@@ -71,9 +77,20 @@ const getResults =
       return getResults(conn)(logger)(resultsSoFar)([allRefsResolved, stillHasRefs, ...tail]);
     }
 
-    if (partWithRefsReplaced.records.length > 200) {
+    // We could have refs to records in a file we haven't loaded yet.
+    const { resolved, unresolved } = filterUnresolved(partWithRefsReplaced.records);
+    if (unresolved.length) {
+      // split the file and put the unresolved stuff last in line
+      return getResults(conn)(logger)(resultsSoFar)([
+        { ...head, records: resolved },
+        ...tail,
+        { ...head, records: unresolved },
+      ]);
+    }
+
+    if (partWithRefsReplaced.records.length > TREE_API_LIMIT) {
       logger.debug(
-        `There are more than 200 records in ${partWithRefsReplaced.filePath}.  Will split into multiple requests.`
+        `There are more than ${TREE_API_LIMIT} records in ${partWithRefsReplaced.filePath}.  Will split into multiple requests.`
       );
       return getResults(conn)(logger)(resultsSoFar)([...fileSplitter(partWithRefsReplaced), ...tail]);
     }
@@ -95,10 +112,10 @@ const getResults =
     }
   };
 
-/** if the file has more than 200 records, split it into multiple files */
+/** if the file has more than TREE_API_LIMIT records, split it into multiple files */
 export const fileSplitter = (planPart: EnrichedPlanPart): EnrichedPlanPart[] => {
-  const head = planPart.records.slice(0, 200);
-  const tail = planPart.records.slice(200);
+  const head = planPart.records.slice(0, TREE_API_LIMIT);
+  const tail = planPart.records.slice(TREE_API_LIMIT);
   return tail.length ? [{ ...planPart, records: head }, ...fileSplitter({ ...planPart, records: tail })] : [planPart];
 };
 
@@ -197,3 +214,14 @@ const hasOnlySimpleFiles = (planParts: DataPlanPartFilesOnly[]): boolean =>
 
 const hasRefs = (planParts: DataPlanPartFilesOnly[]): boolean =>
   planParts.some((p) => p.saveRefs !== undefined || p.resolveRefs !== undefined);
+
+const hasUnresolvedRefs = (records: SObjectTreeInput[]): boolean =>
+  records.some((r) => Object.values(r).some((v) => typeof v === 'string' && genericRefRegex.test(v)));
+
+// TODO: change this implementation to use Object.groupBy when it's on all supported node versions
+const filterUnresolved = (
+  records: SObjectTreeInput[]
+): { resolved: SObjectTreeInput[]; unresolved: SObjectTreeInput[] } => ({
+  resolved: records.filter((r) => !hasUnresolvedRefs([r])),
+  unresolved: records.filter((r) => hasUnresolvedRefs([r])),
+});
