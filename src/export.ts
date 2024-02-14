@@ -376,7 +376,7 @@ const queryRecords =
   (conn: Connection) =>
   async (query: string): Promise<QueryResult<BasicRecord>> => {
     try {
-      return await conn.query(query);
+      return (await conn.autoFetchQuery(query)) as unknown as QueryResult<BasicRecord>;
     } catch (err) {
       if (err instanceof Error && err.name === 'MALFORMED_QUERY') {
         const errMsg = messages.getMessage('soqlMalformed', [query]);
