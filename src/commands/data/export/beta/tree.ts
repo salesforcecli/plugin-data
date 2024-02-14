@@ -7,7 +7,7 @@
 
 import { Messages } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
-import { orgFlags } from '../../../../flags.js';
+import { orgFlags, prefixValidation } from '../../../../flags.js';
 import { ExportConfig, runExport } from '../../../../export.js';
 import { DataPlanPart, SObjectTreeFileContents } from '../../../../dataSoqlQueryTypes.js';
 
@@ -35,6 +35,7 @@ export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileCo
     prefix: Flags.string({
       char: 'x',
       summary: messages.getMessage('flags.prefix.summary'),
+      parse: prefixValidation,
     }),
     'output-dir': Flags.directory({
       char: 'd',
