@@ -1,4 +1,4 @@
-# New Data Tree Command Plan
+# New Data Tree Commands Plan
 
 We're improving the `data export tree` and `data import tree` commands, but doing it in phases. 
 
