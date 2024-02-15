@@ -12,5 +12,6 @@ const genericRefRegex = new RegExp('^@\\w+Ref\\d+$');
 
 export const isUnresolvedRef = (v: unknown): boolean => typeof v === 'string' && genericRefRegex.test(v);
 
+/** at least record in the array has at least one property value that matches the regex */
 export const hasUnresolvedRefs = (records: SObjectTreeInput[]): boolean =>
   records.some((r) => Object.values(r).some(isUnresolvedRef));

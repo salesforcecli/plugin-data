@@ -21,6 +21,7 @@ import {
   SObjectTreeInput,
   hasNestedRecords,
 } from './dataSoqlQueryTypes.js';
+import { hasUnresolvedRefs } from './api/data/tree/functions.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'exportApi');
@@ -73,7 +74,7 @@ export const runExport = async (configInput: ExportConfig): Promise<DataPlanPart
         sobject,
         contents: { records },
         saveRefs: shouldSaveRefs(records, [...planMap.values()].flat()),
-        resolveRefs: shouldResolveRefs(records),
+        resolveRefs: hasUnresolvedRefs(records),
         file: `${getPrefixedFileName(sobject, prefix)}.json`,
         dir: outputDir ?? '',
       })
@@ -106,9 +107,6 @@ const shouldSaveRefs = (recordsOfType: SObjectTreeInput[], allRecords: SObjectTr
   const refs = new Set(recordsOfType.map((r) => `@${r.attributes.referenceId}`));
   return allRecords.some((r) => Object.values(r).some((v) => typeof v === 'string' && refs.has(v)));
 };
-
-const shouldResolveRefs = (recordsOfType: SObjectTreeInput[]): boolean =>
-  recordsOfType.some((r) => Object.values(r).some((v) => typeof v === 'string' && Boolean(v.match(/^@.*Ref\d+$/g))));
 
 /** convert between types.  DataPlanPart is exported and part of the command's return type and file structure so we're stuck with it */
 const planFileToDataPartPlan = (p: PlanFile): DataPlanPart => ({
