@@ -77,3 +77,7 @@ The `files` property of the plan objects must contain only strings
 There are references in a data file %s that can't be resolved:
 
 %s
+
+# error.RefsInFiles
+
+The file %s includes references (ex: '@AccountRef1'). Those are only supported with --plan, not --files.`

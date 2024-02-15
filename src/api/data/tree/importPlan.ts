@@ -20,9 +20,11 @@ import {
   sendSObjectTreeRequest,
   treeSaveErrorHandler,
 } from './importCommon.js';
+import { isUnresolvedRef } from './functions.js';
+import { hasUnresolvedRefs } from './functions.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-export const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
+const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
 // the "new" type for these.  We're ignoring saveRefs/resolveRefs
 export type EnrichedPlanPart = Omit<DataPlanPartFilesOnly, 'saveRefs' | 'resolveRefs'> & {
@@ -39,8 +41,6 @@ type ResultsSoFar = {
 const TREE_API_LIMIT = 200;
 
 const refRegex = (object: string): RegExp => new RegExp(`^@${object}Ref\\d+$`);
-const genericRefRegex = new RegExp('^@\\w+Ref\\d+$');
-
 export const importFromPlan = async (conn: Connection, planFilePath: string): Promise<ImportResult[]> => {
   const resolvedPlanPath = path.resolve(process.cwd(), planFilePath);
   const logger = Logger.childFromRoot('data:import:tree:importFromPlan');
@@ -220,11 +220,6 @@ const hasOnlySimpleFiles = (planParts: DataPlanPartFilesOnly[]): boolean =>
 
 const hasRefs = (planParts: DataPlanPartFilesOnly[]): boolean =>
   planParts.some((p) => p.saveRefs !== undefined || p.resolveRefs !== undefined);
-
-const isUnresolvedRef = (v: unknown): boolean => typeof v === 'string' && genericRefRegex.test(v);
-
-const hasUnresolvedRefs = (records: SObjectTreeInput[]): boolean =>
-  records.some((r) => Object.values(r).some(isUnresolvedRef));
 
 // TODO: change this implementation to use Object.groupBy when it's on all supported node versions
 const filterUnresolved = (
