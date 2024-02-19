@@ -1,0 +1,12 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "Case",
+        "referenceId": "CaseRef1"
+      },
+      "Status": "New",
+      "AccountId": "@AccountRef1"
+    }
+  ]
+}

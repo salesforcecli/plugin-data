@@ -44,6 +44,11 @@ export type BasicRecord = {
   };
 };
 
+export type SObjectTreeInput = Omit<BasicRecord, 'attributes'> & {
+  attributes: Omit<BasicRecord['attributes'], 'url'> & {
+    referenceId: string;
+  };
+};
 export interface DataPlanPart {
   sobject: string;
   saveRefs: boolean;
@@ -51,21 +56,27 @@ export interface DataPlanPart {
   files: Array<string | (DataPlanPart & { file: string })>;
 }
 
-export type SObjectTreeInput = {
-  attributes: {
-    type: string;
-    referenceId: string;
-  };
-} & {
-  [index: string]: unknown;
-};
-
 export type SObjectTreeFileContents = {
   records: SObjectTreeInput[];
 };
 
-export const hasNestedRecords = <T>(element: unknown): element is { records: T[] } =>
-  Array.isArray((element as { records: T[] })?.records);
+type ElementWithRecords<T> = { records: T[] };
+
+/** element: a field value from the sobject.  Empty arrays return true */
+export const hasNestedRecords = <T>(element: unknown): element is ElementWithRecords<T> =>
+  Array.isArray((element as ElementWithRecords<T>)?.records);
+
+/** element: a field value from the sobject.  Empty arrays return false */
+export const hasNonEmptyNestedRecords = <T>(element: unknown): element is ElementWithRecords<T> =>
+  hasNestedRecords(element) && element.records.length > 0;
+
+/** convenience method for filtering Object.entries array */
+export const hasNestedRecordsFilter = <T>(entry: [string, unknown]): entry is [string, ElementWithRecords<T>] =>
+  typeof entry[0] === 'string' && hasNonEmptyNestedRecords(entry[1]);
 
 export const isAttributesElement = (element: unknown): element is SObjectTreeInput['attributes'] =>
   !!(element as SObjectTreeInput['attributes']).referenceId && !!(element as SObjectTreeInput['attributes']).type;
+
+/** convenience method for filtering Object.entries array */
+export const isAttributesEntry = (entry: [string, unknown]): entry is ['attributes', SObjectTreeInput['attributes']] =>
+  entry[0] === 'attributes' && isAttributesElement(entry[1]);

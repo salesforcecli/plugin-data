@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import path from 'node:path'
+import path from 'node:path';
 import fs from 'node:fs';
 
 import { Logger, Messages, Org, SfError, Lifecycle } from '@salesforce/core';
@@ -19,7 +19,7 @@ import {
   SObjectTreeInput,
 } from '../../../dataSoqlQueryTypes.js';
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'exportApi');
 
 const DATA_PLAN_FILENAME_PART = '-plan.json';

@@ -1,0 +1,20 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "Task",
+        "referenceId": "TaskRef1"
+      },
+      "Subject": "Do something",
+      "WhatId": "@OpportunityRef1"
+    },
+    {
+      "attributes": {
+        "type": "Task",
+        "referenceId": "TaskRef2"
+      },
+      "Subject": "Do a case thing",
+      "WhatId": "@CaseRef1"
+    }
+  ]
+}

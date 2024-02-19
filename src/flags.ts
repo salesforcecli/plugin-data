@@ -5,7 +5,6 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-
 import { Messages } from '@salesforce/core';
 import {
   Flags,
@@ -14,7 +13,7 @@ import {
   requiredOrgFlagWithDeprecations,
 } from '@salesforce/sf-plugins-core';
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
 export const perflogFlag = Flags.boolean({
@@ -40,3 +39,11 @@ export const resultFormatFlag = Flags.string({
   aliases: ['resultformat'],
   deprecateAliases: true,
 });
+
+export const prefixValidation = (i: string): Promise<string> => {
+  if (i.includes('/') || i.includes('\\')) {
+    const treeExportMsgs = Messages.loadMessages('@salesforce/plugin-data', 'tree.export');
+    throw new Error(treeExportMsgs.getMessage('PrefixSlashError'));
+  }
+  return Promise.resolve(i);
+};
