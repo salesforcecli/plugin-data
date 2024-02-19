@@ -1,3 +1,9 @@
+# [3.1.0](https://github.com/salesforcecli/plugin-data/compare/3.0.23...3.1.0) (2024-02-19)
+
+### Features
+
+- beta tree exports/import ([#810](https://github.com/salesforcecli/plugin-data/issues/810)) ([9f6c02b](https://github.com/salesforcecli/plugin-data/commit/9f6c02b23ac25e2866316599e6ae753f6c938fa0))
+
 ## [3.0.23](https://github.com/salesforcecli/plugin-data/compare/3.0.22...3.0.23) (2024-02-18)
 
 ### Bug Fixes
