@@ -1640,15 +1640,15 @@
     strip-ansi "6.0.1"
     ts-retry-promise "^0.8.0"
 
-"@salesforce/core@^6.4.1", "@salesforce/core@^6.5.1", "@salesforce/core@^6.5.2", "@salesforce/core@^6.5.3":
-  version "6.5.4"
-  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-6.5.4.tgz#05e494d3b4f910c6eaa79b6e5ac6c6d98c952726"
-  integrity sha512-wNTtHDwRt0yWIDfDA/zz/y4OxUcxwT8/hUeqflDr96uEmPow7JjuNt709ziFyvG32sGIVebbHxbvsat+HGSdcQ==
+"@salesforce/core@^6.4.1", "@salesforce/core@^6.5.1", "@salesforce/core@^6.5.3", "@salesforce/core@^6.5.4":
+  version "6.5.5"
+  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-6.5.5.tgz#ddfab1f6a51808ed1cadc98be3b7235d25ea436f"
+  integrity sha512-2zWTwc9m+LGJNSKXk6I01dzWEjWKkHyYZbROksIPzfWJ5lGfErzpvsTcGAAskBrJD9EpQ4/BtMSLhPSwskI7Fw==
   dependencies:
     "@salesforce/kit" "^3.0.15"
     "@salesforce/schemas" "^1.6.1"
     "@salesforce/ts-types" "^2.0.9"
-    "@types/semver" "^7.5.6"
+    "@types/semver" "^7.5.7"
     ajv "^8.12.0"
     change-case "^4.1.2"
     faye "^1.4.0"
@@ -1661,7 +1661,7 @@
     pino-abstract-transport "^1.1.0"
     pino-pretty "^10.3.1"
     proper-lockfile "^4.1.2"
-    semver "^7.5.4"
+    semver "^7.6.0"
     ts-retry-promise "^0.7.1"
 
 "@salesforce/dev-config@^4.1.0":
@@ -1746,15 +1746,15 @@
     chalk "^4"
     inquirer "^8.2.5"
 
-"@salesforce/sf-plugins-core@^7.1.9":
-  version "7.1.9"
-  resolved "https://registry.yarnpkg.com/@salesforce/sf-plugins-core/-/sf-plugins-core-7.1.9.tgz#b4ea2005096f2289160cfd4452afb51d53bdefb3"
-  integrity sha512-nyl6Kh1IHbGxcbQSUoJcte3t4fvozaXuHQWkHExIMGKjvSp8fCnx4pra8NZRdg/HnbWWu6eIHV4b/cHdzKWjnQ==
+"@salesforce/sf-plugins-core@^7.1.11":
+  version "7.1.11"
+  resolved "https://registry.yarnpkg.com/@salesforce/sf-plugins-core/-/sf-plugins-core-7.1.11.tgz#63c0ca8cdc2f94b36b8e4bd5f107f9d806f9f5be"
+  integrity sha512-2EAv1OYxGo5e/rZ+3k3G96oVZKK2FBPKK4CiFhgp8bQ7BB0+7+bmSyBjoQ26Q2AaEp4k0GQeNsh+0RN2ZhTuVg==
   dependencies:
     "@inquirer/confirm" "^2.0.17"
     "@inquirer/password" "^1.1.16"
-    "@oclif/core" "^3.19.1"
-    "@salesforce/core" "^6.5.2"
+    "@oclif/core" "^3.19.2"
+    "@salesforce/core" "^6.5.4"
     "@salesforce/kit" "^3.0.15"
     "@salesforce/ts-types" "^2.0.9"
     chalk "^5.3.0"
@@ -2513,10 +2513,15 @@
   dependencies:
     "@types/node" "*"
 
-"@types/semver@^7.5.0", "@types/semver@^7.5.6":
+"@types/semver@^7.5.0":
   version "7.5.6"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.5.6.tgz#c65b2bfce1bec346582c07724e3f8c1017a20339"
   integrity sha512-dn1l8LaMea/IjDoHNd9J52uBbInB796CDffS6VdIxvqYCPSG0V0DzHp76GpaWnlhg88uYyPbXCDIowa86ybd5A==
+
+"@types/semver@^7.5.7":
+  version "7.5.8"
+  resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.5.8.tgz#8268a8c57a3e4abd25c165ecd36237db7948a55e"
+  integrity sha512-I8EUhyrgfLrcTkzV3TSsGyl1tSuPrEDzr0yd5m90UgNxQkyDXULk3b6MlQqTCpZpNtWe1K0hzclnZkTcLBe2UQ==
 
 "@types/shelljs@^0.8.15":
   version "0.8.15"
