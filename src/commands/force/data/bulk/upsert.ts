@@ -68,10 +68,9 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
     const batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
     const csvStream = fs.createReadStream(flags.file, { encoding: 'utf-8' });
 
-    const concurrencyMode = flags.serial ? 'Serial' : 'Parallel';
     const job = conn.bulk.createJob(sobject, 'upsert', {
       extIdField: flags['external-id'],
-      concurrencyMode,
+      concurrencyMode: flags.serial ? 'Serial' : 'Parallel',
     });
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor

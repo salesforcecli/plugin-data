@@ -19,7 +19,6 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.base.command');
 
 export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
-  protected job!: IngestJobV2<Schema>;
   protected connection: Connection | undefined;
   protected cache: BulkDataRequestCache | undefined;
   protected isAsync = false;
@@ -45,10 +44,10 @@ export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
     }
   }
 
-  protected setupLifecycleListeners(): void {
-    this.job.on('jobProgress', () => {
+  protected setupLifecycleListeners(job: IngestJobV2<Schema>): void {
+    job.on('jobProgress', () => {
       const handler = async (): Promise<void> => {
-        const jobInfo = await this.job.check();
+        const jobInfo = await job.check();
         this.spinner.status = `${getRemainingTimeStatus(this.isAsync, this.endWaitTime)}${getStage(
           jobInfo.state
         )}${getRemainingRecordsStatus(jobInfo)}`;
@@ -56,7 +55,7 @@ export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
       handler().catch((err) => this.eventListenerErrorHandler(err));
     });
 
-    this.job.on('failed', (err: Error) => {
+    job.on('failed', (err: Error) => {
       try {
         this.error(err);
       } finally {
@@ -64,7 +63,7 @@ export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
       }
     });
 
-    this.job.on('error', (message: string) => {
+    job.on('error', (message: string) => {
       try {
         this.error(message);
       } finally {
@@ -72,14 +71,14 @@ export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
       }
     });
 
-    this.job.once('jobTimeout', () => {
+    job.once('jobTimeout', () => {
       const handler = async (): Promise<void> => {
         await this.cache?.createCacheEntryForRequest(
-          this.job.id ?? '',
+          job.id ?? '',
           this.connection?.getUsername(),
           this.connection?.getApiVersion()
         );
-        this.displayBulkV2Result(await this.job.check());
+        this.displayBulkV2Result(await job.check());
       };
       handler().catch((err) => this.eventListenerErrorHandler(err));
     });

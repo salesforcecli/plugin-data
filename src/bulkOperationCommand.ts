@@ -90,15 +90,15 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
       if (os.platform() === 'win32') {
         createJobOptions.lineEnding = 'CRLF';
       }
-      this.job = connection.bulk2.createJob(createJobOptions);
+      const job = connection.bulk2.createJob(createJobOptions);
       this.connection = connection;
 
-      this.setupLifecycleListeners();
+      this.setupLifecycleListeners(job);
       try {
-        const jobInfo = await executeBulkV2DataRequest(this.job, csvRecords, wait.milliseconds);
+        const jobInfo = await executeBulkV2DataRequest(job, csvRecords, wait.milliseconds);
         if (this.isAsync) {
           await this.cache?.createCacheEntryForRequest(
-            this.job.id ?? '',
+            job.id ?? '',
             connection?.getUsername(),
             connection?.getApiVersion()
           );
@@ -109,12 +109,12 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
           return result;
         }
         if (this.jsonEnabled()) {
-          result.records = transformResults(await this.job.getAllResults());
+          result.records = transformResults(await job.getAllResults());
         }
         // We only print human readable error outputs if --json is not specified.
         // The JSON result itself will already contain the error information (see above).
         else if (verbose) {
-          const records = await this.job.getAllResults();
+          const records = await job.getAllResults();
           if (records?.failedResults?.length > 0) {
             printBulkErrors(records.failedResults);
           }

@@ -6,9 +6,7 @@
  */
 
 import { Flags, loglevel, optionalOrgFlagWithDeprecations } from '@salesforce/sf-plugins-core';
-import { IngestJobV2 } from 'jsforce/lib/api/bulk2.js';
 import { Messages } from '@salesforce/core';
-import { Schema } from 'jsforce';
 import { Duration } from '@salesforce/kit';
 import { BulkResultV2, ResumeOptions } from './types.js';
 import { isBulkV2RequestDone, transformResults, waitOrTimeout } from './bulkUtils.js';
@@ -44,25 +42,23 @@ export abstract class ResumeBulkCommand extends BulkBaseCommand {
     loglevel,
   };
 
-  protected declare job: IngestJobV2<Schema>;
-
   protected async resume(resumeOptions: ResumeOptions, wait: Duration): Promise<BulkResultV2> {
     this.spinner.start('Getting status');
     const conn = resumeOptions.options.connection;
 
-    this.job = conn.bulk2.job('ingest', { id: resumeOptions.jobInfo.id });
+    const job = conn.bulk2.job('ingest', { id: resumeOptions.jobInfo.id });
     this.endWaitTime = Date.now() + wait.milliseconds;
     this.spinner.status = getRemainingTimeStatus(this.isAsync, this.endWaitTime);
-    this.setupLifecycleListeners();
-    await waitOrTimeout(this.job, wait.milliseconds);
-    const jobInfo = await this.job.check();
+    this.setupLifecycleListeners(job);
+    await waitOrTimeout(job, wait.milliseconds);
+    const jobInfo = await job.check();
     this.spinner.stop();
     this.displayBulkV2Result(jobInfo);
     const result = { jobInfo } as BulkResultV2;
     if (!isBulkV2RequestDone(jobInfo) || !this.jsonEnabled()) {
       return result;
     }
-    result.records = transformResults(await this.job.getAllResults());
+    result.records = transformResults(await job.getAllResults());
     return result;
   }
 }
