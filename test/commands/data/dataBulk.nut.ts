@@ -93,7 +93,7 @@ describe('data:bulk commands', () => {
         await isCompleted(`data:delete:resume --job-id ${jobInfo.id} --json`);
 
         checkBulkStatusHumanResponse(`data:delete:resume --job-id ${jobInfo.id}`);
-        checkBulkResumeJsonResponse(jobInfo.id, 'upsert');
+        checkBulkResumeJsonResponse(jobInfo.id, 'delete');
       });
     });
   });

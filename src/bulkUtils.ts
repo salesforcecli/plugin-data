@@ -25,6 +25,7 @@ export const transformResults = (results: IngestJobV2Results<Schema>): BulkRecor
   unprocessedRecords: results.unprocessedRecords.map((record) => record as unknown as BulkProcessedRecordV2),
 });
 
+/** call the describe to verify the object exists in the org  */
 export const validateSobjectType = async (sobjectType: string, connection: Connection): Promise<string> => {
   try {
     await connection.sobject(sobjectType).describe();

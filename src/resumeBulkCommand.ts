@@ -5,17 +5,17 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { Flags, loglevel, optionalOrgFlagWithDeprecations } from '@salesforce/sf-plugins-core';
+import { Flags, SfCommand, loglevel, optionalOrgFlagWithDeprecations } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { BulkResultV2, ResumeOptions } from './types.js';
 import { isBulkV2RequestDone, transformResults, waitOrTimeout } from './bulkUtils.js';
-import { BulkBaseCommand, getRemainingTimeStatus } from './BulkBaseCommand.js';
+import { displayBulkV2Result, getRemainingTimeStatus, setupLifecycleListeners } from './BulkBaseCommand.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.resume.command');
 
-export abstract class ResumeBulkCommand extends BulkBaseCommand {
+export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
   public static readonly baseFlags = {
     'target-org': optionalOrgFlagWithDeprecations,
     'job-id': Flags.salesforceId({
@@ -45,15 +45,22 @@ export abstract class ResumeBulkCommand extends BulkBaseCommand {
   protected async resume(resumeOptions: ResumeOptions, wait: Duration): Promise<BulkResultV2> {
     this.spinner.start('Getting status');
     const conn = resumeOptions.options.connection;
-
+    const isAsync = wait.milliseconds === 0;
     const job = conn.bulk2.job('ingest', { id: resumeOptions.jobInfo.id });
-    this.endWaitTime = Date.now() + wait.milliseconds;
-    this.spinner.status = getRemainingTimeStatus(this.isAsync, this.endWaitTime);
-    this.setupLifecycleListeners(job);
+    const endWaitTime = Date.now() + wait.milliseconds;
+    this.spinner.status = getRemainingTimeStatus({ isAsync, endWaitTime });
+    setupLifecycleListeners({
+      job,
+      cmd: this,
+      isAsync,
+      apiVersion: conn.getApiVersion(),
+      username: conn.getUsername(),
+      endWaitTime,
+    });
     await waitOrTimeout(job, wait.milliseconds);
     const jobInfo = await job.check();
     this.spinner.stop();
-    this.displayBulkV2Result(jobInfo);
+    displayBulkV2Result({ jobInfo, username: conn.getUsername(), isAsync, cmd: this });
     const result = { jobInfo } as BulkResultV2;
     if (!isBulkV2RequestDone(jobInfo) || !this.jsonEnabled()) {
       return result;
