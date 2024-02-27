@@ -74,7 +74,7 @@ describe('data:bulk commands', () => {
   });
 
   after(async () => {
-    // await testSession?.clean();
+    await testSession?.clean();
   });
 
   describe('data:bulk verify json and human responses', () => {

@@ -27,12 +27,12 @@ export abstract class ResumeBulkCommand extends BulkBaseCommand {
       summary: messages.getMessage('flags.jobid'),
       aliases: ['jobid'],
       deprecateAliases: true,
-      exactlyOne: ['job-id', 'use-most-recent'],
     }),
     'use-most-recent': Flags.boolean({
       summary: messages.getMessage('flags.useMostRecent.summary'),
+      // don't use `exactlyOne` because this defaults to true
       default: true,
-      exactlyOne: ['job-id', 'use-most-recent'],
+      exclusive: ['job-id'],
     }),
     wait: Flags.duration({
       summary: messages.getMessage('flags.wait.summary'),
