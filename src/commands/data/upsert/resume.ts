@@ -28,7 +28,6 @@ export default class UpsertResume extends ResumeBulkCommand {
       flags['api-version']
     );
     this.connection = resumeOptions.options.connection;
-    this.operation = 'upsert';
     resumeOptions.options.operation = 'upsert';
 
     const resumeResults = await this.resume(resumeOptions, flags.wait);

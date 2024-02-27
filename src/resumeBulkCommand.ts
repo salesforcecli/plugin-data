@@ -51,7 +51,6 @@ export abstract class ResumeBulkCommand extends BulkBaseCommand {
     const conn = resumeOptions.options.connection;
 
     this.job = conn.bulk2.job('ingest', { id: resumeOptions.jobInfo.id });
-    this.wait = wait.milliseconds;
     this.endWaitTime = Date.now() + wait.milliseconds;
     this.spinner.status = getRemainingTimeStatus(this.isAsync, this.endWaitTime);
     this.setupLifecycleListeners();

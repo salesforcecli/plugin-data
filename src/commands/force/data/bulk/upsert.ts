@@ -63,13 +63,13 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
     const conn = flags['target-org'].getConnection(flags['api-version']);
     this.spinner.start('Bulk Upsert');
 
-    await validateSobjectType(flags.sobject, conn);
+    const sobject = await validateSobjectType(flags.sobject, conn);
 
     const batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
     const csvStream = fs.createReadStream(flags.file, { encoding: 'utf-8' });
 
     const concurrencyMode = flags.serial ? 'Serial' : 'Parallel';
-    const job = conn.bulk.createJob(flags.sobject, 'upsert', {
+    const job = conn.bulk.createJob(sobject, 'upsert', {
       extIdField: flags['external-id'],
       concurrencyMode,
     });
@@ -81,7 +81,7 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
       });
 
       try {
-        resolve(await batcher.createAndExecuteBatches(job, csvStream, flags.sobject, flags.wait?.minutes));
+        resolve(await batcher.createAndExecuteBatches(job, csvStream, sobject, flags.wait?.minutes));
         this.spinner.stop();
       } catch (e) {
         this.spinner.stop('error');

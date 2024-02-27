@@ -6,10 +6,10 @@
  */
 
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import { IngestJobV2, IngestOperation, JobInfoV2 } from 'jsforce/lib/api/bulk2.js';
+import { IngestJobV2, JobInfoV2 } from 'jsforce/lib/api/bulk2.js';
 import { Duration } from '@salesforce/kit';
 import { capitalCase } from 'change-case';
-import { Connection, Lifecycle, Messages } from '@salesforce/core';
+import { Connection, Messages } from '@salesforce/core';
 import { Schema } from 'jsforce';
 import { getResultMessage } from './reporters.js';
 import { BulkResultV2 } from './types.js';
@@ -19,43 +19,25 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.base.command');
 
 export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
-  public static readonly enableJsonFlag = true;
-  protected lifeCycle = Lifecycle.getInstance();
   protected job!: IngestJobV2<Schema>;
   protected connection: Connection | undefined;
   protected cache: BulkDataRequestCache | undefined;
   protected isAsync = false;
-  protected operation!: IngestOperation;
   protected endWaitTime = 0;
-  protected wait = 0;
 
   protected displayBulkV2Result(jobInfo: JobInfoV2): void {
     if (this.isAsync) {
-      this.logSuccess(messages.getMessage('success', [this.operation, jobInfo.id]));
-      this.info(
-        messages.getMessage('checkStatus', [
-          this.config.bin,
-          this.operation,
-          jobInfo.id,
-          this.connection?.getUsername(),
-        ])
-      );
+      this.logSuccess(messages.getMessage('success', [jobInfo.operation, jobInfo.id]));
+      this.info(messages.getMessage('checkStatus', [jobInfo.operation, jobInfo.id, this.connection?.getUsername()]));
     } else {
       this.log();
       this.info(getResultMessage(jobInfo));
       if ((jobInfo.numberRecordsFailed ?? 0) > 0 || jobInfo.state === 'Failed') {
-        this.info(messages.getMessage('checkJobViaUi', [this.config.bin, this.connection?.getUsername(), jobInfo.id]));
+        this.info(messages.getMessage('checkJobViaUi', [this.connection?.getUsername(), jobInfo.id]));
         process.exitCode = 1;
       }
       if (jobInfo.state === 'InProgress' || jobInfo.state === 'Open') {
-        this.info(
-          messages.getMessage('checkStatus', [
-            this.config.bin,
-            this.operation,
-            jobInfo.id,
-            this.connection?.getUsername(),
-          ])
-        );
+        this.info(messages.getMessage('checkStatus', [jobInfo.operation, jobInfo.id, this.connection?.getUsername()]));
       }
       if (jobInfo.state === 'Failed') {
         throw messages.createError('bulkJobFailed', [jobInfo.id]);

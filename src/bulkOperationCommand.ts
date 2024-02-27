@@ -70,19 +70,17 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
     sobject: string,
     csvFileName: string,
     connection: Connection,
-    wait: number,
+    wait: Duration,
     verbose: boolean,
     operation: IngestOperation,
     options?: { extIdField: string }
   ): Promise<BulkResultV2> {
     this.cache = await this.getCache();
     this.isAsync = !wait;
-    this.operation = operation;
-    this.wait = wait;
     try {
       const csvRecords: ReadStream = fs.createReadStream(csvFileName, { encoding: 'utf-8' });
       this.spinner.start(`Running ${this.isAsync ? 'async ' : ''}bulk ${operation} request`);
-      this.endWaitTime = Date.now() + Duration.minutes(this.wait).milliseconds;
+      this.endWaitTime = Date.now() + wait.milliseconds;
       this.spinner.status = getRemainingTimeStatus(this.isAsync, this.endWaitTime);
       const createJobOptions: CreateJobOptions = {
         object: sobject,
@@ -97,12 +95,12 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
 
       this.setupLifecycleListeners();
       try {
-        const jobInfo = await executeBulkV2DataRequest(this.job, csvRecords, this.wait);
+        const jobInfo = await executeBulkV2DataRequest(this.job, csvRecords, wait.milliseconds);
         if (this.isAsync) {
           await this.cache?.createCacheEntryForRequest(
             this.job.id ?? '',
-            this.connection?.getUsername(),
-            this.connection?.getApiVersion()
+            connection?.getUsername(),
+            connection?.getApiVersion()
           );
         }
         this.displayBulkV2Result(jobInfo);

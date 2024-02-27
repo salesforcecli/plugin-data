@@ -5,15 +5,15 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-
 import { Messages } from '@salesforce/core';
 import { Flags } from '@salesforce/sf-plugins-core';
+import { Duration } from '@salesforce/kit';
 import { BulkUpsertRequestCache } from '../../../bulkDataRequestCache.js';
 import { BulkOperationCommand } from '../../../bulkOperationCommand.js';
 import { BulkResultV2 } from '../../../types.js';
 import { validateSobjectType } from '../../../bulkUtils.js';
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulkv2.upsert');
 
 export default class Upsert extends BulkOperationCommand {
@@ -35,13 +35,11 @@ export default class Upsert extends BulkOperationCommand {
     const { flags } = await this.parse(Upsert);
     const conn = flags['target-org'].getConnection(flags['api-version']);
 
-    await validateSobjectType(flags.sobject, conn);
-
     return this.runBulkOperation(
-      flags.sobject,
+      await validateSobjectType(flags.sobject, conn),
       flags.file,
       conn,
-      flags.async ? 0 : flags.wait?.minutes,
+      flags.async ? Duration.minutes(0) : flags.wait,
       flags.verbose,
       'upsert',
       {

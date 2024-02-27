@@ -29,7 +29,6 @@ export default class DeleteResume extends ResumeBulkCommand {
       flags['api-version']
     );
     this.connection = resumeOptions.options.connection;
-    this.operation = 'delete';
     resumeOptions.options.operation = 'delete';
     const resumeResults = await this.resume(resumeOptions, flags.wait);
     if (isBulkV2RequestDone(resumeResults.jobInfo)) {

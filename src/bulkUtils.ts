@@ -25,9 +25,10 @@ export const transformResults = (results: IngestJobV2Results<Schema>): BulkRecor
   unprocessedRecords: results.unprocessedRecords.map((record) => record as unknown as BulkProcessedRecordV2),
 });
 
-export const validateSobjectType = async (sobjectType: string, connection: Connection): Promise<void> => {
+export const validateSobjectType = async (sobjectType: string, connection: Connection): Promise<string> => {
   try {
     await connection.sobject(sobjectType).describe();
+    return sobjectType;
   } catch (e) {
     throw new Error(messages.getMessage('invalidSobject', [sobjectType, (e as Error).message]));
   }
