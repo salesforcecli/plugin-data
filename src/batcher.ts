@@ -5,7 +5,6 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-
 import { ReadStream } from 'node:fs';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { Ux } from '@salesforce/sf-plugins-core';
@@ -19,7 +18,7 @@ const BATCH_RECORDS_LIMIT = 10000;
 const BATCH_BYTES_LIMIT = 10000000;
 const POLL_FREQUENCY_MS = 5000;
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'batcher');
 
 type BatchEntry = Record<string, string>;
@@ -44,12 +43,7 @@ type BulkResult = {
 export type BatcherReturnType = Awaited<ReturnType<Batcher['createAndExecuteBatches']>>;
 
 export class Batcher {
-  public constructor(
-    private readonly conn: Connection,
-    private readonly ux: Ux,
-    private readonly cli: string,
-    private readonly separator: string
-  ) {}
+  public constructor(private readonly conn: Connection, private readonly ux: Ux) {}
 
   /**
    * get and display the job status; close the job if completed
@@ -175,17 +169,7 @@ export class Batcher {
                 // we're using an async method on an event listener which doesn't fit the .on method parameter types
                 // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 async (batchInfo: BatchInfo): Promise<void> => {
-                  this.ux.log(
-                    messages.getMessage('CheckStatusCommand', [
-                      i + 1,
-                      this.cli,
-                      this.separator,
-                      this.separator,
-                      this.separator,
-                      batchInfo.jobId,
-                      batchInfo.id,
-                    ])
-                  );
+                  this.ux.log(messages.getMessage('CheckStatusCommand', [i + 1, batchInfo.jobId, batchInfo.id]));
                   const result = await newBatch.check();
                   if (result.state === 'Failed') {
                     reject(result.stateMessage);
@@ -216,10 +200,6 @@ export class Batcher {
     const jobIdIndex = err.message.indexOf('750');
     const batchIdIndex = err.message.indexOf('751');
     const message = messages.getMessage('TimeOut', [
-      this.cli,
-      this.separator,
-      this.separator,
-      this.separator,
       err.message.substr(jobIdIndex, 18),
       err.message.substr(batchIdIndex, 18),
     ]);
@@ -259,16 +239,7 @@ export class Batcher {
           if (result.state === 'Failed') {
             reject(result.stateMessage);
           } else if (!overallInfo) {
-            this.ux.log(
-              messages.getMessage('PollingInfo', [
-                this.cli,
-                this.separator,
-                this.separator,
-                this.separator,
-                POLL_FREQUENCY_MS / 1000,
-                batchInfo.jobId,
-              ])
-            );
+            this.ux.log(messages.getMessage('PollingInfo', [POLL_FREQUENCY_MS / 1000, batchInfo.jobId]));
             overallInfo = true;
           }
           this.ux.log(messages.getMessage('BatchQueued', [batchNum, batchInfo.id]));

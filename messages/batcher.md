@@ -18,7 +18,7 @@ Batch Status
 
 Will poll the batch statuses every %s seconds.
 To fetch the status on your own, press CTRL+C and use the command:
-%s force%sdata%sbulk%sstatus -i %s -b [<batchId>]
+sf force data bulk status -i %s -b [<batchId>]
 
 # ExternalIdRequired
 
@@ -27,12 +27,12 @@ An External ID is required on %s to perform an upsert.
 # TimeOut
 
 The operation timed out. Check the status with command:
-%s force%sdata%sbulk%sstatus -i %s -b %s
+sf force data bulk status -i %s -b %s
 
 # CheckStatusCommand
 
 Check batch #%s’s status with the command:
-%s force%sdata%sbulk%sstatus -i %s -b %s
+sf force data bulk status -i %s -b %s
 
 # BatchQueued
 
