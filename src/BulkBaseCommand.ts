@@ -5,9 +5,8 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import { BulkOperation, IngestJobV2, IngestOperation, JobInfoV2, JobStateV2 } from 'jsforce/lib/api/bulk.js';
+import { IngestJobV2, IngestOperation, JobInfoV2 } from 'jsforce/lib/api/bulk2.js';
 import { Duration } from '@salesforce/kit';
 import { capitalCase } from 'change-case';
 import { Connection, Lifecycle, Messages } from '@salesforce/core';
@@ -16,23 +15,19 @@ import { getResultMessage } from './reporters.js';
 import { BulkResultV2 } from './types.js';
 import { BulkDataRequestCache } from './bulkDataRequestCache.js';
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.base.command');
 
 export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
   public static readonly enableJsonFlag = true;
   protected lifeCycle = Lifecycle.getInstance();
-  protected job!: IngestJobV2<Schema, IngestOperation>;
+  protected job!: IngestJobV2<Schema>;
   protected connection: Connection | undefined;
   protected cache: BulkDataRequestCache | undefined;
   protected isAsync = false;
-  protected operation!: BulkOperation;
+  protected operation!: IngestOperation;
   protected endWaitTime = 0;
   protected wait = 0;
-  private numberRecordsProcessed = 0;
-  private numberRecordsFailed = 0;
-  private numberRecordSucceeded = 0;
-  private timeout = false;
 
   protected displayBulkV2Result(jobInfo: JobInfoV2): void {
     if (this.isAsync) {
@@ -69,15 +64,14 @@ export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
   }
 
   protected setupLifecycleListeners(): void {
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this.job.on('jobProgress', async () => {
-      const jobInfo = await this.job.check();
-      this.numberRecordsProcessed = jobInfo.numberRecordsProcessed ?? 0;
-      this.numberRecordsFailed = jobInfo.numberRecordsFailed ?? 0;
-      this.numberRecordSucceeded = this.numberRecordsProcessed - this.numberRecordsFailed;
-      this.spinner.status = `${this.getRemainingTimeStatus()}${this.getStage(
-        jobInfo.state
-      )}${this.getRemainingRecordsStatus()}`;
+    this.job.on('jobProgress', () => {
+      const handler = async (): Promise<void> => {
+        const jobInfo = await this.job.check();
+        this.spinner.status = `${getRemainingTimeStatus(this.isAsync, this.endWaitTime)}${getStage(
+          jobInfo.state
+        )}${getRemainingRecordsStatus(jobInfo)}`;
+      };
+      handler().catch((err) => this.eventListenerErrorHandler(err));
     });
 
     this.job.on('failed', (err: Error) => {
@@ -96,37 +90,38 @@ export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
       }
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this.job.on('jobTimeout', async () => {
-      if (!this.timeout) {
-        this.timeout = true;
+    this.job.once('jobTimeout', () => {
+      const handler = async (): Promise<void> => {
         await this.cache?.createCacheEntryForRequest(
           this.job.id ?? '',
           this.connection?.getUsername(),
           this.connection?.getApiVersion()
         );
         this.displayBulkV2Result(await this.job.check());
-      }
+      };
+      handler().catch((err) => this.eventListenerErrorHandler(err));
     });
   }
 
-  protected getRemainingTimeStatus(): string {
-    return this.isAsync
-      ? ''
-      : messages.getMessage('remainingTimeStatus', [Duration.milliseconds(this.endWaitTime - Date.now()).minutes]);
-  }
-
-  protected getRemainingRecordsStatus(): string {
-    // the leading space is intentional
-    return ` ${messages.getMessage('remainingRecordsStatus', [
-      this.numberRecordSucceeded,
-      this.numberRecordsFailed,
-      this.numberRecordsProcessed,
-    ])}`;
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  protected getStage(state: JobStateV2): string {
-    return ` Stage: ${capitalCase(state)}.`;
+  private eventListenerErrorHandler(err: unknown): void {
+    return err instanceof Error || typeof err === 'string' ? this.error(err) : this.error(JSON.stringify(err));
   }
 }
+
+export const getRemainingTimeStatus = (isAsync: boolean, endWaitTime: number): string =>
+  isAsync ? '' : messages.getMessage('remainingTimeStatus', [Duration.milliseconds(endWaitTime - Date.now()).minutes]);
+
+const getStage = (state: JobInfoV2['state']): string => ` Stage: ${capitalCase(state)}.`;
+
+const getRemainingRecordsStatus = (jobInfo: JobInfoV2): string => {
+  const numberRecordsProcessed = jobInfo.numberRecordsProcessed ?? 0;
+  const numberRecordsFailed = jobInfo.numberRecordsFailed ?? 0;
+  const numberRecordSucceeded = numberRecordsProcessed - numberRecordsFailed;
+
+  // the leading space is intentional
+  return ` ${messages.getMessage('remainingRecordsStatus', [
+    numberRecordSucceeded,
+    numberRecordsFailed,
+    numberRecordsProcessed,
+  ])}`;
+};
