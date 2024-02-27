@@ -31,14 +31,14 @@ export const orgFlags = {
   loglevel,
 };
 
-export const resultFormatFlag = Flags.string({
+export const resultFormatFlag = Flags.option({
   char: 'r',
   summary: messages.getMessage('flags.resultFormat.summary'),
-  options: ['human', 'json', 'csv'],
+  options: ['human', 'json', 'csv'] as const,
   default: 'human',
   aliases: ['resultformat'],
   deprecateAliases: true,
-});
+})();
 
 export const prefixValidation = (i: string): Promise<string> => {
   if (i.includes('/') || i.includes('\\')) {
