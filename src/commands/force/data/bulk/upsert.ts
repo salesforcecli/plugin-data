@@ -6,14 +6,13 @@
  */
 import fs from 'node:fs';
 
-
 import { Messages } from '@salesforce/core';
 import { Flags, SfCommand, Ux } from '@salesforce/sf-plugins-core';
 import { orgFlags } from '../../../../flags.js';
 import { Batcher, BatcherReturnType } from '../../../../batcher.js';
 import { validateSobjectType } from '../../../../bulkUtils.js';
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.upsert');
 
 export default class Upsert extends SfCommand<BatcherReturnType> {
@@ -66,12 +65,7 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
 
     await validateSobjectType(flags.sobject, conn);
 
-    const batcher = new Batcher(
-      conn,
-      new Ux({ jsonEnabled: this.jsonEnabled() }),
-      this.config.bin,
-      this.config.pjson.oclif.topicSeparator ?? ':'
-    );
+    const batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
     const csvStream = fs.createReadStream(flags.file, { encoding: 'utf-8' });
 
     const concurrencyMode = flags.serial ? 'Serial' : 'Parallel';

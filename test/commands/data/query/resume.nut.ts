@@ -9,7 +9,7 @@ import { expect, config } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { QueryResult, Record } from 'jsforce';
 import { sleep } from '@salesforce/kit';
-import { JobInfoV2 } from 'jsforce/lib/api/bulk.js';
+import { JobInfoV2 } from 'jsforce/lib/api/bulk2.js';
 config.truncateThreshold = 0;
 
 /** Verify that the operation completed successfully and results are available before attempting to do stuff with the results */

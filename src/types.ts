@@ -4,7 +4,9 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { JobInfoV2, BatchInfo, JobInfo } from 'jsforce/lib/api/bulk.js';
+import { BatchInfo, JobInfo } from 'jsforce/lib/api/bulk.js';
+import { JobInfoV2 } from 'jsforce/lib/api/bulk2.js';
+
 import { Connection } from '@salesforce/core';
 
 export type BulkProcessedRecordV2 = {

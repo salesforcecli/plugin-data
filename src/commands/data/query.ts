@@ -7,9 +7,8 @@
 
 import fs from 'node:fs';
 
-
 import { Connection, Logger, Messages, SfError } from '@salesforce/core';
-import { Record } from 'jsforce';
+import { Record as jsforceRecord } from 'jsforce';
 import {
   AnyJson,
   ensureJsonArray,
@@ -28,7 +27,7 @@ import { displayResults, transformBulkResults } from '../../queryUtils.js';
 import { FormatTypes } from '../../reporters.js';
 import { BulkQueryRequestCache } from '../../bulkDataRequestCache.js';
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
 
 export class DataSoqlQueryCommand extends SfCommand<unknown> {
@@ -146,10 +145,9 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
     allRows: boolean | undefined = false
   ): Promise<SoqlQueryResult> {
     connection.bulk2.pollTimeout = timeout.milliseconds ?? Duration.minutes(5).milliseconds;
-    let res: Record[];
     try {
-      res = (await connection.bulk2.query(query, allRows ? { scanAll: true } : {})) ?? [];
-      return transformBulkResults(res, query);
+      const res = (await connection.bulk2.query(query, allRows ? { scanAll: true } : {})) ?? [];
+      return transformBulkResults((await res.toArray()) as jsforceRecord[], query);
     } catch (e) {
       const err = e as Error & { jobId: string };
       if (timeout.minutes === 0 && err.name === 'JobPollingTimeout') {
@@ -226,7 +224,7 @@ export const retrieveColumns = async (
   logger?.debug('fetching columns for query');
   // eslint-disable-next-line no-underscore-dangle
   const columnUrl = `${connection._baseUrl()}/query?q=${encodeURIComponent(query)}&columns=true`;
-  const results = toJsonMap(await connection.request<Record>(columnUrl));
+  const results = toJsonMap(await connection.request<jsforceRecord>(columnUrl));
 
   return recursivelyFindColumns(ensureJsonArray(results.columnMetadata));
 };

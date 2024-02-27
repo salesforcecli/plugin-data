@@ -10,7 +10,7 @@ import { Logger, Messages } from '@salesforce/core';
 import { ux } from '@oclif/core';
 import chalk from 'chalk';
 import { get, getArray, getNumber, isString, Optional } from '@salesforce/ts-types';
-import { JobInfoV2 } from 'jsforce/lib/api/bulk.js';
+import { JobInfoV2 } from 'jsforce/lib/api/bulk2.js';
 import { capitalCase } from 'change-case';
 import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes.js';
 

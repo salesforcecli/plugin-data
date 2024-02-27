@@ -7,14 +7,13 @@
 import fs from 'node:fs';
 import { ReadStream } from 'node:fs';
 
-
 import { Connection, Messages } from '@salesforce/core';
 import { Flags, SfCommand, Ux } from '@salesforce/sf-plugins-core';
 import { orgFlags } from '../../../../flags.js';
 import { Batcher, BatcherReturnType } from '../../../../batcher.js';
 import { validateSobjectType } from '../../../../bulkUtils.js';
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.delete');
 
 export default class Delete extends SfCommand<BatcherReturnType> {
@@ -58,12 +57,7 @@ export default class Delete extends SfCommand<BatcherReturnType> {
 
     const csvRecords: ReadStream = fs.createReadStream(flags.file, { encoding: 'utf-8' });
     const job = conn.bulk.createJob<'delete'>(flags.sobject, 'delete');
-    const batcher: Batcher = new Batcher(
-      conn,
-      new Ux({ jsonEnabled: this.jsonEnabled() }),
-      this.config.bin,
-      this.config.pjson.oclif.topicSeparator ?? ':'
-    );
+    const batcher: Batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
     return new Promise(async (resolve, reject) => {

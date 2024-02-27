@@ -5,7 +5,8 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { IngestJobV2, IngestJobV2Results, IngestOperation, JobInfoV2 } from 'jsforce/lib/api/bulk.js';
+import { IngestJobV2, type JobInfoV2, type IngestJobV2Results } from 'jsforce/lib/api/bulk2.js';
+
 import { Schema } from 'jsforce';
 import { Connection, Messages } from '@salesforce/core';
 import { BulkProcessedRecordV2, BulkRecordsV2 } from './types.js';
@@ -32,7 +33,7 @@ export const validateSobjectType = async (sobjectType: string, connection: Conne
   }
 };
 
-export const waitOrTimeout = async (job: IngestJobV2<Schema, IngestOperation>, wait: number): Promise<void> => {
+export const waitOrTimeout = async (job: IngestJobV2<Schema>, wait: number): Promise<void> => {
   if (wait > 0) {
     let waitCountDown = wait;
     const progress = setInterval(() => {
