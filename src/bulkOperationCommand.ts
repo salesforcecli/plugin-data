@@ -8,31 +8,24 @@ import fs from 'node:fs';
 import { ReadStream } from 'node:fs';
 import os from 'node:os';
 
-
 import { Flags } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
 import { Connection, Messages } from '@salesforce/core';
 import { ux } from '@oclif/core';
 import { Schema } from 'jsforce';
-import {
-  BulkOperation,
-  IngestJobV2,
-  IngestJobV2FailedResults,
-  IngestOperation,
-  JobInfoV2,
-} from 'jsforce/lib/api/bulk.js';
+import { IngestJobV2, IngestJobV2FailedResults, IngestOperation, JobInfoV2 } from 'jsforce/lib/api/bulk2.js';
 import { orgFlags } from './flags.js';
 import { BulkDataRequestCache } from './bulkDataRequestCache.js';
 import { BulkResultV2 } from './types.js';
 import { isBulkV2RequestDone, transformResults, waitOrTimeout } from './bulkUtils.js';
-import { BulkBaseCommand } from './BulkBaseCommand.js';
+import { BulkBaseCommand, getRemainingTimeStatus } from './BulkBaseCommand.js';
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.operation.command');
 
 type CreateJobOptions = {
   object: string;
-  operation: BulkOperation;
+  operation: IngestOperation;
   externalIdFieldName?: string;
   lineEnding?: 'CRLF';
 };
@@ -73,59 +66,13 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
     }),
   };
 
-  /**
-   * create and execute batches based on the record arrays; wait for completion response if -w flag is set with > 0 minutes
-   * to get proper logging/printing to console pass the instance of UX that called this method
-   *
-   * @param job {IngestJobV2}
-   * @param input
-   * @param sobjectType {string}
-   * @param wait {number}
-   */
-  private static async executeBulkV2DataRequest<J extends Schema, T extends IngestOperation>(
-    job: IngestJobV2<J, T>,
-    input: ReadStream,
-    sobjectType: string,
-    wait?: number
-  ): Promise<JobInfoV2> {
-    await job.open();
-    const timeNow = Date.now();
-    let remainingTime = wait ? Duration.minutes(wait).milliseconds : 0;
-    job.emit('jobProgress', { remainingTime, stage: 'uploading' });
-    await job.uploadData(input);
-    remainingTime = remainingTime - (Date.now() - timeNow);
-    job.emit('jobProgress', { remainingTime, stage: 'uploadComplete' });
-    await job.close();
-    if (remainingTime > 0) {
-      job.emit('startPolling');
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      await waitOrTimeout(job, remainingTime);
-    }
-    return job.check();
-  }
-
-  private static printBulkErrors(failedResults: IngestJobV2FailedResults<Schema>): void {
-    const columns = {
-      id: { header: 'Id' },
-      sfId: { header: 'Sf_Id' },
-      error: { header: 'Error' },
-    };
-    const options = { title: `Bulk Failures [${failedResults.length}]` };
-    ux.log();
-    ux.table(
-      failedResults.map((f) => ({ id: 'Id' in f ? f.Id : '', sfId: f.sf__Id, error: f.sf__Error })),
-      columns,
-      options
-    );
-  }
-
   public async runBulkOperation(
     sobject: string,
     csvFileName: string,
     connection: Connection,
     wait: number,
     verbose: boolean,
-    operation: BulkOperation,
+    operation: IngestOperation,
     options?: { extIdField: string }
   ): Promise<BulkResultV2> {
     this.cache = await this.getCache();
@@ -136,7 +83,7 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
       const csvRecords: ReadStream = fs.createReadStream(csvFileName, { encoding: 'utf-8' });
       this.spinner.start(`Running ${this.isAsync ? 'async ' : ''}bulk ${operation} request`);
       this.endWaitTime = Date.now() + Duration.minutes(this.wait).milliseconds;
-      this.spinner.status = this.getRemainingTimeStatus();
+      this.spinner.status = getRemainingTimeStatus(this.isAsync, this.endWaitTime);
       const createJobOptions: CreateJobOptions = {
         object: sobject,
         operation,
@@ -150,7 +97,7 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
 
       this.setupLifecycleListeners();
       try {
-        const jobInfo = await BulkOperationCommand.executeBulkV2DataRequest(this.job, csvRecords, sobject, this.wait);
+        const jobInfo = await executeBulkV2DataRequest(this.job, csvRecords, this.wait);
         if (this.isAsync) {
           await this.cache?.createCacheEntryForRequest(
             this.job.id ?? '',
@@ -171,7 +118,7 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
         else if (verbose) {
           const records = await this.job.getAllResults();
           if (records?.failedResults?.length > 0) {
-            BulkOperationCommand.printBulkErrors(records.failedResults);
+            printBulkErrors(records.failedResults);
           }
         }
         return result;
@@ -186,3 +133,48 @@ export abstract class BulkOperationCommand extends BulkBaseCommand {
 
   protected abstract getCache(): Promise<BulkDataRequestCache>;
 }
+
+/**
+ * create and execute batches based on the record arrays; wait for completion response if -w flag is set with > 0 minutes
+ * to get proper logging/printing to console pass the instance of UX that called this method
+ *
+ * @param job {IngestJobV2}
+ * @param input
+ * @param sobjectType {string}
+ * @param wait {number}
+ */
+const executeBulkV2DataRequest = async <J extends Schema>(
+  job: IngestJobV2<J>,
+  input: ReadStream,
+  wait?: number
+): Promise<JobInfoV2> => {
+  await job.open();
+  const timeNow = Date.now();
+  let remainingTime = wait ? Duration.minutes(wait).milliseconds : 0;
+  job.emit('jobProgress', { remainingTime, stage: 'uploading' });
+  await job.uploadData(input);
+  remainingTime = remainingTime - (Date.now() - timeNow);
+  job.emit('jobProgress', { remainingTime, stage: 'uploadComplete' });
+  await job.close();
+  if (remainingTime > 0) {
+    job.emit('startPolling');
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    await waitOrTimeout(job, remainingTime);
+  }
+  return job.check();
+};
+
+const printBulkErrors = (failedResults: IngestJobV2FailedResults<Schema>): void => {
+  const columns = {
+    id: { header: 'Id' },
+    sfId: { header: 'Sf_Id' },
+    error: { header: 'Error' },
+  };
+  const options = { title: `Bulk Failures [${failedResults.length}]` };
+  ux.log();
+  ux.table(
+    failedResults.map((f) => ({ id: 'Id' in f ? f.Id : '', sfId: f.sf__Id, error: f.sf__Error })),
+    columns,
+    options
+  );
+};
