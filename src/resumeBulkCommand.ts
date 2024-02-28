@@ -9,7 +9,7 @@ import { Flags, SfCommand, loglevel, optionalOrgFlagWithDeprecations } from '@sa
 import { Messages } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { BulkResultV2, ResumeOptions } from './types.js';
-import { isBulkV2RequestDone, transformResults, waitOrTimeout } from './bulkUtils.js';
+import { POLL_FREQUENCY_MS, isBulkV2RequestDone, remainingTime, transformResults } from './bulkUtils.js';
 import { displayBulkV2Result, getRemainingTimeStatus, setupLifecycleListeners } from './BulkBaseCommand.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -43,11 +43,11 @@ export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
   };
 
   protected async resume(resumeOptions: ResumeOptions, wait: Duration): Promise<BulkResultV2> {
+    const endWaitTime = Date.now() + wait.milliseconds;
     this.spinner.start('Getting status');
     const conn = resumeOptions.options.connection;
     const isAsync = wait.milliseconds === 0;
     const job = conn.bulk2.job('ingest', { id: resumeOptions.jobInfo.id });
-    const endWaitTime = Date.now() + wait.milliseconds;
     this.spinner.status = getRemainingTimeStatus({ isAsync, endWaitTime });
     setupLifecycleListeners({
       job,
@@ -57,7 +57,9 @@ export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
       username: conn.getUsername(),
       endWaitTime,
     });
-    await waitOrTimeout(job, wait.milliseconds);
+    if (Date.now() < endWaitTime) {
+      await job.poll(POLL_FREQUENCY_MS, remainingTime(Date.now())(endWaitTime));
+    }
     const jobInfo = await job.check();
     this.spinner.stop();
     displayBulkV2Result({ jobInfo, username: conn.getUsername(), isAsync, cmd: this });

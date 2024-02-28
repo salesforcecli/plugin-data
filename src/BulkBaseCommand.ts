@@ -82,7 +82,8 @@ export const displayBulkV2Result = ({
       cmd.info(messages.getMessage('checkStatus', [jobInfo.operation, jobInfo.id, username]));
     }
     if (jobInfo.state === 'Failed') {
-      throw messages.createError('bulkJobFailed', [jobInfo.id]);
+      const error = messages.createError('bulkJobFailed', [jobInfo.id]);
+      error.setData(jobInfo);
     }
   }
 };

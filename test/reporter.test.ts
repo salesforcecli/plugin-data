@@ -12,12 +12,14 @@ import { get, getPlainObject } from '@salesforce/ts-types';
 import sinon from 'sinon';
 import { ux } from '@oclif/core';
 import { Field, SoqlQueryResult } from '../src/dataSoqlQueryTypes.js';
-import { CsvReporter, HumanReporter, escape } from '../src/reporters.js';
+import { CsvReporter, HumanReporter, escape, nullString, parseFields, prepNullValues } from '../src/reporters.js';
 import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars.js';
 
 chaiUse(chaiAsPromised);
 
-describe('reporter tests', () => {
+describe.only('reporter tests', () => {
+  // partial application of deps so we can UT just the actual logic
+  const parseFieldsFn = parseFields()('');
   describe('human reporter tests', () => {
     let reporter: HumanReporter;
     let queryData: SoqlQueryResult;
@@ -32,23 +34,22 @@ describe('reporter tests', () => {
       reporter = new HumanReporter(dataSoqlQueryResult, queryData.columns);
     });
     it('parses result fields', () => {
-      const { attributeNames, children, aggregates } = reporter.parseFields();
+      const { attributeNames, children, aggregates } = parseFieldsFn(queryData.columns);
       expect(attributeNames).to.be.ok;
       expect(children).to.be.ok;
       expect(aggregates).to.be.ok;
     });
     it('preps null values in result', () => {
-      const { attributeNames, children, aggregates } = reporter.parseFields();
+      const { attributeNames, children, aggregates } = parseFieldsFn(queryData.columns);
       expect(attributeNames).to.be.ok;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const massagedRows = reporter.massageRows(queryData.result.records, children, aggregates);
       expect(massagedRows).to.be.deep.equal(queryData.result.records);
-      reporter.prepNullValues(massagedRows);
-      expect(massagedRows).to.be.ok;
+      expect(prepNullValues(massagedRows)).to.be.ok;
     });
 
     it('stringifies JSON results correctly', async () => {
-      queryData = soqlQueryExemplars.queryWithNestedObject.soqlQueryResult;
+      queryData = structuredClone(soqlQueryExemplars.queryWithNestedObject.soqlQueryResult);
       const dataSoqlQueryResult: SoqlQueryResult = {
         columns: queryData.columns,
         query: queryData.query,
@@ -57,17 +58,46 @@ describe('reporter tests', () => {
       const sb = sinon.createSandbox();
       const reflectSpy = sb.spy(Reflect, 'set');
       reporter = new HumanReporter(dataSoqlQueryResult, queryData.columns);
-      const { attributeNames, children, aggregates } = reporter.parseFields();
+      const { attributeNames, children, aggregates } = parseFieldsFn(queryData.columns);
       expect(attributeNames).to.be.ok;
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const massagedRows = reporter.massageRows(queryData.result.records, children, aggregates);
       expect(massagedRows).to.be.deep.equal(queryData.result.records);
-      reporter.prepNullValues(massagedRows);
-      expect(massagedRows).to.be.ok;
+      const preppedRows = massagedRows.map(prepNullValues);
+      expect(preppedRows).to.be.ok;
       // would be called 6 times if not set correctly in massageRows
       expect(reflectSpy.callCount).to.equal(3);
-      expect(massagedRows).to.not.include('object Object');
+      expect(preppedRows).to.not.include('object Object');
+    });
+
+    describe('null value prep', () => {
+      it('queryWithNestedObject', () => {
+        soqlQueryExemplars.queryWithNestedObject.soqlQueryResult.result.records.map(prepNullValues).map((r) => {
+          expect(r.Metadata.urls, JSON.stringify(r.Metadata)).to.equal(nullString);
+          expect(r.Metadata.description, JSON.stringify(r.Metadata)).to.equal(nullString);
+          return undefined;
+        });
+      });
+      it('queryWithAggregates', () => {
+        const result = soqlQueryExemplars.queryWithAggregates.soqlQueryResult.result.records
+          .map(prepNullValues)
+          .filter((r) => typeof r.expr0 !== 'number');
+
+        expect(result.length).to.be.greaterThan(5);
+        result.map((r) => {
+          expect(r.expr0).to.equal(nullString);
+        });
+      });
+      it('subQuery', () => {
+        const result = soqlQueryExemplars.subQuery.soqlQueryResult.result.records
+          .map(prepNullValues)
+          .filter((r) => typeof r.Contacts?.totalSize !== 'number');
+
+        result.map((r) => {
+          expect(r.Contacts).to.equal(nullString);
+        });
+      });
     });
 
     it('preps columns for display values in result', () => {});
@@ -131,19 +161,12 @@ describe('reporter tests', () => {
     });
   });
   describe('handles subqueries for human result', () => {
-    let reporter: HumanReporter;
     let queryData: SoqlQueryResult;
     beforeEach(async () => {
       queryData = soqlQueryExemplars.subQuery.soqlQueryResult;
-      const dataSoqlQueryResult: SoqlQueryResult = {
-        columns: queryData.columns,
-        query: queryData.query,
-        result: queryData.result,
-      };
-      reporter = new HumanReporter(dataSoqlQueryResult, queryData.columns);
     });
     it('parses result fields', () => {
-      const { attributeNames, children, aggregates } = reporter.parseFields();
+      const { attributeNames, children, aggregates } = parseFieldsFn(queryData.columns);
       expect(attributeNames).to.be.ok;
       expect(children).to.be.ok;
       expect(aggregates).to.be.ok;

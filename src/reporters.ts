@@ -9,7 +9,7 @@ import { EOL } from 'node:os';
 import { Logger, Messages } from '@salesforce/core';
 import { ux } from '@oclif/core';
 import chalk from 'chalk';
-import { get, getArray, getNumber, isString, Optional } from '@salesforce/ts-types';
+import { get, getArray, getNumber, isPlainObject, isString, Optional } from '@salesforce/ts-types';
 import { JobInfoV2 } from 'jsforce/lib/api/bulk2.js';
 import { capitalCase } from 'change-case';
 import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes.js';
@@ -17,21 +17,15 @@ import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes.js';
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
 const reporterMessages = Messages.loadMessages('@salesforce/plugin-data', 'reporter');
+export const nullString = chalk.bold('null');
 
-class Reporter {
+class QueryReporter {
   protected logger: Logger;
-
-  public constructor() {
-    this.logger = Logger.childFromRoot('reporter');
-  }
-}
-
-class QueryReporter extends Reporter {
   protected columns: Field[] = [];
   protected data: SoqlQueryResult;
 
   public constructor(data: SoqlQueryResult, columns: Field[]) {
-    super();
+    this.logger = Logger.childFromRoot('reporter');
     this.columns = columns;
     this.data = data;
   }
@@ -49,75 +43,20 @@ export class HumanReporter extends QueryReporter {
   }
 
   public display(): void {
-    const { attributeNames, children, aggregates } = this.parseFields();
+    const { attributeNames, children, aggregates } = parseFields(this.logger)(this.data.query)(this.columns);
     // in case of count() there are no records, but there is a totalSize
     const totalCount = this.data.result.records.length ? this.data.result.records.length : this.data.result.totalSize;
     this.soqlQuery(attributeNames, this.massageRows(this.data.result.records, children, aggregates), totalCount);
   }
 
-  public parseFields(): ParsedFields {
-    const fields = this.columns;
-    // Field names
-    const attributeNames: string[] = [];
-
-    // For subqueries. Display the children under the parents
-    const children: string[] = [];
-
-    // For function fields, like avg(total).
-    const aggregates: Field[] = [];
-
-    if (fields) {
-      this.logger.info(`Found fields ${JSON.stringify(fields.map((field) => `${typeof field}.${field.name}`))}`);
-
-      fields.forEach((field) => {
-        if (field.fieldType === FieldType.subqueryField) {
-          children.push(field.name);
-          (field.fields ?? []).forEach((subfield) => attributeNames.push(`${field.name}.${subfield.name}`));
-        } else if (field.fieldType === FieldType.functionField) {
-          if (field.alias) {
-            attributeNames.push(field.alias);
-          } else {
-            attributeNames.push(field.name);
-          }
-          aggregates.push(field);
-        } else {
-          attributeNames.push(field.name);
-        }
-      });
-    } else {
-      this.logger.info(`No fields found for query "${this.data.query}"`);
-    }
-
-    return { attributeNames, children, aggregates };
-  }
-
+  // eslint-disable-next-line class-methods-use-this
   public soqlQuery(
     columns: Array<Optional<string>>,
     records: Array<Record<string, unknown>>,
     totalCount: number
   ): void {
-    this.prepNullValues(records);
-    ux.table(records, prepColumns(columns));
+    ux.table(records.map(prepNullValues), prepColumns(columns));
     ux.log(chalk.bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
-  }
-
-  public prepNullValues(records: unknown[]): void {
-    records
-      .filter((record) => record)
-      .forEach((record): void => {
-        if (record) {
-          const recordAsObject = record as never;
-          Reflect.ownKeys(recordAsObject).forEach((propertyKey) => {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const value = Reflect.get(recordAsObject, propertyKey);
-            if (value === null) {
-              Reflect.set(recordAsObject, propertyKey, chalk.bold('null'));
-            } else if (typeof value === 'object') {
-              this.prepNullValues([value]);
-            }
-          });
-        }
-      });
   }
 
   //  public massageRows(queryResults: BasicRecord[], children: string[], aggregates: Field[]): BasicRecord[] {
@@ -180,11 +119,11 @@ export class HumanReporter extends QueryReporter {
                   Object.entries(record as never).forEach(([key, value]) => {
                     if (!index) {
                       Reflect.defineProperty(result, `${child.toString()}.${key}`, {
-                        value: value ?? chalk.bold('null'),
+                        value: value ?? nullString,
                       });
                     } else {
                       Reflect.defineProperty(newResult, `${child.toString()}.${key}`, {
-                        value: value ?? chalk.bold('null'),
+                        value: value ?? nullString,
                       });
                     }
                   });
@@ -324,11 +263,6 @@ export class JsonReporter extends QueryReporter {
     super(data, columns);
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  public log(): void {
-    return;
-  }
-
   public display(): void {
     ux.styledJSON({ status: 0, result: this.data.result });
   }
@@ -363,6 +297,17 @@ const prepColumns = (columns: Array<Optional<string>>): ux.Table.table.Columns<R
   return formattedColumns;
 };
 
+/** find null/undefined and replace it with a styled string */
+export const prepNullValues = <T>(record: T): T =>
+  isPlainObject(record)
+    ? (Object.fromEntries(
+        Object.entries(record).map(([key, value]) => [key, maybeReplaceNulls(maybeRecurseNestedObjects(value))])
+      ) as T)
+    : record;
+
+const maybeReplaceNulls = <T>(value: T): T | string => value ?? nullString;
+const maybeRecurseNestedObjects = <T>(value: T): T => (isPlainObject(value) ? prepNullValues(value) : value);
+
 /**
  * Escape a value to be placed in a CSV row. We follow rfc 4180
  * https://tools.ietf.org/html/rfc4180#section-2 and will not surround the
@@ -384,3 +329,49 @@ export const getResultMessage = (jobInfo: JobInfoV2): string =>
     jobInfo.numberRecordsProcessed,
     jobInfo.numberRecordsFailed,
   ]);
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// const logFn = <T>(i: T): T => {
+//   // eslint-disable-next-line no-console
+//   console.log(i);
+//   return i;
+// };
+
+export const parseFields =
+  (logger?: Logger) =>
+  (query: string) =>
+  (fields: Field[]): ParsedFields => {
+    // Field names
+    const attributeNames: string[] = [];
+
+    // For subqueries. Display the children under the parents
+    const children: string[] = [];
+
+    // For function fields, like avg(total).
+    const aggregates: Field[] = [];
+
+    if (fields) {
+      logger?.info(`Found fields ${JSON.stringify(fields.map((field) => `${typeof field}.${field.name}`))}`);
+
+      fields.forEach((field) => {
+        if (field.fieldType === FieldType.subqueryField) {
+          children.push(field.name);
+          (field.fields ?? []).forEach((subfield) => attributeNames.push(`${field.name}.${subfield.name}`));
+        } else if (field.fieldType === FieldType.functionField) {
+          if (field.alias) {
+            attributeNames.push(field.alias);
+          } else {
+            attributeNames.push(field.name);
+          }
+          aggregates.push(field);
+        } else {
+          attributeNames.push(field.name);
+        }
+      });
+    } else {
+      // TODO: why is fields potential falsy?
+      logger?.info(`No fields found for query "${query}"`);
+    }
+
+    return { attributeNames, children, aggregates };
+  };

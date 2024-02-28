@@ -17,7 +17,13 @@ import { IngestJobV2, IngestJobV2FailedResults, IngestOperation, JobInfoV2 } fro
 import { orgFlags } from './flags.js';
 import { BulkDataRequestCache, BulkDeleteRequestCache, BulkUpsertRequestCache } from './bulkDataRequestCache.js';
 import { BulkResultV2 } from './types.js';
-import { isBulkV2RequestDone, transformResults, validateSobjectType, waitOrTimeout } from './bulkUtils.js';
+import {
+  POLL_FREQUENCY_MS,
+  isBulkV2RequestDone,
+  transformResults,
+  validateSobjectType,
+  remainingTime,
+} from './bulkUtils.js';
 import { displayBulkV2Result, getRemainingTimeStatus, setupLifecycleListeners } from './BulkBaseCommand.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -113,7 +119,7 @@ export const runBulkOperation = async ({
       endWaitTime,
     });
     try {
-      const jobInfo = await executeBulkV2DataRequest(job, csvRecords, wait.milliseconds);
+      const jobInfo = await executeBulkV2DataRequest(job, csvRecords, endWaitTime);
       if (isAsync) {
         await cache?.createCacheEntryForRequest(job.id ?? '', connection?.getUsername(), connection?.getApiVersion());
       }
@@ -162,20 +168,15 @@ const getCache = async (operation: SupportedOperations): Promise<BulkDataRequest
 const executeBulkV2DataRequest = async <J extends Schema>(
   job: IngestJobV2<J>,
   input: ReadStream,
-  wait?: number
+  endWaitTime?: number
 ): Promise<JobInfoV2> => {
   await job.open();
-  const timeNow = Date.now();
-  let remainingTime = wait ? Duration.minutes(wait).milliseconds : 0;
-  job.emit('jobProgress', { remainingTime, stage: 'uploading' });
+  job.emit('jobProgress', { remainingTime: remainingTime(Date.now())(endWaitTime), stage: 'uploading' });
   await job.uploadData(input);
-  remainingTime = remainingTime - (Date.now() - timeNow);
-  job.emit('jobProgress', { remainingTime, stage: 'uploadComplete' });
+  job.emit('jobProgress', { remainingTime: remainingTime(Date.now())(endWaitTime), stage: 'uploadComplete' });
   await job.close();
-  if (remainingTime > 0) {
-    job.emit('startPolling');
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    await waitOrTimeout(job, remainingTime);
+  if (endWaitTime && Date.now() < endWaitTime) {
+    await job.poll(POLL_FREQUENCY_MS, remainingTime(Date.now())(endWaitTime));
   }
   return job.check();
 };

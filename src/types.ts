@@ -10,8 +10,8 @@ import { JobInfoV2 } from 'jsforce/lib/api/bulk2.js';
 import { Connection } from '@salesforce/core';
 
 export type BulkProcessedRecordV2 = {
-  sf__Created: 'true' | 'false';
-  sf__Id: string;
+  sf__Created?: 'true' | 'false';
+  sf__Id?: string;
 } & Record<string, unknown>;
 
 export type BulkRecordsV2 = {
