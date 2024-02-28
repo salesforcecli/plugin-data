@@ -1,36 +1,15 @@
 /*
- * Copyright (c) 2020, salesforce.com, inc.
+ * Copyright (c) 2023, salesforce.com, inc.
  * All rights reserved.
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { EOL } from 'node:os';
-
-import { Logger, Messages } from '@salesforce/core';
 import { ux } from '@oclif/core';
 import { get, getNumber, isString } from '@salesforce/ts-types';
-import { JobInfoV2 } from 'jsforce/lib/api/bulk2.js';
-import { capitalCase } from 'change-case';
-import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes.js';
-
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const reporterMessages = Messages.loadMessages('@salesforce/plugin-data', 'reporter');
-
-export abstract class QueryReporter {
-  protected logger: Logger;
-  protected columns: Field[] = [];
-  protected data: SoqlQueryResult;
-
-  public constructor(data: SoqlQueryResult, columns: Field[]) {
-    this.logger = Logger.childFromRoot('reporter');
-    this.columns = columns;
-    this.data = data;
-  }
-}
-
-const SEPARATOR = ',';
-const DOUBLE_QUOTE = '"';
-const SHOULD_QUOTE_REGEXP = new RegExp(`[${SEPARATOR}${DOUBLE_QUOTE}${EOL}]`);
+import { Field, SoqlQueryResult } from '../dataSoqlQueryTypes.js';
+import { getAggregateAliasOrName } from './reporters.js';
+import { QueryReporter, logFields, isSubquery, isAggregate } from './reporters.js';
 
 export class CsvReporter extends QueryReporter {
   public constructor(data: SoqlQueryResult, columns: Field[]) {
@@ -103,23 +82,6 @@ export class CsvReporter extends QueryReporter {
     return fields.map((field) => field.name);
   }
 }
-
-export class JsonReporter extends QueryReporter {
-  public constructor(data: SoqlQueryResult, columns: Field[]) {
-    super(data, columns);
-  }
-
-  public display(): void {
-    ux.styledJSON({ status: 0, result: this.data.result });
-  }
-}
-
-/**
- * A list of the accepted reporter types
- */
-
-export type FormatTypes = 'human' | 'csv' | 'json';
-
 /**
  * Escape a value to be placed in a CSV row. We follow rfc 4180
  * https://tools.ietf.org/html/rfc4180#section-2 and will not surround the
@@ -127,34 +89,22 @@ export type FormatTypes = 'human' | 'csv' | 'json';
  *
  * @param value The escaped value
  */
+
 export const escape = (value: string): string => {
   if (value && SHOULD_QUOTE_REGEXP.test(value)) {
     return `"${value.replace(/"/gi, '""')}"`;
   }
   return value;
 };
-
-export const getResultMessage = (jobInfo: JobInfoV2): string =>
-  reporterMessages.getMessage('bulkV2Result', [
-    jobInfo.id,
-    capitalCase(jobInfo.state),
-    jobInfo.numberRecordsProcessed,
-    jobInfo.numberRecordsFailed,
-  ]);
-
-export const isAggregate = (field: Field): boolean => field.fieldType === FieldType.functionField;
-export const isSubquery = (field: Field): boolean => field.fieldType === FieldType.subqueryField;
-const getAggregateFieldName = (field: Field): string => field.alias ?? field.name;
-export const getAggregateAliasOrName = (field: Field): string =>
-  isAggregate(field) ? getAggregateFieldName(field) : field.name;
-
+export const SEPARATOR = ',';
+const DOUBLE_QUOTE = '"';
+export const SHOULD_QUOTE_REGEXP = new RegExp(`[${SEPARATOR}${DOUBLE_QUOTE}${EOL}]`);
 const csvAttributeNamesFromField =
   (typeLengths: Map<string, number>) =>
   (field: Field): string[] =>
     typeLengths.has(field.name)
       ? subQueryAttributeNames(typeLengths.get(field.name) ?? 0)(field)
       : [getAggregateAliasOrName(field)];
-
 const subQueryAttributeNames =
   (length: number) =>
   (field: Field): string[] =>
@@ -162,22 +112,3 @@ const subQueryAttributeNames =
       `${field.name}.totalSize`,
       ...(field.fields ?? []).map((subfield) => `${field.name}.records.${index}.${subfield.name}`),
     ]);
-
-export const logFields =
-  (logger: Logger) =>
-  (query: string) =>
-  (fields?: Field[]): Field[] => {
-    if (fields?.length) {
-      logger?.info(`Found fields ${JSON.stringify(fields.map((field) => `${typeof field}.${field.name}`))}`);
-    } else {
-      logger?.info(`No fields found for query "${query}"`);
-    }
-    return fields ?? [];
-  };
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-// const logFn = <T>(i: T): T => {
-//   // eslint-disable-next-line no-console
-//   console.log(i);
-//   return i;
-// };

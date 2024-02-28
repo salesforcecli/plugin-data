@@ -24,7 +24,7 @@ import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { orgFlags, perflogFlag, resultFormatFlag } from '../../flags.js';
 import { Field, FieldType, SoqlQueryResult } from '../../dataSoqlQueryTypes.js';
 import { displayResults, transformBulkResults } from '../../queryUtils.js';
-import { FormatTypes } from '../../reporters.js';
+import { FormatTypes } from '../../reporters/reporters.js';
 import { BulkQueryRequestCache } from '../../bulkDataRequestCache.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);

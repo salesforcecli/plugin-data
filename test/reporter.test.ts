@@ -13,7 +13,7 @@ import sinon from 'sinon';
 import { ux } from '@oclif/core';
 import { HumanReporter, parseFields, prepNullValues, nullString } from '../src/reporters/humanReporter.js';
 import { Field, SoqlQueryResult } from '../src/dataSoqlQueryTypes.js';
-import { CsvReporter, escape } from '../src/reporters.js';
+import { CsvReporter, escape } from '../src/reporters/csvReporter.js';
 import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars.js';
 
 chaiUse(chaiAsPromised);

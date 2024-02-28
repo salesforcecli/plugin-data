@@ -11,7 +11,7 @@ import { Duration } from '@salesforce/kit';
 import { capitalCase } from 'change-case';
 import { Messages } from '@salesforce/core';
 import { Schema } from 'jsforce';
-import { getResultMessage } from './reporters.js';
+import { getResultMessage } from './reporters/reporters.js';
 import { BulkDataRequestCache } from './bulkDataRequestCache.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
