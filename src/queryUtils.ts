@@ -6,7 +6,8 @@
  */
 import { Record } from 'jsforce';
 import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes.js';
-import { CsvReporter, FormatTypes, HumanReporter, JsonReporter } from './reporters.js';
+import { CsvReporter, FormatTypes, JsonReporter } from './reporters.js';
+import { HumanReporter } from './reporters/humanReporter.js';
 
 export const displayResults = (queryResult: SoqlQueryResult, resultFormat: FormatTypes): void => {
   let reporter: HumanReporter | JsonReporter | CsvReporter;

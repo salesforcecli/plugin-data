@@ -11,15 +11,15 @@ import chaiAsPromised from 'chai-as-promised';
 import { get, getPlainObject } from '@salesforce/ts-types';
 import sinon from 'sinon';
 import { ux } from '@oclif/core';
+import { HumanReporter, parseFields, prepNullValues, nullString } from '../src/reporters/humanReporter.js';
 import { Field, SoqlQueryResult } from '../src/dataSoqlQueryTypes.js';
-import { CsvReporter, HumanReporter, escape, nullString, parseFields, prepNullValues } from '../src/reporters.js';
+import { CsvReporter, escape } from '../src/reporters.js';
 import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars.js';
 
 chaiUse(chaiAsPromised);
 
 describe.only('reporter tests', () => {
   // partial application of deps so we can UT just the actual logic
-  const parseFieldsFn = parseFields()('');
   describe('human reporter tests', () => {
     let reporter: HumanReporter;
     let queryData: SoqlQueryResult;
@@ -34,13 +34,13 @@ describe.only('reporter tests', () => {
       reporter = new HumanReporter(dataSoqlQueryResult, queryData.columns);
     });
     it('parses result fields', () => {
-      const { attributeNames, children, aggregates } = parseFieldsFn(queryData.columns);
+      const { attributeNames, children, aggregates } = parseFields(queryData.columns);
       expect(attributeNames).to.be.ok;
       expect(children).to.be.ok;
       expect(aggregates).to.be.ok;
     });
     it('preps null values in result', () => {
-      const { attributeNames, children, aggregates } = parseFieldsFn(queryData.columns);
+      const { attributeNames, children, aggregates } = parseFields(queryData.columns);
       expect(attributeNames).to.be.ok;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const massagedRows = reporter.massageRows(queryData.result.records, children, aggregates);
@@ -58,7 +58,7 @@ describe.only('reporter tests', () => {
       const sb = sinon.createSandbox();
       const reflectSpy = sb.spy(Reflect, 'set');
       reporter = new HumanReporter(dataSoqlQueryResult, queryData.columns);
-      const { attributeNames, children, aggregates } = parseFieldsFn(queryData.columns);
+      const { attributeNames, children, aggregates } = parseFields(queryData.columns);
       expect(attributeNames).to.be.ok;
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -166,7 +166,7 @@ describe.only('reporter tests', () => {
       queryData = soqlQueryExemplars.subQuery.soqlQueryResult;
     });
     it('parses result fields', () => {
-      const { attributeNames, children, aggregates } = parseFieldsFn(queryData.columns);
+      const { attributeNames, children, aggregates } = parseFields(queryData.columns);
       expect(attributeNames).to.be.ok;
       expect(children).to.be.ok;
       expect(aggregates).to.be.ok;
