@@ -12,6 +12,7 @@ import {
   orgApiVersionFlagWithDeprecations,
   requiredOrgFlagWithDeprecations,
 } from '@salesforce/sf-plugins-core';
+import { formatTypes } from './reporters/reporters.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
@@ -34,7 +35,7 @@ export const orgFlags = {
 export const resultFormatFlag = Flags.option({
   char: 'r',
   summary: messages.getMessage('flags.resultFormat.summary'),
-  options: ['human', 'json', 'csv'] as const,
+  options: formatTypes,
   default: 'human',
   aliases: ['resultformat'],
   deprecateAliases: true,

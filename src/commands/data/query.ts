@@ -24,7 +24,6 @@ import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { orgFlags, perflogFlag, resultFormatFlag } from '../../flags.js';
 import { Field, FieldType, SoqlQueryResult } from '../../dataSoqlQueryTypes.js';
 import { displayResults, transformBulkResults } from '../../queryUtils.js';
-import { FormatTypes } from '../../reporters/reporters.js';
 import { BulkQueryRequestCache } from '../../bulkDataRequestCache.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -124,7 +123,7 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
             flags['all-rows']
           );
       if (!this.jsonEnabled()) {
-        displayResults({ ...queryResult }, flags['result-format'] as FormatTypes);
+        displayResults({ ...queryResult }, flags['result-format']);
       }
       return queryResult.result;
     } finally {

@@ -39,8 +39,8 @@ export class JsonReporter extends QueryReporter {
 /**
  * A list of the accepted reporter types
  */
-
-export type FormatTypes = 'human' | 'csv' | 'json';
+export const formatTypes = ['human', 'csv', 'json'] as const;
+export type FormatTypes = (typeof formatTypes)[number];
 
 export const getResultMessage = (jobInfo: JobInfoV2): string =>
   reporterMessages.getMessage('bulkV2Result', [
@@ -56,6 +56,7 @@ const getAggregateFieldName = (field: Field): string => field.alias ?? field.nam
 export const getAggregateAliasOrName = (field: Field): string =>
   isAggregate(field) ? getAggregateFieldName(field) : field.name;
 
+/** if there are fields, log them by type/name; otherwise, log that there are no fields for the query  */
 export const logFields =
   (logger: Logger) =>
   (query: string) =>
@@ -67,10 +68,3 @@ export const logFields =
     }
     return fields ?? [];
   };
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-// const logFn = <T>(i: T): T => {
-//   // eslint-disable-next-line no-console
-//   console.log(i);
-//   return i;
-// };

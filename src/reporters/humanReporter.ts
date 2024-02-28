@@ -20,6 +20,8 @@ type ParsedFields = {
   aggregates: Field[];
 };
 
+type FieldsMappedByName = Map<string, Field>;
+
 export const nullString = chalk.bold('null');
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -33,94 +35,14 @@ export class HumanReporter extends QueryReporter {
   public display(): void {
     logFields(this.logger)(this.data.query)(this.columns);
     const { attributeNames, children, aggregates } = parseFields(this.columns);
+    const fieldMap = mapFieldsByName(this.columns);
     // in case of count() there are no records, but there is a totalSize
     const totalCount = this.data.result.records.length ? this.data.result.records.length : this.data.result.totalSize;
-    printTable(attributeNames, this.massageRows(this.data.result.records, children, aggregates), totalCount);
-  }
-
-  //  public massageRows(queryResults: BasicRecord[], children: string[], aggregates: Field[]): BasicRecord[] {
-  public massageRows(
-    queryResults: Array<Record<string, unknown>>,
-    children: string[],
-    aggregates: Field[]
-  ): Array<Record<string, unknown>> {
-    // some fields will return a JSON object that isn't accessible via the query (SELECT Metadata FROM RemoteProxy)
-    // some will return a JSON that IS accessible via the query (SELECT owner.Profile.Name FROM Lead)
-    // querying (SELECT Metadata.isActive FROM RemoteProxy) throws a SOQL validation error, so we have to display the entire Metadata object
-    queryResults.forEach((qr) => {
-      const result = qr;
-      this.data.columns.forEach((col) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const entry = Reflect.get(result, col.name);
-        if (typeof entry === 'object' && col.fieldType === FieldType.field) {
-          Reflect.set(result, col.name, JSON.stringify(entry, null, 2));
-        } else if (typeof entry === 'object' && col.fields?.length && entry) {
-          col.fields.forEach((field) => {
-            Reflect.set(result, `${col.name}.${field.name}`, get(result, `${col.name}.records[0].${field.name}`));
-          });
-        }
-      });
-    });
-
-    // There are subqueries or aggregates. Massage the data.
-    if (children.length > 0 || aggregates.length > 0) {
-      const qr = queryResults.reduce<Array<Record<string, unknown>>>(
-        (newResults: Array<Record<string, unknown>>, result) => {
-          // Aggregates are soql functions that aggregate data, like "SELECT avg(total)" and
-          // are returned in the data as exprX. Aggregates can have aliases, like "avg(total) totalAverage"
-          // and are returned in the data as the alias.
-          if (aggregates.length > 0) {
-            for (let i = 0; i < aggregates.length; i++) {
-              const aggregate = aggregates[i];
-              if (!aggregate.alias) {
-                Reflect.set(result as never, aggregate.name, Reflect.get(result as never, `expr${i}`));
-              }
-            }
-          }
-
-          const subResults: Array<Record<string, unknown>> = [];
-          if (children.length > 0) {
-            const childrenRows: Record<string, unknown> = {};
-            children.forEach((child) => {
-              const aChild = get(result as never, child);
-              Reflect.set(childrenRows, child, aChild);
-              Reflect.deleteProperty(result as never, child);
-            });
-
-            Reflect.ownKeys(childrenRows).forEach((child) => {
-              const childO = get(childrenRows, child as string);
-              if (childO) {
-                const childRecords = getArray(childO, 'records', []);
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                childRecords.forEach((record: unknown, index) => {
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                  const newResult: Record<string, unknown> = {};
-                  Object.entries(record as never).forEach(([key, value]) => {
-                    if (!index) {
-                      Reflect.defineProperty(result, `${child.toString()}.${key}`, {
-                        value: value ?? nullString,
-                      });
-                    } else {
-                      Reflect.defineProperty(newResult, `${child.toString()}.${key}`, {
-                        value: value ?? nullString,
-                      });
-                    }
-                  });
-                  if (index) {
-                    subResults.push(newResult);
-                  }
-                });
-              }
-            });
-          }
-          newResults.push(result, ...subResults);
-          return newResults;
-        },
-        []
-      );
-      return qr;
-    }
-    return queryResults;
+    const preppedData = this.data.result.records
+      .map(massageJson(fieldMap))
+      .map(massageAggregates(aggregates))
+      .flatMap(maybeMassageSubqueries(children));
+    printTable(attributeNames, preppedData, totalCount);
   }
 }
 
@@ -132,24 +54,21 @@ export const parseFields = (fields: Field[]): ParsedFields => ({
 
 export const prepColumns = (columns: Array<Optional<string>>): ux.Table.table.Columns<Record<string, unknown>> => {
   const formattedColumns: ux.Table.table.Columns<Record<string, unknown>> = {};
-  columns
-    .map((field: Optional<string>) => field)
-    .filter(isString)
-    .map(
-      (field) =>
-        (formattedColumns[field] = {
-          header: field.toUpperCase(),
-          get: (row): string => {
-            // first test if key exists, if so, return value
-            if (Reflect.has(row, field)) {
-              return (Reflect.get(row, field) as string) ?? '';
-            } else {
-              // if not, try to find it query
-              return (get(row, field) as string) ?? '';
-            }
-          },
-        })
-    );
+  columns.filter(isString).map(
+    (field) =>
+      (formattedColumns[field] = {
+        header: field.toUpperCase(),
+        get: (row): string => {
+          // first test if key exists, if so, return value
+          if (Reflect.has(row, field)) {
+            return (Reflect.get(row, field) as string) ?? '';
+          } else {
+            // if not, try to find it query
+            return (get(row, field) as string) ?? '';
+          }
+        },
+      })
+  );
   return formattedColumns;
 };
 
@@ -177,3 +96,89 @@ const humanNamesFromField = (field: Field): string[] =>
   isSubquery(field)
     ? (field.fields ?? [])?.map((subfield) => `${field.name}.${subfield.name}`)
     : [getAggregateAliasOrName(field)];
+
+/**
+ * some fields will return a JSON object that isn't accessible via the query (SELECT Metadata FROM RemoteProxy)
+ * some will return a JSON that IS accessible via the query (SELECT owner.Profile.Name FROM Lead)
+ * querying (SELECT Metadata.isActive FROM RemoteProxy) throws a SOQL validation error, so we have to display the entire Metadata object
+ */
+export const massageJson =
+  (fieldMap: FieldsMappedByName) =>
+  (queryRow: Record<string, unknown>): Record<string, unknown> =>
+    Object.fromEntries(Object.entries(queryRow).flatMap(([k, v]) => maybeReplaceJson(fieldMap.get(k))([k, v])));
+
+const maybeReplaceJson =
+  (field?: Field) =>
+  ([key, value]: [key: string, value: unknown]): Array<[string, unknown]> => {
+    if (isPlainObject(value) && field?.fieldType === FieldType.field) {
+      return [[key, JSON.stringify(value, null, 2)]];
+    }
+    if (isPlainObject(value) && field?.fields?.length && value) {
+      return field.fields.map((subfield) => [`${key}.${subfield.name}`, get(value, `records[0].${subfield.name}`)]);
+    }
+    return [[key, value]];
+  };
+
+export const mapFieldsByName = (fields: Field[]): FieldsMappedByName =>
+  new Map(fields.map((field) => [field.name, field]));
+
+const massageAggregates =
+  (aggregates: Field[]) =>
+  (queryRow: Record<string, unknown>): Record<string, unknown> =>
+    aggregates.length ? renameAggregates(aggregates)(queryRow) : queryRow;
+
+/** replace ex: expr0 with the alias (if there is one) or name   */
+export const renameAggregates =
+  (aggregates: Field[]) =>
+  (queryRow: Record<string, unknown>): Record<string, unknown> =>
+    Object.fromEntries(
+      Object.entries(queryRow).map(([k, v]) => {
+        const index = typeof k === 'string' ? k.match(/expr(\d+)/)?.[1] : undefined;
+        if (typeof index === 'string') {
+          const matchingAgg = aggregates.at(parseInt(index, 10));
+          return matchingAgg ? [getAggregateAliasOrName(matchingAgg), v] : [k, v];
+        }
+        return [k, v];
+      })
+    );
+
+const maybeMassageSubqueries =
+  (children: string[]) =>
+  (queryRow: Record<string, unknown>): Array<Record<string, unknown>> =>
+    children.length ? massageSubqueries(children)(queryRow) : [queryRow];
+
+const prependParentWithDotAndReplaceNull =
+  (parent: string) =>
+  ([k, v]: [string, unknown]): [string, unknown] =>
+    [`${parent}.${k}`, v ?? nullString];
+
+const massageSubqueries =
+  (children: string[]) =>
+  (queryRow: Record<string, unknown>): Array<Record<string, unknown>> => {
+    const childrenSet = new Set(children);
+    const childrenRows = new Map(children.map(getChildRecords(queryRow)));
+
+    // all other children are added to a new array of Objects
+    const subResults = Array.from(childrenRows.entries())
+      .map(([childFieldName, childRecords]) =>
+        childRecords.slice(1).flatMap(Object.entries).map(prependParentWithDotAndReplaceNull(childFieldName))
+      )
+      .map((entries) => Object.fromEntries(entries));
+
+    // the first (0-index) child's keys are renamed and transferred onto the parent
+    const childEntriesForParent = Array.from(childrenRows.entries()).flatMap(([childFieldName, childRecords]) =>
+      Object.entries(childRecords[0] ?? {}).map(prependParentWithDotAndReplaceNull(childFieldName))
+    );
+
+    const parentEntries = Object.entries(queryRow)
+      // remove known children from the original object
+      .filter(([key]) => !childrenSet.has(key))
+      .concat(childEntriesForParent);
+
+    return [Object.fromEntries(parentEntries), ...subResults];
+  };
+
+const getChildRecords =
+  (queryRow: unknown) =>
+  (child: string): [key: string, records: Array<Record<string, unknown>>] =>
+    [child, getArray(get(queryRow, child), 'records', []) as Array<Record<string, unknown>>];

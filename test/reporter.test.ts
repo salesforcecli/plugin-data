@@ -6,71 +6,127 @@
  */
 
 import { expect, use as chaiUse } from 'chai';
-
 import chaiAsPromised from 'chai-as-promised';
 import { get, getPlainObject } from '@salesforce/ts-types';
 import sinon from 'sinon';
 import { ux } from '@oclif/core';
-import { HumanReporter, parseFields, prepNullValues, nullString } from '../src/reporters/humanReporter.js';
-import { Field, SoqlQueryResult } from '../src/dataSoqlQueryTypes.js';
+import {
+  parseFields,
+  prepNullValues,
+  nullString,
+  mapFieldsByName,
+  renameAggregates,
+  massageJson,
+} from '../src/reporters/humanReporter.js';
+import { Field, FieldType, SoqlQueryResult } from '../src/dataSoqlQueryTypes.js';
 import { CsvReporter, escape } from '../src/reporters/csvReporter.js';
 import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars.js';
 
 chaiUse(chaiAsPromised);
 
-describe.only('reporter tests', () => {
-  // partial application of deps so we can UT just the actual logic
+describe('reporter tests', () => {
   describe('human reporter tests', () => {
-    let reporter: HumanReporter;
     let queryData: SoqlQueryResult;
     beforeEach(async () => {
       // jsforce has records/attributes/url as a non-optional property.  It may not be!
-      queryData = soqlQueryExemplars.queryWithAggregates.soqlQueryResult as unknown as SoqlQueryResult;
-      const dataSoqlQueryResult: SoqlQueryResult = {
-        columns: queryData.columns,
-        query: queryData.query,
-        result: queryData.result,
-      };
-      reporter = new HumanReporter(dataSoqlQueryResult, queryData.columns);
+      queryData = structuredClone(soqlQueryExemplars.queryWithAggregates.soqlQueryResult) as unknown as SoqlQueryResult;
     });
-    it('parses result fields', () => {
-      const { attributeNames, children, aggregates } = parseFields(queryData.columns);
-      expect(attributeNames).to.be.ok;
-      expect(children).to.be.ok;
-      expect(aggregates).to.be.ok;
-    });
-    it('preps null values in result', () => {
-      const { attributeNames, children, aggregates } = parseFields(queryData.columns);
-      expect(attributeNames).to.be.ok;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const massagedRows = reporter.massageRows(queryData.result.records, children, aggregates);
-      expect(massagedRows).to.be.deep.equal(queryData.result.records);
-      expect(prepNullValues(massagedRows)).to.be.ok;
+    describe('column parsing', () => {
+      it('basic query', () => {
+        const { attributeNames, children, aggregates } = parseFields(
+          soqlQueryExemplars.simpleQuery.soqlQueryResult.columns
+        );
+        expect(attributeNames).to.deep.equal(['Id', 'Name']);
+        expect(children).to.deep.equal([]);
+        expect(aggregates).to.deep.equal([]);
+      });
+      it('parses result fields', () => {
+        const { attributeNames, children, aggregates } = parseFields(queryData.columns);
+        expect(attributeNames).to.deep.equal(['Name', queryData.columns[1].name]);
+        expect(children).to.deep.equal([]);
+        expect(aggregates).to.deep.equal([queryData.columns[1]]);
+      });
     });
 
-    it('stringifies JSON results correctly', async () => {
-      queryData = structuredClone(soqlQueryExemplars.queryWithNestedObject.soqlQueryResult);
-      const dataSoqlQueryResult: SoqlQueryResult = {
-        columns: queryData.columns,
-        query: queryData.query,
-        result: queryData.result,
-      };
-      const sb = sinon.createSandbox();
-      const reflectSpy = sb.spy(Reflect, 'set');
-      reporter = new HumanReporter(dataSoqlQueryResult, queryData.columns);
-      const { attributeNames, children, aggregates } = parseFields(queryData.columns);
-      expect(attributeNames).to.be.ok;
+    describe('stringifies JSON results correctly', () => {
+      it('nested object', async () => {
+        queryData = structuredClone(soqlQueryExemplars.queryWithNestedObject.soqlQueryResult);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const massagedRows = reporter.massageRows(queryData.result.records, children, aggregates);
-      expect(massagedRows).to.be.deep.equal(queryData.result.records);
-      const preppedRows = massagedRows.map(prepNullValues);
-      expect(preppedRows).to.be.ok;
-      // would be called 6 times if not set correctly in massageRows
-      expect(reflectSpy.callCount).to.equal(3);
-      expect(preppedRows).to.not.include('object Object');
+        const massagedRows = queryData.result.records.map(massageJson(mapFieldsByName(queryData.columns)));
+
+        expect(massagedRows).to.not.include('object Object');
+        massagedRows.map((r, i) => {
+          const original = queryData.result.records[i];
+          expect(r.Metadata).to.equal(JSON.stringify(original.Metadata, null, 2));
+        });
+      });
     });
 
+    describe('rename aggregates', () => {
+      it('has no aggregates', () => {
+        const aggregates: Field[] = [];
+        const record = { a: 1, b: 2, c: 3 };
+        expect(renameAggregates(aggregates)(record)).to.be.deep.equal(record);
+      });
+      it('has only an non-aliased aggregate', () => {
+        const aggregates: Field[] = [{ fieldType: FieldType.functionField, name: 'avg(AnnualRevenue)' }];
+        const record = {
+          attributes: {
+            type: 'AggregateResult',
+          },
+          Name: 'Pyramid Construction Inc.',
+          expr0: 950000000,
+        };
+        expect(renameAggregates(aggregates)(record)).to.be.deep.equal({
+          attributes: {
+            type: 'AggregateResult',
+          },
+          Name: 'Pyramid Construction Inc.',
+          'avg(AnnualRevenue)': 950000000,
+        });
+      });
+      it('has only a aliased aggregate', () => {
+        const aggregates: Field[] = [
+          { fieldType: FieldType.functionField, name: 'avg(AnnualRevenue)', alias: 'Avg Rev' },
+        ];
+        const record = {
+          attributes: {
+            type: 'AggregateResult',
+          },
+          Name: 'Pyramid Construction Inc.',
+          expr0: 950000000,
+        };
+        expect(renameAggregates(aggregates)(record)).to.be.deep.equal({
+          attributes: {
+            type: 'AggregateResult',
+          },
+          Name: 'Pyramid Construction Inc.',
+          'Avg Rev': 950000000,
+        });
+      });
+      it('has an aggregate of each type', () => {
+        const aggregates: Field[] = [
+          { fieldType: FieldType.functionField, name: 'sum(AnnualRevenue)', alias: 'Total Rev' },
+          { fieldType: FieldType.functionField, name: 'avg(AnnualRevenue)' },
+        ];
+        const record = {
+          attributes: {
+            type: 'AggregateResult',
+          },
+          Name: 'Pyramid Construction Inc.',
+          expr0: 950000000,
+          expr1: 950000,
+        };
+        expect(renameAggregates(aggregates)(record)).to.be.deep.equal({
+          attributes: {
+            type: 'AggregateResult',
+          },
+          Name: 'Pyramid Construction Inc.',
+          'Total Rev': 950000000,
+          'avg(AnnualRevenue)': 950000,
+        });
+      });
+    });
     describe('null value prep', () => {
       it('queryWithNestedObject', () => {
         soqlQueryExemplars.queryWithNestedObject.soqlQueryResult.result.records.map(prepNullValues).map((r) => {

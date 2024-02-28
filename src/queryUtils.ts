@@ -49,3 +49,9 @@ export const transformBulkResults = (results: Record[], query: string): SoqlQuer
     query,
   };
 };
+
+export const logFn = <T>(i: T): T => {
+  // eslint-disable-next-line no-console
+  console.log(i);
+  return i;
+};
