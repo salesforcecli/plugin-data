@@ -36,9 +36,6 @@ export class JsonReporter extends QueryReporter {
   }
 }
 
-/**
- * A list of the accepted reporter types
- */
 export const formatTypes = ['human', 'csv', 'json'] as const;
 export type FormatTypes = (typeof formatTypes)[number];
 
@@ -68,3 +65,30 @@ export const logFields =
     }
     return fields ?? [];
   };
+
+export const massageAggregates =
+  (aggregates: Field[]) =>
+  (queryRow: Record<string, unknown>): Record<string, unknown> =>
+    aggregates.length ? renameAggregates(aggregates)(queryRow) : queryRow;
+
+/**
+ * replace ex: expr0 with the alias (if there is one) or name
+ *
+ * Aggregates are soql functions that aggregate data, like "SELECT avg(total)" and
+ * are returned in the data as exprX. Aggregates can have aliases, like "avg(total) totalAverage"
+ * and are returned in the data as the alias.
+ *
+ */
+export const renameAggregates =
+  (aggregates: Field[]) =>
+  (queryRow: Record<string, unknown>): Record<string, unknown> =>
+    Object.fromEntries(
+      Object.entries(queryRow).map(([k, v]) => {
+        const index = typeof k === 'string' ? k.match(/expr(\d+)/)?.[1] : undefined;
+        if (typeof index === 'string') {
+          const matchingAgg = aggregates.at(parseInt(index, 10));
+          return matchingAgg ? [getAggregateAliasOrName(matchingAgg), v] : [k, v];
+        }
+        return [k, v];
+      })
+    );

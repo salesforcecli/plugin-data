@@ -15,16 +15,16 @@ import {
   prepNullValues,
   nullString,
   mapFieldsByName,
-  renameAggregates,
   massageJson,
 } from '../src/reporters/humanReporter.js';
+import { renameAggregates } from '../src/reporters/reporters.js';
 import { Field, FieldType, SoqlQueryResult } from '../src/dataSoqlQueryTypes.js';
-import { CsvReporter, escape } from '../src/reporters/csvReporter.js';
+import { CsvReporter, escape, getColumns, getMaxRecord } from '../src/reporters/csvReporter.js';
 import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars.js';
 
 chaiUse(chaiAsPromised);
 
-describe('reporter tests', () => {
+describe.only('reporter tests', () => {
   describe('human reporter tests', () => {
     let queryData: SoqlQueryResult;
     beforeEach(async () => {
@@ -158,62 +158,87 @@ describe('reporter tests', () => {
 
     it('preps columns for display values in result', () => {});
   });
+
   describe('csv reporter tests', () => {
-    let reporter: CsvReporter;
-    let queryData: SoqlQueryResult;
-    beforeEach(async () => {
-      //
-      queryData = soqlQueryExemplars.queryWithAggregates.soqlQueryResult as unknown as SoqlQueryResult;
-      const dataSoqlQueryResult: SoqlQueryResult = {
-        columns: queryData.columns,
-        query: queryData.query,
-        result: queryData.result,
-      };
-      reporter = new CsvReporter(dataSoqlQueryResult, queryData.columns);
+    describe('getMaxRecord for subqueries', () => {
+      it('complexSubQuery', () => {
+        const records = soqlQueryExemplars.complexSubQuery.soqlQueryResult.result.records;
+        expect(getMaxRecord(records)('OpportunityLineItems')).to.equal(1);
+      });
+      it('subQuery', () => {
+        const records = soqlQueryExemplars.subQuery.soqlQueryResult.result.records;
+        expect(getMaxRecord(records)('Contacts')).to.equal(4);
+      });
+    });
+    describe('getColumns', () => {
+      it('nestedObject', () => {
+        expect(
+          getColumns(soqlQueryExemplars.queryWithNestedObject.soqlQueryResult.result.records)(
+            soqlQueryExemplars.queryWithNestedObject.soqlQueryResult.columns
+          )
+        ).to.deep.equal(['Id', 'Metadata']);
+      });
+      it('queryWithAggregates', () => {
+        const queryResult = soqlQueryExemplars.queryWithAggregates.soqlQueryResult as unknown as SoqlQueryResult;
+        expect(getColumns(queryResult.result.records)(queryResult.columns)).to.be.deep.equal([
+          'Name',
+          'avg(AnnualRevenue)',
+        ]);
+      });
+      it('subQueries', () => {
+        const massagedRows = getColumns(soqlQueryExemplars.subQuery.soqlQueryResult.result.records)(
+          soqlQueryExemplars.subQuery.soqlQueryResult.columns
+        );
+        expect(massagedRows).to.be.deep.equal([
+          'Name',
+          'Contacts.totalSize',
+          'Contacts.records.0.LastName',
+          'Contacts.totalSize',
+          'Contacts.records.1.LastName',
+          'Contacts.totalSize',
+          'Contacts.records.2.LastName',
+          'Contacts.totalSize',
+          'Contacts.records.3.LastName',
+        ]);
+      });
     });
 
     it('stringifies JSON results correctly', async () => {
-      queryData = soqlQueryExemplars.queryWithNestedObject.soqlQueryResult;
+      const queryData = structuredClone(soqlQueryExemplars.queryWithNestedObject.soqlQueryResult);
       const dataSoqlQueryResult: SoqlQueryResult = {
         columns: queryData.columns,
         query: queryData.query,
         result: queryData.result,
       };
       const sb = sinon.createSandbox();
-      reporter = new CsvReporter(dataSoqlQueryResult, queryData.columns);
+      const reporter = new CsvReporter(dataSoqlQueryResult, queryData.columns);
       const logStub = sb.stub(ux, 'log');
 
-      const massagedRows = reporter.massageRows();
-      const data = getPlainObject(reporter, 'data');
       reporter.display();
-      expect(logStub.called).to.be.true;
-      expect(massagedRows).to.be.deep.equal(
-        soqlQueryExemplars.queryWithNestedObject.soqlQueryResult.columns.map((column: Field) => column.name)
-      );
-      expect(get(data, 'result.records')).be.equal(
+
+      // writes header row + 1 per record
+      expect(logStub.callCount).to.equal(1 + queryData.result.records.length);
+      // escapes the Metadata field which is an object
+      expect(logStub.getCall(1).args[0]).to.include(escape(JSON.stringify(queryData.result.records[0].Metadata)));
+
+      // no mutation of original results
+      const data = getPlainObject(reporter, 'data');
+      expect(get(data, 'result.records')).deep.equal(
         soqlQueryExemplars.queryWithNestedObject.soqlQueryResult.result.records
       );
     });
 
-    it('massages report results', () => {
-      const massagedRows = reporter.massageRows();
-      const data = getPlainObject(reporter, 'data');
-      expect(massagedRows).to.be.deep.equal(
-        soqlQueryExemplars.queryWithAggregates.soqlQueryResult.columns.map((column: Field) => column.name)
-      );
-      expect(get(data, 'result.records')).be.equal(
-        soqlQueryExemplars.queryWithAggregates.soqlQueryResult.result.records
-      );
-    });
-    it('escapes embedded separator', () => {
-      let escapedString = escape('"a,b,c"');
-      expect(escapedString).to.be.equal('"""a,b,c"""');
-      escapedString = escape('a,b,c');
-      expect(escapedString).to.be.equal('"a,b,c"');
-    });
-    it('noop escape with no embedded separator', () => {
-      const escapedString = escape('abc');
-      expect(escapedString).to.be.equal('abc');
+    describe('escaping', () => {
+      it('escapes embedded separator', () => {
+        let escapedString = escape('"a,b,c"');
+        expect(escapedString).to.be.equal('"""a,b,c"""');
+        escapedString = escape('a,b,c');
+        expect(escapedString).to.be.equal('"a,b,c"');
+      });
+      it('noop escape with no embedded separator', () => {
+        const escapedString = escape('abc');
+        expect(escapedString).to.be.equal('abc');
+      });
     });
   });
   describe('handles subqueries for human result', () => {
@@ -226,35 +251,6 @@ describe('reporter tests', () => {
       expect(attributeNames).to.be.ok;
       expect(children).to.be.ok;
       expect(aggregates).to.be.ok;
-    });
-  });
-  describe('handles subqueries for csv', () => {
-    let reporter: CsvReporter;
-    let queryData: SoqlQueryResult;
-    beforeEach(async () => {
-      queryData = soqlQueryExemplars.subQuery.soqlQueryResult;
-      const dataSoqlQueryResult: SoqlQueryResult = {
-        columns: queryData.columns,
-        query: queryData.query,
-        result: queryData.result,
-      };
-      reporter = new CsvReporter(dataSoqlQueryResult, queryData.columns);
-    });
-    it('massages report results', () => {
-      const massagedRows = reporter.massageRows();
-      const data = get(reporter, 'data');
-      expect(massagedRows).to.be.deep.equal([
-        'Name',
-        'Contacts.totalSize',
-        'Contacts.records.0.LastName',
-        'Contacts.totalSize',
-        'Contacts.records.1.LastName',
-        'Contacts.totalSize',
-        'Contacts.records.2.LastName',
-        'Contacts.totalSize',
-        'Contacts.records.3.LastName',
-      ]);
-      expect(get(data, 'result.records')).be.equal(soqlQueryExemplars.subQuery.soqlQueryResult.result.records);
     });
   });
 });

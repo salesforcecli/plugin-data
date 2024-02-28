@@ -10,6 +10,7 @@ import { get, getArray, isPlainObject, isString, Optional } from '@salesforce/ts
 import { Messages } from '@salesforce/core';
 import { Field, FieldType, SoqlQueryResult } from '../dataSoqlQueryTypes.js';
 import { QueryReporter, logFields, isSubquery, isAggregate, getAggregateAliasOrName } from './reporters.js';
+import { massageAggregates } from './reporters.js';
 
 type ParsedFields = {
   /** Field names */
@@ -121,26 +122,6 @@ const maybeReplaceJson =
 
 export const mapFieldsByName = (fields: Field[]): FieldsMappedByName =>
   new Map(fields.map((field) => [field.name, field]));
-
-const massageAggregates =
-  (aggregates: Field[]) =>
-  (queryRow: Record<string, unknown>): Record<string, unknown> =>
-    aggregates.length ? renameAggregates(aggregates)(queryRow) : queryRow;
-
-/** replace ex: expr0 with the alias (if there is one) or name   */
-export const renameAggregates =
-  (aggregates: Field[]) =>
-  (queryRow: Record<string, unknown>): Record<string, unknown> =>
-    Object.fromEntries(
-      Object.entries(queryRow).map(([k, v]) => {
-        const index = typeof k === 'string' ? k.match(/expr(\d+)/)?.[1] : undefined;
-        if (typeof index === 'string') {
-          const matchingAgg = aggregates.at(parseInt(index, 10));
-          return matchingAgg ? [getAggregateAliasOrName(matchingAgg), v] : [k, v];
-        }
-        return [k, v];
-      })
-    );
 
 const maybeMassageSubqueries =
   (children: string[]) =>

@@ -7,8 +7,9 @@
 import { EOL } from 'node:os';
 import { ux } from '@oclif/core';
 import { get, getNumber, isString } from '@salesforce/ts-types';
+import { Record as jsforceRecord } from 'jsforce';
 import { Field, SoqlQueryResult } from '../dataSoqlQueryTypes.js';
-import { getAggregateAliasOrName } from './reporters.js';
+import { getAggregateAliasOrName, massageAggregates } from './reporters.js';
 import { QueryReporter, logFields, isSubquery, isAggregate } from './reporters.js';
 
 export class CsvReporter extends QueryReporter {
@@ -17,71 +18,56 @@ export class CsvReporter extends QueryReporter {
   }
 
   public display(): void {
-    const attributeNames = this.massageRows();
-
-    // begin output
-    ux.log(attributeNames.map(escape).join(SEPARATOR));
-
-    // explained why we need this below - foreach does not allow types
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    this.data.result.records.forEach((row: Record<string, unknown>) => {
-      const values = attributeNames.map((name) => {
-        // try get(row, name) first, then if it fails, default to row[name]. The default will happen in bulk cases.
-        // the standard case returns {field:{nested: 'value'}}, while the bulk will return {field.nested: 'value'}
-        const value = get(row, name, row[name]);
-        if (isString(value)) {
-          return escape(value);
-          // if value is null, then typeof value === 'object' so check before typeof to avoid illegal csv
-        } else if (value === null) {
-          return;
-        } else if (typeof value === 'object') {
-          return escape(JSON.stringify(value));
-        }
-        return value;
-      });
-      ux.log(values.join(SEPARATOR));
-    });
-  }
-
-  public massageRows(): string[] {
     const fields = logFields(this.logger)(this.data.query)(this.columns);
+    const aggregates = fields.filter(isAggregate);
+    const preppedData = this.data.result.records.map(massageAggregates(aggregates));
+    const attributeNames = getColumns(preppedData)(fields);
 
-    if (fields.some(isSubquery) || fields.some(isAggregate)) {
-      // If there are subqueries, we need to get the max child length for each subquery.
-      const typeLengths = new Map<string, number>(fields.filter(isSubquery).map((field) => [field.name, 0]));
-      // For function fields, like avg(total).
-      const aggregates = fields.filter(isAggregate);
-
-      // Get max lengths by iterating over the records once
-      this.data.result.records.forEach((result) => {
-        [...typeLengths.keys()].forEach((key) => {
-          const record = get(result as never, key);
-          const totalSize = getNumber(record, 'totalSize');
-          if (!!totalSize && totalSize > (typeLengths.get(key) ?? 0)) {
-            typeLengths.set(key, totalSize);
-          }
-        });
-
-        // Aggregates are soql functions that aggregate data, like "SELECT avg(total)" and
-        // are returned in the data as exprX. Aggregates can have aliases, like "avg(total) totalAverage"
-        // and are returned in the data as the alias.
-        if (aggregates.length > 0) {
-          for (let i = 0; i < aggregates.length; i++) {
-            const aggregate = aggregates[i];
-            if (!aggregate.alias) {
-              Reflect.set(result as never, aggregate.name, Reflect.get(result as never, `expr${i}`));
-            }
-          }
-        }
-      });
-
-      return fields.flatMap(csvAttributeNamesFromField(typeLengths));
-    }
-    // simple case, no aggregates or subqueries
-    return fields.map((field) => field.name);
+    [
+      // header row
+      attributeNames.map(escape).join(SEPARATOR),
+      // data
+      ...preppedData.map((row): string => attributeNames.map(getFieldValue(row)).join(SEPARATOR)),
+    ].map((line) => ux.log(line));
   }
 }
+
+const getFieldValue =
+  (row: jsforceRecord) =>
+  (fieldName: string): unknown => {
+    // try get(row, name) first, then if it fails, default to row[name]. The default will happen in bulk cases.
+    // the standard case returns {field:{nested: 'value'}}, while the bulk will return {field.nested: 'value'}
+    const value = get(row, fieldName, row[fieldName]);
+    if (isString(value)) {
+      return escape(value);
+      // if value is null, then typeof value === 'object' so check before typeof to avoid illegal csv
+    } else if (value === null) {
+      return;
+    } else if (typeof value === 'object') {
+      return escape(JSON.stringify(value));
+    }
+    return value;
+  };
+
+export const getMaxRecord =
+  (allRecords: jsforceRecord[]) =>
+  (fieldName: string): number =>
+    allRecords.reduce((max, record) => Math.max(max, getNumber(get(record, fieldName), 'totalSize', 0)), 0);
+
+export const getColumns =
+  (records: jsforceRecord[]) =>
+  (fields: Field[]): string[] => {
+    // If there are subqueries, we need to get the max child length for each subquery.
+    // For function fields, like avg(total).
+    const maxRecordsPerField = new Map<string, number>(
+      fields.filter(isSubquery).map((field) => [field.name, getMaxRecord(records)(field.name)])
+    );
+
+    return [...maxRecordsPerField.values()].some((n) => n > 0)
+      ? fields.flatMap(csvAttributeNamesFromField(maxRecordsPerField)) // flatten nested objects from the query down to a flat file
+      : fields.map((field) => field.name); // simple case, no aggregates or subqueries
+  };
+
 /**
  * Escape a value to be placed in a CSV row. We follow rfc 4180
  * https://tools.ietf.org/html/rfc4180#section-2 and will not surround the
@@ -89,22 +75,25 @@ export class CsvReporter extends QueryReporter {
  *
  * @param value The escaped value
  */
-
 export const escape = (value: string): string => {
   if (value && SHOULD_QUOTE_REGEXP.test(value)) {
     return `"${value.replace(/"/gi, '""')}"`;
   }
   return value;
 };
-export const SEPARATOR = ',';
+
+const SEPARATOR = ',';
 const DOUBLE_QUOTE = '"';
-export const SHOULD_QUOTE_REGEXP = new RegExp(`[${SEPARATOR}${DOUBLE_QUOTE}${EOL}]`);
+const SHOULD_QUOTE_REGEXP = new RegExp(`[${SEPARATOR}${DOUBLE_QUOTE}${EOL}]`);
+
 const csvAttributeNamesFromField =
   (typeLengths: Map<string, number>) =>
   (field: Field): string[] =>
     typeLengths.has(field.name)
       ? subQueryAttributeNames(typeLengths.get(field.name) ?? 0)(field)
       : [getAggregateAliasOrName(field)];
+
+// to flatten nested objects from the query down to a flat file, we need to construct column names
 const subQueryAttributeNames =
   (length: number) =>
   (field: Field): string[] =>
