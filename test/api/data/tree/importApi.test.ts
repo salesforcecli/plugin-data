@@ -57,7 +57,7 @@ const jsonRefRegex = /[.]*["|'][A-Z0-9_]*["|'][ ]*:[ ]*["|']@([A-Z0-9_]*)["|'][.
 describe('ImportApi', () => {
   const sandbox = sinon.createSandbox();
 
-  Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+  Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
   const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
   afterEach(() => {
@@ -647,7 +647,7 @@ describe('ImportApi', () => {
   describe('getSchema', () => {
     it('should return the schema', () => {
       const org = new Org({ aliasOrUsername: 'import@test.org' });
-      const importApi = new ImportApi(org, 'sf', ':');
+      const importApi = new ImportApi(org);
       expect(importApi.getSchema()).to.deep.equal(dataImportPlanSchema);
     });
   });
