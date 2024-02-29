@@ -34,6 +34,14 @@ export const setupLifecycleListeners = ({
   isAsync: boolean;
   endWaitTime: number;
 }): void => {
+  // the event emitted by jsforce's polling function
+  job.on('inProgress', (jobInfo: JobInfoV2) => {
+    cmd.spinner.status = `${getRemainingTimeStatus({
+      isAsync,
+      endWaitTime,
+    })}${getStage(jobInfo.state)}${getRemainingRecordsStatus(jobInfo)}`;
+  });
+  // the event emitted other places in the plugin
   job.on('jobProgress', () => {
     const handler = async (): Promise<void> => {
       const jobInfo = await job.check();
@@ -82,8 +90,7 @@ export const displayBulkV2Result = ({
       cmd.info(messages.getMessage('checkStatus', [jobInfo.operation, jobInfo.id, username]));
     }
     if (jobInfo.state === 'Failed') {
-      const error = messages.createError('bulkJobFailed', [jobInfo.id]);
-      error.setData(jobInfo);
+      throw messages.createError('bulkJobFailed', [jobInfo.id]).setData(jobInfo);
     }
   }
 };

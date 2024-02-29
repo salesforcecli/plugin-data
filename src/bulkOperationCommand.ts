@@ -103,10 +103,8 @@ export const runBulkOperation = async ({
       object: sobject,
       operation,
       externalIdFieldName: options?.extIdField,
+      ...(os.platform() === 'win32' ? { lineEnding: 'CRLF' } : {}),
     };
-    if (os.platform() === 'win32') {
-      createJobOptions.lineEnding = 'CRLF';
-    }
     const job = connection.bulk2.createJob(createJobOptions);
 
     setupLifecycleListeners({
