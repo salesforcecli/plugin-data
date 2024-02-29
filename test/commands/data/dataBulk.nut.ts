@@ -137,7 +137,7 @@ describe('data:bulk commands', () => {
       const result = execCmd('data:delete:bulk --sobject Account --file account.csv --wait 10 --verbose', {
         ensureExitCode: 0,
       }).shellOutput.stdout; // eslint-disable-next-line no-console
-      expect(result).to.include('Status Job Complete Records processed 1. Records failed 0.');
+      expect(result).to.include('| Status Job Complete | Records processed 1 | Records failed 0');
     });
 
     it('should have information in --json', () => {
