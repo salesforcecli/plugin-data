@@ -61,7 +61,6 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
       char: 'b',
       default: false,
       summary: messages.getMessage('flags.bulk.summary'),
-      exclusive: ['use-tooling-api'],
     }),
     wait: Flags.duration({
       unit: 'minutes',
