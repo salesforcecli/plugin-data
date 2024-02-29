@@ -12,8 +12,13 @@ import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
 import { Connection, Messages } from '@salesforce/core';
 import { ux } from '@oclif/core';
-import { Schema } from 'jsforce';
-import { IngestJobV2, IngestJobV2FailedResults, IngestOperation, JobInfoV2 } from 'jsforce/lib/api/bulk2.js';
+import { Schema } from '@jsforce/jsforce-node';
+import {
+  IngestJobV2,
+  IngestJobV2FailedResults,
+  IngestOperation,
+  JobInfoV2,
+} from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { orgFlags } from './flags.js';
 import { BulkDataRequestCache, BulkDeleteRequestCache, BulkUpsertRequestCache } from './bulkDataRequestCache.js';
 import { BulkResultV2 } from './types.js';

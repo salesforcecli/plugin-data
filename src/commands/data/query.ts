@@ -8,7 +8,7 @@
 import fs from 'node:fs';
 
 import { Connection, Logger, Messages, SfError } from '@salesforce/core';
-import { Record as jsforceRecord } from 'jsforce';
+import { Record as jsforceRecord } from '@jsforce/jsforce-node';
 import {
   AnyJson,
   ensureJsonArray,
