@@ -40,9 +40,10 @@ export class HumanReporter extends QueryReporter {
     // in case of count() there are no records, but there is a totalSize
     const totalCount = this.data.result.records.length ? this.data.result.records.length : this.data.result.totalSize;
     const preppedData = this.data.result.records
-      .map(massageJson(fieldMap))
       .map(massageAggregates(aggregates))
-      .flatMap(maybeMassageSubqueries(children));
+      .flatMap(maybeMassageSubqueries(children))
+      .map(massageJson(fieldMap));
+
     printTable(attributeNames, preppedData, totalCount);
   }
 }
