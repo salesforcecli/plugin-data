@@ -24,7 +24,7 @@ import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars.js';
 
 chaiUse(chaiAsPromised);
 
-describe.only('reporter tests', () => {
+describe('reporter tests', () => {
   describe('human reporter tests', () => {
     let queryData: SoqlQueryResult;
     beforeEach(async () => {
