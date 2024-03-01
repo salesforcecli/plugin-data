@@ -9,10 +9,13 @@ import { JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 
 import { Connection } from '@salesforce/core';
 
+export type GenericEntry = [string, unknown];
+export type GenericObject = Record<string, unknown>;
+
 export type BulkProcessedRecordV2 = {
   sf__Created?: 'true' | 'false';
   sf__Id?: string;
-} & Record<string, unknown>;
+} & GenericObject;
 
 export type BulkRecordsV2 = {
   successfulResults: BulkProcessedRecordV2[];

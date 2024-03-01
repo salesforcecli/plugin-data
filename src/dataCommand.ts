@@ -9,15 +9,16 @@ import { Connection, Messages, SfError } from '@salesforce/core';
 import { Record as jsforceRecord, SaveResult } from '@jsforce/jsforce-node';
 
 import { ux } from '@oclif/core';
+import { GenericObject } from './types.js';
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
-export const logNestedObject = (obj: Record<string, unknown>, indentation = 0): void => {
+export const logNestedObject = (obj: GenericObject, indentation = 0): void => {
   const space = ' '.repeat(indentation);
   Object.entries(obj).forEach(([key, value]) => {
     if (!!value && typeof value === 'object') {
       ux.log(`${space}${key}:`);
-      logNestedObject(value as Record<string, unknown>, indentation + 2);
+      logNestedObject(value as GenericObject, indentation + 2);
     } else {
       ux.log(`${space}${key}: ${value as string}`);
     }
@@ -29,10 +30,8 @@ export const logNestedObject = (obj: Record<string, unknown>, indentation = 0): 
  *
  * @param [keyValuePairs] - The list of key=value pair strings.
  */
-const transformKeyValueSequence = (
-  keyValuePairs: string[]
-): Record<string, string | boolean | Record<string, unknown>> => {
-  const constructedObject: Record<string, string | boolean | Record<string, unknown>> = {};
+const transformKeyValueSequence = (keyValuePairs: string[]): Record<string, string | boolean | GenericObject> => {
+  const constructedObject: Record<string, string | boolean | GenericObject> = {};
 
   keyValuePairs.forEach((pair) => {
     // Look for the *first* '=' and splits there, ignores any subsequent '=' for this pair
@@ -43,7 +42,7 @@ const transformKeyValueSequence = (
       const key = pair.substr(0, eqPosition);
       if (pair.includes('{') && pair.includes('}')) {
         try {
-          constructedObject[key] = JSON.parse(pair.substr(eqPosition + 1)) as Record<string, unknown>;
+          constructedObject[key] = JSON.parse(pair.substr(eqPosition + 1)) as GenericObject;
         } catch {
           // the data contained { and }, but wasn't valid JSON, default to parsing as-is
           constructedObject[key] = convertToBooleanIfApplicable(pair.substr(eqPosition + 1));
@@ -113,7 +112,7 @@ const parseKeyValueSequence = (text: string): string[] => {
   return keyValuePairs;
 };
 
-export const stringToDictionary = (str: string): Record<string, string | boolean | Record<string, unknown>> => {
+export const stringToDictionary = (str: string): Record<string, string | boolean | GenericObject> => {
   const keyValuePairs = parseKeyValueSequence(str);
   return transformKeyValueSequence(keyValuePairs);
 };

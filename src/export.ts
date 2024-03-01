@@ -21,6 +21,7 @@ import {
   SObjectTreeInput,
   hasNestedRecords,
 } from './dataSoqlQueryTypes.js';
+import { GenericEntry } from './types.js';
 import { hasUnresolvedRefs } from './api/data/tree/functions.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -160,7 +161,7 @@ const removeNonPlanProperties = (record: SObjectTreeInput): SObjectTreeInput =>
   ) as SObjectTreeInput;
 
 /** the url doesn't exist in the non-plan tree output.  Whether that matters or not, this results in cleaner files */
-const removeUrlIfAttributes = <T extends [string, unknown]>([key, value]: T): T =>
+const removeUrlIfAttributes = <T extends GenericEntry>([key, value]: T): T =>
   [
     key,
     key === 'attributes' && typeof value === 'object' && value && 'type' in value
@@ -172,7 +173,7 @@ const removeUrlIfAttributes = <T extends [string, unknown]>([key, value]: T): T 
   ] as T;
 
 /** remove Id, nulls and empty records arrays */
-const nonPlanPropertiesFilter = ([key, value]: [string, unknown]): boolean =>
+const nonPlanPropertiesFilter = ([key, value]: GenericEntry): boolean =>
   key !== 'Id' && value !== null && !isEmptyRecordsArray(value);
 
 const isEmptyRecordsArray = (value: unknown): value is { records: [] } =>
@@ -389,8 +390,8 @@ const queryRecords =
 /** return only fields that, based on metadata, are lookups/master-details AND have a string value (id will be a string)  */
 const isRelationshipFieldFilter =
   (typeDescribe: DescribeSObjectResult) =>
-  (tuple: [string, unknown]): tuple is [string, string] =>
-    isRelationshipWithMetadata(typeDescribe)(tuple[0]) && typeof tuple[1] === 'string';
+  (entry: GenericEntry): entry is [string, string] =>
+    isRelationshipWithMetadata(typeDescribe)(entry[0]) && typeof entry[1] === 'string';
 
 const idFromRecord = (record: BasicRecord): string => path.basename(record.attributes.url);
 const typeFromRecord = (record: BasicRecord): string => record.attributes.type;

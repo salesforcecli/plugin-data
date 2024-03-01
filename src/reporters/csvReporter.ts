@@ -9,7 +9,7 @@ import { ux } from '@oclif/core';
 import { get, getNumber, isString } from '@salesforce/ts-types';
 import { Record as jsforceRecord } from '@jsforce/jsforce-node';
 import { Field, SoqlQueryResult } from '../dataSoqlQueryTypes.js';
-import { getAggregateAliasOrName, massageAggregates } from './reporters.js';
+import { getAggregateAliasOrName, maybeMassageAggregates } from './reporters.js';
 import { QueryReporter, logFields, isSubquery, isAggregate } from './reporters.js';
 
 export class CsvReporter extends QueryReporter {
@@ -20,7 +20,7 @@ export class CsvReporter extends QueryReporter {
   public display(): void {
     const fields = logFields(this.logger)(this.data.query)(this.columns);
     const aggregates = fields.filter(isAggregate);
-    const preppedData = this.data.result.records.map(massageAggregates(aggregates));
+    const preppedData = this.data.result.records.map(maybeMassageAggregates(aggregates));
     const attributeNames = getColumns(preppedData)(fields);
 
     [

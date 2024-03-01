@@ -10,6 +10,7 @@ import { ux } from '@oclif/core';
 import { JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { capitalCase } from 'change-case';
 import { Field, FieldType, SoqlQueryResult } from '../dataSoqlQueryTypes.js';
+import { GenericObject } from '../types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const reporterMessages = Messages.loadMessages('@salesforce/plugin-data', 'reporter');
@@ -66,9 +67,9 @@ export const logFields =
     return fields ?? [];
   };
 
-export const massageAggregates =
+export const maybeMassageAggregates =
   (aggregates: Field[]) =>
-  (queryRow: Record<string, unknown>): Record<string, unknown> =>
+  (queryRow: GenericObject): GenericObject =>
     aggregates.length ? renameAggregates(aggregates)(queryRow) : queryRow;
 
 /**
@@ -81,7 +82,7 @@ export const massageAggregates =
  */
 export const renameAggregates =
   (aggregates: Field[]) =>
-  (queryRow: Record<string, unknown>): Record<string, unknown> =>
+  (queryRow: GenericObject): GenericObject =>
     Object.fromEntries(
       Object.entries(queryRow).map(([k, v]) => {
         const index = typeof k === 'string' ? k.match(/expr(\d+)/)?.[1] : undefined;

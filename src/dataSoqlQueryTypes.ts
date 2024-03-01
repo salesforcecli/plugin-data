@@ -7,6 +7,7 @@
 
 import { QueryResult, Record } from '@jsforce/jsforce-node';
 import { Optional } from '@salesforce/ts-types';
+import { GenericEntry } from './types.js';
 
 export enum FieldType {
   field,
@@ -71,12 +72,12 @@ export const hasNonEmptyNestedRecords = <T>(element: unknown): element is Elemen
   hasNestedRecords(element) && element.records.length > 0;
 
 /** convenience method for filtering Object.entries array */
-export const hasNestedRecordsFilter = <T>(entry: [string, unknown]): entry is [string, ElementWithRecords<T>] =>
+export const hasNestedRecordsFilter = <T>(entry: GenericEntry): entry is [string, ElementWithRecords<T>] =>
   typeof entry[0] === 'string' && hasNonEmptyNestedRecords(entry[1]);
 
 export const isAttributesElement = (element: unknown): element is SObjectTreeInput['attributes'] =>
   !!(element as SObjectTreeInput['attributes']).referenceId && !!(element as SObjectTreeInput['attributes']).type;
 
 /** convenience method for filtering Object.entries array */
-export const isAttributesEntry = (entry: [string, unknown]): entry is ['attributes', SObjectTreeInput['attributes']] =>
+export const isAttributesEntry = (entry: GenericEntry): entry is ['attributes', SObjectTreeInput['attributes']] =>
   entry[0] === 'attributes' && isAttributesElement(entry[1]);

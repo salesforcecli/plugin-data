@@ -12,6 +12,7 @@ import { createHash } from 'node:crypto';
 
 import { AnyJson, isString } from '@salesforce/ts-types';
 import { Logger, SchemaValidator, SfError, Connection, Messages } from '@salesforce/core';
+import { GenericObject } from '../../../types.js';
 import { SObjectTreeInput } from '../../../dataSoqlQueryTypes.js';
 import { DataPlanPartFilesOnly, ImportResult } from './importTypes.js';
 import {
@@ -247,7 +248,7 @@ const addFingerprint =
     return { ...resultsSoFar, fingerprints: resultsSoFar.fingerprints.add(fingerprint) };
   };
 
-const hashObject = (obj: Record<string, unknown>): string =>
+const hashObject = (obj: GenericObject): string =>
   createHash('sha256')
     .update(Buffer.from(JSON.stringify(obj)))
     .digest('hex');
