@@ -6,8 +6,7 @@
     "sourceMap": true,
     "baseUrl": "..",
     "paths": {
-      "@salesforce/kit": ["node_modules/@salesforce/kit"],
-      "jsforce": ["node_modules/jsforce"]
+      "@salesforce/kit": ["node_modules/@salesforce/kit"]
     }
   }
 }
