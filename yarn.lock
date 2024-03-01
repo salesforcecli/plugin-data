@@ -2364,14 +2364,7 @@
     "@types/node" "*"
     "@types/responselike" "^1.0.0"
 
-"@types/chai-as-promised@^7.1.8":
-  version "7.1.8"
-  resolved "https://registry.npmjs.org/@types/chai-as-promised/-/chai-as-promised-7.1.8.tgz"
-  integrity sha512-ThlRVIJhr69FLlh6IctTXFkmhtP3NpMZ2QGq69StYLyKZFp/HOp1VdKZj7RvfNWYYcJ1xlbLGLLWj1UvP5u/Gw==
-  dependencies:
-    "@types/chai" "*"
-
-"@types/chai@*", "@types/chai@^4.3.11":
+"@types/chai@^4.3.11":
   version "4.3.11"
   resolved "https://registry.npmjs.org/@types/chai/-/chai-4.3.11.tgz"
   integrity sha512-qQR1dr2rGIHYlJulmr8Ioq3De0Le9E4MJ5AiaeAETJJpndT1uUNHsGFK3L/UIu+rbkQSdj8J/w2bCsBZc/Y5fQ==
@@ -3315,13 +3308,6 @@ cardinal@^2.1.1:
     ansicolors "~0.3.2"
     redeyed "~2.1.0"
 
-chai-as-promised@^7.1.1:
-  version "7.1.1"
-  resolved "https://registry.npmjs.org/chai-as-promised/-/chai-as-promised-7.1.1.tgz"
-  integrity sha512-azL6xMoi+uxu6z4rhWQ1jbdUhOMhis2PvscD/xjLqNMkv3BPPp2JyyuTHOrf9BOosGpNQ11v6BKv/g57RXbiaA==
-  dependencies:
-    check-error "^1.0.2"
-
 chai@^4.3.10:
   version "4.3.10"
   resolved "https://registry.npmjs.org/chai/-/chai-4.3.10.tgz"
@@ -3393,7 +3379,7 @@ chardet@^0.7.0:
   resolved "https://registry.npmjs.org/chardet/-/chardet-0.7.0.tgz"
   integrity sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA==
 
-check-error@^1.0.2, check-error@^1.0.3:
+check-error@^1.0.3:
   version "1.0.3"
   resolved "https://registry.npmjs.org/check-error/-/check-error-1.0.3.tgz"
   integrity sha512-iKEoDYaRmd1mxM90a2OEfWhjsjPpYPuQ+lMYsoxB126+t8fw7ySEO48nmDg5COTjxDI65/Y2OWpeEHk3ZOe8zg==
@@ -8668,7 +8654,7 @@ typedoc@^0.25.3:
     minimatch "^9.0.3"
     shiki "^0.14.1"
 
-"typescript@^4.6.4 || ^5.2.2", typescript@^5.2.2, typescript@~5.3.2:
+"typescript@^4.6.4 || ^5.2.2", typescript@~5.3.2:
   version "5.3.3"
   resolved "https://registry.npmjs.org/typescript/-/typescript-5.3.3.tgz"
   integrity sha512-pXWcraxM0uxAS+tN0AG/BF2TyqmHO014Z070UsJ+pFvYuRSq8KH8DmWpnbXe0pEPDHXZV3FcAbJkijJ5oNEnWw==
@@ -8677,6 +8663,11 @@ typescript@^4.9.5:
   version "4.9.5"
   resolved "https://registry.npmjs.org/typescript/-/typescript-4.9.5.tgz"
   integrity sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==
+
+typescript@^5.3.3:
+  version "5.3.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.3.3.tgz#b3ce6ba258e72e6305ba66f5c9b452aaee3ffe37"
+  integrity sha512-pXWcraxM0uxAS+tN0AG/BF2TyqmHO014Z070UsJ+pFvYuRSq8KH8DmWpnbXe0pEPDHXZV3FcAbJkijJ5oNEnWw==
 
 uglify-js@^3.1.4:
   version "3.17.4"

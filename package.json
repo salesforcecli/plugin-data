@@ -124,12 +124,10 @@
     "@salesforce/cli-plugins-testkit": "^5.1.9",
     "@salesforce/dev-scripts": "^8.4.1",
     "@salesforce/plugin-command-reference": "^3.0.69",
-    "@types/chai-as-promised": "^7.1.8",
-    "chai-as-promised": "^7.1.1",
     "eslint-plugin-sf-plugin": "^1.17.3",
     "oclif": "^4.4.18",
     "ts-node": "^10.9.2",
-    "typescript": "^5.2.2"
+    "typescript": "^5.3.3"
   },
   "wireit": {
     "build": {
