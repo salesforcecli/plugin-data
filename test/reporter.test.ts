@@ -15,6 +15,7 @@ import {
   nullString,
   mapFieldsByName,
   massageJson,
+  maybeMassageSubqueries,
 } from '../src/reporters/humanReporter.js';
 import { renameAggregates } from '../src/reporters/reporters.js';
 import { Field, FieldType, SoqlQueryResult } from '../src/dataSoqlQueryTypes.js';
@@ -23,11 +24,6 @@ import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars.js';
 
 describe('reporter tests', () => {
   describe('human reporter tests', () => {
-    let queryData: SoqlQueryResult;
-    beforeEach(async () => {
-      // jsforce has records/attributes/url as a non-optional property.  It may not be!
-      queryData = structuredClone(soqlQueryExemplars.queryWithAggregates.soqlQueryResult) as unknown as SoqlQueryResult;
-    });
     describe('column parsing', () => {
       it('basic query', () => {
         const { attributeNames, children, aggregates } = parseFields(
@@ -38,19 +34,43 @@ describe('reporter tests', () => {
         expect(aggregates).to.deep.equal([]);
       });
       it('parses result fields', () => {
+        const queryData = soqlQueryExemplars.queryWithAggregates.soqlQueryResult;
         const { attributeNames, children, aggregates } = parseFields(queryData.columns);
         expect(attributeNames).to.deep.equal(['Name', queryData.columns[1].name]);
         expect(children).to.deep.equal([]);
         expect(aggregates).to.deep.equal([queryData.columns[1]]);
       });
+      it('complex', () => {
+        const { attributeNames, children, aggregates } = parseFields(
+          soqlQueryExemplars.complexSubQuery.soqlQueryResult.columns
+        );
+        expect(attributeNames).to.deep.equal([
+          'Amount',
+          'Id',
+          'Name',
+          'StageName',
+          'CloseDate',
+          'OpportunityLineItems.Id',
+          'OpportunityLineItems.ListPrice',
+          'OpportunityLineItems.PricebookEntry.UnitPrice',
+          'OpportunityLineItems.PricebookEntry.Name',
+          'OpportunityLineItems.PricebookEntry.Id',
+          'OpportunityLineItems.PricebookEntry.Product2.Family',
+        ]);
+        expect(children).to.deep.equal(['OpportunityLineItems']);
+        expect(aggregates).to.deep.equal([]);
+      });
     });
 
     describe('stringifies JSON results correctly', () => {
-      it('nested object', async () => {
-        queryData = structuredClone(soqlQueryExemplars.queryWithNestedObject.soqlQueryResult);
-
+      it('no changes to basic record', () => {
+        const queryData = soqlQueryExemplars.simpleQuery.soqlQueryResult;
         const massagedRows = queryData.result.records.map(massageJson(mapFieldsByName(queryData.columns)));
-
+        expect(massagedRows).to.deep.equal(queryData.result.records);
+      });
+      it('nested object', () => {
+        const queryData = structuredClone(soqlQueryExemplars.queryWithNestedObject.soqlQueryResult);
+        const massagedRows = queryData.result.records.map(massageJson(mapFieldsByName(queryData.columns)));
         expect(massagedRows).to.not.include('object Object');
         massagedRows.map((r, i) => {
           const original = queryData.result.records[i];
@@ -152,8 +172,52 @@ describe('reporter tests', () => {
         });
       });
     });
+    describe('subqueries', () => {
+      it('parses result fields', () => {
+        const queryData = soqlQueryExemplars.subQuery.soqlQueryResult;
+        const { attributeNames, children, aggregates } = parseFields(queryData.columns);
+        expect(attributeNames).to.be.ok;
+        expect(children).to.deep.equal(['Contacts']);
+        expect(aggregates).to.be.ok;
+      });
+      it('has no subqueries => no change', () => {
+        const queryData = soqlQueryExemplars.simpleQuery.soqlQueryResult;
+        const { children } = parseFields(queryData.columns);
+        expect(children).to.deep.equal([]);
+        const result = queryData.result.records.flatMap(maybeMassageSubqueries(children));
+        expect(result).to.deep.equal(queryData.result.records);
+      });
+      it('creates correct parent and child rows for parent', () => {
+        const queryData = soqlQueryExemplars.subQuery.soqlQueryResult;
+        const { children } = parseFields(queryData.columns);
+        const result = queryData.result.records.flatMap(maybeMassageSubqueries(children));
+        // parent with 1 child
+        const index = result.findIndex((r) => r.Name === 'United Oil & Gas, Singapore');
+        expect(result[index]).to.have.property('Contacts.LastName', 'Ripley');
+        // child
+        expect(result[index + 1]).to.have.property('Contacts.LastName', "D'Cruz");
 
-    it('preps columns for display values in result', () => {});
+        // parent with 4 children
+        const index2 = result.findIndex((r) => r.Name === 'United Oil & Gas Corp.');
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        expect(result.slice(index2, index2 + 4).map((r) => r['Contacts.LastName'])).to.deep.equal([
+          'Pavlova',
+          'Boyle',
+          'Green',
+          'Song',
+        ]);
+      });
+      it('complex', () => {
+        const queryData = soqlQueryExemplars.complexSubQuery.soqlQueryResult;
+        const { children } = parseFields(queryData.columns);
+        const result = queryData.result.records.flatMap(maybeMassageSubqueries(children));
+        expect(result.length).to.equal(1);
+        // it fully expands the fields and gets the correct value
+        expect(result[0]).to.have.property('OpportunityLineItems.PricebookEntry.Product2.Family', 'None');
+        expect(result[0]).to.have.property('OpportunityLineItems.PricebookEntry.UnitPrice', 1300);
+      });
+    });
   });
 
   describe('csv reporter tests', () => {
@@ -236,18 +300,6 @@ describe('reporter tests', () => {
         const escapedString = escape('abc');
         expect(escapedString).to.be.equal('abc');
       });
-    });
-  });
-  describe('handles subqueries for human result', () => {
-    let queryData: SoqlQueryResult;
-    beforeEach(async () => {
-      queryData = soqlQueryExemplars.subQuery.soqlQueryResult;
-    });
-    it('parses result fields', () => {
-      const { attributeNames, children, aggregates } = parseFields(queryData.columns);
-      expect(attributeNames).to.be.ok;
-      expect(children).to.be.ok;
-      expect(aggregates).to.be.ok;
     });
   });
 });
