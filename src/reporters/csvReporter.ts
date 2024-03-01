@@ -7,7 +7,7 @@
 import { EOL } from 'node:os';
 import { ux } from '@oclif/core';
 import { get, getNumber, isString } from '@salesforce/ts-types';
-import { Record as jsforceRecord } from 'jsforce';
+import { Record as jsforceRecord } from '@jsforce/jsforce-node';
 import { Field, SoqlQueryResult } from '../dataSoqlQueryTypes.js';
 import { getAggregateAliasOrName, massageAggregates } from './reporters.js';
 import { QueryReporter, logFields, isSubquery, isAggregate } from './reporters.js';

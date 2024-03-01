@@ -8,6 +8,7 @@ import { ux } from '@oclif/core';
 import chalk from 'chalk';
 import { get, getArray, isPlainObject, isString, Optional } from '@salesforce/ts-types';
 import { Messages } from '@salesforce/core';
+import { Record as jsforceRecord } from '@jsforce/jsforce-node';
 import { Field, FieldType, SoqlQueryResult } from '../dataSoqlQueryTypes.js';
 import { QueryReporter, logFields, isSubquery, isAggregate, getAggregateAliasOrName } from './reporters.js';
 import { massageAggregates } from './reporters.js';
@@ -20,6 +21,7 @@ type ParsedFields = {
   /** For function fields, like avg(total). */
   aggregates: Field[];
 };
+type GenericEntry = [string, unknown];
 
 type FieldsMappedByName = Map<string, Field>;
 
@@ -35,16 +37,17 @@ export class HumanReporter extends QueryReporter {
 
   public display(): void {
     logFields(this.logger)(this.data.query)(this.columns);
-    const { attributeNames, children, aggregates } = parseFields(this.columns);
+    const { attributeNames: columnNames, children, aggregates } = parseFields(this.columns);
     const fieldMap = mapFieldsByName(this.columns);
     // in case of count() there are no records, but there is a totalSize
     const totalCount = this.data.result.records.length ? this.data.result.records.length : this.data.result.totalSize;
     const preppedData = this.data.result.records
+      .map(removeAttributesFromObject)
       .map(massageAggregates(aggregates))
       .flatMap(maybeMassageSubqueries(children))
       .map(massageJson(fieldMap));
 
-    printTable(attributeNames, preppedData, totalCount);
+    printTable(preppedData, columnNames, totalCount);
   }
 }
 
@@ -86,8 +89,8 @@ const maybeReplaceNulls = <T>(value: T): T | string => value ?? nullString;
 const maybeRecurseNestedObjects = <T>(value: T): T => (isPlainObject(value) ? prepNullValues(value) : value);
 
 const printTable = (
-  columns: Array<Optional<string>>,
   records: Array<Record<string, unknown>>,
+  columns: Array<Optional<string>>,
   totalCount: number
 ): void => {
   ux.table(records.map(prepNullValues), prepColumns(columns));
@@ -106,12 +109,12 @@ const humanNamesFromField = (field: Field): string[] =>
  */
 export const massageJson =
   (fieldMap: FieldsMappedByName) =>
-  (queryRow: Record<string, unknown>): Record<string, unknown> =>
+  (queryRow: jsforceRecord): Record<string, unknown> =>
     Object.fromEntries(Object.entries(queryRow).flatMap(([k, v]) => maybeReplaceJson(fieldMap.get(k))([k, v])));
 
 const maybeReplaceJson =
   (field?: Field) =>
-  ([key, value]: [key: string, value: unknown]): Array<[string, unknown]> => {
+  ([key, value]: GenericEntry): GenericEntry[] => {
     if (isPlainObject(value) && field?.fieldType === FieldType.field) {
       return [[key, JSON.stringify(value, null, 2)]];
     }
@@ -126,31 +129,43 @@ export const mapFieldsByName = (fields: Field[]): FieldsMappedByName =>
 
 const maybeMassageSubqueries =
   (children: string[]) =>
-  (queryRow: Record<string, unknown>): Array<Record<string, unknown>> =>
+  (queryRow: jsforceRecord): jsforceRecord[] =>
     children.length ? massageSubqueries(children)(queryRow) : [queryRow];
 
-const prependParentWithDotAndReplaceNull =
+const prependWithDot =
   (parent: string) =>
-  ([k, v]: [string, unknown]): [string, unknown] =>
-    [`${parent}.${k}`, v ?? nullString];
+  ([k, v]: GenericEntry): GenericEntry =>
+    [`${parent}.${k}`, v];
+
+const replaceNullValue = ([k, v]: GenericEntry): GenericEntry => [k, maybeReplaceNulls(v)];
 
 const massageSubqueries =
   (children: string[]) =>
-  (queryRow: Record<string, unknown>): Array<Record<string, unknown>> => {
+  (queryRow: jsforceRecord): jsforceRecord[] => {
+    const childrenRows = children.map(getChildRecords(queryRow));
     const childrenSet = new Set(children);
-    const childrenRows = new Map(children.map(getChildRecords(queryRow)));
-
-    // all other children are added to a new array of Objects
-    const subResults = Array.from(childrenRows.entries())
-      .map(([childFieldName, childRecords]) =>
-        childRecords.slice(1).flatMap(Object.entries).map(prependParentWithDotAndReplaceNull(childFieldName))
-      )
-      .map((entries) => Object.fromEntries(entries));
 
     // the first (0-index) child's keys are renamed and transferred onto the parent
-    const childEntriesForParent = Array.from(childrenRows.entries()).flatMap(([childFieldName, childRecords]) =>
-      Object.entries(childRecords[0] ?? {}).map(prependParentWithDotAndReplaceNull(childFieldName))
-    );
+    const childEntriesForParent = childrenRows
+      .flatMap(([childFieldName, childRecords]) =>
+        Object.entries(childRecords[0] ?? {})
+          .map(prependWithDot(childFieldName))
+          .flatMap(resolveObjects)
+          .map(replaceNullValue)
+      )
+      .filter(removeAttributesfromEntry);
+    // all other children, if any, are added to a new array of Objects
+    const subResults = childrenRows
+      .map(([childFieldName, childRecords]) =>
+        childRecords
+          .slice(1)
+          .flatMap(Object.entries)
+          .map(prependWithDot(childFieldName))
+          .flatMap(resolveObjects)
+          .map(replaceNullValue)
+      )
+      .map(Object.entries)
+      .filter(removeEmptyObjects);
 
     const parentEntries = Object.entries(queryRow)
       // remove known children from the original object
@@ -160,7 +175,19 @@ const massageSubqueries =
     return [Object.fromEntries(parentEntries), ...subResults];
   };
 
+/** query has subQueries that result in arrays of records */
 const getChildRecords =
-  (queryRow: unknown) =>
-  (child: string): [key: string, records: Array<Record<string, unknown>>] =>
-    [child, getArray(get(queryRow, child), 'records', []) as Array<Record<string, unknown>>];
+  (queryRow: jsforceRecord) =>
+  (child: string): [key: string, records: jsforceRecord[]] =>
+    [child, (getArray(get(queryRow, child), 'records', []) as jsforceRecord[]).map(removeAttributesFromObject)];
+
+/** Query has foo.bar.baz (upward references to parents).  This recursively flattens those object fields to match the query columns */
+const resolveObjects = ([k, v]: GenericEntry): GenericEntry[] =>
+  isPlainObject(v)
+    ? Object.entries(v).filter(removeAttributesfromEntry).map(prependWithDot(k)).flatMap(resolveObjects)
+    : [[k, v]];
+
+const removeAttributesfromEntry = ([k]: GenericEntry): boolean => k !== 'attributes';
+const removeAttributesFromObject = (record: jsforceRecord): jsforceRecord =>
+  Object.fromEntries(Object.entries(record).filter(removeAttributesfromEntry));
+const removeEmptyObjects = (record: jsforceRecord): boolean => Object.keys(record).length > 1;

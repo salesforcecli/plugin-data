@@ -5,15 +5,12 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import chai, { expect } from 'chai';
-import chaiAsPromised from 'chai-as-promised';
+import { expect } from 'chai';
 
 import sinon from 'sinon';
 import { retrieveColumns } from '../src/commands/data/query.js';
 import { queryFieldsExemplars } from './test-files/queryFields.exemplars.js';
 import { createFakeConnection } from './testUtil.js';
-
-chai.use(chaiAsPromised);
 
 describe('queryFields tests', () => {
   const fakeConnection = createFakeConnection();

@@ -7,7 +7,8 @@
     "declaration": false,
     "baseUrl": ".",
     "paths": {
-      "@salesforce/kit": ["node_modules/@salesforce/kit"]
+      "@salesforce/kit": ["node_modules/@salesforce/kit"],
+      "jsforce": ["node_modules/jsforce"]
     }
   },
   "include": ["./src/**/*.ts"]

@@ -9,7 +9,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 
 import { Logger, Messages, SfError, Lifecycle, Connection } from '@salesforce/core';
-import type { DescribeSObjectResult, QueryResult } from 'jsforce';
+import type { DescribeSObjectResult, QueryResult } from '@jsforce/jsforce-node';
 import { Ux } from '@salesforce/sf-plugins-core';
 import { ensure } from '@salesforce/ts-types';
 import {

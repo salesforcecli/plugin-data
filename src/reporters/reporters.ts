@@ -7,7 +7,7 @@
 
 import { Logger, Messages } from '@salesforce/core';
 import { ux } from '@oclif/core';
-import { JobInfoV2 } from 'jsforce/lib/api/bulk2.js';
+import { JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { capitalCase } from 'change-case';
 import { Field, FieldType, SoqlQueryResult } from '../dataSoqlQueryTypes.js';
 

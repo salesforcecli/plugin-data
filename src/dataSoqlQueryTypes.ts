@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { QueryResult, Record } from 'jsforce';
+import { QueryResult, Record } from '@jsforce/jsforce-node';
 import { Optional } from '@salesforce/ts-types';
 
 export enum FieldType {

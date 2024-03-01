@@ -6,8 +6,8 @@
  */
 
 import { Messages } from '@salesforce/core';
-import { QueryJobV2 } from 'jsforce/lib/api/bulk2.js';
-import { Record as jsforceRecord } from 'jsforce';
+import { QueryJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
+import { Record as jsforceRecord } from '@jsforce/jsforce-node';
 import {
   Flags,
   loglevel,
@@ -59,6 +59,7 @@ export class BulkQueryReport extends SfCommand<unknown> {
       flags['target-org'],
       flags['api-version']
     );
+    // @ts-expect-error jsforce 2 vs 3 differences in private stuff inside Connection
     const job = new QueryJobV2(resumeOptions.options.connection, {
       id: resumeOptions.jobInfo.id,
       pollingOptions: getNonZeroTimeoutPollingOptions(resumeOptions.options.pollingOptions),

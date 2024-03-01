@@ -12,8 +12,14 @@ import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
 import { Connection, Messages } from '@salesforce/core';
 import { ux } from '@oclif/core';
-import { Schema } from 'jsforce';
-import { IngestJobV2, IngestJobV2FailedResults, IngestOperation, JobInfoV2 } from 'jsforce/lib/api/bulk2.js';
+import { Schema } from '@jsforce/jsforce-node';
+import {
+  BulkV2,
+  IngestJobV2,
+  IngestJobV2FailedResults,
+  IngestOperation,
+  JobInfoV2,
+} from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { orgFlags } from './flags.js';
 import { BulkDataRequestCache, BulkDeleteRequestCache, BulkUpsertRequestCache } from './bulkDataRequestCache.js';
 import { BulkResultV2 } from './types.js';
@@ -105,7 +111,7 @@ export const runBulkOperation = async ({
       externalIdFieldName: options?.extIdField,
       ...(os.platform() === 'win32' ? { lineEnding: 'CRLF' } : {}),
     };
-    const job = connection.bulk2.createJob(createJobOptions);
+    const job = (connection.bulk2 as unknown as BulkV2<Schema>).createJob(createJobOptions);
 
     setupLifecycleListeners({
       job,

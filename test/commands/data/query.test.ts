@@ -8,24 +8,16 @@
 import { resolve } from 'node:path';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import chai from 'chai';
 import { Config } from '@oclif/core';
 import { OrgConfigProperties } from '@salesforce/core';
-import {
-  TestContext,
-  MockTestOrgData,
-  // shouldThrow
-} from '@salesforce/core/lib/testSetup.js';
-
-import chaiAsPromised from 'chai-as-promised';
-import { describe } from 'mocha';
+import { TestContext, MockTestOrgData } from '@salesforce/core/lib/testSetup.js';
 import sinon from 'sinon';
-import { expect } from 'chai';
+import { expect, config as chaiConfig } from 'chai';
 import { soqlQueryExemplars } from '../../test-files/soqlQuery.exemplars.js';
 import { DataSoqlQueryCommand } from '../../../src/commands/data/query.js';
 import { SoqlQueryResult } from '../../../src/dataSoqlQueryTypes.js';
-chai.use(chaiAsPromised);
 
+chaiConfig.truncateThreshold = 0;
 describe('Execute a SOQL statement', (): void => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
@@ -171,7 +163,7 @@ describe('Execute a SOQL statement', (): void => {
         $$.SANDBOX.restore();
       });
 
-      it('should have human results for a complex subquery', async () => {
+      it('should have human results for a complex subquery.  [If this test fails, zoom out on your terminal to avoid truncation]', async () => {
         await DataSoqlQueryCommand.run(
           [
             '--target-org',
@@ -185,18 +177,13 @@ describe('Execute a SOQL statement', (): void => {
         const stdout = stdoutSpy.args.flat().join('');
 
         // properly expanded columns from query
-        expect(
-          /.*?AMOUNT.*?ID.*?OPPORTUNITYLINEITEMS.ID.*?OPPORTUNITYLINEITEMS.PRICEBOOKENTRY.PRODUCT2.FAMILY.*?/.test(
-            stdout
-          )
-        ).to.be.true;
+        expect(stdout).to.match(
+          /.*?AMOUNT.*?ID.*?OPPORTUNITYLINEITEMS.ID.*?OPPORTUNITYLINEITEMS.PRICEBOOKENTRY.PRODUCT2.FAMILY.*?/
+        );
         // was able to parse the data for each column
-        expect(
-          /.*?1300.*?0063F00000RdvMKQAZ.*?My Opportunity.*?00k3F000007kBoDQAU.*?MyProduct.*?01u3F00000AwCfuQAF.*?/.test(
-            stdout
-          ),
-          stdout
-        ).to.be.true;
+        expect(stdout).to.match(
+          /.*?1300.*?0063F00000RdvMKQAZ.*?My Opportunity.*?00k3F000007kBoDQAU.*?MyProduct.*?01u3F00000AwCfuQAF.*?/
+        );
         expect(stdout).to.include('records retrieved: 1');
       });
     });

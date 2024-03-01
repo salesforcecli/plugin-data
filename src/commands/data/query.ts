@@ -8,7 +8,7 @@
 import fs from 'node:fs';
 
 import { Connection, Logger, Messages, SfError } from '@salesforce/core';
-import { Record as jsforceRecord } from 'jsforce';
+import { Record as jsforceRecord } from '@jsforce/jsforce-node';
 import {
   AnyJson,
   ensureJsonArray,
@@ -21,6 +21,7 @@ import {
 } from '@salesforce/ts-types';
 import { Duration } from '@salesforce/kit';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
+import { BulkV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { orgFlags, perflogFlag, resultFormatFlag } from '../../flags.js';
 import { Field, FieldType, SoqlQueryResult } from '../../dataSoqlQueryTypes.js';
 import { displayResults, transformBulkResults } from '../../queryUtils.js';
@@ -144,7 +145,9 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
   ): Promise<SoqlQueryResult> {
     connection.bulk2.pollTimeout = timeout.milliseconds ?? Duration.minutes(5).milliseconds;
     try {
-      const res = (await connection.bulk2.query(query, allRows ? { scanAll: true } : {})) ?? [];
+      // @ts-expect-error jsforce 2 vs 3 differences in private stuff inside Connection
+      const bulk2 = new BulkV2(connection);
+      const res = (await bulk2.query(query, allRows ? { scanAll: true } : {})) ?? [];
       return transformBulkResults((await res.toArray()) as jsforceRecord[], query);
     } catch (e) {
       const err = e as Error & { jobId: string };

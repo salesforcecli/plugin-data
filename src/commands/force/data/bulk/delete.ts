@@ -66,6 +66,7 @@ export default class Delete extends SfCommand<BatcherReturnType> {
       });
 
       try {
+        // @ts-expect-error jsforce 2 vs 3 differences in private stuff inside Connection
         resolve(await batcher.createAndExecuteBatches(job, csvRecords, sobject, flags.wait?.minutes));
         this.spinner.stop();
       } catch (e) {

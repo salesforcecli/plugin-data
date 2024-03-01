@@ -12,7 +12,7 @@ import { expect, config as chaiConfig } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { sleep } from '@salesforce/kit';
 import { ensurePlainObject } from '@salesforce/ts-types';
-import { SaveResult } from 'jsforce';
+import { SaveResult } from '@jsforce/jsforce-node';
 import { BulkResultV2 } from '../../../src/types.js';
 import { QueryResult } from './dataSoqlQuery.nut.js';
 

@@ -6,7 +6,7 @@
  */
 
 import { Connection, Messages, SfError } from '@salesforce/core';
-import { Record as jsforceRecord, SaveResult } from 'jsforce';
+import { Record as jsforceRecord, SaveResult } from '@jsforce/jsforce-node';
 
 import { ux } from '@oclif/core';
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);

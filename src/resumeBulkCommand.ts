@@ -8,10 +8,10 @@
 import { Flags, SfCommand, loglevel, optionalOrgFlagWithDeprecations } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
+import { BulkV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { BulkResultV2, ResumeOptions } from './types.js';
 import { POLL_FREQUENCY_MS, isBulkV2RequestDone, remainingTime, transformResults } from './bulkUtils.js';
 import { displayBulkV2Result, getRemainingTimeStatus, setupLifecycleListeners } from './BulkBaseCommand.js';
-
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.resume.command');
 
@@ -47,7 +47,9 @@ export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
     this.spinner.start('Getting status');
     const conn = resumeOptions.options.connection;
     const isAsync = wait.milliseconds === 0;
-    const job = conn.bulk2.job('ingest', { id: resumeOptions.jobInfo.id });
+    // @ts-expect-error jsforce 2 vs 3 differences.
+    const bulk2 = new BulkV2(conn);
+    const job = bulk2.job('ingest', { id: resumeOptions.jobInfo.id });
     this.spinner.status = getRemainingTimeStatus({ isAsync, endWaitTime });
     setupLifecycleListeners({
       job,

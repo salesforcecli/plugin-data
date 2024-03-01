@@ -5,8 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { expect, use as chaiUse } from 'chai';
-import chaiAsPromised from 'chai-as-promised';
+import { expect } from 'chai';
 import { get, getPlainObject } from '@salesforce/ts-types';
 import sinon from 'sinon';
 import { ux } from '@oclif/core';
@@ -21,8 +20,6 @@ import { renameAggregates } from '../src/reporters/reporters.js';
 import { Field, FieldType, SoqlQueryResult } from '../src/dataSoqlQueryTypes.js';
 import { CsvReporter, escape, getColumns, getMaxRecord } from '../src/reporters/csvReporter.js';
 import { soqlQueryExemplars } from './test-files/soqlQuery.exemplars.js';
-
-chaiUse(chaiAsPromised);
 
 describe('reporter tests', () => {
   describe('human reporter tests', () => {

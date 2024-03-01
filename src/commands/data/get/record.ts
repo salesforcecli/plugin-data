@@ -6,7 +6,7 @@
  */
 
 import { Messages, SfError } from '@salesforce/core';
-import { Record } from 'jsforce';
+import { Record } from '@jsforce/jsforce-node';
 import { toAnyJson } from '@salesforce/ts-types';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { orgFlags, perflogFlag } from '../../../flags.js';

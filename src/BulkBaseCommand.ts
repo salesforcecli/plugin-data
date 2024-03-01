@@ -6,11 +6,11 @@
  */
 
 import { SfCommand, Spinner } from '@salesforce/sf-plugins-core';
-import { IngestJobV2, JobInfoV2 } from 'jsforce/lib/api/bulk2.js';
+import { IngestJobV2, JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { Duration } from '@salesforce/kit';
 import { capitalCase } from 'change-case';
 import { Messages } from '@salesforce/core';
-import { Schema } from 'jsforce';
+import { Schema } from '@jsforce/jsforce-node';
 import { getResultMessage } from './reporters/reporters.js';
 import { BulkDataRequestCache } from './bulkDataRequestCache.js';
 

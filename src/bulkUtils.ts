@@ -11,11 +11,10 @@ import type {
   IngestJobV2SuccessfulResults,
   IngestJobV2FailedResults,
   IngestJobV2UnprocessedRecords,
-} from 'jsforce/lib/api/bulk2.js';
+} from '@jsforce/jsforce-node/lib/api/bulk2.js';
 
-import { Schema } from 'jsforce';
+import { Schema } from '@jsforce/jsforce-node';
 import { Connection, Messages } from '@salesforce/core';
-import { ensureArray } from '@salesforce/kit';
 import { BulkProcessedRecordV2, BulkRecordsV2 } from './types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -28,9 +27,12 @@ export const isBulkV2RequestDone = (jobInfo: JobInfoV2): boolean =>
 
 export const transformResults = (results: IngestJobV2Results<Schema>): BulkRecordsV2 => ({
   // ensureArray is used to handle the undefined or non-array case
-  successfulResults: ensureArray(results.successfulResults).map(anyRecordToBulkProcessedRecordV2),
-  failedResults: ensureArray(results.failedResults).map(anyRecordToBulkProcessedRecordV2),
-  unprocessedRecords: ensureArray(results.unprocessedRecords).map(anyRecordToBulkProcessedRecordV2),
+  successfulResults: results.successfulResults.map(anyRecordToBulkProcessedRecordV2),
+  failedResults: results.failedResults.map(anyRecordToBulkProcessedRecordV2),
+  // if the csv can't be read, it returns a string that is the csv body
+  ...(typeof results.unprocessedRecords === 'string'
+    ? { unprocessedRecords: [], unparsed: results.unprocessedRecords }
+    : { unprocessedRecords: results.unprocessedRecords.map(anyRecordToBulkProcessedRecordV2) }),
 });
 
 const anyRecordToBulkProcessedRecordV2 = (

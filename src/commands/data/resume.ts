@@ -7,7 +7,7 @@
 
 import { Messages, SfError } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
-import { BatchInfo } from 'jsforce/lib/api/bulk.js';
+import { BatchInfo } from '@jsforce/jsforce-node/lib/api/bulk.js';
 import { orgFlags } from '../../flags.js';
 import { Batcher } from '../../batcher.js';
 import { StatusResult } from '../../types.js';

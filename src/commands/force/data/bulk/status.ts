@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { BatchInfo } from 'jsforce/lib/api/bulk.js';
+import { BatchInfo } from '@jsforce/jsforce-node/lib/api/bulk.js';
 import { Messages, SfError } from '@salesforce/core';
 import { Flags, SfCommand, Ux } from '@salesforce/sf-plugins-core';
 import { orgFlags } from '../../../../flags.js';

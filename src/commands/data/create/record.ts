@@ -6,7 +6,7 @@
  */
 
 import { Messages } from '@salesforce/core';
-import { SaveResult } from 'jsforce';
+import { SaveResult } from '@jsforce/jsforce-node';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { orgFlags, perflogFlag } from '../../../flags.js';
 import { stringToDictionary, collectErrorMessages } from '../../../dataCommand.js';

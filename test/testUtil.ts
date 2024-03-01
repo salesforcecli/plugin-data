@@ -6,7 +6,7 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { QueryResult, SaveResult, UpsertResult, UserInfo } from 'jsforce';
+import { QueryResult, SaveResult, UpsertResult, UserInfo } from '@jsforce/jsforce-node';
 import { Connection } from '@salesforce/core';
 import EventEmitter = NodeJS.EventEmitter;
 
