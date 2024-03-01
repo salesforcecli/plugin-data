@@ -21,7 +21,7 @@ import {
 } from '@salesforce/ts-types';
 import { Duration } from '@salesforce/kit';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { BulkV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
+import { BulkV2, QueryJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { orgFlags, perflogFlag, resultFormatFlag } from '../../flags.js';
 import { Field, FieldType, SoqlQueryResult } from '../../dataSoqlQueryTypes.js';
 import { displayResults, transformBulkResults } from '../../queryUtils.js';
@@ -143,25 +143,38 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
     timeout: Duration,
     allRows: boolean | undefined = false
   ): Promise<SoqlQueryResult> {
-    connection.bulk2.pollTimeout = timeout.milliseconds ?? Duration.minutes(5).milliseconds;
+    if (timeout.milliseconds === 0) {
+      const job = new QueryJobV2(
+        // @ts-expect-error jsforce 2 vs 3 differences in private stuff inside Connection
+        connection,
+        {
+          bodyParams: {
+            query,
+            operation: allRows ? 'queryAll' : 'query',
+          },
+          pollingOptions: { pollTimeout: timeout.milliseconds, interval: 5000 },
+        }
+      );
+      const info = await job.open();
+      return prepareAsyncQueryResponse(connection)(this)({ query, jobId: info.id });
+    }
     try {
+      connection.bulk2.pollTimeout = timeout.milliseconds ?? Duration.minutes(5).milliseconds;
+
       // @ts-expect-error jsforce 2 vs 3 differences in private stuff inside Connection
       const bulk2 = new BulkV2(connection);
       const res = (await bulk2.query(query, allRows ? { scanAll: true } : {})) ?? [];
       return transformBulkResults((await res.toArray()) as jsforceRecord[], query);
     } catch (e) {
-      const err = e as Error & { jobId: string };
-      if (timeout.minutes === 0 && err.name === 'JobPollingTimeout') {
-        // async query, so we can't throw an error, suggest data:query:resume --queryid <id>
-        const cache = await BulkQueryRequestCache.create();
-        await cache.createCacheEntryForRequest(err.jobId, connection.getUsername(), connection.getApiVersion());
-        this.log(messages.getMessage('bulkQueryTimeout', [err.jobId, err.jobId, connection.getUsername()]));
-        return { columns: [], result: { done: false, records: [], totalSize: 0, id: err.jobId }, query };
+      if (e instanceof Error && e.name === 'JobPollingTimeout' && 'jobId' in e && typeof e.jobId === 'string') {
+        process.exitCode = 69;
+        return prepareAsyncQueryResponse(connection)(this)({ query, jobId: e.jobId });
       } else {
-        throw SfError.wrap(err);
+        throw e instanceof Error || typeof e === 'string' ? SfError.wrap(e) : e;
       }
     }
   }
+
   private async runSoqlQuery(
     connection: Connection | Connection['tooling'],
     query: string,
@@ -197,6 +210,22 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
     };
   }
 }
+
+const prepareAsyncQueryResponse =
+  (connection: Connection) =>
+  (cmd: SfCommand<unknown>) =>
+  async ({ query, jobId }: { query: string; jobId: string }): Promise<SoqlQueryResult> => {
+    const cache = await BulkQueryRequestCache.create();
+    await cache.createCacheEntryForRequest(jobId, connection.getUsername(), connection.getApiVersion());
+    cmd.log(messages.getMessage('bulkQueryTimeout', [jobId, jobId, connection.getUsername()]));
+    return buildEmptyQueryResult({ query, jobId });
+  };
+
+const buildEmptyQueryResult = ({ query, jobId }: { query: string; jobId: string }): SoqlQueryResult => ({
+  columns: [],
+  result: { done: false, records: [], totalSize: 0, id: jobId },
+  query,
+});
 
 const searchSubColumnsRecursively = (parent: AnyJson): string[] => {
   const column = ensureJsonMap(parent);
