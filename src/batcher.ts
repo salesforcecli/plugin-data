@@ -14,9 +14,9 @@ import { stringify } from 'csv-stringify/sync';
 import parse from 'csv-parse';
 import { Batch, BatchInfo, BulkIngestBatchResult, BulkOperation, Job, JobInfo } from 'jsforce/lib/api/bulk.js';
 // max rows per file in Bulk 1.0
-const BATCH_RECORDS_LIMIT = 10000;
+const BATCH_RECORDS_LIMIT = 10_000;
 /// max characters/bytes per file in Bulk 1.0
-const BATCH_BYTES_LIMIT = 10000000;
+const BATCH_BYTES_LIMIT = 10_000_000;
 const POLL_FREQUENCY_MS = 5000;
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
@@ -272,7 +272,7 @@ export class Batcher {
             overallInfo = true;
           }
           this.ux.log(messages.getMessage('BatchQueued', [batchNum, batchInfo.id]));
-          newBatch.poll(POLL_FREQUENCY_MS, waitMins * 60000);
+          newBatch.poll(POLL_FREQUENCY_MS, waitMins * 60_000);
         }
       );
       // we're using an async method on an event listener which doesn't fit the .on method parameter types
