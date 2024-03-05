@@ -1398,7 +1398,7 @@ export const soqlQueryExemplars = {
               type: 'AggregateResult',
             },
             Name: 'Edge Communications',
-            expr0: 139000000,
+            expr0: 139_000_000,
           },
           {
             attributes: {
@@ -1412,28 +1412,28 @@ export const soqlQueryExemplars = {
               type: 'AggregateResult',
             },
             Name: 'United Oil & Gas Corp.',
-            expr0: 5600000000,
+            expr0: 5_600_000_000,
           },
           {
             attributes: {
               type: 'AggregateResult',
             },
             Name: 'Pyramid Construction Inc.',
-            expr0: 950000000,
+            expr0: 950_000_000,
           },
           {
             attributes: {
               type: 'AggregateResult',
             },
             Name: 'Grand Hotels & Resorts Ltd',
-            expr0: 500000000,
+            expr0: 500_000_000,
           },
           {
             attributes: {
               type: 'AggregateResult',
             },
             Name: 'Dickenson plc',
-            expr0: 50000000,
+            expr0: 50_000_000,
           },
           {
             attributes: {
@@ -1447,7 +1447,7 @@ export const soqlQueryExemplars = {
               type: 'AggregateResult',
             },
             Name: 'Burlington Textiles Corp of America',
-            expr0: 350000000,
+            expr0: 350_000_000,
           },
           {
             attributes: {
@@ -1468,14 +1468,14 @@ export const soqlQueryExemplars = {
               type: 'AggregateResult',
             },
             Name: 'Express Logistics and Transport',
-            expr0: 950000000,
+            expr0: 950_000_000,
           },
           {
             attributes: {
               type: 'AggregateResult',
             },
             Name: 'GenePoint',
-            expr0: 30000000,
+            expr0: 30_000_000,
           },
           {
             attributes: {
@@ -2189,7 +2189,7 @@ export const soqlQueryExemplars = {
               type: 'AggregateResult',
             },
             Name: 'Edge Communications',
-            expr0: 139000000,
+            expr0: 139_000_000,
           },
           {
             attributes: {
@@ -2203,28 +2203,28 @@ export const soqlQueryExemplars = {
               type: 'AggregateResult',
             },
             Name: 'United Oil & Gas Corp.',
-            expr0: 5600000000,
+            expr0: 5_600_000_000,
           },
           {
             attributes: {
               type: 'AggregateResult',
             },
             Name: 'Pyramid Construction Inc.',
-            expr0: 950000000,
+            expr0: 950_000_000,
           },
           {
             attributes: {
               type: 'AggregateResult',
             },
             Name: 'Grand Hotels & Resorts Ltd',
-            expr0: 500000000,
+            expr0: 500_000_000,
           },
           {
             attributes: {
               type: 'AggregateResult',
             },
             Name: 'Dickenson plc',
-            expr0: 50000000,
+            expr0: 50_000_000,
           },
           {
             attributes: {
@@ -2238,7 +2238,7 @@ export const soqlQueryExemplars = {
               type: 'AggregateResult',
             },
             Name: 'Burlington Textiles Corp of America',
-            expr0: 350000000,
+            expr0: 350_000_000,
           },
           {
             attributes: {
@@ -2259,14 +2259,14 @@ export const soqlQueryExemplars = {
               type: 'AggregateResult',
             },
             Name: 'Express Logistics and Transport',
-            expr0: 950000000,
+            expr0: 950_000_000,
           },
           {
             attributes: {
               type: 'AggregateResult',
             },
             Name: 'GenePoint',
-            expr0: 30000000,
+            expr0: 30_000_000,
           },
           {
             attributes: {
