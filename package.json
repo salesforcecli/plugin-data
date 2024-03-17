@@ -109,7 +109,7 @@
   },
   "dependencies": {
     "@oclif/core": "^3.23.0",
-    "@salesforce/core": "^6.5.5",
+    "@salesforce/core": "^6.7.1",
     "@salesforce/kit": "^3.0.15",
     "@salesforce/sf-plugins-core": "^7.1.15",
     "@salesforce/ts-types": "^2.0.9",
