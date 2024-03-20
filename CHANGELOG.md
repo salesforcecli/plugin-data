@@ -1,3 +1,33 @@
+## [3.1.11](https://github.com/salesforcecli/plugin-data/compare/3.1.10...3.1.11) (2024-03-17)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/core from 6.7.0 to 6.7.1 ([ddad015](https://github.com/salesforcecli/plugin-data/commit/ddad015d16d6219307f16075ad8b9771293059e3))
+
+## [3.1.10](https://github.com/salesforcecli/plugin-data/compare/3.1.9...3.1.10) (2024-03-17)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/sf-plugins-core from 7.1.14 to 7.1.15 ([3bd12c7](https://github.com/salesforcecli/plugin-data/commit/3bd12c70d6fb787a6a4c81f14d25e0344b11840b))
+
+## [3.1.9](https://github.com/salesforcecli/plugin-data/compare/3.1.8...3.1.9) (2024-03-10)
+
+### Bug Fixes
+
+- **deps:** bump csv-stringify from 6.4.5 to 6.4.6 ([d0b51ca](https://github.com/salesforcecli/plugin-data/commit/d0b51ca1699c4c46fd8ac0d875fe19f703e04702))
+
+## [3.1.8](https://github.com/salesforcecli/plugin-data/compare/3.1.7...3.1.8) (2024-03-10)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 3.19.6 to 3.23.0 ([9c30d9a](https://github.com/salesforcecli/plugin-data/commit/9c30d9a77e707e9e398e023a10192a1963c1a2ae))
+
+## [3.1.7](https://github.com/salesforcecli/plugin-data/compare/3.1.6...3.1.7) (2024-03-03)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/sf-plugins-core from 7.1.13 to 7.1.14 ([959fb77](https://github.com/salesforcecli/plugin-data/commit/959fb778e6e419044bed86f2c96065098b3bc88c))
+
 ## [3.1.6](https://github.com/salesforcecli/plugin-data/compare/3.1.5...3.1.6) (2024-02-26)
 
 ## [3.1.5](https://github.com/salesforcecli/plugin-data/compare/3.1.4...3.1.5) (2024-02-26)

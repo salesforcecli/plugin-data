@@ -71,7 +71,7 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
       const key = this.getLatestKey();
       if (key) {
         // key definitely exists because it came from the cache
-        const entry = this.get(key)!;
+        const entry = this.get(key);
 
         return {
           jobInfo: { id: entry.jobId },
