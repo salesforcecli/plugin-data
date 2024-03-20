@@ -8,7 +8,6 @@ import fs from 'node:fs';
 import { ReadStream } from 'node:fs';
 import os from 'node:os';
 
-
 import { Flags } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
 import { Connection, Messages } from '@salesforce/core';
@@ -27,7 +26,7 @@ import { BulkResultV2 } from './types.js';
 import { isBulkV2RequestDone, transformResults, waitOrTimeout } from './bulkUtils.js';
 import { BulkBaseCommand } from './BulkBaseCommand.js';
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.operation.command');
 
 type CreateJobOptions = {
@@ -40,6 +39,7 @@ type CreateJobOptions = {
 export abstract class BulkOperationCommand extends BulkBaseCommand {
   public static readonly baseFlags = {
     ...orgFlags,
+    ...BulkBaseCommand.baseFlags,
     file: Flags.file({
       char: 'f',
       summary: messages.getMessage('flags.csvfile.summary'),

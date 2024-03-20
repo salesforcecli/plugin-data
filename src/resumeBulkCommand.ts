@@ -5,7 +5,6 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-
 import { Flags, loglevel, optionalOrgFlagWithDeprecations } from '@salesforce/sf-plugins-core';
 import { IngestJobV2, IngestOperation } from 'jsforce/lib/api/bulk.js';
 import { Messages } from '@salesforce/core';
@@ -15,11 +14,12 @@ import { BulkResultV2, ResumeOptions } from './types.js';
 import { isBulkV2RequestDone, transformResults, waitOrTimeout } from './bulkUtils.js';
 import { BulkBaseCommand } from './BulkBaseCommand.js';
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.resume.command');
 
 export abstract class ResumeBulkCommand extends BulkBaseCommand {
   public static readonly baseFlags = {
+    ...BulkBaseCommand.baseFlags,
     'target-org': { ...optionalOrgFlagWithDeprecations, summary: messages.getMessage('flags.targetOrg.summary') },
     'job-id': Flags.salesforceId({
       length: 18,
