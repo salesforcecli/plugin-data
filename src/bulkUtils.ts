@@ -51,7 +51,9 @@ export const validateSobjectType = async (sobjectType: string, connection: Conne
     throw new Error(messages.getMessage('invalidSobject', [sobjectType, (e as Error).message]));
   }
 };
+
+/** calculate ms between the "now" time and the endWaitTime */
 export const remainingTime =
   (now: number) =>
   (endWaitTime?: number): number =>
-    Math.max(endWaitTime ?? now - now, 0);
+    Math.max((endWaitTime ?? now) - now, 0);
