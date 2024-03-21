@@ -5,15 +5,14 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-
-import { BatchInfo } from 'jsforce/lib/api/bulk.js';
+import { BatchInfo } from '@jsforce/jsforce-node/lib/api/bulk.js';
 import { Messages, SfError } from '@salesforce/core';
 import { Flags, SfCommand, Ux } from '@salesforce/sf-plugins-core';
 import { orgFlags } from '../../../../flags.js';
 import { Batcher } from '../../../../batcher.js';
 import { StatusResult } from '../../../../types.js';
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.status');
 
 export default class Status extends SfCommand<StatusResult> {
@@ -46,12 +45,7 @@ export default class Status extends SfCommand<StatusResult> {
     const { flags } = await this.parse(Status);
     this.spinner.start('Getting Status');
     const conn = flags['target-org'].getConnection(flags['api-version']);
-    const batcher = new Batcher(
-      conn,
-      new Ux({ jsonEnabled: this.jsonEnabled() }),
-      this.config.bin,
-      this.config.pjson.oclif.topicSeparator ?? ':'
-    );
+    const batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
     if (flags['job-id'] && flags['batch-id']) {
       // view batch status
       const job = conn.bulk.job(flags['job-id']);

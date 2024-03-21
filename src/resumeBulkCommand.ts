@@ -5,22 +5,19 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-
-import { Flags, loglevel, optionalOrgFlagWithDeprecations } from '@salesforce/sf-plugins-core';
-import { IngestJobV2, IngestOperation } from 'jsforce/lib/api/bulk.js';
+import { Flags, SfCommand, loglevel, optionalOrgFlagWithDeprecations } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
-import { Schema } from 'jsforce';
 import { Duration } from '@salesforce/kit';
+import { BulkV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { BulkResultV2, ResumeOptions } from './types.js';
-import { isBulkV2RequestDone, transformResults, waitOrTimeout } from './bulkUtils.js';
-import { BulkBaseCommand } from './BulkBaseCommand.js';
-
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+import { POLL_FREQUENCY_MS, isBulkV2RequestDone, remainingTime, transformResults } from './bulkUtils.js';
+import { displayBulkV2Result, getRemainingTimeStatus, setupLifecycleListeners } from './BulkBaseCommand.js';
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.resume.command');
 
-export abstract class ResumeBulkCommand extends BulkBaseCommand {
+export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
   public static readonly baseFlags = {
-    'target-org': { ...optionalOrgFlagWithDeprecations, summary: messages.getMessage('flags.targetOrg.summary') },
+    'target-org': optionalOrgFlagWithDeprecations,
     'job-id': Flags.salesforceId({
       length: 18,
       char: 'i',
@@ -31,6 +28,7 @@ export abstract class ResumeBulkCommand extends BulkBaseCommand {
     }),
     'use-most-recent': Flags.boolean({
       summary: messages.getMessage('flags.useMostRecent.summary'),
+      // don't use `exactlyOne` because this defaults to true
       default: true,
       exclusive: ['job-id'],
     }),
@@ -44,26 +42,34 @@ export abstract class ResumeBulkCommand extends BulkBaseCommand {
     loglevel,
   };
 
-  protected declare job: IngestJobV2<Schema, IngestOperation>;
-
   protected async resume(resumeOptions: ResumeOptions, wait: Duration): Promise<BulkResultV2> {
+    const endWaitTime = Date.now() + wait.milliseconds;
     this.spinner.start('Getting status');
     const conn = resumeOptions.options.connection;
-
-    this.job = conn.bulk2.job({ id: resumeOptions.jobInfo.id });
-    this.wait = wait.milliseconds;
-    this.endWaitTime = Date.now() + wait.milliseconds;
-    this.spinner.status = this.getRemainingTimeStatus();
-    this.setupLifecycleListeners();
-    await waitOrTimeout(this.job, wait.milliseconds);
-    const jobInfo = await this.job.check();
+    const isAsync = wait.milliseconds === 0;
+    // @ts-expect-error jsforce 2 vs 3 differences.
+    const bulk2 = new BulkV2(conn);
+    const job = bulk2.job('ingest', { id: resumeOptions.jobInfo.id });
+    this.spinner.status = getRemainingTimeStatus({ isAsync, endWaitTime });
+    setupLifecycleListeners({
+      job,
+      cmd: this,
+      isAsync,
+      apiVersion: conn.getApiVersion(),
+      username: conn.getUsername(),
+      endWaitTime,
+    });
+    if (Date.now() < endWaitTime) {
+      await job.poll(POLL_FREQUENCY_MS, remainingTime(Date.now())(endWaitTime));
+    }
+    const jobInfo = await job.check();
     this.spinner.stop();
-    this.displayBulkV2Result(jobInfo);
+    displayBulkV2Result({ jobInfo, username: conn.getUsername(), isAsync, cmd: this });
     const result = { jobInfo } as BulkResultV2;
     if (!isBulkV2RequestDone(jobInfo) || !this.jsonEnabled()) {
       return result;
     }
-    result.records = transformResults(await this.job.getAllResults());
+    result.records = transformResults(await job.getAllResults());
     return result;
   }
 }

@@ -5,40 +5,32 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-
 import { Messages } from '@salesforce/core';
-import { BulkDeleteRequestCache } from '../../../bulkDataRequestCache.js';
-import { BulkOperationCommand } from '../../../bulkOperationCommand.js';
+import { Duration } from '@salesforce/kit';
+import { SfCommand } from '@salesforce/sf-plugins-core';
+import { baseFlags, runBulkOperation } from '../../../bulkOperationCommand.js';
 import { BulkResultV2 } from '../../../types.js';
-import { validateSobjectType } from '../../../bulkUtils.js';
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulkv2.delete');
 
-export default class Delete extends BulkOperationCommand {
+export default class Delete extends SfCommand<BulkResultV2> {
   public static readonly examples = messages.getMessages('examples');
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
 
+  public static readonly flags = baseFlags;
+
   public async run(): Promise<BulkResultV2> {
     const { flags } = await this.parse(Delete);
-
-    const conn = flags['target-org'].getConnection(flags['api-version']);
-
-    await validateSobjectType(flags.sobject, conn);
-
-    return this.runBulkOperation(
-      flags.sobject,
-      flags.file,
-      conn,
-      flags.async ? 0 : flags.wait?.minutes,
-      flags.verbose,
-      'delete'
-    );
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  protected async getCache(): Promise<BulkDeleteRequestCache> {
-    return BulkDeleteRequestCache.create();
+    return runBulkOperation({
+      cmd: this,
+      sobject: flags.sobject,
+      csvFileName: flags.file,
+      connection: flags['target-org'].getConnection(flags['api-version']),
+      wait: flags.async ? Duration.minutes(0) : flags.wait,
+      verbose: flags.verbose,
+      operation: 'delete',
+    });
   }
 }

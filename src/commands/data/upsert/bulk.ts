@@ -5,23 +5,22 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-
 import { Messages } from '@salesforce/core';
-import { Flags } from '@salesforce/sf-plugins-core';
-import { BulkUpsertRequestCache } from '../../../bulkDataRequestCache.js';
-import { BulkOperationCommand } from '../../../bulkOperationCommand.js';
+import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
+import { Duration } from '@salesforce/kit';
+import { runBulkOperation, baseFlags } from '../../../bulkOperationCommand.js';
 import { BulkResultV2 } from '../../../types.js';
-import { validateSobjectType } from '../../../bulkUtils.js';
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulkv2.upsert');
 
-export default class Upsert extends BulkOperationCommand {
+export default class Upsert extends SfCommand<BulkResultV2> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
 
   public static readonly flags = {
+    ...baseFlags,
     'external-id': Flags.string({
       char: 'i',
       summary: messages.getMessage('flags.external-id.summary'),
@@ -33,25 +32,18 @@ export default class Upsert extends BulkOperationCommand {
 
   public async run(): Promise<BulkResultV2> {
     const { flags } = await this.parse(Upsert);
-    const conn = flags['target-org'].getConnection(flags['api-version']);
 
-    await validateSobjectType(flags.sobject, conn);
-
-    return this.runBulkOperation(
-      flags.sobject,
-      flags.file,
-      conn,
-      flags.async ? 0 : flags.wait?.minutes,
-      flags.verbose,
-      'upsert',
-      {
+    return runBulkOperation({
+      cmd: this,
+      sobject: flags.sobject,
+      csvFileName: flags.file,
+      connection: flags['target-org'].getConnection(flags['api-version']),
+      wait: flags.async ? Duration.minutes(0) : flags.wait,
+      verbose: flags.verbose,
+      operation: 'upsert',
+      options: {
         extIdField: flags['external-id'],
-      }
-    );
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  protected async getCache(): Promise<BulkUpsertRequestCache> {
-    return BulkUpsertRequestCache.create();
+      },
+    });
   }
 }

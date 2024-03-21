@@ -9,7 +9,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 
 import { Logger, Messages, Org, SfError, Lifecycle } from '@salesforce/core';
-import { DescribeSObjectResult, QueryResult } from 'jsforce';
+import { DescribeSObjectResult, QueryResult } from '@jsforce/jsforce-node';
 import { Ux } from '@salesforce/sf-plugins-core';
 import {
   BasicRecord,
@@ -273,7 +273,6 @@ export class ExportApi {
         treeRecord[key] = ref && ref !== id ? `@${ref}` : id;
         return;
       }
-      // TODO: what to do if ref not found?
       const recordId: string = record['Id'] as string;
       this.logger.error(`Reference ${relTo} not found for ${key}.  Skipping record ${recordId}.`);
       return;

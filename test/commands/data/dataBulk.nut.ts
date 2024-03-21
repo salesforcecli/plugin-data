@@ -12,7 +12,7 @@ import { expect, config as chaiConfig } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { sleep } from '@salesforce/kit';
 import { ensurePlainObject } from '@salesforce/ts-types';
-import { SaveResult } from 'jsforce';
+import { SaveResult } from '@jsforce/jsforce-node';
 import { BulkResultV2 } from '../../../src/types.js';
 import { QueryResult } from './dataSoqlQuery.nut.js';
 
@@ -74,7 +74,7 @@ describe('data:bulk commands', () => {
   });
 
   after(async () => {
-    // await testSession?.clean();
+    await testSession?.clean();
   });
 
   describe('data:bulk verify json and human responses', () => {
@@ -93,7 +93,7 @@ describe('data:bulk commands', () => {
         await isCompleted(`data:delete:resume --job-id ${jobInfo.id} --json`);
 
         checkBulkStatusHumanResponse(`data:delete:resume --job-id ${jobInfo.id}`);
-        checkBulkResumeJsonResponse(jobInfo.id, 'upsert');
+        checkBulkResumeJsonResponse(jobInfo.id, 'delete');
       });
     });
   });
@@ -137,7 +137,7 @@ describe('data:bulk commands', () => {
       const result = execCmd('data:delete:bulk --sobject Account --file account.csv --wait 10 --verbose', {
         ensureExitCode: 0,
       }).shellOutput.stdout; // eslint-disable-next-line no-console
-      expect(result).to.include('Status Job Complete Records processed 1. Records failed 0.');
+      expect(result).to.include('| Status Job Complete | Records processed 1 | Records failed 0');
     });
 
     it('should have information in --json', () => {

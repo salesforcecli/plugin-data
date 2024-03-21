@@ -10,7 +10,7 @@ import os from 'node:os';
 import { expect } from 'chai';
 import { Ux } from '@salesforce/sf-plugins-core';
 import { Connection, SfError } from '@salesforce/core';
-import { JobInfo } from 'jsforce/lib/api/bulk.js';
+import { JobInfo } from '@jsforce/jsforce-node/lib/api/bulk.js';
 import sinon from 'sinon';
 import { Batcher, splitIntoBatches } from '../../src/batcher.js';
 
@@ -31,7 +31,7 @@ describe('batcher', () => {
       styledHeaderSpy = $$.stub(ux, 'styledHeader');
       logSpy = $$.stub(ux, 'log');
 
-      batcher = new Batcher(conn, ux, 'sf', ':');
+      batcher = new Batcher(conn, ux);
     });
 
     afterEach(() => {

@@ -6,14 +6,13 @@
  */
 import fs from 'node:fs';
 
-
 import { Messages } from '@salesforce/core';
 import { Flags, SfCommand, Ux } from '@salesforce/sf-plugins-core';
 import { orgFlags } from '../../../../flags.js';
 import { Batcher, BatcherReturnType } from '../../../../batcher.js';
 import { validateSobjectType } from '../../../../bulkUtils.js';
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.upsert');
 
 export default class Upsert extends SfCommand<BatcherReturnType> {
@@ -64,20 +63,14 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
     const conn = flags['target-org'].getConnection(flags['api-version']);
     this.spinner.start('Bulk Upsert');
 
-    await validateSobjectType(flags.sobject, conn);
+    const sobject = await validateSobjectType(flags.sobject, conn);
 
-    const batcher = new Batcher(
-      conn,
-      new Ux({ jsonEnabled: this.jsonEnabled() }),
-      this.config.bin,
-      this.config.pjson.oclif.topicSeparator ?? ':'
-    );
+    const batcher = new Batcher(conn, new Ux({ jsonEnabled: this.jsonEnabled() }));
     const csvStream = fs.createReadStream(flags.file, { encoding: 'utf-8' });
 
-    const concurrencyMode = flags.serial ? 'Serial' : 'Parallel';
-    const job = conn.bulk.createJob(flags.sobject, 'upsert', {
+    const job = conn.bulk.createJob(sobject, 'upsert', {
       extIdField: flags['external-id'],
-      concurrencyMode,
+      concurrencyMode: flags.serial ? 'Serial' : 'Parallel',
     });
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
@@ -87,7 +80,8 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
       });
 
       try {
-        resolve(await batcher.createAndExecuteBatches(job, csvStream, flags.sobject, flags.wait?.minutes));
+        // @ts-expect-error jsforce 2 vs 3 differences in private stuff inside Connection
+        resolve(await batcher.createAndExecuteBatches(job, csvStream, sobject, flags.wait?.minutes));
         this.spinner.stop();
       } catch (e) {
         this.spinner.stop('error');

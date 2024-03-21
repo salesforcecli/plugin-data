@@ -56,10 +56,6 @@ Include deleted records. By default, deleted records are not returned.
 
 Time to wait for the command to finish, in minutes.
 
-# flags.targetOrg.summary
-
-Org alias or username to use for the target org.
-
 # displayQueryRecordsRetrieved
 
 Total number of records retrieved: %s.

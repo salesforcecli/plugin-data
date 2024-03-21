@@ -5,128 +5,124 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-
-import { SfCommand } from '@salesforce/sf-plugins-core';
-import { BulkOperation, IngestJobV2, IngestOperation, JobInfoV2, JobStateV2 } from 'jsforce/lib/api/bulk.js';
+import { SfCommand, Spinner } from '@salesforce/sf-plugins-core';
+import { IngestJobV2, JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { Duration } from '@salesforce/kit';
 import { capitalCase } from 'change-case';
-import { Connection, Lifecycle, Messages } from '@salesforce/core';
-import { Schema } from 'jsforce';
-import { getResultMessage } from './reporters.js';
-import { BulkResultV2 } from './types.js';
+import { Messages } from '@salesforce/core';
+import { Schema } from '@jsforce/jsforce-node';
+import { getResultMessage } from './reporters/reporters.js';
 import { BulkDataRequestCache } from './bulkDataRequestCache.js';
 
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.base.command');
 
-export abstract class BulkBaseCommand extends SfCommand<BulkResultV2> {
-  public static readonly enableJsonFlag = true;
-  protected lifeCycle = Lifecycle.getInstance();
-  protected job!: IngestJobV2<Schema, IngestOperation>;
-  protected connection: Connection | undefined;
-  protected cache: BulkDataRequestCache | undefined;
-  protected isAsync = false;
-  protected operation!: BulkOperation;
-  protected endWaitTime = 0;
-  protected wait = 0;
-  private numberRecordsProcessed = 0;
-  private numberRecordsFailed = 0;
-  private numberRecordSucceeded = 0;
-  private timeout = false;
+export const setupLifecycleListeners = ({
+  job,
+  cache,
+  username,
+  apiVersion,
+  cmd,
+  isAsync,
+  endWaitTime,
+}: {
+  job: IngestJobV2<Schema>;
+  cache?: BulkDataRequestCache;
+  username?: string;
+  apiVersion?: string;
+  cmd: SfCommand<unknown>;
+  isAsync: boolean;
+  endWaitTime: number;
+}): void => {
+  // the event emitted by jsforce's polling function
+  job.on('inProgress', (jobInfo: JobInfoV2) => {
+    cmd.spinner.status = formatSpinnerProgress(isAsync, endWaitTime, jobInfo);
+  });
+  // the event emitted other places in the plugin
+  job.on('jobProgress', () => {
+    const handler = async (): Promise<void> => {
+      const jobInfo = await job.check();
+      cmd.spinner.status = formatSpinnerProgress(isAsync, endWaitTime, jobInfo);
+    };
+    handler().catch((err) => eventListenerErrorHandler(err));
+  });
 
-  protected displayBulkV2Result(jobInfo: JobInfoV2): void {
-    if (this.isAsync) {
-      this.logSuccess(messages.getMessage('success', [this.operation, jobInfo.id]));
-      this.info(
-        messages.getMessage('checkStatus', [
-          this.config.bin,
-          this.operation,
-          jobInfo.id,
-          this.connection?.getUsername(),
-        ])
-      );
-    } else {
-      this.log();
-      this.info(getResultMessage(jobInfo));
-      if ((jobInfo.numberRecordsFailed ?? 0) > 0 || jobInfo.state === 'Failed') {
-        this.info(messages.getMessage('checkJobViaUi', [this.config.bin, this.connection?.getUsername(), jobInfo.id]));
-        process.exitCode = 1;
-      }
-      if (jobInfo.state === 'InProgress' || jobInfo.state === 'Open') {
-        this.info(
-          messages.getMessage('checkStatus', [
-            this.config.bin,
-            this.operation,
-            jobInfo.id,
-            this.connection?.getUsername(),
-          ])
-        );
-      }
-      if (jobInfo.state === 'Failed') {
-        throw messages.createError('bulkJobFailed', [jobInfo.id]);
-      }
+  job.on('failed', throwAndStopSpinner(cmd.spinner));
+  job.on('error', throwAndStopSpinner(cmd.spinner));
+
+  job.once('jobTimeout', () => {
+    const handler = async (): Promise<void> => {
+      await cache?.createCacheEntryForRequest(job.id ?? '', username, apiVersion);
+      displayBulkV2Result({ jobInfo: await job.check(), username, isAsync, cmd });
+    };
+    handler().catch((err) => eventListenerErrorHandler(err));
+  });
+};
+
+export const displayBulkV2Result = ({
+  jobInfo,
+  isAsync,
+  cmd,
+  username = 'unspecified user',
+}: {
+  jobInfo: JobInfoV2;
+  isAsync: boolean;
+  cmd: SfCommand<unknown>;
+  username?: string;
+}): void => {
+  if (isAsync && jobInfo.state !== 'JobComplete' && jobInfo.state !== 'Failed') {
+    cmd.logSuccess(messages.getMessage('success', [jobInfo.operation, jobInfo.id]));
+    cmd.info(messages.getMessage('checkStatus', [jobInfo.operation, jobInfo.id, username]));
+  } else {
+    cmd.log();
+    cmd.info(getResultMessage(jobInfo));
+    if ((jobInfo.numberRecordsFailed ?? 0) > 0 || jobInfo.state === 'Failed') {
+      cmd.info(messages.getMessage('checkJobViaUi', [username, jobInfo.id]));
+      process.exitCode = 1;
+    }
+    if (jobInfo.state === 'InProgress' || jobInfo.state === 'Open') {
+      cmd.info(messages.getMessage('checkStatus', [jobInfo.operation, jobInfo.id, username]));
+    }
+    if (jobInfo.state === 'Failed') {
+      throw messages.createError('bulkJobFailed', [jobInfo.id]).setData(jobInfo);
     }
   }
+};
 
-  protected setupLifecycleListeners(): void {
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this.job.on('jobProgress', async () => {
-      const jobInfo = await this.job.check();
-      this.numberRecordsProcessed = jobInfo.numberRecordsProcessed ?? 0;
-      this.numberRecordsFailed = jobInfo.numberRecordsFailed ?? 0;
-      this.numberRecordSucceeded = this.numberRecordsProcessed - this.numberRecordsFailed;
-      this.spinner.status = `${this.getRemainingTimeStatus()}${this.getStage(
-        jobInfo.state
-      )}${this.getRemainingRecordsStatus()}`;
-    });
+const eventListenerErrorHandler = (err: unknown): never => {
+  throw err instanceof Error || typeof err === 'string' ? err : JSON.stringify(err);
+};
 
-    this.job.on('failed', (err: Error) => {
-      try {
-        this.error(err);
-      } finally {
-        this.spinner.stop();
-      }
-    });
+const throwAndStopSpinner =
+  (spinner: Spinner) =>
+  (err: Error): void => {
+    try {
+      throw err;
+    } finally {
+      spinner.stop();
+    }
+  };
 
-    this.job.on('error', (message: string) => {
-      try {
-        this.error(message);
-      } finally {
-        this.spinner.stop();
-      }
-    });
+export const getRemainingTimeStatus = ({ isAsync, endWaitTime }: { isAsync: boolean; endWaitTime: number }): string =>
+  isAsync ? '' : messages.getMessage('remainingTimeStatus', [Duration.milliseconds(endWaitTime - Date.now()).minutes]);
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this.job.on('jobTimeout', async () => {
-      if (!this.timeout) {
-        this.timeout = true;
-        await this.cache?.createCacheEntryForRequest(
-          this.job.id ?? '',
-          this.connection?.getUsername(),
-          this.connection?.getApiVersion()
-        );
-        this.displayBulkV2Result(await this.job.check());
-      }
-    });
-  }
+const formatSpinnerProgress = (isAsync: boolean, endWaitTime: number, jobInfo: JobInfoV2): string =>
+  `${getRemainingTimeStatus({
+    isAsync,
+    endWaitTime,
+  })} | ${getStage(jobInfo.state)} | ${getRemainingRecordsStatus(jobInfo)}`;
 
-  protected getRemainingTimeStatus(): string {
-    return this.isAsync
-      ? ''
-      : messages.getMessage('remainingTimeStatus', [Duration.milliseconds(this.endWaitTime - Date.now()).minutes]);
-  }
+const getStage = (state: JobInfoV2['state']): string => ` Stage: ${capitalCase(state)}`;
 
-  protected getRemainingRecordsStatus(): string {
-    // the leading space is intentional
-    return ` ${messages.getMessage('remainingRecordsStatus', [
-      this.numberRecordSucceeded,
-      this.numberRecordsFailed,
-      this.numberRecordsProcessed,
-    ])}`;
-  }
+const getRemainingRecordsStatus = (jobInfo: JobInfoV2): string => {
+  const numberRecordsProcessed = jobInfo.numberRecordsProcessed ?? 0;
+  const numberRecordsFailed = jobInfo.numberRecordsFailed ?? 0;
+  const numberRecordSucceeded = numberRecordsProcessed - numberRecordsFailed;
 
-  // eslint-disable-next-line class-methods-use-this
-  protected getStage(state: JobStateV2): string {
-    return ` Stage: ${capitalCase(state)}.`;
-  }
-}
+  // the leading space is intentional
+  return ` ${messages.getMessage('remainingRecordsStatus', [
+    numberRecordsProcessed,
+    numberRecordSucceeded,
+    numberRecordsFailed,
+  ])}`;
+};

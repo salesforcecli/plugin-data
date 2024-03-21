@@ -6,7 +6,7 @@
  */
 
 import { expect, config } from 'chai';
-import { DescribeSObjectResult } from 'jsforce';
+import { DescribeSObjectResult } from '@jsforce/jsforce-node';
 import {
   RefFromIdByType,
   buildRefMap,
