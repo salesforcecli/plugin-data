@@ -1,3 +1,9 @@
+# [3.2.0](https://github.com/salesforcecli/plugin-data/compare/3.1.11...3.2.0) (2024-03-21)
+
+### Features
+
+- use jsforce v3/improve perf on commands ([#843](https://github.com/salesforcecli/plugin-data/issues/843)) ([5bc7157](https://github.com/salesforcecli/plugin-data/commit/5bc7157dbcc5c131fc84e7948d5e8ef6754c1260))
+
 ## [3.1.11](https://github.com/salesforcecli/plugin-data/compare/3.1.10...3.1.11) (2024-03-17)
 
 ### Bug Fixes
