@@ -17,6 +17,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.resume.c
 
 export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
   public static readonly baseFlags = {
+    ...SfCommand.baseFlags,
     'target-org': optionalOrgFlagWithDeprecations,
     'job-id': Flags.salesforceId({
       length: 18,
