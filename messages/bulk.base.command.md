@@ -13,11 +13,11 @@ sf org open --target-org %s --path "/lightning/setup/AsyncApiJobStatus/page?addr
 
 # remainingTimeStatus
 
-Remaining time: %d minutes.
+Remaining time: %d minutes
 
 # remainingRecordsStatus
 
-%d/%d/%d records successful/failed/processed.
+Processed %d | Success %d | Fail %d
 
 # bulkJobFailed
 

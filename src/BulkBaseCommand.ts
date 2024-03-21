@@ -36,19 +36,13 @@ export const setupLifecycleListeners = ({
 }): void => {
   // the event emitted by jsforce's polling function
   job.on('inProgress', (jobInfo: JobInfoV2) => {
-    cmd.spinner.status = `${getRemainingTimeStatus({
-      isAsync,
-      endWaitTime,
-    })}${getStage(jobInfo.state)}${getRemainingRecordsStatus(jobInfo)}`;
+    cmd.spinner.status = formatSpinnerProgress(isAsync, endWaitTime, jobInfo);
   });
   // the event emitted other places in the plugin
   job.on('jobProgress', () => {
     const handler = async (): Promise<void> => {
       const jobInfo = await job.check();
-      cmd.spinner.status = `${getRemainingTimeStatus({
-        isAsync,
-        endWaitTime,
-      })}${getStage(jobInfo.state)}${getRemainingRecordsStatus(jobInfo)}`;
+      cmd.spinner.status = formatSpinnerProgress(isAsync, endWaitTime, jobInfo);
     };
     handler().catch((err) => eventListenerErrorHandler(err));
   });
@@ -112,7 +106,13 @@ const throwAndStopSpinner =
 export const getRemainingTimeStatus = ({ isAsync, endWaitTime }: { isAsync: boolean; endWaitTime: number }): string =>
   isAsync ? '' : messages.getMessage('remainingTimeStatus', [Duration.milliseconds(endWaitTime - Date.now()).minutes]);
 
-const getStage = (state: JobInfoV2['state']): string => ` Stage: ${capitalCase(state)}.`;
+const formatSpinnerProgress = (isAsync: boolean, endWaitTime: number, jobInfo: JobInfoV2): string =>
+  `${getRemainingTimeStatus({
+    isAsync,
+    endWaitTime,
+  })} | ${getStage(jobInfo.state)} | ${getRemainingRecordsStatus(jobInfo)}`;
+
+const getStage = (state: JobInfoV2['state']): string => ` Stage: ${capitalCase(state)}`;
 
 const getRemainingRecordsStatus = (jobInfo: JobInfoV2): string => {
   const numberRecordsProcessed = jobInfo.numberRecordsProcessed ?? 0;
@@ -121,8 +121,8 @@ const getRemainingRecordsStatus = (jobInfo: JobInfoV2): string => {
 
   // the leading space is intentional
   return ` ${messages.getMessage('remainingRecordsStatus', [
+    numberRecordsProcessed,
     numberRecordSucceeded,
     numberRecordsFailed,
-    numberRecordsProcessed,
   ])}`;
 };
