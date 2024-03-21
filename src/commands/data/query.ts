@@ -159,11 +159,14 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
       return prepareAsyncQueryResponse(connection)(this)({ query, jobId: info.id });
     }
     try {
-      connection.bulk2.pollTimeout = timeout.milliseconds ?? Duration.minutes(5).milliseconds;
-
       // @ts-expect-error jsforce 2 vs 3 differences in private stuff inside Connection
       const bulk2 = new BulkV2(connection);
-      const res = (await bulk2.query(query, allRows ? { scanAll: true } : {})) ?? [];
+      const res =
+        (await bulk2.query(query, {
+          pollTimeout: timeout.milliseconds ?? Duration.minutes(5).milliseconds,
+          pollInterval: 5000,
+          ...(allRows ? { scanAll: true } : {}),
+        })) ?? [];
       return transformBulkResults((await res.toArray()) as jsforceRecord[], query);
     } catch (e) {
       if (e instanceof Error && e.name === 'JobPollingTimeout' && 'jobId' in e && typeof e.jobId === 'string') {
