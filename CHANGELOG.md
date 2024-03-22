@@ -1,3 +1,9 @@
+## [3.2.1](https://github.com/salesforcecli/plugin-data/compare/3.2.0...3.2.1) (2024-03-22)
+
+### Bug Fixes
+
+- spread SfCommand.baseFlags ([#864](https://github.com/salesforcecli/plugin-data/issues/864)) ([cbaa3de](https://github.com/salesforcecli/plugin-data/commit/cbaa3de2258a6ff36874fa5fd4f8b75187b98704))
+
 # [3.2.0](https://github.com/salesforcecli/plugin-data/compare/3.1.11...3.2.0) (2024-03-21)
 
 ### Features
