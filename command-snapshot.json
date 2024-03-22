@@ -4,7 +4,17 @@
     "command": "data:create:record",
     "flagAliases": ["apiversion", "sobjecttype", "targetusername", "u", "usetoolingapi"],
     "flagChars": ["o", "s", "t", "v"],
-    "flags": ["api-version", "json", "loglevel", "perflog", "sobject", "target-org", "use-tooling-api", "values"],
+    "flags": [
+      "api-version",
+      "flags-dir",
+      "json",
+      "loglevel",
+      "perflog",
+      "sobject",
+      "target-org",
+      "use-tooling-api",
+      "values"
+    ],
     "plugin": "@salesforce/plugin-data"
   },
   {
@@ -12,7 +22,18 @@
     "command": "data:delete:bulk",
     "flagAliases": ["apiversion", "csvfile", "sobjecttype", "targetusername", "u"],
     "flagChars": ["a", "f", "o", "s", "w"],
-    "flags": ["api-version", "async", "file", "json", "loglevel", "sobject", "target-org", "verbose", "wait"],
+    "flags": [
+      "api-version",
+      "async",
+      "file",
+      "flags-dir",
+      "json",
+      "loglevel",
+      "sobject",
+      "target-org",
+      "verbose",
+      "wait"
+    ],
     "plugin": "@salesforce/plugin-data"
   },
   {
@@ -22,6 +43,7 @@
     "flagChars": ["i", "o", "s", "t", "w"],
     "flags": [
       "api-version",
+      "flags-dir",
       "json",
       "loglevel",
       "perflog",
@@ -38,7 +60,7 @@
     "command": "data:delete:resume",
     "flagAliases": ["jobid", "targetusername", "u"],
     "flagChars": ["i", "o"],
-    "flags": ["api-version", "job-id", "json", "loglevel", "target-org", "use-most-recent", "wait"],
+    "flags": ["api-version", "flags-dir", "job-id", "json", "loglevel", "target-org", "use-most-recent", "wait"],
     "plugin": "@salesforce/plugin-data"
   },
   {
@@ -46,7 +68,7 @@
     "command": "data:export:beta:tree",
     "flagAliases": ["apiversion", "outputdir", "targetusername", "u"],
     "flagChars": ["d", "o", "p", "q", "x"],
-    "flags": ["api-version", "json", "loglevel", "output-dir", "plan", "prefix", "query", "target-org"],
+    "flags": ["api-version", "flags-dir", "json", "loglevel", "output-dir", "plan", "prefix", "query", "target-org"],
     "plugin": "@salesforce/plugin-data"
   },
   {
@@ -54,7 +76,7 @@
     "command": "data:export:tree",
     "flagAliases": ["apiversion", "outputdir", "targetusername", "u"],
     "flagChars": ["d", "o", "p", "q", "x"],
-    "flags": ["api-version", "json", "loglevel", "output-dir", "plan", "prefix", "query", "target-org"],
+    "flags": ["api-version", "flags-dir", "json", "loglevel", "output-dir", "plan", "prefix", "query", "target-org"],
     "plugin": "@salesforce/plugin-data"
   },
   {
@@ -64,6 +86,7 @@
     "flagChars": ["i", "o", "s", "t", "w"],
     "flags": [
       "api-version",
+      "flags-dir",
       "json",
       "loglevel",
       "perflog",
@@ -80,7 +103,7 @@
     "command": "data:import:beta:tree",
     "flagAliases": ["apiversion", "sobjecttreefiles", "targetusername", "u"],
     "flagChars": ["f", "o", "p"],
-    "flags": ["api-version", "files", "json", "loglevel", "plan", "target-org"],
+    "flags": ["api-version", "files", "flags-dir", "json", "loglevel", "plan", "target-org"],
     "plugin": "@salesforce/plugin-data"
   },
   {
@@ -88,7 +111,17 @@
     "command": "data:import:tree",
     "flagAliases": ["apiversion", "confighelp", "contenttype", "sobjecttreefiles", "targetusername", "u"],
     "flagChars": ["c", "f", "o", "p"],
-    "flags": ["api-version", "config-help", "content-type", "files", "json", "loglevel", "plan", "target-org"],
+    "flags": [
+      "api-version",
+      "config-help",
+      "content-type",
+      "files",
+      "flags-dir",
+      "json",
+      "loglevel",
+      "plan",
+      "target-org"
+    ],
     "plugin": "@salesforce/plugin-data"
   },
   {
@@ -102,6 +135,7 @@
       "async",
       "bulk",
       "file",
+      "flags-dir",
       "json",
       "loglevel",
       "perflog",
@@ -118,7 +152,16 @@
     "command": "data:query:resume",
     "flagAliases": ["apiversion", "bulkqueryid", "resultformat", "targetusername", "u"],
     "flagChars": ["i", "o", "r"],
-    "flags": ["api-version", "bulk-query-id", "json", "loglevel", "result-format", "target-org", "use-most-recent"],
+    "flags": [
+      "api-version",
+      "bulk-query-id",
+      "flags-dir",
+      "json",
+      "loglevel",
+      "result-format",
+      "target-org",
+      "use-most-recent"
+    ],
     "plugin": "@salesforce/plugin-data"
   },
   {
@@ -126,7 +169,7 @@
     "command": "data:resume",
     "flagAliases": ["apiversion", "batchid", "jobid", "targetusername", "u"],
     "flagChars": ["b", "i", "o"],
-    "flags": ["api-version", "batch-id", "job-id", "json", "loglevel", "target-org"],
+    "flags": ["api-version", "batch-id", "flags-dir", "job-id", "json", "loglevel", "target-org"],
     "plugin": "@salesforce/plugin-data"
   },
   {
@@ -136,6 +179,7 @@
     "flagChars": ["i", "o", "s", "t", "v", "w"],
     "flags": [
       "api-version",
+      "flags-dir",
       "json",
       "loglevel",
       "perflog",
@@ -158,6 +202,7 @@
       "async",
       "external-id",
       "file",
+      "flags-dir",
       "json",
       "loglevel",
       "sobject",
@@ -172,7 +217,7 @@
     "command": "data:upsert:resume",
     "flagAliases": ["jobid", "targetusername", "u"],
     "flagChars": ["i", "o"],
-    "flags": ["api-version", "job-id", "json", "loglevel", "target-org", "use-most-recent", "wait"],
+    "flags": ["api-version", "flags-dir", "job-id", "json", "loglevel", "target-org", "use-most-recent", "wait"],
     "plugin": "@salesforce/plugin-data"
   },
   {
@@ -180,7 +225,7 @@
     "command": "force:data:bulk:delete",
     "flagAliases": ["apiversion", "csvfile", "sobjecttype", "targetusername", "u"],
     "flagChars": ["f", "o", "s", "w"],
-    "flags": ["api-version", "file", "json", "loglevel", "sobject", "target-org", "wait"],
+    "flags": ["api-version", "file", "flags-dir", "json", "loglevel", "sobject", "target-org", "wait"],
     "plugin": "@salesforce/plugin-data"
   },
   {
@@ -188,7 +233,7 @@
     "command": "force:data:bulk:status",
     "flagAliases": ["apiversion", "batchid", "jobid", "targetusername", "u"],
     "flagChars": ["b", "i", "o"],
-    "flags": ["api-version", "batch-id", "job-id", "json", "loglevel", "target-org"],
+    "flags": ["api-version", "batch-id", "flags-dir", "job-id", "json", "loglevel", "target-org"],
     "plugin": "@salesforce/plugin-data"
   },
   {
@@ -196,7 +241,18 @@
     "command": "force:data:bulk:upsert",
     "flagAliases": ["apiversion", "csvfile", "externalid", "sobjecttype", "targetusername", "u"],
     "flagChars": ["f", "i", "o", "r", "s", "w"],
-    "flags": ["api-version", "external-id", "file", "json", "loglevel", "serial", "sobject", "target-org", "wait"],
+    "flags": [
+      "api-version",
+      "external-id",
+      "file",
+      "flags-dir",
+      "json",
+      "loglevel",
+      "serial",
+      "sobject",
+      "target-org",
+      "wait"
+    ],
     "plugin": "@salesforce/plugin-data"
   }
 ]
