@@ -22,14 +22,14 @@ describe('rename aggregates', () => {
         type: 'AggregateResult',
       },
       Name: 'Pyramid Construction Inc.',
-      expr0: 950000000,
+      expr0: 950_000_000,
     };
     expect(renameAggregates(aggregates)(record)).to.be.deep.equal({
       attributes: {
         type: 'AggregateResult',
       },
       Name: 'Pyramid Construction Inc.',
-      'avg(AnnualRevenue)': 950000000,
+      'avg(AnnualRevenue)': 950_000_000,
     });
   });
   it('has only a aliased aggregate', () => {
@@ -39,14 +39,14 @@ describe('rename aggregates', () => {
         type: 'AggregateResult',
       },
       Name: 'Pyramid Construction Inc.',
-      expr0: 950000000,
+      expr0: 950_000_000,
     };
     expect(renameAggregates(aggregates)(record)).to.be.deep.equal({
       attributes: {
         type: 'AggregateResult',
       },
       Name: 'Pyramid Construction Inc.',
-      'Avg Rev': 950000000,
+      'Avg Rev': 950_000_000,
     });
   });
   it('has an aggregate of each type', () => {
@@ -59,16 +59,16 @@ describe('rename aggregates', () => {
         type: 'AggregateResult',
       },
       Name: 'Pyramid Construction Inc.',
-      expr0: 950000000,
-      expr1: 950000,
+      expr0: 950_000_000,
+      expr1: 950_000,
     };
     expect(renameAggregates(aggregates)(record)).to.be.deep.equal({
       attributes: {
         type: 'AggregateResult',
       },
       Name: 'Pyramid Construction Inc.',
-      'Total Rev': 950000000,
-      'avg(AnnualRevenue)': 950000,
+      'Total Rev': 950_000_000,
+      'avg(AnnualRevenue)': 950_000,
     });
   });
 });
