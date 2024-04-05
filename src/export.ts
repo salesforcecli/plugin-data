@@ -29,7 +29,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'exportApi');
 
 const DATA_PLAN_FILENAME_PART = 'plan.json';
 
-export interface ExportConfig {
+export type ExportConfig = {
   query: string;
   outputDir?: string;
   plan?: boolean;

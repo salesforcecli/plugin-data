@@ -49,7 +49,7 @@ const ACCOUNT_META = {
   ],
 };
 
-interface ExportResult {
+type ExportResult = {
   status: string;
   message?: string;
   result: AnyJson;

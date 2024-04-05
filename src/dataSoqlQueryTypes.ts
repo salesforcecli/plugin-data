@@ -18,7 +18,7 @@ export enum FieldType {
 /**
  * interface to represent a field when describing the fields that make up a query result
  */
-export interface Field {
+export type Field = {
   fieldType: FieldType;
   name: string;
   fields?: Field[];
@@ -50,7 +50,7 @@ export type SObjectTreeInput = Omit<BasicRecord, 'attributes'> & {
     referenceId: string;
   };
 };
-export interface DataPlanPart {
+export type DataPlanPart = {
   sobject: string;
   saveRefs: boolean;
   resolveRefs: boolean;
