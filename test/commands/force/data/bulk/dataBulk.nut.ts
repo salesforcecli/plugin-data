@@ -16,7 +16,7 @@ import { QueryResult } from '../../../data/dataSoqlQuery.nut.js';
 
 let testSession: TestSession;
 
-interface BulkStatus {
+type BulkStatus = {
   state: string;
   totalProcessingTime: number;
 }

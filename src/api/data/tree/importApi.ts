@@ -37,7 +37,7 @@ const xmlRefRegex = /[.]*<[A-Z0-9_]*>@([A-Z0-9_]*)<\/[A-Z0-9_]*[ID]>[.]*/gim;
 
 const INVALID_DATA_IMPORT_ERR_NAME = 'InvalidDataImport';
 
-interface DataImportComponents {
+type DataImportComponents = {
   instanceUrl: string;
   saveRefs?: boolean;
   resolveRefs?: boolean;
@@ -46,13 +46,13 @@ interface DataImportComponents {
   contentType?: string;
 }
 
-export interface ImportConfig {
+export type ImportConfig = {
   contentType?: string;
   sobjectTreeFiles?: string[];
   plan?: string;
 }
 
-interface RequestMeta {
+type RequestMeta = {
   refRegex: RegExp;
   isJson: boolean;
   headers: Dictionary;

@@ -11,13 +11,13 @@ import { execCmd, genUniqueString, TestSession } from '@salesforce/cli-plugins-t
 import { Dictionary } from '@salesforce/ts-types';
 import { SaveResult } from '@jsforce/jsforce-node';
 
-interface AccountRecord {
+type AccountRecord = {
   Id: string;
   Name: string;
   Phone: string;
 }
 
-interface ApexClassRecord {
+type ApexClassRecord = {
   Id: string;
   Name: string;
   Body: string;

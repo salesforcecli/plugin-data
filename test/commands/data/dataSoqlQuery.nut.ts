@@ -13,13 +13,13 @@ import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 
 config.truncateThreshold = 0;
 
-export interface QueryResult {
+export type QueryResult = {
   totalSize: number;
   done: boolean;
   records: Dictionary[];
 }
 
-interface QueryOptions {
+type QueryOptions = {
   json?: boolean;
   ensureExitCode?: number;
   bulk?: boolean;
