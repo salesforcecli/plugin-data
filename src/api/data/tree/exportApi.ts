@@ -26,14 +26,14 @@ const DATA_PLAN_FILENAME_PART = '-plan.json';
 
 const describe: Record<string, DescribeSObjectResult> = {}; // holds metadata result for object type describe calls
 
-export interface ExportConfig {
+export type ExportConfig = {
   query: string;
   outputDir?: string;
   plan?: boolean;
   prefix?: string;
 }
 
-interface ParentRef {
+type ParentRef = {
   id: string;
   fieldName: string;
 }

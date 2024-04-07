@@ -35,11 +35,11 @@ type TreeResponseError = {
   }>;
 };
 
-export interface ResponseRefs {
+export type ResponseRefs = {
   referenceId: string;
   id: string;
 }
-export interface ImportResults {
+export type ImportResults = {
   responseRefs?: ResponseRefs[];
   sobjectTypes?: Dictionary;
   errors?: string[];
