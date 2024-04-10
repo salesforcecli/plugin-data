@@ -60,7 +60,6 @@ export class BulkQueryReport extends SfCommand<unknown> {
       flags['target-org'],
       flags['api-version']
     );
-    // @ts-expect-error jsforce 2 vs 3 differences in private stuff inside Connection
     const job = new QueryJobV2(resumeOptions.options.connection, {
       id: resumeOptions.jobInfo.id,
       pollingOptions: getNonZeroTimeoutPollingOptions(resumeOptions.options.pollingOptions),

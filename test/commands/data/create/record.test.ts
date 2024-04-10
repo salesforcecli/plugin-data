@@ -9,7 +9,7 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Config } from '@oclif/core';
 import { expect } from 'chai';
-import { TestContext, MockTestOrgData } from '@salesforce/core/lib/testSetup.js';
+import { TestContext, MockTestOrgData } from '@salesforce/core/testSetup';
 import { AnyJson, ensureJsonMap, ensureString } from '@salesforce/ts-types';
 import { SaveResult } from '@jsforce/jsforce-node';
 import Create from '../../../../src/commands/data/create/record.js';

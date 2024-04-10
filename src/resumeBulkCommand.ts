@@ -47,7 +47,6 @@ export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
     this.spinner.start('Getting status');
     const conn = resumeOptions.options.connection;
     const isAsync = wait.milliseconds === 0;
-    // @ts-expect-error jsforce 2 vs 3 differences.
     const bulk2 = new BulkV2(conn);
     const job = bulk2.job('ingest', { id: resumeOptions.jobInfo.id });
     this.spinner.status = getRemainingTimeStatus({ isAsync, endWaitTime });

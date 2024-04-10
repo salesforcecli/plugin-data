@@ -8,7 +8,7 @@ import { resolve } from 'node:path';
 import { strict as assert } from 'node:assert';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup.js';
+import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/testSetup';
 import { ensureJsonMap, ensureString, AnyJson } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { Config } from '@oclif/core';

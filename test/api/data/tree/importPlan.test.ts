@@ -7,7 +7,7 @@
 /* eslint-disable camelcase */ // for salesforce __c style fields
 
 import { expect, assert } from 'chai';
-import { shouldThrow } from '@salesforce/core/lib/testSetup.js';
+import { shouldThrow } from '@salesforce/core/testSetup';
 import { Logger } from '@salesforce/core';
 import {
   replaceRefsInTheSameFile,

@@ -10,7 +10,7 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { AnyJson, ensureJsonMap, ensureString, isString } from '@salesforce/ts-types';
 import { expect } from 'chai';
-import { TestContext, MockTestOrgData } from '@salesforce/core/lib/testSetup.js';
+import { TestContext, MockTestOrgData } from '@salesforce/core/testSetup';
 import { Config } from '@oclif/core';
 import Export from '../../../../src/commands/data/export/tree.js';
 const query = 'SELECT Id, Name from Account';
@@ -53,7 +53,7 @@ type ExportResult = {
   status: string;
   message?: string;
   result: AnyJson;
-}
+};
 
 describe('data:export:tree', () => {
   const $$ = new TestContext();
