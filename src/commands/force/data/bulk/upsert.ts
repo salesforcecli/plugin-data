@@ -80,7 +80,6 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
       });
 
       try {
-        // @ts-expect-error jsforce 2 vs 3 differences in private stuff inside Connection
         resolve(await batcher.createAndExecuteBatches(job, csvStream, sobject, flags.wait?.minutes));
         this.spinner.stop();
       } catch (e) {

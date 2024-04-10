@@ -146,22 +146,17 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
     allRows: boolean | undefined = false
   ): Promise<SoqlQueryResult> {
     if (timeout.milliseconds === 0) {
-      const job = new QueryJobV2(
-        // @ts-expect-error jsforce 2 vs 3 differences in private stuff inside Connection
-        connection,
-        {
-          bodyParams: {
-            query,
-            operation: allRows ? 'queryAll' : 'query',
-          },
-          pollingOptions: { pollTimeout: timeout.milliseconds, interval: 5000 },
-        }
-      );
+      const job = new QueryJobV2(connection, {
+        bodyParams: {
+          query,
+          operation: allRows ? 'queryAll' : 'query',
+        },
+        pollingOptions: { pollTimeout: timeout.milliseconds, pollInterval: 5000 },
+      });
       const info = await job.open();
       return prepareAsyncQueryResponse(connection)(this)({ query, jobId: info.id });
     }
     try {
-      // @ts-expect-error jsforce 2 vs 3 differences in private stuff inside Connection
       const bulk2 = new BulkV2(connection);
       const res =
         (await bulk2.query(query, {

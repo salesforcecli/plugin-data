@@ -111,7 +111,6 @@ export const runBulkOperation = async ({
       externalIdFieldName: options?.extIdField,
       ...(os.platform() === 'win32' ? { lineEnding: 'CRLF' } : {}),
     };
-    // @ts-expect-error jsforce 2 vs 3 differences in private stuff inside Connection
     const bulk2 = new BulkV2<Schema>(connection);
     const job = bulk2.createJob(createJobOptions);
 
