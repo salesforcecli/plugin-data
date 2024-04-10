@@ -11,13 +11,13 @@ import { fileURLToPath } from 'node:url';
 import { Messages } from '@salesforce/core';
 import { ensureJsonMap, ensureString, AnyJson } from '@salesforce/ts-types';
 import { expect } from 'chai';
-import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup.js';
+import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/testSetup';
 
 import { Config } from '@oclif/core';
 import Get from '../../../../src/commands/data/get/record.js';
 
 const sObjectId = '0011100001zhhyUAAQ';
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
 describe('data:get:record', () => {

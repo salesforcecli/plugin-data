@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import { AnyJson, ensureJsonMap, ensureString } from '@salesforce/ts-types';
 import { expect } from 'chai';
-import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/lib/testSetup.js';
+import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/testSetup';
 import { Config } from '@oclif/core';
 import Import from '../../../../src/commands/data/import/tree.js';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

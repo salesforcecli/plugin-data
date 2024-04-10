@@ -10,7 +10,7 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Config } from '@oclif/core';
 import { OrgConfigProperties } from '@salesforce/core';
-import { TestContext, MockTestOrgData } from '@salesforce/core/lib/testSetup.js';
+import { TestContext, MockTestOrgData } from '@salesforce/core/testSetup';
 import sinon from 'sinon';
 import { expect, config as chaiConfig } from 'chai';
 import { soqlQueryExemplars } from '../../test-files/soqlQuery.exemplars.js';
