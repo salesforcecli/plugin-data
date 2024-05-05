@@ -1,3 +1,9 @@
+## [3.3.3](https://github.com/salesforcecli/plugin-data/compare/3.3.2...3.3.3) (2024-05-05)
+
+### Bug Fixes
+
+- **deps:** bump @jsforce/jsforce-node from 3.1.0 to 3.2.0 ([8d29d84](https://github.com/salesforcecli/plugin-data/commit/8d29d842aaa768be7ec5c960c8d7bbf69e137bf8))
+
 ## [3.3.2](https://github.com/salesforcecli/plugin-data/compare/3.3.1...3.3.2) (2024-04-21)
 
 ### Bug Fixes
