@@ -17,14 +17,14 @@ export type QueryResult = {
   totalSize: number;
   done: boolean;
   records: Dictionary[];
-}
+};
 
 type QueryOptions = {
   json?: boolean;
   ensureExitCode?: number;
   bulk?: boolean;
   toolingApi?: boolean;
-}
+};
 
 function verifyRecordFields(accountRecord: Dictionary, fields: string[]) {
   expect(accountRecord).to.have.all.keys(...fields);

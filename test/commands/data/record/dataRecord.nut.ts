@@ -15,14 +15,14 @@ type AccountRecord = {
   Id: string;
   Name: string;
   Phone: string;
-}
+};
 
 type ApexClassRecord = {
   Id: string;
   Name: string;
   Body: string;
   SymbolTable: Dictionary;
-}
+};
 
 const validateAccount = (output: string, recordId: string, accountName: string, phoneNumber: string): void => {
   assert.match(output, new RegExp(`Id:.*?${recordId}`, 'g'), 'Id should be present in output');

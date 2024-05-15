@@ -36,7 +36,7 @@ export type ExportConfig = {
   prefix?: string;
   conn: Connection;
   ux: Ux;
-}
+};
 
 /** refFromIdByType.get('account').get(someAccountId) => AccountRef1 */
 export type RefFromIdByType = Map<string, Map<string, string>>;

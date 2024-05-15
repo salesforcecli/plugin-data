@@ -38,12 +38,12 @@ type TreeResponseError = {
 export type ResponseRefs = {
   referenceId: string;
   id: string;
-}
+};
 export type ImportResults = {
   responseRefs?: ResponseRefs[];
   sobjectTypes?: Dictionary;
   errors?: string[];
-}
+};
 
 export type ImportResult = {
   refId: string;

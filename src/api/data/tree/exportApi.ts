@@ -31,12 +31,12 @@ export type ExportConfig = {
   outputDir?: string;
   plan?: boolean;
   prefix?: string;
-}
+};
 
 type ParentRef = {
   id: string;
   fieldName: string;
-}
+};
 
 /**
  * Exports data from an org into sObject tree format.

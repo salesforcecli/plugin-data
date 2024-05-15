@@ -19,7 +19,7 @@ let testSession: TestSession;
 type BulkStatus = {
   state: string;
   totalProcessingTime: number;
-}
+};
 
 /** Verify that the operation completed successfully and results are available before attempting to do stuff with the results */
 const isCompleted = async (cmd: string): Promise<void> => {
