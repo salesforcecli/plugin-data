@@ -1,25 +1,32 @@
 # summary
 
-Upload a local file to an org
+Upload a local file to an org.
 
 # description
 
-Optionally, attach the file to an existing record and give it a new name.
+This command always creates a new file in the org; you can't update an existing file. After a successful upload, the command displays the ID of the new ContentDocument record which represents the uploaded file.
+
+By default, the uploaded file isn't attached to a record; in the Salesforce UI the file shows up in the Files tab. You can optionally attach the file to an existing record, such as an account, as long as you know its record ID.
+
+You can also give the file a new name after it's been uploaded; by default its name in the org is the same as the local file name.
 
 # flags.name.summary
 
-Name given to the created file.
+New name given to the file after it's uploaded.
 
 # examples
 
-- upload a local file to the default org
-  <%= config.bin %> <%= command.id %> --file path/to/astro.png
+- Upload the local file "resources/astro.png" to your default org:
 
-- give the file a different filename in the org  
-  <%= config.bin %> <%= command.id %> --file path/to/astro.png --name AstroOnABoat.png
+  <%= config.bin %> <%= command.id %> --file resources/astro.png
 
-- attach the file to a record in the org
-  <%= config.bin %> <%= command.id %> --file path/to/astro.png --parentid a03O900000LoJWPIA3
+- Give the file a different filename after it's uploaded to the org with alias "my-scratch":
+
+  <%= config.bin %> <%= command.id %> --file resources/astro.png --name AstroOnABoat.png --target-org my-scratch
+
+- Attach the file to a record in the org:
+
+  <%= config.bin %> <%= command.id %> --file path/to/astro.png --parent-id a03fakeLoJWPIA3
 
 # flags.file.summary
 
@@ -27,7 +34,7 @@ Path of file to upload.
 
 # flags.parent-id.summary
 
-Id of the record to attach the file to.
+ID of the record to attach the file to.
 
 # createSuccess
 
@@ -39,7 +46,7 @@ File attached to record with ID %s.
 
 # attachFailure
 
-The file was uploaded but not able to attach to the record.
+The file was successfully uploaded, but we weren't able to attach it to the record.
 
 # insufficientAccessActions
 
