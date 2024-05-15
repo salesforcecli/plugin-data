@@ -47,7 +47,7 @@
         "longDescription": "Use the data commands to manipulate records in your org. Commands are available to help you work with various APIs. Import CSV files with the Bulk API V2. Export and import data with the SObject Tree Save API. Perform simple CRUD operations on individual records with the REST API.",
         "subtopics": {
           "create": {
-            "description": "Create a record."
+            "description": "Create a record or a file"
           },
           "delete": {
             "description": "Delete a single record or multiple records in bulk."
@@ -70,7 +70,8 @@
           "upsert": {
             "description": "Upsert many records."
           }
-        }
+        },
+        "external": true
       }
     },
     "flexibleTaxonomy": true,
@@ -115,13 +116,15 @@
     "chalk": "^5.3.0",
     "change-case": "^5.4.4",
     "csv-parse": "^4.16.3",
-    "csv-stringify": "^6.4.6"
+    "csv-stringify": "^6.4.6",
+    "form-data": "^4.0.0"
   },
   "devDependencies": {
     "@oclif/plugin-command-snapshot": "^5.1.9",
     "@salesforce/cli-plugins-testkit": "^5.3.4",
     "@salesforce/dev-scripts": "^9.1.1",
     "@salesforce/plugin-command-reference": "^3.0.83",
+    "@salesforce/types": "^1.1.0",
     "eslint-plugin-sf-plugin": "^1.18.3",
     "oclif": "^4.10.2",
     "ts-node": "^10.9.2",
