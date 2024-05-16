@@ -47,7 +47,7 @@
         "longDescription": "Use the data commands to manipulate records in your org. Commands are available to help you work with various APIs. Import CSV files with the Bulk API V2. Export and import data with the SObject Tree Save API. Perform simple CRUD operations on individual records with the REST API.",
         "subtopics": {
           "create": {
-            "description": "Create a record or a file"
+            "description": "Create a record or a file."
           },
           "delete": {
             "description": "Delete a single record or multiple records in bulk."
