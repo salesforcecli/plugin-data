@@ -22,7 +22,7 @@ New title given to the file (ContentDocument) after it's uploaded.
 
 - Give the file a different filename after it's uploaded to the org with alias "my-scratch":
 
-  <%= config.bin %> <%= command.id %> --file resources/astro.png --name AstroOnABoat.png --target-org my-scratch
+  <%= config.bin %> <%= command.id %> --file resources/astro.png --title AstroOnABoat.png --target-org my-scratch
 
 - Attach the file to a record in the org:
 
