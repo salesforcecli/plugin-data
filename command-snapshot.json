@@ -3,8 +3,8 @@
     "alias": [],
     "command": "data:create:file",
     "flagAliases": [],
-    "flagChars": ["f", "i", "n", "o"],
-    "flags": ["api-version", "file", "flags-dir", "json", "name", "parent-id", "target-org"],
+    "flagChars": ["f", "i", "o", "t"],
+    "flags": ["api-version", "file", "flags-dir", "json", "parent-id", "target-org", "title"],
     "plugin": "@salesforce/plugin-data"
   },
   {
