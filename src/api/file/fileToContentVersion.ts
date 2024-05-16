@@ -43,7 +43,7 @@ export async function file2CV(conn: Connection, filepath: string, name?: string)
   });
 
   const result = await conn.query<ContentVersion>(
-    `Select Id, ContentDocumentId from ContentVersion where Id='${CV.id}'`
+    `Select Id, ContentDocumentId, Title, FileExtension from ContentVersion where Id='${CV.id}'`
   );
   return result.records[0];
 }
