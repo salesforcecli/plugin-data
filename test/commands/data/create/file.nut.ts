@@ -49,7 +49,7 @@ describe('data create file NUTs', () => {
 
   it('file upload + attach with filename', () => {
     const newName = 'newName.txt';
-    const command = `data:create:file --file ${filename} --parent-id ${acctId} --name ${newName} --json`;
+    const command = `data:create:file --file ${filename} --parent-id ${acctId} --title ${newName} --json`;
     const output = execCmd<ContentVersion>(command, { ensureExitCode: 0 }).jsonOutput?.result;
     expect(output?.ContentDocumentId)
       .to.be.a('string')

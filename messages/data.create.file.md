@@ -10,9 +10,9 @@ By default, the uploaded file isn't attached to a record; in the Salesforce UI t
 
 You can also give the file a new name after it's been uploaded; by default its name in the org is the same as the local file name.
 
-# flags.name.summary
+# flags.title.summary
 
-New name given to the file after it's uploaded.
+New title given to the file (ContentDocument) after it's uploaded.
 
 # examples
 

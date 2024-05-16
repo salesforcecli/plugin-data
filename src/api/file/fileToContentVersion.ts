@@ -24,14 +24,14 @@ type ContentVersionCreateRequest = {
   Title?: string;
 };
 
-export async function file2CV(conn: Connection, filepath: string, name?: string): Promise<ContentVersion> {
+export async function file2CV(conn: Connection, filepath: string, title?: string): Promise<ContentVersion> {
   const cvcr: ContentVersionCreateRequest = {
     PathOnClient: filepath,
-    Title: name,
+    Title: title,
   };
 
   const form = new FormData();
-  form.append('VersionData', await readFile(filepath), { filename: name ?? basename(filepath) });
+  form.append('VersionData', await readFile(filepath), { filename: title ?? basename(filepath) });
   form.append('entity_content', JSON.stringify(cvcr), { contentType: 'application/json' });
 
   // POST the multipart form to Salesforce's API, can't use the normal "create" action because it doesn't support multipart

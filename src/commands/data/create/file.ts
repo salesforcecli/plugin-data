@@ -26,9 +26,9 @@ export default class DataCreateFile extends SfCommand<ContentVersion> {
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
-    name: Flags.string({
-      summary: messages.getMessage('flags.name.summary'),
-      char: 'n',
+    title: Flags.string({
+      summary: messages.getMessage('flags.title.summary'),
+      char: 't',
       required: false,
     }),
     file: Flags.file({
@@ -49,7 +49,7 @@ export default class DataCreateFile extends SfCommand<ContentVersion> {
   public async run(): Promise<ContentVersion> {
     const { flags } = await this.parse(DataCreateFile);
     const conn = flags['target-org'].getConnection(flags['api-version']);
-    const cv = await file2CV(conn, flags.file, flags.name);
+    const cv = await file2CV(conn, flags.file, flags.title);
     this.logSuccess(messages.getMessage('createSuccess', [cv.ContentDocumentId]));
 
     if (!flags['parent-id']) {
