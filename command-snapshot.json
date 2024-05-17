@@ -1,5 +1,13 @@
 [
   {
+    "alias": [],
+    "command": "data:create:file",
+    "flagAliases": [],
+    "flagChars": ["f", "i", "o", "t"],
+    "flags": ["api-version", "file", "flags-dir", "json", "parent-id", "target-org", "title"],
+    "plugin": "@salesforce/plugin-data"
+  },
+  {
     "alias": ["force:data:record:create"],
     "command": "data:create:record",
     "flagAliases": ["apiversion", "sobjecttype", "targetusername", "u", "usetoolingapi"],

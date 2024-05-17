@@ -23,7 +23,7 @@ export type Field = {
   name: string;
   fields?: Field[];
   alias?: Optional<string>;
-}
+};
 
 /**
  * Type to define SoqlQuery results
@@ -55,7 +55,7 @@ export type DataPlanPart = {
   saveRefs: boolean;
   resolveRefs: boolean;
   files: Array<string | (DataPlanPart & { file: string })>;
-}
+};
 
 export type SObjectTreeFileContents = {
   records: SObjectTreeInput[];

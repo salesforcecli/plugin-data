@@ -13,7 +13,6 @@
 
 import fs from 'node:fs';
 
-
 import sinon from 'sinon';
 import { Connection, Messages, Org } from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
@@ -222,7 +221,7 @@ function deepClone(obj: AnyJson) {
 describe('Export API', () => {
   const sandbox = sinon.createSandbox();
 
-  Messages.importMessagesDirectoryFromMetaUrl(import.meta.url)
+  Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
   const messages = Messages.loadMessages('@salesforce/plugin-data', 'exportApi');
   const testUsername = 'user@my.test';
 

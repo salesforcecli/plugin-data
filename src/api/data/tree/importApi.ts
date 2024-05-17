@@ -44,19 +44,19 @@ type DataImportComponents = {
   refMap: Map<string, string>;
   filepath: string;
   contentType?: string;
-}
+};
 
 export type ImportConfig = {
   contentType?: string;
   sobjectTreeFiles?: string[];
   plan?: string;
-}
+};
 
 type RequestMeta = {
   refRegex: RegExp;
   isJson: boolean;
   headers: Dictionary;
-}
+};
 
 /**
  * Imports data into an org that was exported to files using the export API.
