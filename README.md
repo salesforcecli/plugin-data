@@ -76,6 +76,7 @@ sf plugins
 
 <!-- commands -->
 
+- [`sf data create file`](#sf-data-create-file)
 - [`sf data create record`](#sf-data-create-record)
 - [`sf data delete bulk`](#sf-data-delete-bulk)
 - [`sf data delete record`](#sf-data-delete-record)
@@ -94,6 +95,55 @@ sf plugins
 - [`sf force data bulk delete`](#sf-force-data-bulk-delete)
 - [`sf force data bulk status`](#sf-force-data-bulk-status)
 - [`sf force data bulk upsert`](#sf-force-data-bulk-upsert)
+
+## `sf data create file`
+
+Upload a local file to an org.
+
+```
+USAGE
+  $ sf data create file -o <value> -f <value> [--json] [--flags-dir <value>] [--api-version <value>] [-t <value>] [-i
+    <value>]
+
+FLAGS
+  -f, --file=<value>         (required) Path of file to upload.
+  -i, --parent-id=<value>    ID of the record to attach the file to.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+  -t, --title=<value>        New title given to the file (ContentDocument) after it's uploaded.
+      --api-version=<value>  Override the api version used for api requests made by this command
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Upload a local file to an org.
+
+  This command always creates a new file in the org; you can't update an existing file. After a successful upload, the
+  command displays the ID of the new ContentDocument record which represents the uploaded file.
+
+  By default, the uploaded file isn't attached to a record; in the Salesforce UI the file shows up in the Files tab. You
+  can optionally attach the file to an existing record, such as an account, as long as you know its record ID.
+
+  You can also give the file a new name after it's been uploaded; by default its name in the org is the same as the
+  local file name.
+
+EXAMPLES
+  Upload the local file "resources/astro.png" to your default org:
+
+    $ sf data create file --file resources/astro.png
+
+  Give the file a different filename after it's uploaded to the org with alias "my-scratch":
+
+    $ sf data create file --file resources/astro.png --title AstroOnABoat.png --target-org my-scratch
+
+  Attach the file to a record in the org:
+
+    $ sf data create file --file path/to/astro.png --parent-id a03fakeLoJWPIA3
+```
+
+_See code: [src/commands/data/create/file.ts](https://github.com/salesforcecli/plugin-data/blob/3.4.0/src/commands/data/create/file.ts)_
 
 ## `sf data create record`
 
@@ -149,7 +199,7 @@ EXAMPLES
       TracedEntityId=01p17000000R6bLAAS"
 ```
 
-_See code: [src/commands/data/create/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.3.5/src/commands/data/create/record.ts)_
+_See code: [src/commands/data/create/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.4.0/src/commands/data/create/record.ts)_
 
 ## `sf data delete bulk`
 
@@ -196,7 +246,7 @@ EXAMPLES
     $ sf data delete bulk --sobject MyObject__c --file files/delete.csv --wait 5 --target-org my-scratch
 ```
 
-_See code: [src/commands/data/delete/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.3.5/src/commands/data/delete/bulk.ts)_
+_See code: [src/commands/data/delete/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.4.0/src/commands/data/delete/bulk.ts)_
 
 ## `sf data delete record`
 
@@ -257,7 +307,7 @@ EXAMPLES
     $ sf data delete record --use-tooling-api --sobject TraceFlag --record-id 7tf8c
 ```
 
-_See code: [src/commands/data/delete/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.3.5/src/commands/data/delete/record.ts)_
+_See code: [src/commands/data/delete/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.4.0/src/commands/data/delete/record.ts)_
 
 ## `sf data delete resume`
 
@@ -296,7 +346,7 @@ EXAMPLES
     $ sf data delete resume --use-most-recent --target-org my-scratch
 ```
 
-_See code: [src/commands/data/delete/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.3.5/src/commands/data/delete/resume.ts)_
+_See code: [src/commands/data/delete/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.4.0/src/commands/data/delete/resume.ts)_
 
 ## `sf data export beta tree`
 
@@ -354,7 +404,7 @@ EXAMPLES
       my-scratch
 ```
 
-_See code: [src/commands/data/export/beta/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.3.5/src/commands/data/export/beta/tree.ts)_
+_See code: [src/commands/data/export/beta/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.4.0/src/commands/data/export/beta/tree.ts)_
 
 ## `sf data export tree`
 
@@ -414,7 +464,7 @@ EXAMPLES
       my-scratch
 ```
 
-_See code: [src/commands/data/export/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.3.5/src/commands/data/export/tree.ts)_
+_See code: [src/commands/data/export/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.4.0/src/commands/data/export/tree.ts)_
 
 ## `sf data get record`
 
@@ -478,7 +528,7 @@ EXAMPLES
     $ sf data get record --use-tooling-api --sobject TraceFlag --record-id 7tf8c
 ```
 
-_See code: [src/commands/data/get/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.3.5/src/commands/data/get/record.ts)_
+_See code: [src/commands/data/get/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.4.0/src/commands/data/get/record.ts)_
 
 ## `sf data import beta tree`
 
@@ -521,7 +571,7 @@ EXAMPLES
     $ sf data import beta tree --plan Account-Contact-plan.json
 ```
 
-_See code: [src/commands/data/import/beta/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.3.5/src/commands/data/import/beta/tree.ts)_
+_See code: [src/commands/data/import/beta/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.4.0/src/commands/data/import/beta/tree.ts)_
 
 ## `sf data import tree`
 
@@ -571,7 +621,7 @@ EXAMPLES
     $ sf data import tree --plan Account-Contact-plan.json
 ```
 
-_See code: [src/commands/data/import/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.3.5/src/commands/data/import/tree.ts)_
+_See code: [src/commands/data/import/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.4.0/src/commands/data/import/tree.ts)_
 
 ## `sf data query`
 
@@ -635,7 +685,7 @@ EXAMPLES
     $ sf data query --query "SELECT Id FROM Contact" --bulk --wait 0
 ```
 
-_See code: [src/commands/data/query.ts](https://github.com/salesforcecli/plugin-data/blob/3.3.5/src/commands/data/query.ts)_
+_See code: [src/commands/data/query.ts](https://github.com/salesforcecli/plugin-data/blob/3.4.0/src/commands/data/query.ts)_
 
 ## `sf data query resume`
 
@@ -673,7 +723,7 @@ EXAMPLES
     $ sf data query resume --bulk-query-id 7500x000005BdFzXXX
 ```
 
-_See code: [src/commands/data/query/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.3.5/src/commands/data/query/resume.ts)_
+_See code: [src/commands/data/query/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.4.0/src/commands/data/query/resume.ts)_
 
 ## `sf data resume`
 
@@ -710,7 +760,7 @@ EXAMPLES
     $ sf data resume --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA
 ```
 
-_See code: [src/commands/data/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.3.5/src/commands/data/resume.ts)_
+_See code: [src/commands/data/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.4.0/src/commands/data/resume.ts)_
 
 ## `sf data update record`
 
@@ -772,7 +822,7 @@ EXAMPLES
       "ExpirationDate=2017-12-01T00:58:04.000+0000"
 ```
 
-_See code: [src/commands/data/update/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.3.5/src/commands/data/update/record.ts)_
+_See code: [src/commands/data/update/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.4.0/src/commands/data/update/record.ts)_
 
 ## `sf data upsert bulk`
 
@@ -825,7 +875,7 @@ EXAMPLES
       my-scratch
 ```
 
-_See code: [src/commands/data/upsert/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.3.5/src/commands/data/upsert/bulk.ts)_
+_See code: [src/commands/data/upsert/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.4.0/src/commands/data/upsert/bulk.ts)_
 
 ## `sf data upsert resume`
 
@@ -864,7 +914,7 @@ EXAMPLES
     $ sf data upsert resume --use-most-recent --target-org my-scratch
 ```
 
-_See code: [src/commands/data/upsert/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.3.5/src/commands/data/upsert/resume.ts)_
+_See code: [src/commands/data/upsert/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.4.0/src/commands/data/upsert/resume.ts)_
 
 ## `sf force data bulk delete`
 
@@ -911,7 +961,7 @@ EXAMPLES
     $ sf force data bulk delete --sobject MyObject__c --file files/delete.csv --wait 5 --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/3.3.5/src/commands/force/data/bulk/delete.ts)_
+_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/3.4.0/src/commands/force/data/bulk/delete.ts)_
 
 ## `sf force data bulk status`
 
@@ -948,7 +998,7 @@ EXAMPLES
     $ sf force data bulk status --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/3.3.5/src/commands/force/data/bulk/status.ts)_
+_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/3.4.0/src/commands/force/data/bulk/status.ts)_
 
 ## `sf force data bulk upsert`
 
@@ -1006,6 +1056,6 @@ EXAMPLES
       --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/3.3.5/src/commands/force/data/bulk/upsert.ts)_
+_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/3.4.0/src/commands/force/data/bulk/upsert.ts)_
 
 <!-- commandsstop -->

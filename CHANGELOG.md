@@ -1,3 +1,13 @@
+# [3.4.0](https://github.com/salesforcecli/plugin-data/compare/3.3.5...3.4.0) (2024-05-17)
+
+### Bug Fixes
+
+- edit messages for "data create file" ([#923](https://github.com/salesforcecli/plugin-data/issues/923)) ([add2d77](https://github.com/salesforcecli/plugin-data/commit/add2d771375c2d1628b2bf60b1842cc638a8a8cb))
+
+### Features
+
+- upload and attach files ([f710228](https://github.com/salesforcecli/plugin-data/commit/f710228b69189ad21718a36f84df67fbb98dc6f8))
+
 ## [3.3.5](https://github.com/salesforcecli/plugin-data/compare/3.3.4...3.3.5) (2024-05-12)
 
 ### Bug Fixes
