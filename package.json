@@ -123,7 +123,7 @@
     "@oclif/plugin-command-snapshot": "^5.1.9",
     "@salesforce/cli-plugins-testkit": "^5.3.4",
     "@salesforce/dev-scripts": "^9.1.2",
-    "@salesforce/plugin-command-reference": "^3.0.85",
+    "@salesforce/plugin-command-reference": "^3.0.86",
     "@salesforce/types": "^1.1.0",
     "eslint-plugin-sf-plugin": "^1.18.3",
     "oclif": "^4.10.13",
