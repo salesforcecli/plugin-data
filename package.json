@@ -116,7 +116,7 @@
     "chalk": "^5.3.0",
     "change-case": "^5.4.4",
     "csv-parse": "^5.5.6",
-    "csv-stringify": "^6.4.6",
+    "csv-stringify": "^6.5.0",
     "form-data": "^4.0.0"
   },
   "devDependencies": {
