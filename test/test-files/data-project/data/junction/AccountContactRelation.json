@@ -1,0 +1,28 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "AccountContactRelation",
+        "referenceId": "AccountContactRelationRef1"
+      },
+      "ContactId": "@ContactRef3",
+      "AccountId": "@AccountRef2"
+    },
+    {
+      "attributes": {
+        "type": "AccountContactRelation",
+        "referenceId": "AccountContactRelationRef2"
+      },
+      "ContactId": "@ContactRef2",
+      "AccountId": "@AccountRef2"
+    },
+    {
+      "attributes": {
+        "type": "AccountContactRelation",
+        "referenceId": "AccountContactRelationRef3"
+      },
+      "ContactId": "@ContactRef2",
+      "AccountId": "@AccountRef4"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "ContactRef1"
+      },
+      "LastName": "Person C",
+      "AccountId": "@AccountRef5"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "ContactRef2"
+      },
+      "LastName": "Person X",
+      "AccountId": "@AccountRef5"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "ContactRef3"
+      },
+      "LastName": "Person A",
+      "AccountId": "@AccountRef5"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "ContactRef4"
+      },
+      "LastName": "Person B",
+      "AccountId": "@AccountRef5"
+    }
+  ]
+}
