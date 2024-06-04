@@ -3,13 +3,6 @@
     {
       "attributes": {
         "type": "Account",
-        "referenceId": "AccountRef1"
-      },
-      "Name": "Sample Account for Entitlements"
-    },
-    {
-      "attributes": {
-        "type": "Account",
         "referenceId": "AccountRef2"
       },
       "Name": "Acct 2"
