@@ -8,7 +8,7 @@
 import { resolve } from 'node:path';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Config } from '@oclif/core';
+import { Config } from '@oclif/core/config';
 import { OrgConfigProperties } from '@salesforce/core';
 import { TestContext, MockTestOrgData } from '@salesforce/core/testSetup';
 import sinon from 'sinon';

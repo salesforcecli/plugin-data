@@ -7,7 +7,7 @@
 import { resolve } from 'node:path';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Config } from '@oclif/core';
+import { Config } from '@oclif/core/config';
 import { expect } from 'chai';
 import { TestContext, MockTestOrgData } from '@salesforce/core/testSetup';
 import { AnyJson, ensureJsonMap, ensureString } from '@salesforce/ts-types';

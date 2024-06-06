@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/testSetup';
 import { ensureJsonMap, ensureString, AnyJson } from '@salesforce/ts-types';
 import { expect } from 'chai';
-import { Config } from '@oclif/core';
+import { Config } from '@oclif/core/config';
 
 import { SaveResult } from '@jsforce/jsforce-node';
 import Delete from '../../../../src/commands/data/delete/record.js';
