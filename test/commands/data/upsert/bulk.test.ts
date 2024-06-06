@@ -8,9 +8,9 @@
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
-import { SfError } from '@salesforce/core';
+import { SfError } from '@salesforce/core/sfError';
 import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/testSetup';
-import { Config } from '@oclif/core';
+import { Config } from '@oclif/core/config';
 import { expect } from 'chai';
 import Upsert from '../../../../src/commands/data/upsert/bulk.js';
 

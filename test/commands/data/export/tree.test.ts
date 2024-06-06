@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { AnyJson, ensureJsonMap, ensureString, isString } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { TestContext, MockTestOrgData } from '@salesforce/core/testSetup';
-import { Config } from '@oclif/core';
+import { Config } from '@oclif/core/config';
 import Export from '../../../../src/commands/data/export/tree.js';
 const query = 'SELECT Id, Name from Account';
 

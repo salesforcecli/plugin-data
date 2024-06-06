@@ -11,7 +11,7 @@ import os from 'node:os';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
 import { Connection, Messages } from '@salesforce/core';
-import { ux } from '@oclif/core';
+import { Ux } from '@salesforce/sf-plugins-core/Ux';
 import { Schema } from '@jsforce/jsforce-node';
 import {
   BulkV2,
@@ -104,6 +104,7 @@ export const runBulkOperation = async ({
     const csvRecords: ReadStream = fs.createReadStream(csvFileName, { encoding: 'utf-8' });
     cmd.spinner.start(`Running ${isAsync ? 'async ' : ''}bulk ${operation} request`);
     const endWaitTime = Date.now() + wait.milliseconds;
+    // eslint-disable-next-line no-param-reassign
     cmd.spinner.status = getRemainingTimeStatus({ isAsync, endWaitTime });
     const createJobOptions: CreateJobOptions = {
       object: sobject,
@@ -193,6 +194,7 @@ const printBulkErrors = (failedResults: IngestJobV2FailedResults<Schema>): void 
     error: { header: 'Error' },
   };
   const options = { title: `Bulk Failures [${failedResults.length}]` };
+  const ux = new Ux();
   ux.log();
   ux.table(
     failedResults.map((f) => ({ id: 'Id' in f ? f.Id : '', sfId: f.sf__Id, error: f.sf__Error })),

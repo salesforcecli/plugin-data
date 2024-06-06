@@ -8,17 +8,18 @@
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { Record as jsforceRecord, SaveResult } from '@jsforce/jsforce-node';
 
-import { ux } from '@oclif/core';
+import { Ux } from '@salesforce/sf-plugins-core';
 import { GenericObject } from './types.js';
+
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
-export const logNestedObject = (obj: GenericObject, indentation = 0): void => {
+export const logNestedObject = (ux: Ux, obj: GenericObject, indentation = 0): void => {
   const space = ' '.repeat(indentation);
   Object.entries(obj).forEach(([key, value]) => {
     if (!!value && typeof value === 'object') {
       ux.log(`${space}${key}:`);
-      logNestedObject(value as GenericObject, indentation + 2);
+      logNestedObject(ux, value as GenericObject, indentation + 2);
     } else {
       ux.log(`${space}${key}: ${value as string}`);
     }

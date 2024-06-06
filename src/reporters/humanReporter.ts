@@ -4,8 +4,8 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { ux } from '@oclif/core';
-import chalk from 'chalk';
+import { Ux } from '@salesforce/sf-plugins-core';
+import ansis from 'ansis';
 import { get, getArray, isPlainObject, isString, Optional } from '@salesforce/ts-types';
 import { Messages } from '@salesforce/core';
 import { Record as jsforceRecord } from '@jsforce/jsforce-node';
@@ -24,7 +24,7 @@ type ParsedFields = {
 };
 type FieldsMappedByName = Map<string, Field>;
 
-export const nullString = chalk.bold('null');
+export const nullString = ansis.bold('null');
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 export const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
@@ -56,8 +56,8 @@ export const parseFields = (fields: Field[]): ParsedFields => ({
   aggregates: fields.filter(isAggregate),
 });
 
-export const prepColumns = (columns: Array<Optional<string>>): ux.Table.table.Columns<GenericObject> => {
-  const formattedColumns: ux.Table.table.Columns<GenericObject> = {};
+export const prepColumns = (columns: Array<Optional<string>>): Ux.Table.Columns<GenericObject> => {
+  const formattedColumns: Ux.Table.Columns<GenericObject> = {};
   columns.filter(isString).map(
     (field) =>
       (formattedColumns[field] = {
@@ -88,8 +88,9 @@ const maybeReplaceNulls = <T>(value: T): T | string => value ?? nullString;
 const maybeRecurseNestedObjects = <T>(value: T): T => (isPlainObject(value) ? prepNullValues(value) : value);
 
 const printTable = (records: GenericObject[], columns: Array<Optional<string>>, totalCount: number): void => {
+  const ux = new Ux();
   ux.table(records.map(prepNullValues), prepColumns(columns));
-  ux.log(chalk.bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
+  ux.log(ansis.bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
 };
 
 const humanNamesFromField = (field: Field): string[] =>

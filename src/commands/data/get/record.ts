@@ -8,7 +8,7 @@
 import { Messages, SfError } from '@salesforce/core';
 import { Record } from '@jsforce/jsforce-node';
 import { toAnyJson } from '@salesforce/ts-types';
-import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
+import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
 import { orgFlags, perflogFlag } from '../../../flags.js';
 import { query, logNestedObject } from '../../../dataCommand.js';
 
@@ -64,7 +64,7 @@ export default class Get extends SfCommand<Record> {
       const sObjectId = flags['record-id'] ?? ((await query(conn, flags.sobject, flags.where as string)).Id as string);
       const result = await conn.sobject(flags.sobject).retrieve(sObjectId);
       if (!this.jsonEnabled()) {
-        logNestedObject(result as never);
+        logNestedObject(new Ux({ jsonEnabled: this.jsonEnabled() }), result as never);
       }
       this.spinner.stop();
       return toAnyJson(result) as Record;

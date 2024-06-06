@@ -13,7 +13,7 @@ import { ensureJsonMap, ensureString, AnyJson } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/testSetup';
 
-import { Config } from '@oclif/core';
+import { Config } from '@oclif/core/config';
 import Get from '../../../../src/commands/data/get/record.js';
 
 const sObjectId = '0011100001zhhyUAAQ';

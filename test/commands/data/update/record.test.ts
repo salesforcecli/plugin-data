@@ -11,8 +11,8 @@ import { fileURLToPath } from 'node:url';
 import { AnyJson, ensureJsonMap, ensureString } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/testSetup';
-import { Config } from '@oclif/core';
-import { SfError } from '@salesforce/core';
+import { Config } from '@oclif/core/config';
+import { SfError } from '@salesforce/core/sfError';
 import { SaveResult } from '@jsforce/jsforce-node';
 import Update from '../../../../src/commands/data/update/record.js';
 
