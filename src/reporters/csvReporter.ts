@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { EOL } from 'node:os';
-import { ux } from '@oclif/core';
+import { Ux } from '@salesforce/sf-plugins-core';
 import { get, getNumber, isString } from '@salesforce/ts-types';
 import { Record as jsforceRecord } from '@jsforce/jsforce-node';
 import { Field, SoqlQueryResult } from '../dataSoqlQueryTypes.js';
@@ -22,7 +22,7 @@ export class CsvReporter extends QueryReporter {
     const aggregates = fields.filter(isAggregate);
     const preppedData = this.data.result.records.map(maybeMassageAggregates(aggregates));
     const attributeNames = getColumns(preppedData)(fields);
-
+    const ux = new Ux();
     [
       // header row
       attributeNames.map(escape).join(SEPARATOR),

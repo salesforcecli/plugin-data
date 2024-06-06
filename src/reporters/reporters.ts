@@ -6,7 +6,7 @@
  */
 
 import { Logger, Messages } from '@salesforce/core';
-import { ux } from '@oclif/core';
+import { Ux } from '@salesforce/sf-plugins-core';
 import { JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { capitalCase } from 'change-case';
 import { Field, FieldType, SoqlQueryResult } from '../dataSoqlQueryTypes.js';
@@ -33,7 +33,7 @@ export class JsonReporter extends QueryReporter {
   }
 
   public display(): void {
-    ux.styledJSON({ status: 0, result: this.data.result });
+    new Ux().styledJSON({ status: 0, result: this.data.result });
   }
 }
 

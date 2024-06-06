@@ -8,7 +8,7 @@
 import { expect } from 'chai';
 import { get, getPlainObject } from '@salesforce/ts-types';
 import sinon from 'sinon';
-import { ux } from '@oclif/core';
+import { Ux } from '@salesforce/sf-plugins-core';
 
 import { SoqlQueryResult } from '../../src/dataSoqlQueryTypes.js';
 import { CsvReporter, escape, getColumns, getMaxRecord } from '../../src/reporters/csvReporter.js';
@@ -68,7 +68,7 @@ describe('reporter tests', () => {
       };
       const sb = sinon.createSandbox();
       const reporter = new CsvReporter(dataSoqlQueryResult, queryData.columns);
-      const logStub = sb.stub(ux, 'log');
+      const logStub = sb.stub(Ux.prototype, 'log');
 
       reporter.display();
 
