@@ -120,7 +120,7 @@
     "form-data": "^4.0.0"
   },
   "devDependencies": {
-    "@oclif/plugin-command-snapshot": "^5.2.0",
+    "@oclif/plugin-command-snapshot": "^5.2.2",
     "@salesforce/cli-plugins-testkit": "^5.3.9",
     "@salesforce/dev-scripts": "^10.1.0",
     "@salesforce/plugin-command-reference": "^3.0.89",
