@@ -1585,7 +1585,7 @@
     wordwrap "^1.0.0"
     wrap-ansi "^7.0.0"
 
-"@oclif/core@^4", "@oclif/core@^4.0.0-beta.13":
+"@oclif/core@^4":
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/@oclif/core/-/core-4.0.2.tgz#e6b15c4397e52b31fde9b7695f537c20b56634ed"
   integrity sha512-0r+JwE1FbVlEYNQlLonMULnZb6rKR0RqT8eUgKeJTb5cILhsKUjlZf2NLIX4GP3SZrK8POwGGLcztmj42hZYiw==
@@ -1656,12 +1656,12 @@
   resolved "https://registry.npmjs.org/@pkgjs/parseargs/-/parseargs-0.11.0.tgz"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@salesforce/cli-plugins-testkit@^5.3.9":
-  version "5.3.9"
-  resolved "https://registry.yarnpkg.com/@salesforce/cli-plugins-testkit/-/cli-plugins-testkit-5.3.9.tgz#864cb3e2421c1734c3d4ba838aa7e6447abaf201"
-  integrity sha512-v9WQZCCX1Izs4e/4hMn5nCsPyoE3iUmdpV5/nT9lfjFdtdUlwpfhdwUJqNczEz8g2qkJnebYETrB+KklHAQj2A==
+"@salesforce/cli-plugins-testkit@^5.3.10":
+  version "5.3.10"
+  resolved "https://registry.yarnpkg.com/@salesforce/cli-plugins-testkit/-/cli-plugins-testkit-5.3.10.tgz#d2dbd19525b0c91ae6ea037c90d437f604855b03"
+  integrity sha512-D41LFxtkZGExooVecva5q/oGM+ggsoK7BDcxfdpHS+wD4c62pzQC9qeH7qb3QZczmvXf5Iyt1g/c9ajBzvk74g==
   dependencies:
-    "@salesforce/core" "^7.3.9"
+    "@salesforce/core" "^7.3.12"
     "@salesforce/kit" "^3.1.2"
     "@salesforce/ts-types" "^2.0.9"
     "@types/shelljs" "^0.8.15"
