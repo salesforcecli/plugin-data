@@ -7,7 +7,7 @@
 
 import { Messages } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
-import { SfCommand } from '@salesforce/sf-plugins-core';
+import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { baseFlags, runBulkOperation } from '../../../bulkOperationCommand.js';
 import { BulkResultV2 } from '../../../types.js';
 
@@ -19,7 +19,7 @@ export default class Delete extends SfCommand<BulkResultV2> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
 
-  public static readonly flags = baseFlags;
+  public static readonly flags = { ...baseFlags, 'hard-delete': Flags.boolean({ summary: 'abc', default: false }) };
 
   public async run(): Promise<BulkResultV2> {
     const { flags } = await this.parse(Delete);
@@ -30,7 +30,7 @@ export default class Delete extends SfCommand<BulkResultV2> {
       connection: flags['target-org'].getConnection(flags['api-version']),
       wait: flags.async ? Duration.minutes(0) : flags.wait,
       verbose: flags.verbose,
-      operation: 'delete',
+      operation: flags['hard-delete'] ? 'hardDelete' : 'delete',
     });
   }
 }
