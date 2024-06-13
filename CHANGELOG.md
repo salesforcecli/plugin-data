@@ -1,3 +1,9 @@
+## [3.4.8](https://github.com/salesforcecli/plugin-data/compare/3.4.7...3.4.8) (2024-06-13)
+
+### Bug Fixes
+
+- remove extra logging error message ([#957](https://github.com/salesforcecli/plugin-data/issues/957)) ([247380a](https://github.com/salesforcecli/plugin-data/commit/247380a10fabb84ceee4aa64e6c4a3de8223305f))
+
 ## [3.4.7](https://github.com/salesforcecli/plugin-data/compare/3.4.6...3.4.7) (2024-06-13)
 
 ### Bug Fixes
