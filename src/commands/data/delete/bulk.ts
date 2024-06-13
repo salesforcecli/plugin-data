@@ -19,7 +19,14 @@ export default class Delete extends SfCommand<BulkResultV2> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
 
-  public static readonly flags = { ...baseFlags, 'hard-delete': Flags.boolean({ summary: 'abc', default: false }) };
+  public static readonly flags = {
+    ...baseFlags,
+    'hard-delete': Flags.boolean({
+      summary: messages.getMessage('flags.hard-delete.summary'),
+      description: messages.getMessage('flags.hard-delete.description'),
+      default: false,
+    }),
+  };
 
   public async run(): Promise<BulkResultV2> {
     const { flags } = await this.parse(Delete);
