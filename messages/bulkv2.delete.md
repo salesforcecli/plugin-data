@@ -16,12 +16,12 @@ When you execute this command, it starts a job, displays the ID, and then immedi
 
 - Bulk delete records from a custom object in an org with alias my-scratch and wait 5 minutes for the command to complete:
 
-  <%= config.bin %> <%= command.id %> --sobject MyObject\_\_c --file files/delete.csv --wait 5 --target-org my-scratch
+  <%= config.bin %> <%= command.id %> --sobject MyObject__c --file files/delete.csv --wait 5 --target-org my-scratch
 
 # flags.hard-delete.summary
 
-summary for Juliet here :)
+Mark the records as immediately eligible for deletion by your org. If you don't specify this flag, the deleted records go into the Recycle Bin.
 
 # flags.hard-delete.description
 
-description here :)
+You must have the "Bulk API Hard Delete" system permission to use this flag. The permission is disabled by default and can be enabled only by a system administrator.
