@@ -211,7 +211,6 @@ export class Batcher {
       err.message.substr(batchIdIndex, 18),
     ]);
     this.ux.log('');
-    this.ux.log(message);
 
     process.exitCode = 69;
     return message;
