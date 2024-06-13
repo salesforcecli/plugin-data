@@ -6,7 +6,7 @@
  */
 
 import { Messages, SfError } from '@salesforce/core';
-import { SaveResult } from '@jsforce/jsforce-node';
+import type { SaveResult } from '@jsforce/jsforce-node';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { orgFlags, perflogFlag } from '../../../flags.js';
 import { collectErrorMessages, query } from '../../../dataCommand.js';

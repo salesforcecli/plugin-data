@@ -7,7 +7,7 @@
 
 import { Messages } from '@salesforce/core';
 import { QueryJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
-import { Record as jsforceRecord } from '@jsforce/jsforce-node';
+import type { Record as jsforceRecord } from '@jsforce/jsforce-node';
 import {
   Flags,
   loglevel,

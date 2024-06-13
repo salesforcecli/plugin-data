@@ -11,7 +11,7 @@ import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
 import { Connection, Messages } from '@salesforce/core';
 import { Ux } from '@salesforce/sf-plugins-core/Ux';
-import { Schema } from '@jsforce/jsforce-node';
+import type { Schema } from '@jsforce/jsforce-node';
 import {
   BulkV2,
   IngestJobV2,

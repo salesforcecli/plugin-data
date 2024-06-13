@@ -7,7 +7,7 @@
 import path from 'node:path';
 import { expect, config } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-import { QueryResult, Record } from '@jsforce/jsforce-node';
+import type { QueryResult, Record } from '@jsforce/jsforce-node';
 import { sleep } from '@salesforce/kit';
 import { JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 config.truncateThreshold = 0;
