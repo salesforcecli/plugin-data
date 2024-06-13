@@ -146,6 +146,10 @@ export const runBulkOperation = async ({
       }
       return result;
     } catch (err) {
+      if (err instanceof Error && err.name === 'FEATURENOTENABLED' && operation === 'hardDelete') {
+        // add info specific to hardDelete permission
+        err.message = messages.getMessage('hard-delete-permission-error');
+      }
       cmd.spinner.stop();
       throw err;
     }
