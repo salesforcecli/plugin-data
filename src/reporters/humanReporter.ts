@@ -8,7 +8,7 @@ import { Ux } from '@salesforce/sf-plugins-core';
 import ansis from 'ansis';
 import { get, getArray, isPlainObject, isString, Optional } from '@salesforce/ts-types';
 import { Messages } from '@salesforce/core';
-import { Record as jsforceRecord } from '@jsforce/jsforce-node';
+import type { Record as jsforceRecord } from '@jsforce/jsforce-node';
 import { GenericEntry, GenericObject } from '../types.js';
 import { Field, FieldType, SoqlQueryResult } from '../dataSoqlQueryTypes.js';
 import { QueryReporter, logFields, isSubquery, isAggregate, getAggregateAliasOrName } from './reporters.js';

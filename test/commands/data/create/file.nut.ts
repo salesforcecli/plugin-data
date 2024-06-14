@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
-import { SaveResult } from '@jsforce/jsforce-node';
+import type { SaveResult } from '@jsforce/jsforce-node';
 import { SoqlQueryResult } from '../../../../src/dataSoqlQueryTypes.js';
 import { ContentVersion } from '../../../../src/api/file/fileToContentVersion.js';
 

@@ -9,7 +9,7 @@ import { strict as assert } from 'node:assert/strict';
 import { expect } from 'chai';
 import { execCmd, genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { Dictionary } from '@salesforce/ts-types';
-import { SaveResult } from '@jsforce/jsforce-node';
+import type { SaveResult } from '@jsforce/jsforce-node';
 
 type AccountRecord = {
   Id: string;

@@ -13,7 +13,7 @@ import type {
   IngestJobV2UnprocessedRecords,
 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 
-import { Schema } from '@jsforce/jsforce-node';
+import type { Schema } from '@jsforce/jsforce-node';
 import { Connection, Messages } from '@salesforce/core';
 import { BulkProcessedRecordV2, BulkRecordsV2 } from './types.js';
 

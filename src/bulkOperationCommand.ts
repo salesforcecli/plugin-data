@@ -7,12 +7,11 @@
 import fs from 'node:fs';
 import { ReadStream } from 'node:fs';
 import os from 'node:os';
-
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
 import { Connection, Messages } from '@salesforce/core';
 import { Ux } from '@salesforce/sf-plugins-core/Ux';
-import { Schema } from '@jsforce/jsforce-node';
+import type { Schema } from '@jsforce/jsforce-node';
 import {
   BulkV2,
   IngestJobV2,
@@ -77,7 +76,7 @@ export const baseFlags = {
   }),
 };
 
-type SupportedOperations = Extract<IngestOperation, 'delete' | 'upsert'>;
+type SupportedOperations = Extract<IngestOperation, 'hardDelete' | 'delete' | 'upsert'>;
 
 export const runBulkOperation = async ({
   sobject,
@@ -147,6 +146,10 @@ export const runBulkOperation = async ({
       }
       return result;
     } catch (err) {
+      if (err instanceof Error && err.name === 'FEATURENOTENABLED' && operation === 'hardDelete') {
+        // add info specific to hardDelete permission
+        err.message = messages.getMessage('hard-delete-permission-error');
+      }
       cmd.spinner.stop();
       throw err;
     }
@@ -156,6 +159,7 @@ export const runBulkOperation = async ({
 };
 const getCache = async (operation: SupportedOperations): Promise<BulkDataRequestCache> => {
   switch (operation) {
+    case 'hardDelete':
     case 'delete':
       return BulkDeleteRequestCache.create();
     case 'upsert':
@@ -168,8 +172,7 @@ const getCache = async (operation: SupportedOperations): Promise<BulkDataRequest
  *
  * @param job {IngestJobV2}
  * @param input
- * @param sobjectType {string}
- * @param wait {number}
+ * @param endWaitTime
  */
 const executeBulkV2DataRequest = async <J extends Schema>(
   job: IngestJobV2<J>,

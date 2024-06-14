@@ -8,7 +8,7 @@
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
 import { Connection } from '@salesforce/core';
-import { Record, SaveResult } from '@jsforce/jsforce-node';
+import type { Record, SaveResult } from '@jsforce/jsforce-node';
 import FormData from 'form-data';
 
 export type ContentVersion = {

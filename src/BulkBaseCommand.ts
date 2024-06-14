@@ -6,11 +6,11 @@
  */
 
 import { SfCommand, Spinner } from '@salesforce/sf-plugins-core';
-import { IngestJobV2, JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
+import type { IngestJobV2, JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { Duration } from '@salesforce/kit';
 import { capitalCase } from 'change-case';
 import { Messages } from '@salesforce/core';
-import { Schema } from '@jsforce/jsforce-node';
+import type { Schema } from '@jsforce/jsforce-node';
 import { getResultMessage } from './reporters/reporters.js';
 import { BulkDataRequestCache } from './bulkDataRequestCache.js';
 
@@ -70,9 +70,11 @@ export const displayBulkV2Result = ({
   cmd: SfCommand<unknown>;
   username?: string;
 }): void => {
+  // if we just read from jobInfo.operation it may suggest running the nonexistent `sf data hardDelete resume` command
+  const operation = jobInfo.operation === 'hardDelete' || jobInfo.operation === 'delete' ? 'delete' : jobInfo.operation;
   if (isAsync && jobInfo.state !== 'JobComplete' && jobInfo.state !== 'Failed') {
-    cmd.logSuccess(messages.getMessage('success', [jobInfo.operation, jobInfo.id]));
-    cmd.info(messages.getMessage('checkStatus', [jobInfo.operation, jobInfo.id, username]));
+    cmd.logSuccess(messages.getMessage('success', [operation, jobInfo.id]));
+    cmd.info(messages.getMessage('checkStatus', [operation, jobInfo.id, username]));
   } else {
     cmd.log();
     cmd.info(getResultMessage(jobInfo));
@@ -81,7 +83,7 @@ export const displayBulkV2Result = ({
       process.exitCode = 1;
     }
     if (jobInfo.state === 'InProgress' || jobInfo.state === 'Open') {
-      cmd.info(messages.getMessage('checkStatus', [jobInfo.operation, jobInfo.id, username]));
+      cmd.info(messages.getMessage('checkStatus', [operation, jobInfo.id, username]));
     }
     if (jobInfo.state === 'Failed') {
       throw messages.createError('bulkJobFailed', [jobInfo.id]).setData(jobInfo);

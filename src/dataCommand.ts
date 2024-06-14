@@ -6,7 +6,7 @@
  */
 
 import { Connection, Messages, SfError } from '@salesforce/core';
-import { Record as jsforceRecord, SaveResult } from '@jsforce/jsforce-node';
+import type { Record as jsforceRecord, SaveResult } from '@jsforce/jsforce-node';
 
 import { Ux } from '@salesforce/sf-plugins-core';
 import { GenericObject } from './types.js';

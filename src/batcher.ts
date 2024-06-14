@@ -8,10 +8,10 @@
 import { ReadStream } from 'node:fs';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { Ux } from '@salesforce/sf-plugins-core';
-import { Schema } from '@jsforce/jsforce-node';
+import type { Schema } from '@jsforce/jsforce-node';
 import { stringify } from 'csv-stringify/sync';
 import { parse } from 'csv-parse';
-import {
+import type {
   Batch,
   BatchInfo,
   BulkIngestBatchResult,

@@ -17,3 +17,7 @@ Run the command asynchronously.
 # flags.verbose.summary
 
 Print verbose output of failed records if result is available.
+
+# hard-delete-permission-error
+
+You must have the "Bulk API Hard Delete" system permission to use the --hard-delete flag. This permission is disabled by default and can be enabled only by a system administrator.
