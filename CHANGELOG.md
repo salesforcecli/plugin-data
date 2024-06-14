@@ -1,3 +1,9 @@
+# [3.5.0](https://github.com/salesforcecli/plugin-data/compare/3.4.8...3.5.0) (2024-06-14)
+
+### Features
+
+- add --hard-delete flag ([#959](https://github.com/salesforcecli/plugin-data/issues/959)) ([9062ff6](https://github.com/salesforcecli/plugin-data/commit/9062ff61cca230794d9a9649ffe4d03338d462c5))
+
 ## [3.4.8](https://github.com/salesforcecli/plugin-data/compare/3.4.7...3.4.8) (2024-06-13)
 
 ### Bug Fixes
