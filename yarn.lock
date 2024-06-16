@@ -1741,15 +1741,15 @@
     "@salesforce/ts-types" "^2.0.9"
     tslib "^2.6.2"
 
-"@salesforce/plugin-command-reference@^3.0.89":
-  version "3.0.89"
-  resolved "https://registry.yarnpkg.com/@salesforce/plugin-command-reference/-/plugin-command-reference-3.0.89.tgz#000ac5e569929c59b985b74069c668af1c588b03"
-  integrity sha512-RcaO7nWwzlmZEuz1FWc3QaYu3gtOfcf594jf9Ns+Xx9NfEJj/KOl0GYpi9tjBIuvXGPdb6m910fORm8NiN5FCg==
+"@salesforce/plugin-command-reference@^3.1.2":
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/@salesforce/plugin-command-reference/-/plugin-command-reference-3.1.2.tgz#7732d90de2a11ccd9af1e7abf0d569aea2cc31fe"
+  integrity sha512-QivufpS44qqNczUigmpYGxNHqmbSM5edkXYEs5q2Eyo4ua+8MkZ9MIfDNA2UZgJ0MKhRJf4DLPKjaFrygnJ6TQ==
   dependencies:
-    "@oclif/core" "^3.26.6"
-    "@salesforce/core" "^7.3.9"
+    "@oclif/core" "^4"
+    "@salesforce/core" "^7.3.12"
     "@salesforce/kit" "^3.1.1"
-    "@salesforce/sf-plugins-core" "^9.0.13"
+    "@salesforce/sf-plugins-core" "^10.0.0"
     "@salesforce/ts-types" "^2.0.9"
     chalk "^5.3.0"
     debug "^4.3.4"
@@ -1782,19 +1782,6 @@
     slice-ansi "^7.1.0"
     string-width "^7.1.0"
     terminal-link "^3.0.0"
-
-"@salesforce/sf-plugins-core@^9.0.13":
-  version "9.1.1"
-  resolved "https://registry.yarnpkg.com/@salesforce/sf-plugins-core/-/sf-plugins-core-9.1.1.tgz#8818fdb23e0f174d9e6dded0cf34a88be5e3cc44"
-  integrity sha512-5d4vGLqb1NZoHvDpuTu96TsFg/lexdnQNWC0h7GhOqxikJBpxk6P1DEbk9HrZWL18Gs1YXO9OCj2g8nKqbIC/Q==
-  dependencies:
-    "@inquirer/confirm" "^3.1.9"
-    "@inquirer/password" "^2.1.9"
-    "@oclif/core" "^3.26.6"
-    "@salesforce/core" "^7.3.9"
-    "@salesforce/kit" "^3.1.2"
-    "@salesforce/ts-types" "^2.0.9"
-    chalk "^5.3.0"
 
 "@salesforce/ts-types@^2.0.9":
   version "2.0.9"
