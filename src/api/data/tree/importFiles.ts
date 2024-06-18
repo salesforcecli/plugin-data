@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import { Logger, Connection, Messages } from '@salesforce/core';
 import { isFulfilled } from '@salesforce/kit';
 import { flattenNestedRecords } from '../../../export.js';
-import { SObjectTreeInput, isAttributesEntry } from '../../../dataSoqlQueryTypes.js';
+import { SObjectTreeInput, isAttributesEntry } from '../../../types.js';
 import {
   sendSObjectTreeRequest,
   treeSaveErrorHandler,

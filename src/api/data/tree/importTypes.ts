@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { Dictionary } from '@salesforce/ts-types';
-import { DataPlanPart } from '../../../dataSoqlQueryTypes.js';
+import { DataPlanPart } from '../../../types.js';
 
 /*
  * Copyright (c) 2023, salesforce.com, inc.

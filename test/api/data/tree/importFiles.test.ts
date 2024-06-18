@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import { Messages } from '@salesforce/core';
 
 import { expect, assert } from 'chai';
-import { SObjectTreeFileContents } from '../../../../src/dataSoqlQueryTypes.js';
+import { SObjectTreeFileContents } from '../../../../src/types.js';
 import { FileInfo, createSObjectTypeMap, validateNoRefs } from '../../../../src/api/data/tree/importFiles.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);

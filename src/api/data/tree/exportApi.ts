@@ -7,7 +7,6 @@
 
 import path from 'node:path';
 import fs from 'node:fs';
-
 import { Logger, Messages, Org, SfError, Lifecycle } from '@salesforce/core';
 import type { DescribeSObjectResult, QueryResult } from '@jsforce/jsforce-node';
 import { Ux } from '@salesforce/sf-plugins-core';
@@ -17,7 +16,7 @@ import {
   hasNestedRecords,
   SObjectTreeFileContents,
   SObjectTreeInput,
-} from '../../../dataSoqlQueryTypes.js';
+} from '../../../types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'exportApi');

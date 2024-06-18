@@ -23,7 +23,7 @@ import { Duration } from '@salesforce/kit';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { BulkV2, QueryJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { orgFlags, perflogFlag, resultFormatFlag } from '../../flags.js';
-import { Field, FieldType, SoqlQueryResult } from '../../dataSoqlQueryTypes.js';
+import { Field, FieldType, SoqlQueryResult } from '../../types.js';
 import { displayResults, transformBulkResults } from '../../queryUtils.js';
 import { BulkQueryRequestCache } from '../../bulkDataRequestCache.js';
 

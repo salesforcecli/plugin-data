@@ -12,8 +12,7 @@ import { createHash } from 'node:crypto';
 
 import { AnyJson, isString } from '@salesforce/ts-types';
 import { Logger, SchemaValidator, SfError, Connection, Messages } from '@salesforce/core';
-import { GenericObject } from '../../../types.js';
-import { SObjectTreeInput } from '../../../dataSoqlQueryTypes.js';
+import { GenericObject, SObjectTreeInput } from '../../../types.js';
 import { DataPlanPartFilesOnly, ImportResult } from './importTypes.js';
 import {
   getResultsIfNoError,

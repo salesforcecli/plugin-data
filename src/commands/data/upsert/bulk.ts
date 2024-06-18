@@ -8,7 +8,7 @@
 import { Messages } from '@salesforce/core';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
-import { runBulkOperation, baseFlags } from '../../../bulkOperationCommand.js';
+import { runBulkOperation, baseFlags } from '../../../bulkOperationBase.js';
 import { BulkResultV2 } from '../../../types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);

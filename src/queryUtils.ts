@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import type { Record } from '@jsforce/jsforce-node';
-import { Field, FieldType, SoqlQueryResult } from './dataSoqlQueryTypes.js';
+import { Field, FieldType, SoqlQueryResult } from './types.js';
 import { FormatTypes, JsonReporter } from './reporters/reporters.js';
 import { CsvReporter } from './reporters/csvReporter.js';
 import { HumanReporter } from './reporters/humanReporter.js';

@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { FieldType } from '../../src/dataSoqlQueryTypes.js';
+import { FieldType } from '../../src/types.js';
 import { makeSubfield, queryFieldsExemplars } from './queryFields.exemplars.js';
 
 export const soqlQueryExemplars = {

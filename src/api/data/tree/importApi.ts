@@ -11,10 +11,8 @@ import path, { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { AnyJson, Dictionary, getString, JsonMap } from '@salesforce/ts-types';
 import { Logger, Messages, Org, SchemaValidator, SfError } from '@salesforce/core';
-import { DataPlanPart, hasNestedRecords, isAttributesElement, SObjectTreeInput } from '../../../dataSoqlQueryTypes.js';
-import { TreeResponse } from './importTypes.js';
-import { ResponseRefs } from './importTypes.js';
-import { ImportResults } from './importTypes.js';
+import { DataPlanPart, hasNestedRecords, isAttributesElement, SObjectTreeInput } from '../../../types.js';
+import { TreeResponse, ResponseRefs, ImportResults } from './importTypes.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
