@@ -9,7 +9,7 @@ import { Messages } from '@salesforce/core';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
 import { runBulkOperation, baseFlags } from '../../../bulkOperationBase.js';
-import { BulkResultV2 } from '../../../types.js';
+import type { BulkResultV2 } from '../../../types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulkv2.upsert');

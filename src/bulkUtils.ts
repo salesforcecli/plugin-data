@@ -21,7 +21,7 @@ import { Duration } from '@salesforce/kit';
 import { capitalCase } from 'change-case';
 import { getResultMessage } from './reporters/reporters.js';
 import { BulkDataRequestCache } from './bulkDataRequestCache.js';
-import { BulkProcessedRecordV2, BulkRecordsV2 } from './types.js';
+import type { BulkProcessedRecordV2, BulkRecordsV2 } from './types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');

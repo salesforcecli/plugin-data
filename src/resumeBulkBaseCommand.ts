@@ -9,7 +9,7 @@ import { Flags, SfCommand, loglevel, optionalOrgFlagWithDeprecations } from '@sa
 import { Messages } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { BulkV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
-import { BulkResultV2, ResumeOptions } from './types.js';
+import type { BulkResultV2, ResumeOptions } from './types.js';
 import {
   POLL_FREQUENCY_MS,
   displayBulkV2Result,

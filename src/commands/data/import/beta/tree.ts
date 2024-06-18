@@ -10,7 +10,7 @@ import { SfCommand, Flags, arrayWithDeprecation } from '@salesforce/sf-plugins-c
 import { importFromPlan } from '../../../../api/data/tree/importPlan.js';
 import { importFromFiles } from '../../../../api/data/tree/importFiles.js';
 import { orgFlags } from '../../../../flags.js';
-import { ImportResult } from '../../../../api/data/tree/importTypes.js';
+import type { ImportResult } from '../../../../api/data/tree/importTypes.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.import.beta');

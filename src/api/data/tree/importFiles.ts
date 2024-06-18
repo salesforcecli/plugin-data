@@ -15,7 +15,7 @@ import {
   parseDataFileContents,
   getResultsIfNoError,
 } from './importCommon.js';
-import { ImportResult, ResponseRefs, TreeResponse } from './importTypes.js';
+import type { ImportResult, ResponseRefs, TreeResponse } from './importTypes.js';
 import { hasUnresolvedRefs } from './functions.js';
 
 export type FileInfo = {

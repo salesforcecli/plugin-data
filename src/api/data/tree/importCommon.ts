@@ -5,8 +5,8 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { Connection, SfError, Messages } from '@salesforce/core';
-import { SObjectTreeInput, SObjectTreeFileContents } from '../../../types.js';
-import { ResponseRefs, TreeResponse } from './importTypes.js';
+import type { SObjectTreeInput, SObjectTreeFileContents } from '../../../types.js';
+import type { ResponseRefs, TreeResponse } from './importTypes.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');

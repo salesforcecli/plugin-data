@@ -6,7 +6,6 @@
  */
 
 import fs from 'node:fs';
-
 import { Connection, Logger, Messages, SfError } from '@salesforce/core';
 import type { Record as jsforceRecord } from '@jsforce/jsforce-node';
 import {

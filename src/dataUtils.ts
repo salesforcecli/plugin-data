@@ -7,9 +7,8 @@
 
 import { Connection, Messages, SfError } from '@salesforce/core';
 import type { Record as jsforceRecord, SaveResult } from '@jsforce/jsforce-node';
-
 import { Ux } from '@salesforce/sf-plugins-core';
-import { GenericObject } from './types.js';
+import type { GenericObject } from './types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');

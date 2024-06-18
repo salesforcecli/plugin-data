@@ -6,7 +6,7 @@
  */
 
 import { Messages } from '@salesforce/core';
-import { BulkResultV2 } from '../../../types.js';
+import type { BulkResultV2 } from '../../../types.js';
 import { BulkDeleteRequestCache } from '../../../bulkDataRequestCache.js';
 import { ResumeBulkCommand } from '../../../resumeBulkBaseCommand.js';
 import { isBulkV2RequestDone } from '../../../bulkUtils.js';

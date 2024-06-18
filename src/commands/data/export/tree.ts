@@ -9,7 +9,7 @@ import { Messages } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
 import { orgFlags } from '../../../flags.js';
 import { ExportApi, ExportConfig } from '../../../api/data/tree/exportApi.js';
-import { DataPlanPart, SObjectTreeFileContents } from '../../../types.js';
+import type { DataPlanPart, SObjectTreeFileContents } from '../../../types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.export');

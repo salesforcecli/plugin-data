@@ -8,7 +8,7 @@ import { EOL } from 'node:os';
 import { Ux } from '@salesforce/sf-plugins-core';
 import { get, getNumber, isString } from '@salesforce/ts-types';
 import type { Record as jsforceRecord } from '@jsforce/jsforce-node';
-import { Field, SoqlQueryResult } from '../types.js';
+import type { Field, SoqlQueryResult } from '../types.js';
 import { getAggregateAliasOrName, maybeMassageAggregates } from './reporters.js';
 import { QueryReporter, logFields, isSubquery, isAggregate } from './reporters.js';
 

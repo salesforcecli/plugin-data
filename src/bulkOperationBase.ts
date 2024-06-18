@@ -21,7 +21,7 @@ import {
 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { orgFlags } from './flags.js';
 import { BulkDataRequestCache, BulkDeleteRequestCache, BulkUpsertRequestCache } from './bulkDataRequestCache.js';
-import { BulkResultV2 } from './types.js';
+import type { BulkResultV2 } from './types.js';
 import {
   POLL_FREQUENCY_MS,
   isBulkV2RequestDone,
