@@ -10,7 +10,7 @@ import type { Record } from '@jsforce/jsforce-node';
 import { toAnyJson } from '@salesforce/ts-types';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
 import { orgFlags, perflogFlag } from '../../../flags.js';
-import { query, logNestedObject } from '../../../dataCommand.js';
+import { query, logNestedObject } from '../../../dataUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'record.get');
