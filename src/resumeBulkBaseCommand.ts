@@ -10,8 +10,15 @@ import { Messages } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { BulkV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { BulkResultV2, ResumeOptions } from './types.js';
-import { POLL_FREQUENCY_MS, isBulkV2RequestDone, remainingTime, transformResults } from './bulkUtils.js';
-import { displayBulkV2Result, getRemainingTimeStatus, setupLifecycleListeners } from './BulkBaseCommand.js';
+import {
+  POLL_FREQUENCY_MS,
+  displayBulkV2Result,
+  getRemainingTimeStatus,
+  setupLifecycleListeners,
+  isBulkV2RequestDone,
+  remainingTime,
+  transformResults,
+} from './bulkUtils.js';
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.resume.command');
 

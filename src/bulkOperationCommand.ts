@@ -28,8 +28,10 @@ import {
   transformResults,
   validateSobjectType,
   remainingTime,
+  displayBulkV2Result,
+  getRemainingTimeStatus,
+  setupLifecycleListeners,
 } from './bulkUtils.js';
-import { displayBulkV2Result, getRemainingTimeStatus, setupLifecycleListeners } from './BulkBaseCommand.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.operation.command');
