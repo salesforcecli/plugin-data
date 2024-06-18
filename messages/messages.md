@@ -1,10 +1,10 @@
 # success
 
-Bulk %s request %s started successfully
+Bulk %s request %s started successfully.
 
 # checkStatus
 
-Run command sf data %s resume -i %s -o %s to check status.
+Run the command "sf data %s resume -i %s -o %s" to check the status.
 
 # checkJobViaUi
 
@@ -13,7 +13,7 @@ sf org open --target-org %s --path "/lightning/setup/AsyncApiJobStatus/page?addr
 
 # remainingTimeStatus
 
-Remaining time: %d minutes
+Remaining time: %d minutes.
 
 # remainingRecordsStatus
 
