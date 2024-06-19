@@ -1,3 +1,5 @@
+## [3.5.1](https://github.com/salesforcecli/plugin-data/compare/3.5.0...3.5.1) (2024-06-19)
+
 # [3.5.0](https://github.com/salesforcecli/plugin-data/compare/3.4.8...3.5.0) (2024-06-14)
 
 ### Features
