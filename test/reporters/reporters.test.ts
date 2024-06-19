@@ -7,7 +7,7 @@
 
 import { expect } from 'chai';
 import { renameAggregates } from '../../src/reporters/reporters.js';
-import { Field, FieldType } from '../../src/dataSoqlQueryTypes.js';
+import { Field, FieldType } from '../../src/types.js';
 
 describe('rename aggregates', () => {
   it('has no aggregates', () => {

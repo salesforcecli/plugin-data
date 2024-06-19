@@ -10,7 +10,7 @@ import { get, getPlainObject } from '@salesforce/ts-types';
 import sinon from 'sinon';
 import { Ux } from '@salesforce/sf-plugins-core';
 
-import { SoqlQueryResult } from '../../src/dataSoqlQueryTypes.js';
+import { SoqlQueryResult } from '../../src/types.js';
 import { CsvReporter, escape, getColumns, getMaxRecord } from '../../src/reporters/csvReporter.js';
 import { soqlQueryExemplars } from '../test-files/soqlQuery.exemplars.js';
 

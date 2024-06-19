@@ -18,6 +18,7 @@ describe('data:delete:bulk', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   let config: Config;
+  let pollStub: sinon.SinonStub;
 
   before(async () => {
     config = new Config({ root: resolve(dirname(fileURLToPath(import.meta.url)), '../../../..') });
@@ -33,7 +34,7 @@ describe('data:delete:bulk', () => {
     $$.SANDBOX.stub(IngestJobV2.prototype, 'open').resolves();
     $$.SANDBOX.stub(IngestJobV2.prototype, 'uploadData').resolves();
     $$.SANDBOX.stub(IngestJobV2.prototype, 'close').resolves();
-    $$.SANDBOX.stub(IngestJobV2.prototype, 'poll').resolves();
+    pollStub = $$.SANDBOX.stub(IngestJobV2.prototype, 'poll').resolves();
   });
 
   afterEach(async () => {
@@ -110,6 +111,31 @@ describe('data:delete:bulk', () => {
       );
     }
   });
+
+  it('should throw other errors than timeouts', async () => {
+    pollStub.throws(new Error('Server-side error'));
+
+    const bulk = new Bulk(
+      [
+        '--target-org',
+        'test@org.com',
+        '--wait',
+        '10',
+        '--file',
+        '../../oss/plugin-data/test/test-files/data-project/data/bulkUpsertLarge.csv',
+        '--sobject',
+        'Account',
+      ],
+      config
+    );
+    try {
+      await shouldThrow(bulk.run());
+    } catch (err) {
+      assert(err instanceof Error);
+      expect(err.message).to.equal('Server-side error');
+    }
+  });
+
   it('should not change error when not using --hard-delete', async () => {
     const e = new Error('some other server-side error, but not permissions');
     $$.SANDBOX.stub(IngestJobV2.prototype, 'check').throws(e);

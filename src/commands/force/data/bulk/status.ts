@@ -10,7 +10,7 @@ import { Messages, SfError } from '@salesforce/core';
 import { Flags, SfCommand, Ux } from '@salesforce/sf-plugins-core';
 import { orgFlags } from '../../../../flags.js';
 import { Batcher } from '../../../../batcher.js';
-import { StatusResult } from '../../../../types.js';
+import type { StatusResult } from '../../../../types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.status');

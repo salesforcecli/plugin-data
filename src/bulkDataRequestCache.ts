@@ -7,7 +7,7 @@
 
 import { TTLConfig, Global, Logger, Messages, Org } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
-import { ResumeOptions } from './types.js';
+import type { ResumeOptions } from './types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');

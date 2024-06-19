@@ -8,7 +8,7 @@
 import { Messages } from '@salesforce/core';
 import { getString, JsonMap } from '@salesforce/ts-types';
 import { SfCommand, Flags, arrayWithDeprecation } from '@salesforce/sf-plugins-core';
-import { ImportResult } from '../../../api/data/tree/importTypes.js';
+import type { ImportResult } from '../../../api/data/tree/importTypes.js';
 import { ImportApi, ImportConfig } from '../../../api/data/tree/importApi.js';
 import { orgFlags } from '../../../flags.js';
 

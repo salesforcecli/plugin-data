@@ -8,14 +8,14 @@ import fs from 'node:fs';
 import { Logger, Connection, Messages } from '@salesforce/core';
 import { isFulfilled } from '@salesforce/kit';
 import { flattenNestedRecords } from '../../../export.js';
-import { SObjectTreeInput, isAttributesEntry } from '../../../dataSoqlQueryTypes.js';
+import { SObjectTreeInput, isAttributesEntry } from '../../../types.js';
 import {
   sendSObjectTreeRequest,
   treeSaveErrorHandler,
   parseDataFileContents,
   getResultsIfNoError,
 } from './importCommon.js';
-import { ImportResult, ResponseRefs, TreeResponse } from './importTypes.js';
+import type { ImportResult, ResponseRefs, TreeResponse } from './importTypes.js';
 import { hasUnresolvedRefs } from './functions.js';
 
 export type FileInfo = {

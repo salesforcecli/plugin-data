@@ -9,7 +9,7 @@ import path from 'node:path';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 import type { SaveResult } from '@jsforce/jsforce-node';
-import { SoqlQueryResult } from '../../../../src/dataSoqlQueryTypes.js';
+import { SoqlQueryResult } from '../../../../src/types.js';
 import { ContentVersion } from '../../../../src/api/file/fileToContentVersion.js';
 
 describe('data create file NUTs', () => {

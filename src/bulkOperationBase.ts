@@ -9,7 +9,7 @@ import { ReadStream } from 'node:fs';
 import os from 'node:os';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
-import { Connection, Messages } from '@salesforce/core';
+import { Connection, Messages, SfError } from '@salesforce/core';
 import { Ux } from '@salesforce/sf-plugins-core/Ux';
 import type { Schema } from '@jsforce/jsforce-node';
 import {
@@ -21,15 +21,17 @@ import {
 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { orgFlags } from './flags.js';
 import { BulkDataRequestCache, BulkDeleteRequestCache, BulkUpsertRequestCache } from './bulkDataRequestCache.js';
-import { BulkResultV2 } from './types.js';
+import type { BulkResultV2 } from './types.js';
 import {
   POLL_FREQUENCY_MS,
   isBulkV2RequestDone,
   transformResults,
   validateSobjectType,
   remainingTime,
+  displayBulkV2Result,
+  getRemainingTimeStatus,
+  setupLifecycleListeners,
 } from './bulkUtils.js';
-import { displayBulkV2Result, getRemainingTimeStatus, setupLifecycleListeners } from './BulkBaseCommand.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.operation.command');
@@ -100,7 +102,7 @@ export const runBulkOperation = async ({
   const isAsync = !wait;
   try {
     const [cache] = await Promise.all([getCache(operation), validateSobjectType(sobject, connection)]);
-    const csvRecords: ReadStream = fs.createReadStream(csvFileName, { encoding: 'utf-8' });
+    const csvRecords = fs.createReadStream(csvFileName, { encoding: 'utf-8' });
     cmd.spinner.start(`Running ${isAsync ? 'async ' : ''}bulk ${operation} request`);
     const endWaitTime = Date.now() + wait.milliseconds;
     // eslint-disable-next-line no-param-reassign
@@ -185,7 +187,14 @@ const executeBulkV2DataRequest = async <J extends Schema>(
   job.emit('jobProgress', { remainingTime: remainingTime(Date.now())(endWaitTime), stage: 'uploadComplete' });
   await job.close();
   if (endWaitTime && Date.now() < endWaitTime) {
-    await job.poll(POLL_FREQUENCY_MS, remainingTime(Date.now())(endWaitTime));
+    try {
+      await job.poll(POLL_FREQUENCY_MS, remainingTime(Date.now())(endWaitTime));
+    } catch (e) {
+      if (e instanceof Error && e.name !== 'JobPollingTimeout') {
+        // timeout errors are handled by the 'job.once('jobTimeout')' listener - throw anything else
+        throw SfError.wrap(e);
+      }
+    }
   }
   return job.check();
 };

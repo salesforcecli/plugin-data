@@ -15,7 +15,7 @@ import {
   orgApiVersionFlagWithDeprecations,
   SfCommand,
 } from '@salesforce/sf-plugins-core';
-import { ResumeOptions } from '../../../types.js';
+import type { ResumeOptions } from '../../../types.js';
 import { resultFormatFlag } from '../../../flags.js';
 import { displayResults, transformBulkResults } from '../../../queryUtils.js';
 import { BulkQueryRequestCache } from '../../../bulkDataRequestCache.js';

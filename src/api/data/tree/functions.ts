@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { SObjectTreeInput } from '../../../dataSoqlQueryTypes.js';
+import type { SObjectTreeInput } from '../../../types.js';
 
 /** This is the format for references created by the export command */
 const genericRefRegex = new RegExp('^@\\w+Ref\\d+$');

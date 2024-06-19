@@ -19,9 +19,9 @@ import {
   hasNestedRecordsFilter,
   SObjectTreeFileContents,
   SObjectTreeInput,
+  GenericEntry,
   hasNestedRecords,
-} from './dataSoqlQueryTypes.js';
-import { GenericEntry } from './types.js';
+} from './types.js';
 import { hasUnresolvedRefs } from './api/data/tree/functions.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);

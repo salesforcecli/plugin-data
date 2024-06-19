@@ -15,7 +15,7 @@ import sinon from 'sinon';
 import { expect, config as chaiConfig } from 'chai';
 import { soqlQueryExemplars } from '../../test-files/soqlQuery.exemplars.js';
 import { DataSoqlQueryCommand } from '../../../src/commands/data/query.js';
-import { SoqlQueryResult } from '../../../src/dataSoqlQueryTypes.js';
+import { SoqlQueryResult } from '../../../src/types.js';
 
 chaiConfig.truncateThreshold = 0;
 describe('Execute a SOQL statement', (): void => {

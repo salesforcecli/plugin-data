@@ -7,7 +7,7 @@
 
 import { expect } from 'chai';
 
-import { stringToDictionary } from '../../../src/dataCommand.js';
+import { stringToDictionary } from '../../../src/dataUtils.js';
 
 describe('dataCommand', () => {
   it('should transform a "key=value" string into an equivalent object', () => {
