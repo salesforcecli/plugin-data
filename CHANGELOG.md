@@ -1,3 +1,9 @@
+## [3.5.2](https://github.com/salesforcecli/plugin-data/compare/3.5.1...3.5.2) (2024-06-20)
+
+### Bug Fixes
+
+- updates from devScripts ([#968](https://github.com/salesforcecli/plugin-data/issues/968)) ([53dcb86](https://github.com/salesforcecli/plugin-data/commit/53dcb860cc6a72eb0b2373f78dbf4960d559a6ef))
+
 ## [3.5.1](https://github.com/salesforcecli/plugin-data/compare/3.5.0...3.5.1) (2024-06-19)
 
 # [3.5.0](https://github.com/salesforcecli/plugin-data/compare/3.4.8...3.5.0) (2024-06-14)
