@@ -1881,10 +1881,10 @@
   resolved "https://registry.yarnpkg.com/@salesforce/ts-types/-/ts-types-2.0.10.tgz#f2107a52b60be6c3fe712f4d40aafad48c6bebe0"
   integrity sha512-ulGQ1oUGXrmSUi6NGbxZZ7ykSDv439x+WYZpkMgFLC8Dx0TxJXfUAJYeZh7eKO5xI/ob3iyvN+RBcBkp4KFN1w==
 
-"@salesforce/types@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@salesforce/types/-/types-1.1.0.tgz#22d13c84c22c036e20188c54e679e1710d4ae398"
-  integrity sha512-nYxyX9cR9A+ltELXHDJNKTjOgGrLj3URVUpAfpPlmEMjTYXkitz/4bJchIsN2r1Ud2kBcxUYtjvPOvKBnP9eiQ==
+"@salesforce/types@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/types/-/types-1.2.0.tgz#58842732eebc718f10c48232ff39794698824049"
+  integrity sha512-HHey9SlkmElyNWBoo3DRQMDBkj9cAAwUItkGgzgXo4pCt6DdP1tEkB3QPHElE4KAHk8FVxHGoofs53gFZzEVZg==
 
 "@sindresorhus/is@^4":
   version "4.6.0"
