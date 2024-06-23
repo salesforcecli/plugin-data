@@ -125,7 +125,7 @@
     "@salesforce/dev-scripts": "^10.2.2",
     "@salesforce/plugin-command-reference": "^3.1.5",
     "@salesforce/types": "^1.2.0",
-    "eslint-plugin-sf-plugin": "^1.18.8",
+    "eslint-plugin-sf-plugin": "^1.18.9",
     "oclif": "^4.13.8",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
