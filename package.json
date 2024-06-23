@@ -128,7 +128,7 @@
     "eslint-plugin-sf-plugin": "^1.18.9",
     "oclif": "^4.13.8",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.2"
   },
   "wireit": {
     "build": {
