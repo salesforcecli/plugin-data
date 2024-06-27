@@ -22,9 +22,9 @@ Plan definition file to insert multiple data files.
 
 # flags.plan.description
 
-Unlike the `--files` flag, the files listed in the plan definition file **can** contain more then 200 records. These will be automatically batched to comply with that limit.
+Unlike when you use the `--files` flag, the files listed in the plan definition file **can** contain more then 200 records. When the CLI executes the import, it automatically batches the records to comply with the 200 record limit set by the API.
 
-The file order matters--records with lookups to records in another file should be listed AFTER that file Example: you're loading Account and Contact records, and the contacts have references to those Accounts. The Accounts file should come before the Contacts file.
+The order in which you list the files in the plan definition file matters. Specifically, records with lookups to records in another file should be listed AFTER that file. For example, let's say you're loading Account and Contact records, and the contacts have references to those accounts. Be sure you list the Accounts file before the Contacts file.
 
 The plan definition file has the following schema:
 
