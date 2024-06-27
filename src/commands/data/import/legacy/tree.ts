@@ -91,10 +91,6 @@ export default class Import extends SfCommand<ImportResult[] | JsonMap> {
       id: { header: 'ID' },
     });
 
-    this.info(
-      'Be sure to check out the new "sf data import beta tree".  It handles more records and objects with lookups to the same object (ex: parent account)'
-    );
-
     return processedResult;
   }
 }

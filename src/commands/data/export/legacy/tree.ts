@@ -47,10 +47,6 @@ export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileCo
   };
 
   public async run(): Promise<DataPlanPart[] | SObjectTreeFileContents> {
-    this.info(
-      'Try the the new "sf data export beta tree" command.  It support SOQL queries with up to 5 levels of objects!'
-    );
-
     const { flags } = await this.parse(Export);
     const ux = new Ux({ jsonEnabled: this.jsonEnabled() });
     const exportApi = new ExportApi(flags['target-org'], ux);
