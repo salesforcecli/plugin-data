@@ -8,31 +8,29 @@ The JSON files that contain the data are in sObject tree format, which is a coll
 
 If you used the --plan flag when exporting the data to generate a plan definition file, use the --plan flag to reference the file when you import. If you're not using a plan, use the --files flag to list the files. If you specify multiple JSON files that depend on each other in a parent-child relationship, be sure you list them in the correct order.
 
-The sObject Tree API supports requests that contain up to 200 records. For more information, see the REST API Developer Guide. (https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobject_tree.htm)
-
 # flags.files.summary
 
 Comma-separated and in-order JSON files that contain the records, in sObject tree format, that you want to insert.
+
+# flag.files.description
+
+Each file can contain up to 200 total records. For more information, see the REST API Developer Guide. (https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobject_tree.htm)
 
 # flags.plan.summary
 
 Plan definition file to insert multiple data files.
 
-# flags.content-type.summary
+# flags.plan.description
 
-Content type of import files if their extention is not .json.
+Unlike the `--files` flag, the files listed in the plan definition file **can** contain more then 200 records. These will be automatically batched to comply with that limit.
 
-# flags.content-type.deprecation
+The file order matters--records with lookups to records in another file should be listed AFTER that file Example: you're loading Account and Contact records, and the contacts have references to those Accounts. The Accounts file should come before the Contacts file.
 
-The `config-type` flag is deprecated and will be moved to a `legacy` command after July 10, 2024. It will be completely removed after Nov 10, 2024. Use the new `data tree beta import` command.
+The plan definition file has the following schema:
 
-# flags.config-help.summary
-
-Display schema information for the --plan configuration file to stdout; if you specify this flag, all other flags except --json are ignored.
-
-# flags.config-help.deprecation
-
-The `config-help` flag is deprecated and will be moved to a `legacy` command after July 10, 2024. It will be completely removed after Nov 10, 2024. Use the new `data tree beta import` command.
+- items(object) - SObject Type: Definition of records to be insert per SObject Type
+  - sobject(string) - Name of SObject: Child file references must have SObject roots of this type
+  - files(array) - Files: An array of files paths to load
 
 # examples
 
@@ -43,14 +41,3 @@ The `config-help` flag is deprecated and will be moved to a `legacy` command aft
 - Import records using a plan definition file into your default org:
 
   <%= config.bin %> <%= command.id %> --plan Account-Contact-plan.json
-
-# schema-help
-
-schema(array) - Data Import Plan: Schema for SFDX Toolbelt's data import plan JSON.
-
-- items(object) - SObject Type: Definition of records to be insert per SObject Type
-  - sobject(string) - Name of SObject: Child file references must have SObject roots of this type
-  - saveRefs(boolean) - Save References: Post-save, save references (Name/ID) to be used for reference replacement in subsequent saves. Applies to all data files for this SObject type.
-  - resolveRefs(boolean) - Resolve References: Pre-save, replace @<reference> with ID from previous save. Applies to all data files for this SObject type.
-  - files(array) - Files: An array of files paths to load
-  - items(string|object) - Filepath: Filepath string or object to point to a JSON or XML file having data defined in SObject Tree format.

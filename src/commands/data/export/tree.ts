@@ -7,8 +7,8 @@
 
 import { Messages } from '@salesforce/core';
 import { SfCommand, Flags, Ux } from '@salesforce/sf-plugins-core';
-import { orgFlags } from '../../../flags.js';
-import { ExportApi, ExportConfig } from '../../../api/data/tree/exportApi.js';
+import { orgFlags, prefixValidation } from '../../../flags.js';
+import { ExportConfig, runExport } from '../../../export.js';
 import type { DataPlanPart, SObjectTreeFileContents } from '../../../types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -18,7 +18,7 @@ export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileCo
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
-  public static readonly aliases = ['force:data:tree:export'];
+  public static readonly aliases = ['force:data:tree:export', 'data:tree:beta:export'];
   public static readonly deprecateAliases = true;
 
   public static readonly flags = {
@@ -35,6 +35,7 @@ export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileCo
     prefix: Flags.string({
       char: 'x',
       summary: messages.getMessage('flags.prefix.summary'),
+      parse: prefixValidation,
     }),
     'output-dir': Flags.directory({
       char: 'd',
@@ -45,19 +46,18 @@ export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileCo
   };
 
   public async run(): Promise<DataPlanPart[] | SObjectTreeFileContents> {
-    this.info(
-      'Try the the new "sf data export beta tree" command.  It support SOQL queries with up to 5 levels of objects!'
-    );
-
     const { flags } = await this.parse(Export);
-    const ux = new Ux({ jsonEnabled: this.jsonEnabled() });
-    const exportApi = new ExportApi(flags['target-org'], ux);
+    if (flags.plan) {
+      this.warn(messages.getMessage('PlanJsonWarning'));
+    }
     const exportConfig: ExportConfig = {
       outputDir: flags['output-dir'],
       plan: flags.plan,
       prefix: flags.prefix,
       query: flags.query,
+      conn: flags['target-org'].getConnection(flags['api-version']),
+      ux: new Ux({ jsonEnabled: this.jsonEnabled() }),
     };
-    return exportApi.export(exportConfig);
+    return runExport(exportConfig);
   }
 }

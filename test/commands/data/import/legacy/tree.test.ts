@@ -13,7 +13,7 @@ import { AnyJson, ensureJsonMap, ensureString } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/testSetup';
 import { Config } from '@oclif/core/config';
-import Import from '../../../../src/commands/data/import/tree.js';
+import Import from '../../../../../src/commands/data/import/legacy/tree.js';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const dataImportPlanSchema = JSON.parse(fs.readFileSync('schema/dataImportPlanSchema.json', 'utf-8'));
 
@@ -40,7 +40,7 @@ const expectedImportResult = [
   },
 ];
 
-describe('data:tree:import', () => {
+describe('data:tree:legacy:import', () => {
   const $$ = new TestContext();
   const testOrg = new MockTestOrgData();
   const config = new Config({

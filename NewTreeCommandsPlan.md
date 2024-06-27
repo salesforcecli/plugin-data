@@ -2,7 +2,7 @@
 
 We're improving the `data export tree` and `data import tree` commands, but doing it in phases.
 
-## Phase 1: Beta the new commands. [Now]
+## Phase 1: Beta the new commands. [Completed]
 
 Our plan:
 
@@ -29,7 +29,7 @@ Other differences:
 - `data import beta tree --files` (and not `--plan`) imports the files in parallel. Files can only reference each other if you specify `--plan`.
 - `data import tree` outputs deprecation warnings for both `--content-type` and `--config-help` flags.
 
-## Phase 2: GA the new commands, put the old ones under the `legacy` sub-topic. [July 10, 2024]
+## Phase 2: GA the new commands, put the old ones under the `legacy` sub-topic. [Now]
 
 Our plan:
 
@@ -43,7 +43,7 @@ Our plan:
 
 Our plan:
 
-1. Update `data export tree --plan` to stop writing the unused `saveRefs` and `resolveRefs` properties on plan files, and stop returning them in JSON output.
+1. Update `data export tree --plan` to stop writing the unused `saveRefs` and `resolveRefs` properties on plan files, and stop returning them in JSON output, and remove the warning about that change.
 1. Tighten the schema to remove the `object` part of `files`, and remove `saveRefs` and `resolveRefs`.
 1. Check messages for any that aren't being used, then remove them.
 1. Remove the `beta` alias from `data import tree` and `data export tree`.
