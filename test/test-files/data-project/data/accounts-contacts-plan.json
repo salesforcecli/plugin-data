@@ -2,11 +2,16 @@
   {
     "sobject": "Account",
     "saveRefs": false,
-    "files": ["accounts-only.json"]
+    "files": [
+      "accounts-only.json"
+    ]
   },
   {
-    "sobject": "Account",
+    "sobject": "Contact",
     "resolveRefs": false,
-    "files": ["contacts-only-1.json", "contacts-only-2.json"]
+    "files": [
+      "contacts-only-1.json",
+      "contacts-only-2.json"
+    ]
   }
 ]
