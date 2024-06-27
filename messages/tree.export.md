@@ -46,8 +46,8 @@ Directory in which to generate the JSON files; default is current directory.
 
 # PlanJsonWarning
 
-After Nov 10, 2024, the JSON output for `--plan` will no longer include the `saveRefs` and `resolveRefs` properties.
+Starting on Nov 10, 2024, the JSON output for `--plan` will no longer include the `saveRefs` and `resolveRefs` properties.
 
 # LegacyDeprecation
 
-After Nov 10, 2024, this command will no longer be available. Use `data export tree`.
+Starting on Nov 10, 2024, this command will no longer be available. Use `data export tree` instead.

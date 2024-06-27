@@ -37,6 +37,7 @@ export default class Import extends SfCommand<ImportResult[]> {
     plan: Flags.file({
       char: 'p',
       summary: messages.getMessage('flags.plan.summary'),
+      description: messages.getMessage('flags.plan.description'),
       exactlyOne: ['files', 'plan'],
       exists: true,
     }),
