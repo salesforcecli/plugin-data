@@ -36,7 +36,7 @@ describe('data:tree commands', () => {
 
   it('new tree can import junction objects', () => {
     const importResult = execCmd<ImportResult[]>(
-      `data:import:beta:tree --plan ${path.join(
+      `data:import:tree --plan ${path.join(
         'data',
         'junction',
         'Account-AccountContactRelation-Contact-plan.json'
@@ -50,13 +50,13 @@ describe('data:tree commands', () => {
     const query =
       "select Id, Name, (Select Id, FirstName, LastName, (select AccountId, ContactId from AccountContactRoles) from Contacts), (select Id, ContactId, AccountId from AccountContactRelations where Account.Name != 'We Know Everybody') from Account where Name != 'Sample Account for Entitlements'";
 
-    execCmd(`data:export:beta:tree --query "${query}" --outputdir ${path.join('.', 'export_data')} --plan --json`, {
+    execCmd(`data:export:tree --query "${query}" --outputdir ${path.join('.', 'export_data')} --plan --json`, {
       ensureExitCode: 0,
     });
 
     // Import data to the default org.
     const importResult = execCmd<ImportResult[]>(
-      `data:import:beta:tree --target-org importOrg --plan ${path.join(
+      `data:import:tree --target-org importOrg --plan ${path.join(
         '.',
         'export_data',
         'Account-AccountContactRelation-Contact-plan.json'
