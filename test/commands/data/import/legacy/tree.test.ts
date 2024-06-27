@@ -83,6 +83,7 @@ describe('data:tree:legacy:import', () => {
           '..',
           '..',
           '..',
+          '..',
           'api',
           'data',
           'tree',
@@ -106,6 +107,7 @@ describe('data:tree:legacy:import', () => {
         '--plan',
         pathJoin(
           dirname(fileURLToPath(import.meta.url)),
+          '..',
           '..',
           '..',
           '..',
