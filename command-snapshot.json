@@ -81,7 +81,7 @@
     "plugin": "@salesforce/plugin-data"
   },
   {
-    "alias": ["force:data:tree:export", "data:tree:beta:export"],
+    "alias": ["force:data:tree:export", "data:export:beta:tree"],
     "command": "data:export:tree",
     "flagAliases": ["apiversion", "outputdir", "targetusername", "u"],
     "flagChars": ["d", "o", "p", "q", "x"],
@@ -126,7 +126,7 @@
     "plugin": "@salesforce/plugin-data"
   },
   {
-    "alias": ["force:data:tree:import", "data:tree:beta:import"],
+    "alias": ["force:data:tree:import", "data:import:beta:tree"],
     "command": "data:import:tree",
     "flagAliases": ["apiversion", "sobjecttreefiles", "targetusername", "u"],
     "flagChars": ["f", "o", "p"],
