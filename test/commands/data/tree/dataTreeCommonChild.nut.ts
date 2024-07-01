@@ -43,7 +43,7 @@ describe('data:tree commands with a polymorphic whatId (on tasks) shared between
 
     // Import data to the default org.
     execCmd<ImportResult[]>(
-      `data:import:beta:tree --plan ${path.join(
+      `data:import:tree --plan ${path.join(
         '.',
         'data',
         'commonChild',
@@ -55,7 +55,7 @@ describe('data:tree commands with a polymorphic whatId (on tasks) shared between
     );
 
     execCmd(
-      `data:export:beta:tree --query "${query}" --prefix ${prefix} --outputdir ${path.join(
+      `data:export:tree --query "${query}" --prefix ${prefix} --outputdir ${path.join(
         '.',
         'export_data'
       )} --plan --json`,
@@ -64,7 +64,7 @@ describe('data:tree commands with a polymorphic whatId (on tasks) shared between
 
     // Import data to the 2nd org org.
     execCmd(
-      `data:import:beta:tree --target-org ${importAlias} --plan ${path.join(
+      `data:import:tree --target-org ${importAlias} --plan ${path.join(
         '.',
         'export_data',
         `${prefix}-Account-Opportunity-Task-Case-plan.json`

@@ -42,7 +42,7 @@ describe('data:tree commands with more than 200 records are batches in safe grou
 
     // Import data to the default org.
     const importResult = execCmd<ImportResult[]>(
-      `data:import:beta:tree --plan ${path.join('.', 'data', 'moreThan200', 'Account-plan.json')} --json`,
+      `data:import:tree --plan ${path.join('.', 'data', 'moreThan200', 'Account-plan.json')} --json`,
       {
         ensureExitCode: 0,
       }
@@ -50,7 +50,7 @@ describe('data:tree commands with more than 200 records are batches in safe grou
     expect(importResult.jsonOutput?.result.length).to.equal(265, 'Expected 265 records to be imported');
 
     execCmd(
-      `data:export:beta:tree --query "${query}" --prefix ${prefix} --outputdir ${path.join(
+      `data:export:tree --query "${query}" --prefix ${prefix} --outputdir ${path.join(
         '.',
         'export_data'
       )} --plan --json`,
@@ -59,7 +59,7 @@ describe('data:tree commands with more than 200 records are batches in safe grou
 
     // Import data to the 2nd org org.
     execCmd(
-      `data:import:beta:tree --target-org ${importAlias} --plan ${path.join(
+      `data:import:tree --target-org ${importAlias} --plan ${path.join(
         '.',
         'export_data',
         `${prefix}-Account-plan.json`

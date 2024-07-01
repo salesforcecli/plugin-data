@@ -6,11 +6,11 @@
  */
 
 import { Messages } from '@salesforce/core';
-import { getString, JsonMap } from '@salesforce/ts-types';
 import { SfCommand, Flags, arrayWithDeprecation } from '@salesforce/sf-plugins-core';
-import type { ImportResult } from '../../../api/data/tree/importTypes.js';
-import { ImportApi, ImportConfig } from '../../../api/data/tree/importApi.js';
+import { importFromPlan } from '../../../api/data/tree/importPlan.js';
+import { importFromFiles } from '../../../api/data/tree/importFiles.js';
 import { orgFlags } from '../../../flags.js';
+import type { ImportResult } from '../../../api/data/tree/importTypes.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.import');
@@ -18,11 +18,11 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.import')
 /**
  * Command that provides data import capability via the SObject Tree Save API.
  */
-export default class Import extends SfCommand<ImportResult[] | JsonMap> {
+export default class Import extends SfCommand<ImportResult[]> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
-  public static readonly aliases = ['force:data:tree:import'];
+  public static readonly aliases = ['force:data:tree:import', 'data:import:beta:tree'];
   public static readonly deprecateAliases = true;
 
   public static readonly flags = {
@@ -30,69 +30,31 @@ export default class Import extends SfCommand<ImportResult[] | JsonMap> {
     files: arrayWithDeprecation({
       char: 'f',
       summary: messages.getMessage('flags.files.summary'),
-      exclusive: ['plan'],
+      exactlyOne: ['files', 'plan'],
       aliases: ['sobjecttreefiles'],
       deprecateAliases: true,
     }),
     plan: Flags.file({
       char: 'p',
       summary: messages.getMessage('flags.plan.summary'),
+      description: messages.getMessage('flags.plan.description'),
+      exactlyOne: ['files', 'plan'],
       exists: true,
-    }),
-    'content-type': Flags.string({
-      char: 'c',
-      summary: messages.getMessage('flags.content-type.summary'),
-      hidden: true,
-      aliases: ['contenttype'],
-      deprecateAliases: true,
-      deprecated: { message: messages.getMessage('flags.content-type.deprecation') },
-    }),
-    // displays the schema for a data import plan
-    'config-help': Flags.boolean({
-      summary: messages.getMessage('flags.config-help.summary'),
-      aliases: ['confighelp'],
-      deprecateAliases: true,
-      hidden: true,
-      deprecated: { message: messages.getMessage('flags.config-help.deprecation') },
     }),
   };
 
-  public async run(): Promise<ImportResult[] | JsonMap> {
+  public async run(): Promise<ImportResult[]> {
     const { flags } = await this.parse(Import);
-    const importApi = new ImportApi(flags['target-org']);
 
-    if (flags['config-help']) {
-      // Display config help and return
-      const schema = importApi.getSchema();
-      this.log(messages.getMessage('schema-help'));
-
-      return schema;
-    }
-
-    const importConfig: ImportConfig = {
-      sobjectTreeFiles: flags.files,
-      contentType: flags['content-type'],
-      plan: flags.plan,
-    };
-
-    const importResults = await importApi.import(importConfig);
-
-    const processedResult: ImportResult[] = (importResults.responseRefs ?? []).map((ref) => {
-      const type = getString(importResults.sobjectTypes, ref.referenceId, 'Unknown');
-      return { refId: ref.referenceId, type, id: ref.id };
-    });
+    const conn = flags['target-org'].getConnection(flags['api-version']);
+    const results = flags.plan ? await importFromPlan(conn, flags.plan) : await importFromFiles(conn, flags.files);
 
     this.styledHeader('Import Results');
-    this.table(processedResult, {
+    this.table(results, {
       refId: { header: 'Reference ID' },
       type: { header: 'Type' },
       id: { header: 'ID' },
     });
-
-    this.info(
-      'Be sure to check out the new "sf data import beta tree".  It handles more records and objects with lookups to the same object (ex: parent account)'
-    );
-
-    return processedResult;
+    return results;
   }
 }

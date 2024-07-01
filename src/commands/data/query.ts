@@ -93,7 +93,7 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
    * When the user is using global '--json' flag an instance of SfdxResult is returned.
    * This is necessary since '--json' flag reports results in the form of SfdxResult
    * and bypasses the definition of start result. The goal is to have the output
-   * from '--json' and '--resulformat json' be the same.
+   * from '--json' and '--result-format json' be the same.
    *
    * The DataSoqlQueryResult is necessary to communicate user selections to the reporters.
    * The 'this' object available during display() function does not include user input to
@@ -105,7 +105,7 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
     const flags = (await this.parse(DataSoqlQueryCommand)).flags;
 
     try {
-      // soqlqueryfile will be present if flags.query isn't. Oclif exactlyOne isn't quite that clever
+      // --file will be present if flags.query isn't. Oclif exactlyOne isn't quite that clever
       const queryString = flags.query ?? fs.readFileSync(flags.file as string, 'utf8');
       const conn = flags['target-org'].getConnection(flags['api-version']);
       if (flags['result-format'] !== 'json') this.spinner.start(messages.getMessage('queryRunningMessage'));
@@ -178,14 +178,14 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
     connection: Connection | Connection['tooling'],
     query: string,
     logger: Logger,
-    maxFetch: number | undefined,
-    allRows: boolean | undefined = false
+    maxFetch = 50_000,
+    allRows = false
   ): Promise<SoqlQueryResult> {
     logger.debug('running query');
 
     const result = await connection.query(query, {
       autoFetch: true,
-      maxFetch: maxFetch ?? 50_000,
+      maxFetch,
       scanAll: allRows,
     });
     if (result.records.length && result.totalSize > result.records.length) {

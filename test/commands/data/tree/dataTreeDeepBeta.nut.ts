@@ -38,7 +38,7 @@ describe('data:tree beta commands with more than 2 levels', () => {
 
   it('should error with invalid soql', () => {
     const result = execCmd(
-      `data:export:beta:tree --query 'SELECT' --prefix ${prefix} --outputdir ${path.join('.', 'export_data')}`
+      `data:export:tree --query 'SELECT' --prefix ${prefix} --outputdir ${path.join('.', 'export_data')}`
     );
     const stdError = getString(result, 'shellOutput.stderr', '').toLowerCase();
     const errorKeywords = ['malformed', 'check the soql', 'invalid soql query'];
@@ -50,12 +50,12 @@ describe('data:tree beta commands with more than 2 levels', () => {
       "SELECT Id, Name, Phone, Website, NumberOfEmployees, Industry, (SELECT Lastname, Title, Email FROM Contacts) FROM Account  WHERE Name LIKE 'SampleAccount%'";
 
     // Import data to the default org.
-    execCmd(`data:import:beta:tree --plan ${path.join('.', 'data', 'deep', 'accounts-contacts-plan.json')} --json`, {
+    execCmd(`data:import:tree --plan ${path.join('.', 'data', 'deep', 'accounts-contacts-plan.json')} --json`, {
       ensureExitCode: 0,
     });
 
     execCmd(
-      `data:export:beta:tree --query "${query}" --prefix ${prefix} --outputdir ${path.join(
+      `data:export:tree --query "${query}" --prefix ${prefix} --outputdir ${path.join(
         '.',
         'export_data'
       )} --plan --json`,
@@ -64,7 +64,7 @@ describe('data:tree beta commands with more than 2 levels', () => {
 
     // Import data to the default org.
     execCmd(
-      `data:import:beta:tree --target-org importOrg --plan ${path.join(
+      `data:import:tree --target-org importOrg --plan ${path.join(
         '.',
         'export_data',
         `${prefix}-Account-Contact-plan.json`

@@ -16,11 +16,6 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'data.resume');
 
 export default class Status extends SfCommand<StatusResult> {
-  public static readonly state = 'deprecated';
-  public static readonly deprecationOptions = {
-    to: 'force:data:bulk:status',
-    message: 'Use force:data:bulk:status instead',
-  };
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');

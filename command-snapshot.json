@@ -74,14 +74,14 @@
   },
   {
     "alias": [],
-    "command": "data:export:beta:tree",
+    "command": "data:export:legacy:tree",
     "flagAliases": ["apiversion", "outputdir", "targetusername", "u"],
     "flagChars": ["d", "o", "p", "q", "x"],
     "flags": ["api-version", "flags-dir", "json", "loglevel", "output-dir", "plan", "prefix", "query", "target-org"],
     "plugin": "@salesforce/plugin-data"
   },
   {
-    "alias": ["force:data:tree:export"],
+    "alias": ["force:data:tree:export", "data:export:beta:tree"],
     "command": "data:export:tree",
     "flagAliases": ["apiversion", "outputdir", "targetusername", "u"],
     "flagChars": ["d", "o", "p", "q", "x"],
@@ -109,15 +109,7 @@
   },
   {
     "alias": [],
-    "command": "data:import:beta:tree",
-    "flagAliases": ["apiversion", "sobjecttreefiles", "targetusername", "u"],
-    "flagChars": ["f", "o", "p"],
-    "flags": ["api-version", "files", "flags-dir", "json", "loglevel", "plan", "target-org"],
-    "plugin": "@salesforce/plugin-data"
-  },
-  {
-    "alias": ["force:data:tree:import"],
-    "command": "data:import:tree",
+    "command": "data:import:legacy:tree",
     "flagAliases": ["apiversion", "confighelp", "contenttype", "sobjecttreefiles", "targetusername", "u"],
     "flagChars": ["c", "f", "o", "p"],
     "flags": [
@@ -131,6 +123,14 @@
       "plan",
       "target-org"
     ],
+    "plugin": "@salesforce/plugin-data"
+  },
+  {
+    "alias": ["force:data:tree:import", "data:import:beta:tree"],
+    "command": "data:import:tree",
+    "flagAliases": ["apiversion", "sobjecttreefiles", "targetusername", "u"],
+    "flagChars": ["f", "o", "p"],
+    "flags": ["api-version", "files", "flags-dir", "json", "loglevel", "plan", "target-org"],
     "plugin": "@salesforce/plugin-data"
   },
   {

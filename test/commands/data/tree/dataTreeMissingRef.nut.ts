@@ -31,7 +31,7 @@ describe('data:tree beta commands with a missing reference', () => {
 
   it('import breaks recursion and fails with good error when a ref is missing', () => {
     const failResult = execCmd<ImportResult[]>(
-      `data:import:beta:tree --plan ${path.join('.', 'data', 'missingRef', 'Account-Opportunity-plan.json')} --json`,
+      `data:import:tree --plan ${path.join('.', 'data', 'missingRef', 'Account-Opportunity-plan.json')} --json`,
       {
         ensureExitCode: 'nonZero',
       }
@@ -44,7 +44,7 @@ describe('data:tree beta commands with a missing reference', () => {
 
   it('import breaks recursion and fails with good error when a ref is missing', () => {
     const failResult = execCmd<ImportResult[]>(
-      `data:import:beta:tree --plan ${path.join('.', 'data', 'missingSelfRef', 'Account-plan.json')} --json`,
+      `data:import:tree --plan ${path.join('.', 'data', 'missingSelfRef', 'Account-plan.json')} --json`,
       {
         ensureExitCode: 'nonZero',
       }

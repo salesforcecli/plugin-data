@@ -39,25 +39,18 @@ describe('data:tree commands with records that refer to other records of the sam
     const query = "SELECT Id, Name, ParentId FROM Account where name != 'Sample Account for Entitlements'";
 
     // Import data to the default org.
-    execCmd(`data:import:beta:tree --plan ${path.join('.', 'data', 'self-referencing', 'Account-plan.json')} --json`, {
+    execCmd(`data:import:tree --plan ${path.join('.', 'data', 'self-referencing', 'Account-plan.json')} --json`, {
       ensureExitCode: 0,
     });
 
     execCmd(
-      `data:export:beta:tree --query "${query}" --prefix INT --outputdir ${path.join(
-        '.',
-        'export_data'
-      )} --plan --json`,
+      `data:export:tree --query "${query}" --prefix INT --outputdir ${path.join('.', 'export_data')} --plan --json`,
       { ensureExitCode: 0 }
     );
 
     // Import data to the 2nd org org.
     execCmd(
-      `data:import:beta:tree --target-org importOrg --plan ${path.join(
-        '.',
-        'export_data',
-        'INT-Account-plan.json'
-      )} --json`,
+      `data:import:tree --target-org importOrg --plan ${path.join('.', 'export_data', 'INT-Account-plan.json')} --json`,
       {
         ensureExitCode: 0,
       }
