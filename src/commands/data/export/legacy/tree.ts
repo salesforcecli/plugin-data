@@ -19,6 +19,7 @@ export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileCo
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly hidden = true;
+  public static readonly state = 'deprecated';
   public static readonly deprecationOptions = {
     to: 'data tree export',
     message: messages.getMessage('LegacyDeprecation'),

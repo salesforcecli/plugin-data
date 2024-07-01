@@ -23,6 +23,7 @@ export default class Import extends SfCommand<ImportResult[] | JsonMap> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly hidden = true;
+  public static readonly state = 'deprecated';
   public static deprecationOptions = {
     message: messages.getMessage('deprecation'),
   };
