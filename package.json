@@ -109,7 +109,7 @@
   "dependencies": {
     "@jsforce/jsforce-node": "^3.2.0",
     "@oclif/core": "^4",
-    "@salesforce/core": "^8.0.1",
+    "@salesforce/core": "^8.1.1",
     "@salesforce/kit": "^3.1.6",
     "@salesforce/sf-plugins-core": "^11.1.1",
     "@salesforce/ts-types": "^2.0.10",
