@@ -51,13 +51,18 @@ describe('batcher', () => {
     });
 
     it('will correctly call to print the expected messages 3 log, 2 styledHeader', () => {
-      batcher.bulkStatus(summary, [{ errors: ['error1', 'error2'], success: false, id: '123' }]);
+      batcher.bulkStatus(summary, [{ errors: ['error1', 'error2'], success: false, id: '123', created: true }]);
       expect(styledHeaderSpy.callCount).to.equal(2);
       expect(logSpy.callCount).to.equal(3);
     });
 
     it('will correctly call to print the expected messages 3 log, 3 styledHeader', () => {
-      batcher.bulkStatus(summary, [{ errors: ['error1', 'error2'], success: false, id: '123' }], 123, true);
+      batcher.bulkStatus(
+        summary,
+        [{ errors: ['error1', 'error2'], success: false, id: '123', created: true }],
+        123,
+        true
+      );
       expect(styledHeaderSpy.callCount).to.equal(3);
       expect(logSpy.callCount).to.equal(3);
     });
