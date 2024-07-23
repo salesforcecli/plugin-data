@@ -42,6 +42,10 @@ export async function file2CV(conn: Connection, filepath: string, title?: string
     method: 'POST',
   });
 
+  if (!CV.success) {
+    throw new Error(`Failed to create ContentVersion: ${CV.errors.map((e) => JSON.stringify(e, null, 2)).join('\n')}`);
+  }
+
   return conn.singleRecordQuery<ContentVersion>(
     `Select Id, ContentDocumentId, Title, FileExtension from ContentVersion where Id='${CV.id}'`
   );
