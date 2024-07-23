@@ -1,3 +1,9 @@
+## [3.5.8](https://github.com/salesforcecli/plugin-data/compare/3.5.7...3.5.8) (2024-07-23)
+
+### Bug Fixes
+
+- update try this message so users can copy-and-paste ([#1001](https://github.com/salesforcecli/plugin-data/issues/1001)) ([2c36da3](https://github.com/salesforcecli/plugin-data/commit/2c36da3e58141d807cf331eb300a32f2da70fd97))
+
 ## [3.5.7](https://github.com/salesforcecli/plugin-data/compare/3.5.6...3.5.7) (2024-07-23)
 
 ### Bug Fixes
