@@ -212,8 +212,9 @@ export class ExportApi {
 
   // Generate object type reference (<ObjectType>Ref<Counter>)
   private incrementTypeRefIndex(type: string): string {
-    this.typeRefIndexes.set(type, 1 + (this.typeRefIndexes.get(type) ?? 0));
-    return `${type}Ref${this.typeRefIndexes.get(type)}`;
+    const newVal = 1 + (this.typeRefIndexes.get(type) ?? 0);
+    this.typeRefIndexes.set(type, newVal);
+    return `${type}Ref${newVal}`;
   }
 
   private async processRecordAttributes(
