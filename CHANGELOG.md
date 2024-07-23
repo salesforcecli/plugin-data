@@ -1,3 +1,9 @@
+## [3.5.6](https://github.com/salesforcecli/plugin-data/compare/3.5.5...3.5.6) (2024-07-23)
+
+### Bug Fixes
+
+- linter-nullish-jsforce-update ([#995](https://github.com/salesforcecli/plugin-data/issues/995)) ([319b669](https://github.com/salesforcecli/plugin-data/commit/319b669165cd38f2535741115c66375e6703ce48))
+
 ## [3.5.5](https://github.com/salesforcecli/plugin-data/compare/3.5.4...3.5.5) (2024-07-07)
 
 ### Bug Fixes
