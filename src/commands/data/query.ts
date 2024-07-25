@@ -68,12 +68,24 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
       unit: 'minutes',
       char: 'w',
       summary: messages.getMessage('flags.wait.summary'),
-      dependsOn: ['bulk'],
+      relationships: [
+        {
+          type: 'some',
+          // eslint-disable-next-line @typescript-eslint/require-await
+          flags: [{ name: 'bulk', when: async (flags): Promise<boolean> => Promise.resolve(flags['bulk'] === true) }],
+        },
+      ],
       exclusive: ['async'],
     }),
     async: Flags.boolean({
       summary: messages.getMessage('flags.async.summary'),
-      dependsOn: ['bulk'],
+      relationships: [
+        {
+          type: 'some',
+          // eslint-disable-next-line @typescript-eslint/require-await
+          flags: [{ name: 'bulk', when: async (flags): Promise<boolean> => Promise.resolve(flags['bulk'] === true) }],
+        },
+      ],
       exclusive: ['wait'],
     }),
     'all-rows': Flags.boolean({
