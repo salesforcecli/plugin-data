@@ -68,24 +68,12 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
       unit: 'minutes',
       char: 'w',
       summary: messages.getMessage('flags.wait.summary'),
-      relationships: [
-        {
-          type: 'some',
-          // eslint-disable-next-line @typescript-eslint/require-await
-          flags: [{ name: 'bulk', when: async (flags): Promise<boolean> => Promise.resolve(flags['bulk'] === true) }],
-        },
-      ],
+      dependsOn: ['bulk'],
       exclusive: ['async'],
     }),
     async: Flags.boolean({
       summary: messages.getMessage('flags.async.summary'),
-      relationships: [
-        {
-          type: 'some',
-          // eslint-disable-next-line @typescript-eslint/require-await
-          flags: [{ name: 'bulk', when: async (flags): Promise<boolean> => Promise.resolve(flags['bulk'] === true) }],
-        },
-      ],
+      dependsOn: ['bulk'],
       exclusive: ['wait'],
     }),
     'all-rows': Flags.boolean({
@@ -115,6 +103,17 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
   public async run(): Promise<unknown> {
     this.logger = await Logger.child('data:soql:query');
     const flags = (await this.parse(DataSoqlQueryCommand)).flags;
+
+    if (flags.bulk === false && flags.wait) {
+      this.warn(`Using \`--wait\` without \`--bulk\` is deprecated and will be removed in a future release.
+You can safely remove \`--wait\`, it never had any effect on the command without \`--bulk\`.
+`)
+    }
+    if (flags.bulk === false && flags.async) {
+      this.warn(`Using \`--async\` without \`--bulk\` is deprecated and will be removed in a future release.
+You can safely remove \`--async\`, it never had any effect on the command without \`--bulk\`.
+`)
+    }
 
     try {
       // --file will be present if flags.query isn't. Oclif exactlyOne isn't quite that clever
