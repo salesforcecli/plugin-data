@@ -6,7 +6,7 @@
  */
 
 import { Messages } from '@salesforce/core';
-import { SfCommand, Flags, arrayWithDeprecation } from '@salesforce/sf-plugins-core';
+import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { importFromPlan } from '../../../api/data/tree/importPlan.js';
 import { importFromFiles } from '../../../api/data/tree/importFiles.js';
 import { orgFlags } from '../../../flags.js';
@@ -27,12 +27,14 @@ export default class Import extends SfCommand<ImportResult[]> {
 
   public static readonly flags = {
     ...orgFlags,
-    files: arrayWithDeprecation({
+    files: Flags.string({
       char: 'f',
       summary: messages.getMessage('flags.files.summary'),
       exactlyOne: ['files', 'plan'],
       aliases: ['sobjecttreefiles'],
       deprecateAliases: true,
+      multiple: true,
+      delimiter: ',',
     }),
     plan: Flags.file({
       char: 'p',
@@ -47,7 +49,9 @@ export default class Import extends SfCommand<ImportResult[]> {
     const { flags } = await this.parse(Import);
 
     const conn = flags['target-org'].getConnection(flags['api-version']);
-    const results = flags.plan ? await importFromPlan(conn, flags.plan) : await importFromFiles(conn, flags.files);
+    const results = flags.plan
+      ? await importFromPlan(conn, flags.plan)
+      : await importFromFiles(conn, flags.files ?? []);
 
     this.styledHeader('Import Results');
     this.table(results, {
