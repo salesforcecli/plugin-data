@@ -104,6 +104,17 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
     this.logger = await Logger.child('data:soql:query');
     const flags = (await this.parse(DataSoqlQueryCommand)).flags;
 
+    if (flags.bulk === false && flags.wait) {
+      this.warn(`Using \`--wait\` without \`--bulk\` is deprecated and will be removed after January 1, 2025.
+You can safely remove \`--wait\` (it never had any effect on the command without \`--bulk\`).
+`);
+    }
+    if (flags.bulk === false && flags.async) {
+      this.warn(`Using \`--async\` without \`--bulk\` is deprecated and will be removed after January 1, 2025.
+You can safely remove \`--async\` (it never had any effect on the command without \`--bulk\`).
+`);
+    }
+
     try {
       // --file will be present if flags.query isn't. Oclif exactlyOne isn't quite that clever
       const queryString = flags.query ?? fs.readFileSync(flags.file as string, 'utf8');
