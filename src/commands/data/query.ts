@@ -105,14 +105,14 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
     const flags = (await this.parse(DataSoqlQueryCommand)).flags;
 
     if (flags.bulk === false && flags.wait) {
-      this.warn(`Using \`--wait\` without \`--bulk\` is deprecated and will be removed in a future release.
-You can safely remove \`--wait\`, it never had any effect on the command without \`--bulk\`.
-`)
+      this.warn(`Using \`--wait\` without \`--bulk\` is deprecated and will be removed after Jan 1, 2025.
+You can safely remove \`--wait\` (it never had any effect on the command without \`--bulk\`).
+`);
     }
     if (flags.bulk === false && flags.async) {
-      this.warn(`Using \`--async\` without \`--bulk\` is deprecated and will be removed in a future release.
-You can safely remove \`--async\`, it never had any effect on the command without \`--bulk\`.
-`)
+      this.warn(`Using \`--async\` without \`--bulk\` is deprecated and will be removed after Jan 1, 2025.
+You can safely remove \`--async\` (it never had any effect on the command without \`--bulk\`).
+`);
     }
 
     try {
