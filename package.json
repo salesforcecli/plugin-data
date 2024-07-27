@@ -115,7 +115,7 @@
     "ansis": "^3.2.0",
     "change-case": "^5.4.4",
     "csv-parse": "^5.5.6",
-    "csv-stringify": "^6.5.0",
+    "csv-stringify": "^6.5.1",
     "form-data": "^4.0.0"
   },
   "devDependencies": {
