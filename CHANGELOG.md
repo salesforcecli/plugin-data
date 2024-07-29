@@ -1,3 +1,9 @@
+## [3.5.12](https://github.com/salesforcecli/plugin-data/compare/3.5.11...3.5.12) (2024-07-29)
+
+### Bug Fixes
+
+- override whatwg-url ([#1003](https://github.com/salesforcecli/plugin-data/issues/1003)) ([4fb3391](https://github.com/salesforcecli/plugin-data/commit/4fb3391cf3d2d55e2ed78b25d3f4f018c30a4315))
+
 ## [3.5.11](https://github.com/salesforcecli/plugin-data/compare/3.5.10...3.5.11) (2024-07-29)
 
 ### Bug Fixes
