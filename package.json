@@ -1,6 +1,6 @@
 {
   "name": "@salesforce/plugin-data",
-  "version": "3.5.9",
+  "version": "3.5.10",
   "description": "Plugin for salesforce data commands",
   "author": "Salesforce",
   "homepage": "https://github.com/salesforcecli/plugin-data",
@@ -115,20 +115,20 @@
     "ansis": "^3.2.0",
     "change-case": "^5.4.4",
     "csv-parse": "^5.5.6",
-    "csv-stringify": "^6.5.0",
+    "csv-stringify": "^6.5.1",
     "form-data": "^4.0.0"
   },
   "devDependencies": {
     "@oclif/core": "^4.0.14",
     "@oclif/plugin-command-snapshot": "^5.2.9",
-    "@salesforce/cli-plugins-testkit": "^5.3.19",
-    "@salesforce/dev-scripts": "^10.2.4",
+    "@salesforce/cli-plugins-testkit": "^5.3.20",
+    "@salesforce/dev-scripts": "^10.2.5",
     "@salesforce/plugin-command-reference": "^3.1.5",
     "@salesforce/types": "^1.2.0",
-    "eslint-plugin-sf-plugin": "^1.19.0",
+    "eslint-plugin-sf-plugin": "^1.20.0",
     "oclif": "^4.14.9",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.4"
   },
   "resolutions": {
     "@jsforce/jsforce-node/node-fetch/whatwg-url": "^14.0.0"
