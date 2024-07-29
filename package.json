@@ -107,8 +107,8 @@
     "version": "oclif readme"
   },
   "dependencies": {
-    "@jsforce/jsforce-node": "^3.3.1",
-    "@salesforce/core": "^8.2.1",
+    "@jsforce/jsforce-node": "^3.3.2",
+    "@salesforce/core": "^8.2.6",
     "@salesforce/kit": "^3.1.6",
     "@salesforce/sf-plugins-core": "^11.2.1",
     "@salesforce/ts-types": "^2.0.10",
@@ -129,6 +129,9 @@
     "oclif": "^4.14.9",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
+  },
+  "resolutions": {
+    "@jsforce/jsforce-node/node-fetch/whatwg-url": "^14.0.0"
   },
   "wireit": {
     "build": {
