@@ -1,3 +1,9 @@
+## [3.5.11](https://github.com/salesforcecli/plugin-data/compare/3.5.10...3.5.11) (2024-07-29)
+
+### Bug Fixes
+
+- use native string array ([#1004](https://github.com/salesforcecli/plugin-data/issues/1004)) ([be640cf](https://github.com/salesforcecli/plugin-data/commit/be640cf2ff2356eec858b3b1ae23c51b4f064b7d))
+
 ## [3.5.10](https://github.com/salesforcecli/plugin-data/compare/3.5.9...3.5.10) (2024-07-28)
 
 ### Bug Fixes
