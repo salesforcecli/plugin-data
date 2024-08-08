@@ -4,6 +4,8 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+import fs from 'node:fs';
+import os from 'node:os';
 import type { SearchResult } from '@jsforce/jsforce-node';
 import { Ux } from '@salesforce/sf-plugins-core';
 
@@ -36,13 +38,18 @@ class HumanSearchReporter extends SearchReporter {
   }
 
   public display(): void {
-    // remove 'attributes' property from result and table
-    delete this.result.searchRecords[0].attributes;
-    this.ux.table(
-      this.result.searchRecords,
-      Object.fromEntries(Object.keys(this.result.searchRecords[0]).map((k) => [k, { header: k }])),
-      { 'no-truncate': true, title: 'SOSL Query Results' }
-    );
+    const types = [...new Set(this.result.searchRecords.map((row) => row.attributes?.type ?? ''))];
+
+    types.map((type) => {
+      const filtered = this.result.searchRecords.filter((t) => t.attributes?.type === type);
+      // remove 'attributes' property from result and table
+      delete filtered[0].attributes;
+      this.ux.table(filtered, Object.fromEntries(Object.keys(filtered[0]).map((k) => [k, { header: k }])), {
+        'no-truncate': true,
+        title: `${type} Results`,
+      });
+      this.ux.log();
+    });
   }
 }
 class CsvSearchReporter extends SearchReporter {
@@ -51,12 +58,20 @@ class CsvSearchReporter extends SearchReporter {
   }
 
   public display(): void {
-    // remove 'attributes' property from result and csv output
-    this.result.searchRecords.map((r) => delete r.attributes);
+    const types = [...new Set(this.result.searchRecords.map((row) => row.attributes?.type ?? ''))];
 
-    const cols = Object.keys(this.result.searchRecords[0]);
-    this.ux.log(cols.join(','));
-    this.result.searchRecords.map((record) => this.ux.log(Object.values(record).join(',')));
+    types.map((type) => {
+      const filtered = this.result.searchRecords.filter((t) => t.attributes?.type === type);
+      // remove 'attributes' property from result and csv output
+      filtered.map((r) => delete r.attributes);
+
+      const cols = Object.keys(filtered[0]);
+      const header = cols.join(',');
+      const body = filtered.map((r) => Object.values(r).join(',')).join(os.EOL);
+
+      this.ux.log(`Written to ${type}.csv`);
+      fs.writeFileSync(`${type}.csv`, [header, body].join(os.EOL));
+    });
   }
 }
 
