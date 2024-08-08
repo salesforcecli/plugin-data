@@ -9,7 +9,7 @@ import { Logger, Messages } from '@salesforce/core';
 import { Ux } from '@salesforce/sf-plugins-core';
 import { JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { capitalCase } from 'change-case';
-import { Field, FieldType, GenericObject, SoqlQueryResult } from '../types.js';
+import { Field, FieldType, GenericObject, SoqlQueryResult } from '../../types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const reporterMessages = Messages.loadMessages('@salesforce/plugin-data', 'reporter');

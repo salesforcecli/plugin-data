@@ -9,7 +9,7 @@ import ansis from 'ansis';
 import { get, getArray, isPlainObject, isString, Optional } from '@salesforce/ts-types';
 import { Messages } from '@salesforce/core';
 import type { Record as jsforceRecord } from '@jsforce/jsforce-node';
-import { GenericEntry, GenericObject, Field, FieldType, SoqlQueryResult } from '../types.js';
+import { GenericEntry, GenericObject, Field, FieldType, SoqlQueryResult } from '../../types.js';
 import { QueryReporter, logFields, isSubquery, isAggregate, getAggregateAliasOrName } from './reporters.js';
 import { maybeMassageAggregates } from './reporters.js';
 
