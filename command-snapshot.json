@@ -182,6 +182,14 @@
     "plugin": "@salesforce/plugin-data"
   },
   {
+    "alias": [],
+    "command": "data:search",
+    "flagAliases": ["apiversion", "resultformat", "targetusername", "u"],
+    "flagChars": ["f", "o", "q", "r"],
+    "flags": ["api-version", "file", "flags-dir", "json", "loglevel", "query", "result-format", "target-org"],
+    "plugin": "@salesforce/plugin-data"
+  },
+  {
     "alias": ["force:data:record:update"],
     "command": "data:update:record",
     "flagAliases": ["apiversion", "sobjectid", "sobjecttype", "targetusername", "u", "usetoolingapi"],
