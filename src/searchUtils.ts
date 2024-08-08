@@ -41,6 +41,9 @@ class HumanSearchReporter extends SearchReporter {
   }
 
   public display(): void {
+    if (this.types.length === 0) {
+      this.ux.log('No Records Found');
+    }
     this.types.map((type) => {
       const filtered = this.result.searchRecords.filter((t) => t.attributes?.type === type);
       // remove 'attributes' property from result and table
@@ -59,6 +62,9 @@ class CsvSearchReporter extends SearchReporter {
   }
 
   public display(): void {
+    if (this.types.length === 0) {
+      this.ux.log('No Records Found');
+    }
     this.types.map((type) => {
       const filtered = this.result.searchRecords.filter((t) => t.attributes?.type === type);
       // remove 'attributes' property from result and csv output
