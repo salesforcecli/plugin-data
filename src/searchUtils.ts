@@ -11,17 +11,16 @@ import { Ux } from '@salesforce/sf-plugins-core';
 
 export const displaySearchResults = (queryResult: SearchResult, resultFormat: 'human' | 'json' | 'csv'): void => {
   let reporter: HumanSearchReporter | JsonSearchReporter | CsvSearchReporter;
-  const ux = new Ux();
 
   switch (resultFormat) {
     case 'human':
-      reporter = new HumanSearchReporter(queryResult, ux);
+      reporter = new HumanSearchReporter(queryResult);
       break;
     case 'csv':
-      reporter = new CsvSearchReporter(queryResult, ux);
+      reporter = new CsvSearchReporter(queryResult);
       break;
     case 'json':
-      reporter = new JsonSearchReporter(queryResult, ux);
+      reporter = new JsonSearchReporter(queryResult);
       break;
   }
   // delegate to selected reporter
@@ -29,18 +28,20 @@ export const displaySearchResults = (queryResult: SearchResult, resultFormat: 'h
 };
 
 abstract class SearchReporter {
-  protected constructor(public result: SearchResult, public ux: Ux) {}
+  public types: string[];
+  public ux = new Ux();
+  protected constructor(public result: SearchResult) {
+    this.types = [...new Set(this.result.searchRecords.map((row) => row.attributes?.type ?? ''))];
+  }
   public abstract display(): void;
 }
 class HumanSearchReporter extends SearchReporter {
-  public constructor(props: SearchResult, ux: Ux) {
-    super(props, ux);
+  public constructor(props: SearchResult) {
+    super(props);
   }
 
   public display(): void {
-    const types = [...new Set(this.result.searchRecords.map((row) => row.attributes?.type ?? ''))];
-
-    types.map((type) => {
+    this.types.map((type) => {
       const filtered = this.result.searchRecords.filter((t) => t.attributes?.type === type);
       // remove 'attributes' property from result and table
       delete filtered[0].attributes;
@@ -53,31 +54,28 @@ class HumanSearchReporter extends SearchReporter {
   }
 }
 class CsvSearchReporter extends SearchReporter {
-  public constructor(props: SearchResult, ux: Ux) {
-    super(props, ux);
+  public constructor(props: SearchResult) {
+    super(props);
   }
 
   public display(): void {
-    const types = [...new Set(this.result.searchRecords.map((row) => row.attributes?.type ?? ''))];
-
-    types.map((type) => {
+    this.types.map((type) => {
       const filtered = this.result.searchRecords.filter((t) => t.attributes?.type === type);
       // remove 'attributes' property from result and csv output
       filtered.map((r) => delete r.attributes);
 
-      const cols = Object.keys(filtered[0]);
-      const header = cols.join(',');
+      const cols = Object.keys(filtered[0]).join(',');
       const body = filtered.map((r) => Object.values(r).join(',')).join(os.EOL);
 
       this.ux.log(`Written to ${type}.csv`);
-      fs.writeFileSync(`${type}.csv`, [header, body].join(os.EOL));
+      fs.writeFileSync(`${type}.csv`, [cols, body].join(os.EOL));
     });
   }
 }
 
 class JsonSearchReporter extends SearchReporter {
-  public constructor(props: SearchResult, ux: Ux) {
-    super(props, ux);
+  public constructor(props: SearchResult) {
+    super(props);
   }
 
   public display(): void {
