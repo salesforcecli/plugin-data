@@ -24,6 +24,10 @@ Specify the SOSL query at the command line with the --query flag or read the que
 
 SOSL query to execute.
 
+# flags.result-format.summary
+
+abs
+
 # flags.file.summary
 
 File that contains the SOSL query.
