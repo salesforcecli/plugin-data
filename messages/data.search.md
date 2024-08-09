@@ -6,6 +6,8 @@ Execute a SOSL text-based search query.
 
 Specify the SOSL query at the command line with the --query flag or read the query from a file with the --file flag.
 
+By default, the results are written to the terminal in human-readable format. If you specify `--result-format csv`, the output is written to one or more CSV (comma-separated values) files. The file names correspond to the Salesforce objects in the results, such as Account.csv. Both `--result-format human` and `--result-format json` display only to the terminal.
+
 # examples
 
 - Specify a SOSL query at the command line; the command uses your default org:
@@ -16,7 +18,7 @@ Specify the SOSL query at the command line with the --query flag or read the que
 
   <%= config.bin %> <%= command.id %> --file query.txt --target-org my-scratch
 
-- Similar to previous example, but display the results as comma-separated values:
+- Similar to the previous example, but write the results to one or more CSV files, depending on the Salesforce objects in the results:
 
   <%= config.bin %> <%= command.id %> --file query.txt --target-org my-scratch --result-format csv
 
@@ -26,7 +28,7 @@ SOSL query to execute.
 
 # flags.result-format.summary
 
-abs
+Format to display the results, or to write to disk if you specify "csv"; the --json flag overrides this flag.
 
 # flags.file.summary
 
