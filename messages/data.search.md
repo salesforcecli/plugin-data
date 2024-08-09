@@ -14,6 +14,10 @@ asdfasdf
 
 SOSL query to execute.
 
+# flags.result-format.summary
+
+abs
+
 # flags.file.summary
 
 File that contains the SOQL query.
