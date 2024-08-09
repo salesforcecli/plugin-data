@@ -19,7 +19,7 @@ import { IngestJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { SfCommand, Spinner } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
 import { capitalCase } from 'change-case';
-import { getResultMessage } from './reporters/reporters.js';
+import { getResultMessage } from './reporters/query/reporters.js';
 import { BulkDataRequestCache } from './bulkDataRequestCache.js';
 import type { BulkProcessedRecordV2, BulkRecordsV2 } from './types.js';
 

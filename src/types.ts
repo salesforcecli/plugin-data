@@ -33,9 +33,6 @@ export type Field = {
  */
 export type SoqlQueryResult = {
   query: string;
-  // an id can be present when a bulk query times out
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore jsforce v2 types are too strict for running general queries
   result: QueryResult<jsRecord> & { id?: string };
   columns: Field[];
 };

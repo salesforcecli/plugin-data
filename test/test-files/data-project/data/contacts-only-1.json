@@ -9,6 +9,7 @@
     {
       "attributes": { "type": "Contact", "referenceId": "ManagerRef" },
       "lastname": "Woods",
+      "firstname": "Sample",
       "title": "Vice President",
       "AccountId": "@SampleAcct2Ref"
     }

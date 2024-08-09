@@ -11,7 +11,7 @@ import sinon from 'sinon';
 import { Ux } from '@salesforce/sf-plugins-core';
 
 import { SoqlQueryResult } from '../../src/types.js';
-import { CsvReporter, escape, getColumns, getMaxRecord } from '../../src/reporters/csvReporter.js';
+import { CsvReporter, escape, getColumns, getMaxRecord } from '../../src/reporters/query/csvReporter.js';
 import { soqlQueryExemplars } from '../test-files/soqlQuery.exemplars.js';
 
 describe('reporter tests', () => {
