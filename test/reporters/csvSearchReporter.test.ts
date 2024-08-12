@@ -7,20 +7,22 @@
 import fs from 'node:fs';
 import { TestContext } from '@salesforce/core/testSetup';
 import { expect } from 'chai';
-import { Ux } from '@salesforce/sf-plugins-core';
+import { stubUx } from '@salesforce/sf-plugins-core';
 import { CsvSearchReporter } from '../../src/reporters/search/csvSearchReporter.js';
 
 describe('CSV search reporter', () => {
   const $$ = new TestContext();
+  let commandStubs: ReturnType<typeof stubUx>;
 
-  beforeEach(() => {});
+  beforeEach(() => {
+    commandStubs = stubUx($$.SANDBOX);
+  });
 
   afterEach(() => {
     $$.SANDBOX.restore();
   });
 
   it('will write two csv files', () => {
-    const logStub = $$.SANDBOX.stub(Ux.prototype, 'log');
     const writeFileStub = $$.SANDBOX.stub(fs, 'writeFileSync');
     const reporter = new CsvSearchReporter({
       searchRecords: [
@@ -60,10 +62,9 @@ describe('CSV search reporter', () => {
     expect(writeFileStub.firstCall.args[1]).to.include('Name,Industry');
     expect(writeFileStub.firstCall.args[1]).to.include('Jones,Apparel');
     expect(writeFileStub.secondCall.args[0]).to.include('Contact.csv');
-    expect(logStub.callCount).to.equal(2);
+    expect(commandStubs.log.callCount).to.equal(2);
   });
   it('will not write', () => {
-    const logStub = $$.SANDBOX.stub(Ux.prototype, 'log');
     const reporter = new CsvSearchReporter({
       searchRecords: [],
     });
@@ -71,6 +72,6 @@ describe('CSV search reporter', () => {
     reporter.display();
 
     // two objects, two tables
-    expect(logStub.firstCall.firstArg).to.equal('No Records Found');
+    expect(commandStubs.log.firstCall.firstArg).to.equal('No Records Found');
   });
 });

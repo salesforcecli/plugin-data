@@ -6,20 +6,22 @@
  */
 import { TestContext } from '@salesforce/core/testSetup';
 import { expect } from 'chai';
-import { Ux } from '@salesforce/sf-plugins-core';
+import { stubUx } from '@salesforce/sf-plugins-core';
 import { HumanSearchReporter } from '../../src/reporters/search/humanSearchReporter.js';
 
 describe('human search reporter', () => {
   const $$ = new TestContext();
+  let commandStubs: ReturnType<typeof stubUx>;
 
-  beforeEach(() => {});
+  beforeEach(() => {
+    commandStubs = stubUx($$.SANDBOX);
+  });
 
   afterEach(() => {
     $$.SANDBOX.restore();
   });
 
   it('will write two tables', () => {
-    const tableStub = $$.SANDBOX.stub(Ux.prototype, 'table');
     const reporter = new HumanSearchReporter({
       searchRecords: [
         {
@@ -54,21 +56,19 @@ describe('human search reporter', () => {
     reporter.display();
 
     // two objects, two tables
-    expect(tableStub.callCount).to.equal(2);
-    expect(Object.keys(tableStub.args[0][1])).to.deep.equal(['Name', 'Industry']);
-    expect(tableStub.args[0][2]?.title).to.equal('Account Results');
-    expect(Object.keys(tableStub.args[1][1])).to.deep.equal(['FirstName', 'LastName', 'Department']);
-    expect(tableStub.args[1][2]?.title).to.equal('Contact Results');
+    expect(commandStubs.table.callCount).to.equal(2);
+    expect(Object.keys(commandStubs.table.args[0][1])).to.deep.equal(['Name', 'Industry']);
+    expect(commandStubs.table.args[0][2]?.title).to.equal('Account Results');
+    expect(Object.keys(commandStubs.table.args[1][1])).to.deep.equal(['FirstName', 'LastName', 'Department']);
+    expect(commandStubs.table.args[1][2]?.title).to.equal('Contact Results');
   });
+
   it('will not print a table for no results', () => {
-    const logStub = $$.SANDBOX.stub(Ux.prototype, 'log');
     const reporter = new HumanSearchReporter({
       searchRecords: [],
     });
 
     reporter.display();
-
-    // two objects, two tables
-    expect(logStub.firstCall.firstArg).to.equal('No Records Found');
+    expect(commandStubs.log.firstCall.firstArg).to.equal('No Records Found');
   });
 });
