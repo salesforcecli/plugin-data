@@ -5,13 +5,21 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { Ux } from '@salesforce/sf-plugins-core';
-import { SearchResult } from '@jsforce/jsforce-node';
+import { Record, SearchResult } from '@jsforce/jsforce-node';
+import { ensureString } from '@salesforce/ts-types';
+import { omit } from '@salesforce/kit';
 
 export abstract class SearchReporter {
-  public types: string[];
+  public typeRecordsMap: Map<string, Record[]> = new Map<string, Record[]>();
   public ux = new Ux();
   protected constructor(public result: SearchResult) {
-    this.types = [...new Set(this.result.searchRecords.map((row) => row.attributes?.type ?? ''))];
+    this.result.searchRecords.map((r) => {
+      const type = ensureString(r.attributes?.type);
+      return this.typeRecordsMap.has(type)
+        ? // the extra info in 'attributes' causes issues when creating generic csv/table columns
+          this.typeRecordsMap.get(type)!.push(omit(r, 'attributes'))
+        : this.typeRecordsMap.set(type, [omit(r, 'attributes')]);
+    });
   }
   public abstract display(): void;
 }

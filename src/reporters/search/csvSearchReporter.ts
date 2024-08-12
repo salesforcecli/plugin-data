@@ -15,19 +15,16 @@ export class CsvSearchReporter extends SearchReporter {
   }
 
   public display(): void {
-    if (this.types.length === 0) {
+    if (this.typeRecordsMap.size === 0) {
       this.ux.log('No Records Found');
     }
-    this.types.map((type) => {
-      const filtered = this.result.searchRecords.filter((t) => t.attributes?.type === type);
-      // remove 'attributes' property from result and csv output
-      filtered.map((r) => delete r.attributes);
-
-      const cols = Object.keys(filtered[0]).join(',');
-      const body = filtered.map((r) => Object.values(r).join(',')).join(os.EOL);
-
+    this.typeRecordsMap.forEach((records, type) => {
       this.ux.log(`Written to ${type}.csv`);
-      fs.writeFileSync(`${type}.csv`, [cols, body].join(os.EOL));
+      fs.writeFileSync(
+        `${type}.csv`,
+        // columns, with the rows (...) and then joined with new lines
+        [Object.keys(records[0]).join(','), ...records.map((r) => Object.values(r).join(','))].join(os.EOL)
+      );
     });
   }
 }

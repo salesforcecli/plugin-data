@@ -13,14 +13,12 @@ export class HumanSearchReporter extends SearchReporter {
   }
 
   public display(): void {
-    if (this.types.length === 0) {
+    if (this.typeRecordsMap.size === 0) {
       this.ux.log('No Records Found');
     }
-    this.types.map((type) => {
-      const filtered = this.result.searchRecords.filter((t) => t.attributes?.type === type);
-      // remove 'attributes' property from result and table
-      delete filtered[0].attributes;
-      this.ux.table(filtered, Object.fromEntries(Object.keys(filtered[0]).map((k) => [k, { header: k }])), {
+    this.typeRecordsMap.forEach((records, type) => {
+      // to find the columns of the query, parse the keys of the first record
+      this.ux.table(records, Object.fromEntries(Object.keys(records[0]).map((k) => [k, { header: k }])), {
         'no-truncate': true,
         title: `${type} Results`,
       });
