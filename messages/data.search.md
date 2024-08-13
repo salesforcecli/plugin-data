@@ -28,7 +28,7 @@ SOSL query to execute.
 
 # flags.result-format.summary
 
-Format to display the results, or to write to disk if you specify "csv"; the --json flag overrides this flag.
+Format to display the results, or to write to disk if you specify "csv".
 
 # flags.file.summary
 

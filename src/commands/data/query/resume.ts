@@ -36,7 +36,7 @@ export class BulkQueryReport extends SfCommand<unknown> {
     'target-org': { ...optionalOrgFlagWithDeprecations, summary: queryMessages.getMessage('flags.targetOrg.summary') },
     'api-version': orgApiVersionFlagWithDeprecations,
     loglevel,
-    'result-format': resultFormatFlag,
+    'result-format': resultFormatFlag(),
     'bulk-query-id': Flags.salesforceId({
       length: 18,
       char: 'i',

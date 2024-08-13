@@ -20,7 +20,7 @@ export class HumanSearchReporter extends SearchReporter {
       // to find the columns of the query, parse the keys of the first record
       this.ux.table(records, Object.fromEntries(Object.keys(records[0]).map((k) => [k, { header: k }])), {
         'no-truncate': true,
-        title: `${type} Results`,
+        title: type,
       });
       this.ux.log();
     });

@@ -33,10 +33,10 @@ export class DataSearchCommand extends SfCommand<SearchResult> {
       summary: messages.getMessage('flags.file.summary'),
       exactlyOne: ['query', 'file'],
     }),
-    'result-format': {
-      ...resultFormatFlag,
+    'result-format': resultFormatFlag({
       summary: messages.getMessage('flags.result-format.summary'),
-    },
+      exclusive: ['json'],
+    }),
   };
 
   public async run(): Promise<SearchResult> {
@@ -49,8 +49,7 @@ export class DataSearchCommand extends SfCommand<SearchResult> {
       if (flags['result-format'] !== 'json') this.spinner.start(messages.getMessage('queryRunningMessage'));
       const queryResult = await conn.search(queryString);
       if (!this.jsonEnabled()) {
-        // once we overrode result-format summary, undefined became a flag option, but the default is human
-        displaySearchResults(queryResult, flags['result-format'] ?? 'human');
+        displaySearchResults(queryResult, flags['result-format']);
       }
       return queryResult;
     } finally {
