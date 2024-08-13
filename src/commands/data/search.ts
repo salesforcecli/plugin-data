@@ -35,6 +35,7 @@ export class DataSearchCommand extends SfCommand<SearchResult> {
     }),
     'result-format': resultFormatFlag({
       summary: messages.getMessage('flags.result-format.summary'),
+      exclusive: ['json'],
     }),
   };
 
