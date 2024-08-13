@@ -12,7 +12,7 @@ import {
   orgApiVersionFlagWithDeprecations,
   requiredOrgFlagWithDeprecations,
 } from '@salesforce/sf-plugins-core';
-import { formatTypes } from './reporters/query/reporters.js';
+import { FormatTypes, formatTypes } from './reporters/query/reporters.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
@@ -32,14 +32,14 @@ export const orgFlags = {
   loglevel,
 };
 
-export const resultFormatFlag = Flags.option({
+export const resultFormatFlag = Flags.custom<FormatTypes>({
   char: 'r',
   summary: messages.getMessage('flags.resultFormat.summary'),
   options: formatTypes,
   default: 'human',
   aliases: ['resultformat'],
   deprecateAliases: true,
-})();
+});
 
 export const prefixValidation = (i: string): Promise<string> => {
   if (i.includes('/') || i.includes('\\')) {
