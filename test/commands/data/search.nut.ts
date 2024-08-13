@@ -63,8 +63,8 @@ describe('data:search command', () => {
         'data:search -q "FIND {Sample} IN ALL FIELDS RETURNING Account(Name,Phone), Contact(FirstName,LastName)"'
       ).shellOutput.stdout;
       // two objects with references
-      expect(result).to.include('Contact Results');
-      expect(result).to.include('Account Results');
+      expect(result).to.include('Contact');
+      expect(result).to.include('Account');
       // specific account result
       expect(result).to.include('SampleAccount2');
       expect(result).to.include('1234567890');

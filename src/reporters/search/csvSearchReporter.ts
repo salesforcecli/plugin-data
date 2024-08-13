@@ -20,11 +20,10 @@ export class CsvSearchReporter extends SearchReporter {
     }
     this.typeRecordsMap.forEach((records, type) => {
       this.ux.log(`Written to ${type}.csv`);
-      fs.writeFileSync(
-        `${type}.csv`,
-        // columns, with the rows (...) and then joined with new lines
-        [Object.keys(records[0]).join(','), ...records.map((r) => Object.values(r).join(','))].join(os.EOL)
-      );
+      const cols = Object.keys(records[0]).join(',');
+      const body = records.map((r) => Object.values(r).join(',')).join(os.EOL);
+
+      fs.writeFileSync(`${type}.csv`, [cols, body].join(os.EOL));
     });
   }
 }
