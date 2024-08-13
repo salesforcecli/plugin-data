@@ -12,7 +12,7 @@ import {
   mapFieldsByName,
   massageJson,
   maybeMassageSubqueries,
-} from '../../src/reporters/humanReporter.js';
+} from '../../src/reporters/query/humanReporter.js';
 import { soqlQueryExemplars } from '../test-files/soqlQuery.exemplars.js';
 
 describe('human reporter tests', () => {

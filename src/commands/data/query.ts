@@ -79,7 +79,7 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
     'all-rows': Flags.boolean({
       summary: messages.getMessage('flags.all-rows.summary'),
     }),
-    'result-format': resultFormatFlag,
+    'result-format': resultFormatFlag(),
     perflog: perflogFlag,
   };
 

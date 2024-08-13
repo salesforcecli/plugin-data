@@ -6,9 +6,9 @@
  */
 import type { Record } from '@jsforce/jsforce-node';
 import { Field, FieldType, SoqlQueryResult } from './types.js';
-import { FormatTypes, JsonReporter } from './reporters/reporters.js';
-import { CsvReporter } from './reporters/csvReporter.js';
-import { HumanReporter } from './reporters/humanReporter.js';
+import { FormatTypes, JsonReporter } from './reporters/query/reporters.js';
+import { CsvReporter } from './reporters/query/csvReporter.js';
+import { HumanReporter } from './reporters/query/humanReporter.js';
 
 export const displayResults = (queryResult: SoqlQueryResult, resultFormat: FormatTypes): void => {
   let reporter: HumanReporter | JsonReporter | CsvReporter;

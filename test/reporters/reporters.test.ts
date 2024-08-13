@@ -6,7 +6,7 @@
  */
 
 import { expect } from 'chai';
-import { renameAggregates } from '../../src/reporters/reporters.js';
+import { renameAggregates } from '../../src/reporters/query/reporters.js';
 import { Field, FieldType } from '../../src/types.js';
 
 describe('rename aggregates', () => {
