@@ -58,9 +58,9 @@ describe('human search reporter', () => {
     // two objects, two tables
     expect(commandStubs.table.callCount).to.equal(2);
     expect(Object.keys(commandStubs.table.args[0][1])).to.deep.equal(['Name', 'Industry']);
-    expect(commandStubs.table.args[0][2]?.title).to.equal('Account Results');
+    expect(commandStubs.table.args[0][2]?.title).to.equal('Account');
     expect(Object.keys(commandStubs.table.args[1][1])).to.deep.equal(['FirstName', 'LastName', 'Department']);
-    expect(commandStubs.table.args[1][2]?.title).to.equal('Contact Results');
+    expect(commandStubs.table.args[1][2]?.title).to.equal('Contact');
   });
 
   it('will not print a table for no results', () => {
