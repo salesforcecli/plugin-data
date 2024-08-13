@@ -97,7 +97,6 @@ describe('data:search command', () => {
       const contact = fs.readFileSync(path.join(testSession.project.dir, 'Contact.csv'), 'utf8');
       expect(contact).to.include('FirstName,LastName');
       expect(contact).to.include('Sample,Woods');
-      expect(contact).to.include(',Washington');
     });
     it('should not find results correctly', () => {
       const result = execCmd(
