@@ -1,3 +1,9 @@
+# [3.6.0](https://github.com/salesforcecli/plugin-data/compare/3.5.15...3.6.0) (2024-08-13)
+
+### Features
+
+- sosl ([#1025](https://github.com/salesforcecli/plugin-data/issues/1025)) ([833fc4e](https://github.com/salesforcecli/plugin-data/commit/833fc4e40aeea1d3fe1207cf74b810d2b5964665)), closes [#1026](https://github.com/salesforcecli/plugin-data/issues/1026) [#1033](https://github.com/salesforcecli/plugin-data/issues/1033)
+
 ## [3.5.15](https://github.com/salesforcecli/plugin-data/compare/3.5.14...3.5.15) (2024-08-11)
 
 ### Bug Fixes
