@@ -9,8 +9,8 @@ import fs from 'node:fs';
 import { Messages } from '@salesforce/core';
 import type { SearchResult } from '@jsforce/jsforce-node';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { resultFormatFlag } from '../../flags.js';
 import { displaySearchResults } from '../../searchUtils.js';
+import { FormatTypes, formatTypes } from '../../reporters/query/reporters.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'data.search');
@@ -34,10 +34,13 @@ export class DataSearchCommand extends SfCommand<SearchResult> {
       summary: messages.getMessage('flags.file.summary'),
       exactlyOne: ['query', 'file'],
     }),
-    'result-format': resultFormatFlag({
+    'result-format': Flags.custom<FormatTypes>({
+      char: 'r',
       summary: messages.getMessage('flags.result-format.summary'),
+      options: formatTypes,
+      default: 'human',
       exclusive: ['json'],
-    }),
+    })(),
   };
 
   public async run(): Promise<SearchResult> {
