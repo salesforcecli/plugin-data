@@ -6,18 +6,21 @@
  */
 
 import * as fs from 'node:fs';
+import { Writable } from 'node:stream';
 import { EOL } from 'node:os';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages, SfError } from '@salesforce/core';
-import { QueryJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
-import { Record as SfRecord } from '@jsforce/jsforce-node';
+import { Logger, Messages } from '@salesforce/core';
+import { QueryJobInfoV2, QueryJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { Duration } from '@salesforce/kit';
+import { Parsable } from '@jsforce/jsforce-node/lib/record-stream.js';
+import { Record as SfRecord } from '@jsforce/jsforce-node';
 import { BulkExportRequestCache } from '../../../bulkDataRequestCache.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'data.export.bulk');
 
 export type DataExportBulkResult = {
+  totalSize: number;
   path: string;
 };
 
@@ -52,19 +55,23 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
       summary: messages.getMessage('flags.output-file.summary'),
       required: true,
     }),
-    'result-format': Flags.custom({
+    'result-format': Flags.option({
       required: true,
-      options: ['csv', 'json'],
+      options: ['csv', 'json'] as const,
       default: 'csv',
       summary: messages.getMessage('flags.result-format.summary'),
       char: 'r',
     })(),
   };
 
+  private logger!: Logger;
+
   public async run(): Promise<DataExportBulkResult> {
     const { flags } = await this.parse(DataExportBulk);
 
-    const conn = flags['target-org'].getConnection();
+    this.logger = await Logger.child('data:export:bulk');
+
+    const conn = flags['target-org'].getConnection(flags['api-version']);
 
     const timeout = flags.async ? Duration.minutes(0) : flags.wait ?? Duration.minutes(0);
 
@@ -86,62 +93,97 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
       await cache.createCacheEntryForRequest(jobInfo.id, conn.getUsername(), conn.getApiVersion());
       this.log(messages.getMessage('export.timeout', [jobInfo.id, jobInfo.id, conn.getUsername()]));
       return {
+        totalSize: 0,
         path: '',
       };
     }
 
-    const recordStream = await conn.bulk2.query(flags.query, {
-      pollTimeout: timeout.milliseconds,
-      pollInterval: 5000,
+    const queryJob = new QueryJobV2(conn, {
+      bodyParams: {
+        query: flags.query,
+        operation: flags['all-rows'] ? 'queryAll' : 'query',
+      },
+      pollingOptions: {
+        pollTimeout: timeout.milliseconds,
+        pollInterval: 5000,
+      },
     });
 
-    const fileStream = fs.createWriteStream(flags['output-file']);
+    const recordStream = new Parsable();
+    const dataStream = recordStream.stream('csv');
 
-    fileStream.on('error', (error) => {
-      throw SfError.wrap(error);
-    });
-    recordStream.on('error', (error) => {
-      throw SfError.wrap(error);
-    });
+    // switch stream into flowing mode
+    recordStream.on('record', () => {});
+
+    let jobInfo: QueryJobInfoV2 | undefined;
+
+    try {
+      await queryJob.open();
+
+      queryJob.on('jobComplete', (completedJob: QueryJobInfoV2) => {
+        jobInfo = completedJob;
+      });
+      await queryJob.poll();
+
+      const queryRecordsStream = await queryJob.result().then((s) => s.stream());
+      queryRecordsStream.pipe(dataStream);
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(`bulk query failed due to: ${err.message}`);
+
+      if (err.name !== 'JobPollingTimeoutError') {
+        // fires off one last attempt to clean up and ignores the result | error
+        queryJob.delete().catch((ignored: Error) => ignored);
+      }
+
+      throw err;
+    }
+    if (typeof jobInfo === 'undefined') {
+      throw new Error('could not get jobinfo');
+    }
 
     if (flags['result-format'] === 'json') {
-      fileStream.write(`[${EOL}`);
-      recordStream.on('record', (data: SfRecord) => {
-        fileStream.write(`  ${JSON.stringify(data)},${EOL}`);
-      });
-      recordStream.on('end', () => {
-        fileStream.end();
-      });
-
-      fileStream.on('close', () => {
-        fs.open(flags['output-file'], 'r+', (err, fd) => {
-          if (err) throw err;
-
-          fs.fstat(fd, (fstatError, stats) => {
-            if (fstatError) throw fstatError;
-
-            // start reading at the last 2 bytes to overwrite the trailing comma from the last record with the closing square-bracket.
-            const writable = fs.createWriteStream(flags['output-file'], {
-              fd,
-              start: stats.size - 2,
-            });
-
-            writable.on('finish', () => {
-              // TODO: this msg should include records qty
-              // eslint-disable-next-line no-console
-              console.log(`Records saved to ${flags['output-file']}`);
-            });
-            writable.write(`${EOL}]`);
-            writable.end();
-          });
-        });
-      });
-    } else {
+      const fileStream = new JsonWritable(flags['output-file'], jobInfo.numberRecordsProcessed);
       recordStream.pipe(fileStream);
+    } else {
+      const fileStream = fs.createWriteStream(flags['output-file']);
+      recordStream.stream().pipe(fileStream);
     }
 
     return {
+      totalSize: jobInfo.numberRecordsProcessed,
       path: flags['output-file'],
     };
+  }
+}
+
+// eslint-disable-next-line sf-plugin/only-extend-SfCommand
+class JsonWritable extends Writable {
+  private recordsQty: number;
+  private recordsWritten = 0;
+  private filePath: fs.PathLike;
+  private fileStream!: fs.WriteStream;
+
+  public constructor(filePath: fs.PathLike, recordsQty: number) {
+    super({ objectMode: true });
+    this.recordsQty = recordsQty;
+    this.filePath = filePath;
+  }
+
+  public _construct(callback: () => void): void {
+    this.fileStream = fs.createWriteStream(this.filePath);
+    this.fileStream.write(`[${EOL}`);
+    callback();
+  }
+
+  public _write(chunk: SfRecord, encoding: BufferEncoding, callback: () => void): void {
+    if (this.recordsQty - 1 === this.recordsWritten) {
+      // last record, close JSON array
+      this.fileStream.write(`  ${JSON.stringify(chunk)}${EOL}]`, encoding, callback);
+      this.fileStream.end();
+    } else {
+      this.fileStream.write(`  ${JSON.stringify(chunk)},${EOL}`, encoding, callback);
+      this.recordsWritten++;
+    }
   }
 }
