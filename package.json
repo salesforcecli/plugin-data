@@ -53,7 +53,8 @@
             "description": "Delete a single record or multiple records in bulk."
           },
           "export": {
-            "description": "Export data from your org."
+            "description": "Export data from your org.",
+            "external": true
           },
           "get": {
             "description": "Get a single record."

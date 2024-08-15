@@ -175,3 +175,25 @@ export class BulkUpsertRequestCache extends BulkDataRequestCache {
     await cache.write();
   }
 }
+
+export class BulkExportRequestCache extends BulkDataRequestCache {
+  public static getDefaultOptions(): TTLConfig.Options {
+    return {
+      isGlobal: true,
+      isState: true,
+      filename: BulkUpsertRequestCache.getFileName(),
+      stateFolder: Global.SF_STATE_FOLDER,
+      ttl: Duration.days(7),
+    };
+  }
+
+  public static getFileName(): string {
+    return 'bulk-data-export-cache.json';
+  }
+
+  public static async unset(key: string): Promise<void> {
+    const cache = await BulkUpsertRequestCache.create();
+    cache.unset(key);
+    await cache.write();
+  }
+}
