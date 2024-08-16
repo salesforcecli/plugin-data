@@ -13,7 +13,8 @@ import { Logger, Messages } from '@salesforce/core';
 import { QueryJobInfoV2, QueryJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { Duration } from '@salesforce/kit';
 import { Parsable } from '@jsforce/jsforce-node/lib/record-stream.js';
-import { Record as SfRecord } from '@jsforce/jsforce-node';
+import { Schema, Record as SfRecord } from '@jsforce/jsforce-node';
+import ansis from 'ansis';
 import { BulkExportRequestCache } from '../../../bulkDataRequestCache.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -75,6 +76,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
 
     const timeout = flags.async ? Duration.minutes(0) : flags.wait ?? Duration.minutes(0);
 
+    // async: create query job in the org but don't poll for its status
     if (timeout.milliseconds === 0) {
       const job = new QueryJobV2(conn, {
         bodyParams: {
@@ -98,7 +100,9 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
         conn.getUsername(),
         conn.getApiVersion()
       );
+
       this.log(messages.getMessage('export.timeout', [jobInfo.id, jobInfo.id, conn.getUsername()]));
+
       return {
         totalSize: 0,
         path: '',
@@ -116,38 +120,12 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
       },
     });
 
-    const recordStream = new Parsable();
-    const dataStream = recordStream.stream('csv');
+    await queryJob.open();
+
+    const [recordStream, jobInfo] = await getQueryStream(queryJob, this.logger);
 
     // switch stream into flowing mode
     recordStream.on('record', () => {});
-
-    let jobInfo: QueryJobInfoV2 | undefined;
-
-    try {
-      await queryJob.open();
-
-      queryJob.on('jobComplete', (completedJob: QueryJobInfoV2) => {
-        jobInfo = completedJob;
-      });
-      await queryJob.poll();
-
-      const queryRecordsStream = await queryJob.result().then((s) => s.stream());
-      queryRecordsStream.pipe(dataStream);
-    } catch (error) {
-      const err = error as Error;
-      this.logger.error(`bulk query failed due to: ${err.message}`);
-
-      if (err.name !== 'JobPollingTimeoutError') {
-        // fires off one last attempt to clean up and ignores the result | error
-        queryJob.delete().catch((ignored: Error) => ignored);
-      }
-
-      throw err;
-    }
-    if (typeof jobInfo === 'undefined') {
-      throw new Error('could not get jobinfo');
-    }
 
     if (flags['result-format'] === 'json') {
       const fileStream = new JsonWritable(flags['output-file'], jobInfo.numberRecordsProcessed);
@@ -157,6 +135,8 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
       recordStream.stream().pipe(fileStream);
     }
 
+    this.log(ansis.bold(`${jobInfo.numberRecordsProcessed} records written to ${flags['output-file']}`));
+
     return {
       totalSize: jobInfo.numberRecordsProcessed,
       path: flags['output-file'],
@@ -164,6 +144,41 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
   }
 }
 
+export async function getQueryStream(
+  queryJob: QueryJobV2<Schema>,
+  logger: Logger
+): Promise<[Parsable, QueryJobInfoV2]> {
+  const recordStream = new Parsable();
+  const dataStream = recordStream.stream('csv');
+
+  let jobInfo: QueryJobInfoV2 | undefined;
+
+  try {
+    queryJob.on('jobComplete', (completedJob: QueryJobInfoV2) => {
+      jobInfo = completedJob;
+    });
+    await queryJob.poll();
+
+    const queryRecordsStream = await queryJob.result().then((s) => s.stream());
+    queryRecordsStream.pipe(dataStream);
+  } catch (error) {
+    const err = error as Error;
+    // TODO: improve log messages
+    logger.error(`bulk query failed due to: ${err.message}`);
+
+    if (err.name !== 'JobPollingTimeoutError') {
+      // fires off one last attempt to clean up and ignores the result | error
+      queryJob.delete().catch((ignored: Error) => ignored);
+    }
+
+    throw err;
+  }
+  if (!jobInfo) {
+    throw new Error('could not get jobinfo');
+  }
+
+  return [recordStream, jobInfo];
+}
 // eslint-disable-next-line sf-plugin/only-extend-SfCommand
 export class JsonWritable extends Writable {
   private recordsQty: number;
