@@ -105,9 +105,21 @@ export type ResumeOptions = {
     query: string;
     connection: Connection;
   };
-  outputFile?: string;
-  outputFormat?: string;
   jobInfo: { id: string };
+};
+
+export type ResumeBulkExportOptions = {
+  options: {
+    operation: BulkOperation;
+    pollingOptions: { pollTimeout: number; pollInterval: number };
+    query: string;
+    connection: Connection;
+  };
+  jobInfo: { id: string };
+  outputInfo: {
+    filePath: string;
+    format: 'csv' | 'json';
+  };
 };
 
 export type BulkResultV2 = {

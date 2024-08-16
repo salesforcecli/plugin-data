@@ -7,15 +7,23 @@
 
 import { TTLConfig, Global, Logger, Messages, Org } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
-import type { ResumeOptions } from './types.js';
+import type { ResumeBulkExportOptions, ResumeOptions } from './types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
 export type BulkDataCacheConfig = {
   username: string;
-  outputFile?: string;
-  outputFormat?: 'csv' | 'json';
+  jobId: string;
+  apiVersion: string;
+};
+
+export type BulkExportCacheConfig = {
+  username: string;
+  outputInfo: {
+    filePath: string;
+    format: 'csv' | 'json';
+  };
   jobId: string;
   apiVersion: string;
 };
@@ -178,12 +186,12 @@ export class BulkUpsertRequestCache extends BulkDataRequestCache {
   }
 }
 
-export class BulkExportRequestCache extends BulkDataRequestCache {
+export class BulkExportRequestCache extends TTLConfig<TTLConfig.Options, BulkExportCacheConfig> {
   public static getDefaultOptions(): TTLConfig.Options {
     return {
       isGlobal: true,
       isState: true,
-      filename: BulkUpsertRequestCache.getFileName(),
+      filename: BulkExportRequestCache.getFileName(),
       stateFolder: Global.SF_STATE_FOLDER,
       ttl: Duration.days(7),
     };
@@ -193,16 +201,21 @@ export class BulkExportRequestCache extends BulkDataRequestCache {
     return 'bulk-data-export-cache.json';
   }
 
+  public static async unset(key: string): Promise<void> {
+    const cache = await BulkUpsertRequestCache.create();
+    cache.unset(key);
+    await cache.write();
+  }
+
   /**
-   * Creates a new bulk data request cache entry for the given bulk request id.
-   *
-   * @param bulkRequestId
-   * @param username
+   * Creates a new bulk export request cache entry for the given id.
    */
-  public async cache(
+  public async createCacheEntryForRequest(
     bulkRequestId: string,
-    outputFile: string,
-    outputFormat: 'csv' | 'json',
+    outputInfo: {
+      filePath: string;
+      format: 'csv' | 'json';
+    },
     username: string | undefined,
     apiVersion: string | undefined
   ): Promise<void> {
@@ -211,21 +224,19 @@ export class BulkExportRequestCache extends BulkDataRequestCache {
     }
     this.set(bulkRequestId, {
       jobId: bulkRequestId,
-      outputFile,
-      outputFormat,
+      outputInfo,
       username,
       apiVersion,
     });
     await this.write();
-    Logger.childFromRoot('DataRequestCache').debug(`bulk cache saved for ${bulkRequestId}`);
+    Logger.childFromRoot('BulkExportCache').debug(`bulk cache saved for ${bulkRequestId}`);
   }
 
   public async resolveResumeOptionsFromCache(
     bulkJobId: string | undefined,
     useMostRecent: boolean,
-    org: Org | undefined,
     apiVersion: string | undefined
-  ): Promise<ResumeOptions> {
+  ): Promise<ResumeBulkExportOptions> {
     if (!useMostRecent && !bulkJobId) {
       throw messages.createError('bulkRequestIdRequiredWhenNotUsingMostRecent');
     }
@@ -243,8 +254,10 @@ export class BulkExportRequestCache extends BulkDataRequestCache {
 
         return {
           jobInfo: { id: entry.jobId },
-          outputFile: entry.outputFile,
-          outputFormat: entry.outputFormat,
+          outputInfo: {
+            filePath: entry.outputInfo.filePath,
+            format: entry.outputInfo.format,
+          },
           options: {
             ...resumeOptionsOptions,
             connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
@@ -257,22 +270,14 @@ export class BulkExportRequestCache extends BulkDataRequestCache {
       if (entry) {
         return {
           jobInfo: { id: entry.jobId },
-          outputFile: entry.outputFile,
-          outputFormat: entry.outputFormat,
+          outputInfo: entry.outputInfo,
           options: {
             ...resumeOptionsOptions,
             connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
           },
         };
-      } else if (org) {
-        return {
-          jobInfo: { id: bulkJobId },
-          options: {
-            ...resumeOptionsOptions,
-            connection: org.getConnection(apiVersion),
-          },
-        };
       } else {
+        // TODO: update error msg
         throw messages.createError('cannotCreateResumeOptionsWithoutAnOrg');
       }
     } else if (useMostRecent) {
@@ -280,11 +285,5 @@ export class BulkExportRequestCache extends BulkDataRequestCache {
     } else {
       throw messages.createError('bulkRequestIdRequiredWhenNotUsingMostRecent');
     }
-  }
-
-  public static async unset(key: string): Promise<void> {
-    const cache = await BulkUpsertRequestCache.create();
-    cache.unset(key);
-    await cache.write();
   }
 }

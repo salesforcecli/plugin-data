@@ -18,7 +18,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'data.export.r
 
 export type DataExportResumeResult = {
   totalSize: number;
-  path: string;
+  filePath: string;
 };
 
 export default class DataExportResume extends SfCommand<DataExportResumeResult> {
@@ -54,18 +54,20 @@ export default class DataExportResume extends SfCommand<DataExportResumeResult> 
     const resumeOpts = await cache.resolveResumeOptionsFromCache(
       flags['bulk-query-id'],
       flags['use-most-recent'],
-      flags['target-org'],
       flags['api-version']
     );
 
     const queryJob = new QueryJobV2(resumeOpts.options.connection, {
       id: resumeOpts.jobInfo.id,
       pollingOptions: {
+        // TODO:
+        // this will always be `0` (set in BulkExportRequestCache.resolveResumeOptionsFromCache), should be increased or polling might burn API quota
         pollInterval: resumeOpts.options.pollingOptions.pollInterval,
-        // TODO: maybe do this check on `export bulk` and cache 1s if async?
         // polling options are retrieved from the cache.
-        // If `--async` or `--wait 0` were used, we'd be passing that to the jsforce poll method,
-        // which means it would never check the actual result, and always throw a timeout error */
+        // If `--async` or `--wait 0` were used, we'd be passing `0` (set in BulkExportRequestCache.resolveResumeOptionsFromCache)
+        // to the jsforce poll method, which means it would never check the actual result, and always throw a timeout error */
+        //
+        // TODO: big export queries can take a while to get processed, 1s might cause `export resume` to timeout before the query job is done
         pollTimeout: Math.max(resumeOpts.options.pollingOptions.pollTimeout, 1000),
       },
     });
@@ -75,27 +77,19 @@ export default class DataExportResume extends SfCommand<DataExportResumeResult> 
     // switch stream into flowing mode
     recordStream.on('record', () => {});
 
-    if (!resumeOpts.outputFormat) {
-      throw new Error('output format was not cached');
-    }
-
-    if (!resumeOpts.outputFile) {
-      throw new Error('output format was not cached');
-    }
-
-    if (resumeOpts.outputFormat) {
-      const fileStream = new JsonWritable(resumeOpts.outputFile, jobInfo.numberRecordsProcessed);
+    if (resumeOpts.outputInfo.format === 'json') {
+      const fileStream = new JsonWritable(resumeOpts.outputInfo.filePath, jobInfo.numberRecordsProcessed);
       recordStream.pipe(fileStream);
     } else {
-      const fileStream = fs.createWriteStream(resumeOpts.outputFile);
+      const fileStream = fs.createWriteStream(resumeOpts.outputInfo.filePath);
       recordStream.stream().pipe(fileStream);
     }
 
-    this.log(ansis.bold(`${jobInfo.numberRecordsProcessed} records written to ${resumeOpts.outputFile}`));
+    this.log(ansis.bold(`${jobInfo.numberRecordsProcessed} records written to ${resumeOpts.outputInfo.filePath}`));
 
     return {
       totalSize: jobInfo.numberRecordsProcessed,
-      path: resumeOpts.outputFile,
+      filePath: resumeOpts.outputInfo.filePath,
     };
   }
 }

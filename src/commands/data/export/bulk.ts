@@ -22,7 +22,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'data.export.b
 
 export type DataExportBulkResult = {
   totalSize: number;
-  path: string;
+  filePath: string;
 };
 
 export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
@@ -93,10 +93,12 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
 
       const cache = await BulkExportRequestCache.create();
       // TODO: this should save `column-delimiter` too
-      await cache.cache(
+      await cache.createCacheEntryForRequest(
         jobInfo.id,
-        flags['output-file'],
-        flags['result-format'],
+        {
+          filePath: flags['output-file'],
+          format: flags['result-format'],
+        },
         conn.getUsername(),
         conn.getApiVersion()
       );
@@ -105,7 +107,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
 
       return {
         totalSize: 0,
-        path: '',
+        filePath: '',
       };
     }
 
@@ -139,7 +141,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
 
     return {
       totalSize: jobInfo.numberRecordsProcessed,
-      path: flags['output-file'],
+      filePath: flags['output-file'],
     };
   }
 }
