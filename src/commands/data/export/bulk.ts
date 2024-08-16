@@ -90,7 +90,14 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
       const jobInfo = await job.open();
 
       const cache = await BulkExportRequestCache.create();
-      await cache.createCacheEntryForRequest(jobInfo.id, conn.getUsername(), conn.getApiVersion());
+      // TODO: this should save `column-delimiter` too
+      await cache.cache(
+        jobInfo.id,
+        flags['output-file'],
+        flags['result-format'],
+        conn.getUsername(),
+        conn.getApiVersion()
+      );
       this.log(messages.getMessage('export.timeout', [jobInfo.id, jobInfo.id, conn.getUsername()]));
       return {
         totalSize: 0,
@@ -158,7 +165,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
 }
 
 // eslint-disable-next-line sf-plugin/only-extend-SfCommand
-class JsonWritable extends Writable {
+export class JsonWritable extends Writable {
   private recordsQty: number;
   private recordsWritten = 0;
   private filePath: fs.PathLike;

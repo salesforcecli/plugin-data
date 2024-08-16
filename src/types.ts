@@ -105,6 +105,8 @@ export type ResumeOptions = {
     query: string;
     connection: Connection;
   };
+  outputFile?: string;
+  outputFormat?: string;
   jobInfo: { id: string };
 };
 

@@ -14,6 +14,8 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
 export type BulkDataCacheConfig = {
   username: string;
+  outputFile?: string;
+  outputFormat?: 'csv' | 'json';
   jobId: string;
   apiVersion: string;
 };
@@ -189,6 +191,95 @@ export class BulkExportRequestCache extends BulkDataRequestCache {
 
   public static getFileName(): string {
     return 'bulk-data-export-cache.json';
+  }
+
+  /**
+   * Creates a new bulk data request cache entry for the given bulk request id.
+   *
+   * @param bulkRequestId
+   * @param username
+   */
+  public async cache(
+    bulkRequestId: string,
+    outputFile: string,
+    outputFormat: 'csv' | 'json',
+    username: string | undefined,
+    apiVersion: string | undefined
+  ): Promise<void> {
+    if (!username) {
+      throw messages.createError('usernameRequired');
+    }
+    this.set(bulkRequestId, {
+      jobId: bulkRequestId,
+      outputFile,
+      outputFormat,
+      username,
+      apiVersion,
+    });
+    await this.write();
+    Logger.childFromRoot('DataRequestCache').debug(`bulk cache saved for ${bulkRequestId}`);
+  }
+
+  public async resolveResumeOptionsFromCache(
+    bulkJobId: string | undefined,
+    useMostRecent: boolean,
+    org: Org | undefined,
+    apiVersion: string | undefined
+  ): Promise<ResumeOptions> {
+    if (!useMostRecent && !bulkJobId) {
+      throw messages.createError('bulkRequestIdRequiredWhenNotUsingMostRecent');
+    }
+    const resumeOptionsOptions = {
+      operation: 'query',
+      query: '',
+      pollingOptions: { pollTimeout: 0, pollInterval: 0 },
+    } satisfies Pick<ResumeOptions['options'], 'operation' | 'query' | 'pollingOptions'>;
+
+    if (useMostRecent) {
+      const key = this.getLatestKey();
+      if (key) {
+        // key definitely exists because it came from the cache
+        const entry = this.get(key);
+
+        return {
+          jobInfo: { id: entry.jobId },
+          outputFile: entry.outputFile,
+          outputFormat: entry.outputFormat,
+          options: {
+            ...resumeOptionsOptions,
+            connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
+          },
+        };
+      }
+    }
+    if (bulkJobId) {
+      const entry = this.get(bulkJobId);
+      if (entry) {
+        return {
+          jobInfo: { id: entry.jobId },
+          outputFile: entry.outputFile,
+          outputFormat: entry.outputFormat,
+          options: {
+            ...resumeOptionsOptions,
+            connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
+          },
+        };
+      } else if (org) {
+        return {
+          jobInfo: { id: bulkJobId },
+          options: {
+            ...resumeOptionsOptions,
+            connection: org.getConnection(apiVersion),
+          },
+        };
+      } else {
+        throw messages.createError('cannotCreateResumeOptionsWithoutAnOrg');
+      }
+    } else if (useMostRecent) {
+      throw messages.createError('cannotFindMostRecentCacheEntry');
+    } else {
+      throw messages.createError('bulkRequestIdRequiredWhenNotUsingMostRecent');
+    }
   }
 
   public static async unset(key: string): Promise<void> {
