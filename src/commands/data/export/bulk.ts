@@ -57,8 +57,12 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
     query: Flags.string({
       summary: messages.getMessage('flags.query.summary'),
       char: 'q',
-      // TODO: this shouldn't be required after adding `query-file`
-      required: true,
+      exclusive: ['query-file'],
+    }),
+    'query-file': Flags.file({
+      summary: messages.getMessage('flags.query-file.summary'),
+      exists: true,
+      exclusive: ['query'],
     }),
     'all-rows': Flags.boolean({
       summary: messages.getMessage('flags.all-rows.summary'),
@@ -97,11 +101,14 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
 
     const timeout = flags.async ? Duration.minutes(0) : flags.wait ?? Duration.minutes(0);
 
+    // `flags['query-file']` will be present if `flags.query` isn't. oclif's `exclusive` isn't quite that clever
+    const soqlQuery = flags.query ?? fs.readFileSync(flags['query-file'] as string, 'utf8');
+
     // async: create query job in the org but don't poll for its status
     if (timeout.milliseconds === 0) {
       const job = new QueryJobV2(conn, {
         bodyParams: {
-          query: flags.query,
+          query: soqlQuery,
           operation: flags['all-rows'] ? 'queryAll' : 'query',
           columnDelimiter: flags['column-delimiter'],
           lineEnding: flags['line-ending'],
@@ -136,7 +143,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
 
     const queryJob = new QueryJobV2(conn, {
       bodyParams: {
-        query: flags.query,
+        query: soqlQuery,
         operation: flags['all-rows'] ? 'queryAll' : 'query',
         columnDelimiter: flags['column-delimiter'],
         lineEnding: flags['line-ending'],

@@ -64,3 +64,7 @@ Column delimiter to be used when writing CSV output.
 # flags.line-ending.summary
 
 Line ending to be used when writing CSV output.
+
+# flags.query-file.summary
+
+File that contains the SOQL query.
