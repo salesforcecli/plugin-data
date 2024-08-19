@@ -84,9 +84,20 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
       summary: messages.getMessage('flags.column-delimiter.summary'),
     })(),
     'line-ending': Flags.option({
-      default: platform() === 'win32' ? 'CRLF' : 'LF',
       summary: messages.getMessage('flags.line-ending.summary'),
       options: ['LF', 'CRLF'] as const,
+      relationships: [
+        {
+          type: 'some',
+          flags: [
+            {
+              name: 'result-format',
+              // eslint-disable-next-line @typescript-eslint/require-await
+              when: async (flags): Promise<boolean> => flags['result-format'] === 'csv',
+            },
+          ],
+        },
+      ],
     })(),
   };
 
@@ -104,6 +115,8 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
     // `flags['query-file']` will be present if `flags.query` isn't. oclif's `exclusive` isn't quite that clever
     const soqlQuery = flags.query ?? fs.readFileSync(flags['query-file'] as string, 'utf8');
 
+    const lineEnding = flags['line-ending'] ?? platform() === 'win32' ? 'CRLF' : 'LF';
+
     // async: create query job in the org but don't poll for its status
     if (timeout.milliseconds === 0) {
       const job = new QueryJobV2(conn, {
@@ -111,7 +124,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
           query: soqlQuery,
           operation: flags['all-rows'] ? 'queryAll' : 'query',
           columnDelimiter: flags['column-delimiter'],
-          lineEnding: flags['line-ending'],
+          lineEnding,
         },
         pollingOptions: {
           pollTimeout: timeout.milliseconds,
@@ -146,7 +159,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
         query: soqlQuery,
         operation: flags['all-rows'] ? 'queryAll' : 'query',
         columnDelimiter: flags['column-delimiter'],
-        lineEnding: flags['line-ending'],
+        lineEnding,
       },
       pollingOptions: {
         pollTimeout: timeout.milliseconds,
