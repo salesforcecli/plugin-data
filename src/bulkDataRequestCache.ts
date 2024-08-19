@@ -8,6 +8,7 @@
 import { TTLConfig, Global, Logger, Messages, Org } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import type { ResumeBulkExportOptions, ResumeOptions } from './types.js';
+import { ColumnDelimiterKeys } from './commands/data/export/bulk.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
@@ -23,6 +24,7 @@ export type BulkExportCacheConfig = {
   outputInfo: {
     filePath: string;
     format: 'csv' | 'json';
+    columnDelimiter: ColumnDelimiterKeys;
   };
   jobId: string;
   apiVersion: string;
@@ -215,6 +217,7 @@ export class BulkExportRequestCache extends TTLConfig<TTLConfig.Options, BulkExp
     outputInfo: {
       filePath: string;
       format: 'csv' | 'json';
+      columnDelimiter: ColumnDelimiterKeys;
     },
     username: string | undefined,
     apiVersion: string | undefined
@@ -257,6 +260,7 @@ export class BulkExportRequestCache extends TTLConfig<TTLConfig.Options, BulkExp
           outputInfo: {
             filePath: entry.outputInfo.filePath,
             format: entry.outputInfo.format,
+            columnDelimiter: entry.outputInfo.columnDelimiter,
           },
           options: {
             ...resumeOptionsOptions,

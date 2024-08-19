@@ -25,6 +25,17 @@ export type DataExportBulkResult = {
   filePath: string;
 };
 
+export enum ColumnDelimiter {
+  BACKQUOTE = '`',
+  CARET = '^',
+  COMMA = ',',
+  PIPE = '|',
+  SEMICOLON = ';',
+  TAB = '	',
+}
+
+export type ColumnDelimiterKeys = keyof typeof ColumnDelimiter;
+
 export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
@@ -63,6 +74,11 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
       summary: messages.getMessage('flags.result-format.summary'),
       char: 'r',
     })(),
+    'column-delimiter': Flags.option({
+      options: ['BACKQUOTE', 'CARET', 'COMMA', 'PIPE', 'SEMICOLON', 'TAB'] as const,
+      default: 'COMMA',
+      summary: messages.getMessage('flags.column-delimiter.summary'),
+    })(),
   };
 
   private logger!: Logger;
@@ -82,6 +98,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
         bodyParams: {
           query: flags.query,
           operation: flags['all-rows'] ? 'queryAll' : 'query',
+          columnDelimiter: flags['column-delimiter'],
         },
         pollingOptions: {
           pollTimeout: timeout.milliseconds,
@@ -92,12 +109,12 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
       const jobInfo = await job.open();
 
       const cache = await BulkExportRequestCache.create();
-      // TODO: this should save `column-delimiter` too
       await cache.createCacheEntryForRequest(
         jobInfo.id,
         {
           filePath: flags['output-file'],
           format: flags['result-format'],
+          columnDelimiter: flags['column-delimiter'],
         },
         conn.getUsername(),
         conn.getApiVersion()
@@ -115,6 +132,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
       bodyParams: {
         query: flags.query,
         operation: flags['all-rows'] ? 'queryAll' : 'query',
+        columnDelimiter: flags['column-delimiter'],
       },
       pollingOptions: {
         pollTimeout: timeout.milliseconds,
@@ -124,7 +142,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
 
     await queryJob.open();
 
-    const [recordStream, jobInfo] = await getQueryStream(queryJob, this.logger);
+    const [recordStream, jobInfo] = await getQueryStream(queryJob, flags['column-delimiter'], this.logger);
 
     // switch stream into flowing mode
     recordStream.on('record', () => {});
@@ -148,10 +166,13 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
 
 export async function getQueryStream(
   queryJob: QueryJobV2<Schema>,
+  columnDelimiter: ColumnDelimiterKeys,
   logger: Logger
 ): Promise<[Parsable, QueryJobInfoV2]> {
   const recordStream = new Parsable();
-  const dataStream = recordStream.stream('csv');
+  const dataStream = recordStream.stream('csv', {
+    delimiter: ColumnDelimiter[columnDelimiter],
+  });
 
   let jobInfo: QueryJobInfoV2 | undefined;
 

@@ -56,3 +56,7 @@ File where output is saved.
 # flags.result-format.summary
 
 Format to display the results.
+
+# flags.column-delimiter.summary
+
+Column delimiter to be used when writing CSV output.

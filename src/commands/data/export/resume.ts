@@ -72,7 +72,7 @@ export default class DataExportResume extends SfCommand<DataExportResumeResult> 
       },
     });
 
-    const [recordStream, jobInfo] = await getQueryStream(queryJob, this.logger);
+    const [recordStream, jobInfo] = await getQueryStream(queryJob, resumeOpts.outputInfo.columnDelimiter, this.logger);
 
     // switch stream into flowing mode
     recordStream.on('record', () => {});
