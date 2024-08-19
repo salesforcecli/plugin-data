@@ -8,7 +8,7 @@
 import { TTLConfig, Global, Logger, Messages, Org } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import type { ResumeBulkExportOptions, ResumeOptions } from './types.js';
-import { ColumnDelimiterKeys } from './commands/data/export/bulk.js';
+import { ColumnDelimiterKeys } from './bulkUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
@@ -251,43 +251,42 @@ export class BulkExportRequestCache extends TTLConfig<TTLConfig.Options, BulkExp
 
     if (useMostRecent) {
       const key = this.getLatestKey();
-      if (key) {
-        // key definitely exists because it came from the cache
-        const entry = this.get(key);
+      if (!key) {
+        throw messages.createError('cannotFindMostRecentCacheEntry');
+      }
+      // key definitely exists because it came from the cache
+      const entry = this.get(key);
 
-        return {
-          jobInfo: { id: entry.jobId },
-          outputInfo: {
-            filePath: entry.outputInfo.filePath,
-            format: entry.outputInfo.format,
-            columnDelimiter: entry.outputInfo.columnDelimiter,
-          },
-          options: {
-            ...resumeOptionsOptions,
-            connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
-          },
-        };
-      }
+      return {
+        jobInfo: { id: entry.jobId },
+        outputInfo: {
+          filePath: entry.outputInfo.filePath,
+          format: entry.outputInfo.format,
+          columnDelimiter: entry.outputInfo.columnDelimiter,
+        },
+        options: {
+          ...resumeOptionsOptions,
+          connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
+        },
+      };
     }
-    if (bulkJobId) {
-      const entry = this.get(bulkJobId);
-      if (entry) {
-        return {
-          jobInfo: { id: entry.jobId },
-          outputInfo: entry.outputInfo,
-          options: {
-            ...resumeOptionsOptions,
-            connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
-          },
-        };
-      } else {
-        // TODO: update error msg
-        throw messages.createError('cannotCreateResumeOptionsWithoutAnOrg');
-      }
-    } else if (useMostRecent) {
-      throw messages.createError('cannotFindMostRecentCacheEntry');
-    } else {
+
+    if (!bulkJobId) {
       throw messages.createError('bulkRequestIdRequiredWhenNotUsingMostRecent');
     }
+
+    const entry = this.get(bulkJobId);
+    if (!entry) {
+      throw messages.createError('error.bulkRequestIdNotFound', [bulkJobId]);
+    }
+
+    return {
+      jobInfo: { id: entry.jobId },
+      outputInfo: entry.outputInfo,
+      options: {
+        ...resumeOptionsOptions,
+        connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
+      },
+    };
   }
 }

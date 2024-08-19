@@ -9,7 +9,7 @@ import { JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import type { QueryResult, Record as jsRecord } from '@jsforce/jsforce-node';
 import { Optional } from '@salesforce/ts-types';
 import { Connection } from '@salesforce/core';
-import { ColumnDelimiterKeys } from './commands/data/export/bulk.js';
+import { ColumnDelimiterKeys } from './bulkUtils.js';
 
 export type GenericEntry = [string, unknown];
 export type GenericObject = Record<string, unknown>;

@@ -11,7 +11,7 @@ import { Logger, Messages } from '@salesforce/core';
 import { QueryJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import ansis from 'ansis';
 import { BulkExportRequestCache } from '../../../bulkDataRequestCache.js';
-import { getQueryStream, JsonWritable } from './bulk.js';
+import { getQueryStream, JsonWritable } from '../../../bulkUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'data.export.resume');
@@ -32,11 +32,11 @@ export default class DataExportResume extends SfCommand<DataExportResumeResult> 
       length: 18,
       char: 'i',
       startsWith: '750',
-      summary: 'hehehe',
+      summary: messages.getMessage('flags.bulk-query-id.summary'),
       exactlyOne: ['bulk-query-id', 'use-most-recent'],
     }),
     'use-most-recent': Flags.boolean({
-      summary: 'hehe',
+      summary: messages.getMessage('flags.use-most-recent.summary'),
       exactlyOne: ['bulk-query-id', 'use-most-recent'],
     }),
     'api-version': Flags.orgApiVersion(),

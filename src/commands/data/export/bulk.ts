@@ -6,16 +6,14 @@
  */
 
 import * as fs from 'node:fs';
-import { Writable } from 'node:stream';
-import { EOL, platform } from 'node:os';
+import { platform } from 'node:os';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Logger, Messages } from '@salesforce/core';
-import { QueryJobInfoV2, QueryJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
+import { QueryJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { Duration } from '@salesforce/kit';
-import { Parsable } from '@jsforce/jsforce-node/lib/record-stream.js';
-import { Schema, Record as SfRecord } from '@jsforce/jsforce-node';
 import ansis from 'ansis';
 import { BulkExportRequestCache } from '../../../bulkDataRequestCache.js';
+import { getQueryStream, JsonWritable } from '../../../bulkUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'data.export.bulk');
@@ -24,17 +22,6 @@ export type DataExportBulkResult = {
   totalSize: number;
   filePath: string;
 };
-
-export enum ColumnDelimiter {
-  BACKQUOTE = '`',
-  CARET = '^',
-  COMMA = ',',
-  PIPE = '|',
-  SEMICOLON = ';',
-  TAB = '	',
-}
-
-export type ColumnDelimiterKeys = keyof typeof ColumnDelimiter;
 
 export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
   public static readonly summary = messages.getMessage('summary');
@@ -188,74 +175,5 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
       totalSize: jobInfo.numberRecordsProcessed,
       filePath: flags['output-file'],
     };
-  }
-}
-
-export async function getQueryStream(
-  queryJob: QueryJobV2<Schema>,
-  columnDelimiter: ColumnDelimiterKeys,
-  logger: Logger
-): Promise<[Parsable, QueryJobInfoV2]> {
-  const recordStream = new Parsable();
-  const dataStream = recordStream.stream('csv', {
-    delimiter: ColumnDelimiter[columnDelimiter],
-  });
-
-  let jobInfo: QueryJobInfoV2 | undefined;
-
-  try {
-    queryJob.on('jobComplete', (completedJob: QueryJobInfoV2) => {
-      jobInfo = completedJob;
-    });
-    await queryJob.poll();
-
-    const queryRecordsStream = await queryJob.result().then((s) => s.stream());
-    queryRecordsStream.pipe(dataStream);
-  } catch (error) {
-    const err = error as Error;
-    // TODO: improve log messages
-    logger.error(`bulk query failed due to: ${err.message}`);
-
-    if (err.name !== 'JobPollingTimeoutError') {
-      // fires off one last attempt to clean up and ignores the result | error
-      queryJob.delete().catch((ignored: Error) => ignored);
-    }
-
-    throw err;
-  }
-  if (!jobInfo) {
-    throw new Error('could not get jobinfo');
-  }
-
-  return [recordStream, jobInfo];
-}
-// eslint-disable-next-line sf-plugin/only-extend-SfCommand
-export class JsonWritable extends Writable {
-  private recordsQty: number;
-  private recordsWritten = 0;
-  private filePath: fs.PathLike;
-  private fileStream!: fs.WriteStream;
-
-  public constructor(filePath: fs.PathLike, recordsQty: number) {
-    super({ objectMode: true });
-    this.recordsQty = recordsQty;
-    this.filePath = filePath;
-  }
-
-  public _construct(callback: () => void): void {
-    this.fileStream = fs.createWriteStream(this.filePath);
-    this.fileStream.write(`[${EOL}`);
-    callback();
-  }
-
-  public _write(chunk: SfRecord, encoding: BufferEncoding, callback: () => void): void {
-    if (this.recordsQty - 1 === this.recordsWritten) {
-      // last record, close JSON array
-      this.fileStream.write(`  ${JSON.stringify(chunk)}${EOL}]`, encoding, callback);
-      this.fileStream.end();
-    } else {
-      this.fileStream.write(`  ${JSON.stringify(chunk)},${EOL}`, encoding, callback);
-      this.recordsWritten++;
-    }
   }
 }

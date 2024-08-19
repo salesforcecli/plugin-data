@@ -4,17 +4,16 @@ Summary of a command.
 
 # description
 
-More information about a command. Don't repeat the summary. 
+More information about a command. Don't repeat the summary.
 
-# flags.name.summary
+# flags.bulk-query-id.summary
 
-Description of a flag.
+Job ID of the bulk query.
 
-# flags.name.description
+# flags.use-most-recent.summary
 
-More information about a flag. Don't repeat the summary. 
+Use the most recent bulk query ID from cache.
 
 # examples
 
 - <%= config.bin %> <%= command.id %>
-

@@ -52,6 +52,10 @@ Format to display the results; the --json flag overrides this flag.
 
 The bulk request id must be supplied when not looking for most recent cache entry.
 
+# error.bulkRequestIdNotFound
+
+Could not find a cache entry for job ID %s
+
 # cannotFindMostRecentCacheEntry
 
 Could not load a most recent cache entry for a bulk request. Please rerun your command with a bulk request id.
@@ -67,3 +71,7 @@ A valid username is required when creating a cache entry.
 # invalidSobject
 
 The supplied SObject type "%s" is invalid. Error message: %s.
+
+# error.noJobInfo
+
+Failed to get job info after polling for the query job status.
