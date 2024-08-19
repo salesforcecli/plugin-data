@@ -60,3 +60,7 @@ Format to display the results.
 # flags.column-delimiter.summary
 
 Column delimiter to be used when writing CSV output.
+
+# flags.line-ending.summary
+
+Line ending to be used when writing CSV output.

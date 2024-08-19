@@ -7,7 +7,7 @@
 
 import * as fs from 'node:fs';
 import { Writable } from 'node:stream';
-import { EOL } from 'node:os';
+import { EOL, platform } from 'node:os';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Logger, Messages } from '@salesforce/core';
 import { QueryJobInfoV2, QueryJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
@@ -79,6 +79,11 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
       default: 'COMMA',
       summary: messages.getMessage('flags.column-delimiter.summary'),
     })(),
+    'line-ending': Flags.option({
+      default: platform() === 'win32' ? 'CRLF' : 'LF',
+      summary: messages.getMessage('flags.line-ending.summary'),
+      options: ['LF', 'CRLF'] as const,
+    })(),
   };
 
   private logger!: Logger;
@@ -99,6 +104,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
           query: flags.query,
           operation: flags['all-rows'] ? 'queryAll' : 'query',
           columnDelimiter: flags['column-delimiter'],
+          lineEnding: flags['line-ending'],
         },
         pollingOptions: {
           pollTimeout: timeout.milliseconds,
@@ -133,6 +139,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
         query: flags.query,
         operation: flags['all-rows'] ? 'queryAll' : 'query',
         columnDelimiter: flags['column-delimiter'],
+        lineEnding: flags['line-ending'],
       },
       pollingOptions: {
         pollTimeout: timeout.milliseconds,
