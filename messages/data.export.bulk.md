@@ -36,9 +36,6 @@ SOQL query to execute.
 
 # export.timeout
 
-Query ID: %s
-Query is in progress.
-
 Run "sf data export resume -i %s -o %s" to get the latest status and results.
 
 # flags.all-rows.summary

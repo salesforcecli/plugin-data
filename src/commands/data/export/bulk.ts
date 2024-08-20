@@ -7,9 +7,12 @@
 
 import * as fs from 'node:fs';
 import { platform } from 'node:os';
+import { pipeline } from 'node:stream/promises';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Logger, Messages } from '@salesforce/core';
-import { QueryJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
+import { Logger, Messages, Org } from '@salesforce/core';
+import { MultiStageOutput } from '@oclif/multi-stage-output';
+import terminalLink from 'terminal-link';
+import { QueryJobInfoV2, QueryJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { Duration } from '@salesforce/kit';
 import ansis from 'ansis';
 import { BulkExportRequestCache } from '../../../bulkDataRequestCache.js';
@@ -104,8 +107,33 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
 
     const lineEnding = flags['line-ending'] ?? platform() === 'win32' ? 'CRLF' : 'LF';
 
+    const async = timeout.milliseconds === 0;
+
+    const baseUrl = flags['target-org'].getField<string>(Org.Fields.INSTANCE_URL).toString();
+
+    const ms = new MultiStageOutput<QueryJobInfoV2>({
+      jsonEnabled: flags.json ?? false,
+      stages: async
+        ? ['creating query bulk job', 'done']
+        : ['creating query bulk job', 'processing job', 'saving records'],
+      title: async ? 'Exporting data (async)' : 'Exporting data',
+      postStagesBlock: [
+        {
+          label: 'Job Id',
+          type: 'dynamic-key-value',
+          bold: true,
+          get: (data) =>
+            data?.id &&
+            terminalLink(
+              data.id,
+              `${baseUrl}/lightning/setup/AsyncApiJobStatus/page?address=${encodeURIComponent(`/${data.id}`)}`
+            ),
+        },
+      ],
+    });
+
     // async: create query job in the org but don't poll for its status
-    if (timeout.milliseconds === 0) {
+    if (async) {
       const job = new QueryJobV2(conn, {
         bodyParams: {
           query: soqlQuery,
@@ -119,26 +147,39 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
         },
       });
 
-      const jobInfo = await job.open();
+      job.on('open', (jobInfo: QueryJobInfoV2) => {
+        ms.goto('done', { id: jobInfo.id });
+        ms.stop();
+      });
 
-      const cache = await BulkExportRequestCache.create();
-      await cache.createCacheEntryForRequest(
-        jobInfo.id,
-        {
-          filePath: flags['output-file'],
-          format: flags['result-format'],
-          columnDelimiter: flags['column-delimiter'],
-        },
-        conn.getUsername(),
-        conn.getApiVersion()
-      );
+      ms.goto('creating query bulk job');
 
-      this.log(messages.getMessage('export.timeout', [jobInfo.id, jobInfo.id, conn.getUsername()]));
+      try {
+        const jobInfo = await job.open();
 
-      return {
-        totalSize: 0,
-        filePath: '',
-      };
+        const cache = await BulkExportRequestCache.create();
+        await cache.createCacheEntryForRequest(
+          jobInfo.id,
+          {
+            filePath: flags['output-file'],
+            format: flags['result-format'],
+            columnDelimiter: flags['column-delimiter'],
+          },
+          conn.getUsername(),
+          conn.getApiVersion()
+        );
+
+        this.log(messages.getMessage('export.timeout', [jobInfo.id, conn.getUsername()]));
+
+        return {
+          totalSize: 0,
+          filePath: '',
+        };
+      } catch (err) {
+        const error = err as Error;
+        ms.stop(error);
+        throw err;
+      }
     }
 
     const queryJob = new QueryJobV2(conn, {
@@ -154,6 +195,24 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
       },
     });
 
+    // TODO: re-enable/polish this once the bulk2 query paging bug is fixed
+    // queryJob.on('inProgress', (jobInfo: QueryJobInfoV2) => {
+    //   ms.goto('processing job', { id: jobInfo.id})
+    //   ms.stop()
+    // })
+
+    queryJob.on('error', (error: Error) => {
+      ms.stop(error);
+    });
+
+    queryJob.on('open', (jobInfo: QueryJobInfoV2) => {
+      ms.goto('processing job', {
+        id: jobInfo.id,
+      });
+    });
+
+    ms.goto('creating query bulk job');
+
     await queryJob.open();
 
     const [recordStream, jobInfo] = await getQueryStream(queryJob, flags['column-delimiter'], this.logger);
@@ -161,15 +220,17 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
     // switch stream into flowing mode
     recordStream.on('record', () => {});
 
+    ms.goto('saving records');
+
     if (flags['result-format'] === 'json') {
-      const fileStream = new JsonWritable(flags['output-file'], jobInfo.numberRecordsProcessed);
-      recordStream.pipe(fileStream);
+      await pipeline(recordStream, new JsonWritable(flags['output-file'], jobInfo.numberRecordsProcessed));
     } else {
-      const fileStream = fs.createWriteStream(flags['output-file']);
-      recordStream.stream().pipe(fileStream);
+      await pipeline(recordStream.stream(), fs.createWriteStream(flags['output-file']));
     }
 
-    this.log(ansis.bold(`${jobInfo.numberRecordsProcessed} records written to ${flags['output-file']}`));
+    ms.stop();
+
+    this.log(ansis.bold(`${jobInfo.numberRecordsProcessed} records saved to ${flags['output-file']}`));
 
     return {
       totalSize: jobInfo.numberRecordsProcessed,
