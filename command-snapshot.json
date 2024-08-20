@@ -74,10 +74,40 @@
   },
   {
     "alias": [],
+    "command": "data:export:bulk",
+    "flagAliases": [],
+    "flagChars": ["o", "q", "r", "w"],
+    "flags": [
+      "all-rows",
+      "api-version",
+      "async",
+      "column-delimiter",
+      "flags-dir",
+      "json",
+      "line-ending",
+      "output-file",
+      "query",
+      "query-file",
+      "result-format",
+      "target-org",
+      "wait"
+    ],
+    "plugin": "@salesforce/plugin-data"
+  },
+  {
+    "alias": [],
     "command": "data:export:legacy:tree",
     "flagAliases": ["apiversion", "outputdir", "targetusername", "u"],
     "flagChars": ["d", "o", "p", "q", "x"],
     "flags": ["api-version", "flags-dir", "json", "loglevel", "output-dir", "plan", "prefix", "query", "target-org"],
+    "plugin": "@salesforce/plugin-data"
+  },
+  {
+    "alias": [],
+    "command": "data:export:resume",
+    "flagAliases": [],
+    "flagChars": ["i", "o"],
+    "flags": ["api-version", "bulk-query-id", "flags-dir", "json", "target-org", "use-most-recent"],
     "plugin": "@salesforce/plugin-data"
   },
   {
