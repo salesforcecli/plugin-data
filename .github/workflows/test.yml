@@ -20,7 +20,7 @@ jobs:
       nodeVersionOverride: '22'
   nuts:
     needs: linux-unit-tests
-    uses: salesforcecli/github-workflows/.github/workflows/nut.yml@ew/input-envs
+    uses: salesforcecli/github-workflows/.github/workflows/nut.yml@main
     secrets: inherit
     strategy:
       matrix:
