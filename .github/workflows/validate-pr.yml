@@ -8,4 +8,4 @@ on:
 
 jobs:
   pr-validation:
-    uses: salesforcecli/github-workflows/.github/workflows/validatePR.yml@ew/input-envs
+    uses: salesforcecli/github-workflows/.github/workflows/validatePR.yml@main
