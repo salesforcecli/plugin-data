@@ -1,3 +1,33 @@
+## [3.6.5](https://github.com/salesforcecli/plugin-data/compare/3.6.4...3.6.5) (2024-09-01)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/core from 8.4.0 to 8.5.2 ([b13711b](https://github.com/salesforcecli/plugin-data/commit/b13711ba038732f553f7f4c3216ad737757bbc78))
+
+## [3.6.4](https://github.com/salesforcecli/plugin-data/compare/3.6.3...3.6.4) (2024-09-01)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/kit from 3.2.1 to 3.2.2 ([ef9ef14](https://github.com/salesforcecli/plugin-data/commit/ef9ef1425c5666f73438edf8adf7c5f5a4e7cc8e))
+
+## [3.6.3](https://github.com/salesforcecli/plugin-data/compare/3.6.2...3.6.3) (2024-08-25)
+
+### Bug Fixes
+
+- **deps:** bump micromatch from 4.0.5 to 4.0.8 ([3b62919](https://github.com/salesforcecli/plugin-data/commit/3b6291914fa4388ae6c8d1b1d20ed638febf374d))
+
+## [3.6.2](https://github.com/salesforcecli/plugin-data/compare/3.6.1...3.6.2) (2024-08-25)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/sf-plugins-core from 11.3.2 to 11.3.4 ([c255b08](https://github.com/salesforcecli/plugin-data/commit/c255b08bb154b5979a16a223f4452d583e43c7bd))
+
+## [3.6.1](https://github.com/salesforcecli/plugin-data/compare/3.6.0...3.6.1) (2024-08-18)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/sf-plugins-core from 11.2.4 to 11.3.2 ([64075fc](https://github.com/salesforcecli/plugin-data/commit/64075fc76e10c8cd8c9224877ce3059487e9d162))
+
 # [3.6.0](https://github.com/salesforcecli/plugin-data/compare/3.5.15...3.6.0) (2024-08-13)
 
 ### Features
