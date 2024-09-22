@@ -1,3 +1,9 @@
+## [3.6.6](https://github.com/salesforcecli/plugin-data/compare/3.6.5...3.6.6) (2024-09-22)
+
+### Bug Fixes
+
+- **search:** remove deprecated flags ([#1034](https://github.com/salesforcecli/plugin-data/issues/1034)) ([87e04f2](https://github.com/salesforcecli/plugin-data/commit/87e04f2c760363407f53837ffe85671e64a7531a))
+
 ## [3.6.5](https://github.com/salesforcecli/plugin-data/compare/3.6.4...3.6.5) (2024-09-01)
 
 ### Bug Fixes
