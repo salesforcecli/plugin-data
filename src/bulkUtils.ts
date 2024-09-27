@@ -5,11 +5,14 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { Writable } from 'node:stream';
+import { Transform, Readable, Writable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import * as fs from 'node:fs';
 import { EOL } from 'node:os';
 import { Record as SfRecord } from '@jsforce/jsforce-node';
-import type {
+import { HttpApi } from '@jsforce/jsforce-node/lib/http-api.js';
+import { HttpResponse } from '@jsforce/jsforce-node';
+import {
   JobInfoV2,
   IngestJobV2Results,
   IngestJobV2SuccessfulResults,
@@ -18,10 +21,9 @@ import type {
   QueryJobV2,
   QueryJobInfoV2,
 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
-import { Parsable } from '@jsforce/jsforce-node/lib/record-stream.js';
-
+import { Parser as csvParse } from 'csv-parse';
 import type { Schema } from '@jsforce/jsforce-node';
-import { Connection, Logger, Messages } from '@salesforce/core';
+import { Connection, Messages } from '@salesforce/core';
 import { IngestJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { SfCommand, Spinner } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
@@ -193,43 +195,51 @@ export enum ColumnDelimiter {
 
 export type ColumnDelimiterKeys = keyof typeof ColumnDelimiter;
 
-export async function getQueryStream(
-  queryJob: QueryJobV2<Schema>,
-  columnDelimiter: ColumnDelimiterKeys,
-  logger: Logger
-): Promise<[Parsable, QueryJobInfoV2]> {
-  const recordStream = new Parsable();
-  const dataStream = recordStream.stream('csv', {
-    delimiter: ColumnDelimiter[columnDelimiter],
-  });
-
-  let jobInfo: QueryJobInfoV2 | undefined;
-
-  try {
-    queryJob.on('jobComplete', (completedJob: QueryJobInfoV2) => {
-      jobInfo = completedJob;
-    });
-    await queryJob.poll();
-
-    const queryRecordsStream = await queryJob.result().then((s) => s.stream());
-    queryRecordsStream.pipe(dataStream);
-  } catch (error) {
-    const err = error as Error;
-    logger.error(`query job failed due to: ${err.message}`);
-
-    if (err.name !== 'JobPollingTimeoutError') {
-      // fires off one last attempt to clean up and ignores the result | error
-      queryJob.delete().catch((ignored: Error) => ignored);
-    }
-
-    throw err;
-  }
-  if (!jobInfo) {
-    throw messages.createError('error.noJobInfo');
-  }
-
-  return [recordStream, jobInfo];
-}
+// export async function getQueryStream(
+//   queryJob: QueryJobV2<Schema>,
+//   columnDelimiter: ColumnDelimiterKeys,
+//   logger: Logger
+// ): Promise<[Parsable, QueryJobInfoV2]> {
+//   const recordStream = new Parsable();
+//   const dataStream = recordStream.stream('csv', {
+//     delimiter: ColumnDelimiter[columnDelimiter],
+//   });
+//
+//   let jobInfo: QueryJobInfoV2 | undefined;
+//
+//   try {
+//     queryJob.on('jobComplete', (completedJob: QueryJobInfoV2) => {
+//       jobInfo = completedJob;
+//     });
+//     await queryJob.poll();
+//
+//     const queryRecordsStream = await queryJob.result().then((s) => s.stream());
+//     console.log('starting pipeline from the plugin')
+//     pipeline(queryRecordsStream, dataStream, (err) => {
+//       if (err) {
+//         throw err
+//       } else {
+//         console.log('plugin pipeline succeeded.');
+//       }
+//     })
+//     console.log('pipeline done')
+//   } catch (error) {
+//     const err = error as Error;
+//     logger.error(`query job failed due to: ${err.message}`);
+//
+//     if (err.name !== 'JobPollingTimeoutError') {
+//       // fires off one last attempt to clean up and ignores the result | error
+//       queryJob.delete().catch((ignored: Error) => ignored);
+//     }
+//
+//     throw err;
+//   }
+//   if (!jobInfo) {
+//     throw messages.createError('error.noJobInfo');
+//   }
+//
+//   return [recordStream, jobInfo];
+// }
 
 export class JsonWritable extends Writable {
   private recordsQty: number;
@@ -259,4 +269,139 @@ export class JsonWritable extends Writable {
       this.recordsWritten++;
     }
   }
+}
+
+async function bulkRequest(conn: Connection, url: string): Promise<{ body: string; headers: HttpResponse['headers'] }> {
+  const httpApi = new HttpApi(conn, {
+    responseType: 'text/plain', // this ensures jsforce doesn't try parsing the body
+  });
+
+  let headers: HttpResponse['headers'] | undefined;
+
+  httpApi.on('response', (response: HttpResponse) => {
+    headers = response.headers;
+  });
+
+  const body = await httpApi.request<string>({
+    url: conn.normalizeUrl(url),
+    method: 'GET',
+  });
+
+  if (!headers) throw new Error('failed to get HTTP headers for bulk query');
+
+  return {
+    body,
+    headers,
+  };
+}
+
+export async function exportRecords(
+  conn: Connection,
+  queryJob: QueryJobV2<Schema>,
+  outputInfo: {
+    filePath: string;
+    format: 'csv' | 'json';
+  }
+): Promise<QueryJobInfoV2> {
+  let jobInfo: QueryJobInfoV2 | undefined;
+
+  try {
+    queryJob.on('jobComplete', (completedJob: QueryJobInfoV2) => {
+      jobInfo = completedJob;
+    });
+    await queryJob.poll();
+    if (jobInfo === undefined) {
+      throw new Error('could not get job info after polling');
+    }
+  } catch (err) {
+    const error = err as Error;
+    if (error.name !== 'JobPollingTimeoutError') {
+      // fires off one last attempt to clean up and ignores the result | error
+      queryJob.delete().catch((ignored: Error) => ignored);
+    }
+
+    throw err;
+  }
+
+  let locator: string | undefined;
+
+  while (locator !== 'null') {
+    // we can't parallelize this because we:
+    // 1. need to get 1 batch to know the locator for the next one
+    // 2. merge all batches into one csv or json file
+    //
+    // eslint-disable-next-line no-await-in-loop
+    const res = await bulkRequest(
+      conn,
+      locator ? `/jobs/query/${jobInfo.id}/results?locator=${locator}` : `/jobs/query/${jobInfo.id}/results`
+    );
+
+    if (outputInfo.format === 'json') {
+      const jsonWritable = fs.createWriteStream(outputInfo.filePath, {
+        flags: 'a', // append mode
+      });
+
+      if (!locator) {
+        // first write
+        jsonWritable.write(`[${EOL}`);
+      }
+
+      // eslint-disable-next-line no-await-in-loop
+      await pipeline(
+        Readable.from(locator ? res.body.slice(res.body.indexOf(EOL) + 1) : res.body),
+        new csvParse({ columns: true }), // TODO: handle other delimitators here
+        new Transform({
+          objectMode: true,
+          // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+          transform(chunk, _encoding, callback) {
+            // TODO:
+            // handle EOL/closing json here!
+            callback(null, `  ${JSON.stringify(chunk)},${EOL}`);
+          },
+        }),
+        jsonWritable
+      );
+    } else {
+      // csv
+      // eslint-disable-next-line no-await-in-loop
+      await pipeline(
+        locator
+          ? [
+              Readable.from(res.body.slice(res.body.indexOf(EOL) + 1)),
+              fs.createWriteStream(outputInfo.filePath, {
+                flags: 'a', // append mode
+              }),
+            ]
+          : [Readable.from(res.body), fs.createWriteStream(outputInfo.filePath)]
+      );
+    }
+
+    // if (locator) {
+    //   // eslint-disable-next-line no-await-in-loop
+    //   await pipeline(
+    //     // strip the first line (CSV header) of the batches
+    //     Readable.from(res.body.slice(res.body.indexOf(EOL) + 1)),
+    //     fs.createWriteStream(outputInfo.filePath, {
+    //       flags: 'a', // append mode
+    //     })
+    //   );
+    // } else {
+    //   // first batch, include CSV header
+    //   // eslint-disable-next-line no-await-in-loop
+    //   if (outputInfo.format == 'csv') {
+    //     await pipeline(Readable.from(res.body), fs.createWriteStream(outputInfo.filePath));
+    //   } else {
+    //     await pipeline(
+    //       Readable.from(res.body),
+    //       new csvParse({ columns: true }),
+    //       new JsonWritable(outputInfo.filePath, 248_783)
+    //     );
+    //   }
+    // }
+
+    locator = res.headers['sforce-locator'];
+    // locator = 'null';
+  }
+
+  return jobInfo;
 }

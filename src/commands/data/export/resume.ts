@@ -5,13 +5,13 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import * as fs from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Logger, Messages } from '@salesforce/core';
 import { QueryJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import ansis from 'ansis';
 import { BulkExportRequestCache } from '../../../bulkDataRequestCache.js';
-import { getQueryStream, JsonWritable } from '../../../bulkUtils.js';
+import { exportRecords } from '../../../bulkUtils.js';
+// import { getQueryStream, JsonWritable } from '../../../bulkUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'data.export.resume');
@@ -48,6 +48,7 @@ export default class DataExportResume extends SfCommand<DataExportResumeResult> 
     const { flags } = await this.parse(DataExportResume);
 
     this.logger = await Logger.child('data:export:resume');
+    this.logger.debug('wooho');
 
     const cache = await BulkExportRequestCache.create();
 
@@ -67,18 +68,7 @@ export default class DataExportResume extends SfCommand<DataExportResumeResult> 
       },
     });
 
-    const [recordStream, jobInfo] = await getQueryStream(queryJob, resumeOpts.outputInfo.columnDelimiter, this.logger);
-
-    // switch stream into flowing mode
-    recordStream.on('record', () => {});
-
-    if (resumeOpts.outputInfo.format === 'json') {
-      const fileStream = new JsonWritable(resumeOpts.outputInfo.filePath, jobInfo.numberRecordsProcessed);
-      recordStream.pipe(fileStream);
-    } else {
-      const fileStream = fs.createWriteStream(resumeOpts.outputInfo.filePath);
-      recordStream.stream().pipe(fileStream);
-    }
+    const jobInfo = await exportRecords(resumeOpts.options.connection, queryJob, resumeOpts.outputInfo);
 
     this.log(ansis.bold(`${jobInfo.numberRecordsProcessed} records written to ${resumeOpts.outputInfo.filePath}`));
 

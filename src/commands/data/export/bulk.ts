@@ -7,16 +7,14 @@
 
 import * as fs from 'node:fs';
 import { platform } from 'node:os';
-import { pipeline } from 'node:stream/promises';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Logger, Messages, Org } from '@salesforce/core';
+import { Messages, Org } from '@salesforce/core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import terminalLink from 'terminal-link';
 import { QueryJobInfoV2, QueryJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { Duration } from '@salesforce/kit';
-import ansis from 'ansis';
 import { BulkExportRequestCache } from '../../../bulkDataRequestCache.js';
-import { getQueryStream, JsonWritable } from '../../../bulkUtils.js';
+import { exportRecords } from '../../../bulkUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'data.export.bulk');
@@ -91,12 +89,12 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
     })(),
   };
 
-  private logger!: Logger;
+  // private logger!: Logger;
 
   public async run(): Promise<DataExportBulkResult> {
     const { flags } = await this.parse(DataExportBulk);
 
-    this.logger = await Logger.child('data:export:bulk');
+    // this.logger = await Logger.child('data:export:bulk');
 
     const conn = flags['target-org'].getConnection(flags['api-version']);
 
@@ -195,12 +193,6 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
       },
     });
 
-    // TODO: re-enable/polish this once the bulk2 query paging bug is fixed
-    // queryJob.on('inProgress', (jobInfo: QueryJobInfoV2) => {
-    //   ms.goto('processing job', { id: jobInfo.id})
-    //   ms.stop()
-    // })
-
     queryJob.on('error', (error: Error) => {
       ms.stop(error);
     });
@@ -215,22 +207,14 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
 
     await queryJob.open();
 
-    const [recordStream, jobInfo] = await getQueryStream(queryJob, flags['column-delimiter'], this.logger);
-
-    // switch stream into flowing mode
-    recordStream.on('record', () => {});
-
     ms.goto('saving records');
 
-    if (flags['result-format'] === 'json') {
-      await pipeline(recordStream, new JsonWritable(flags['output-file'], jobInfo.numberRecordsProcessed));
-    } else {
-      await pipeline(recordStream.stream(), fs.createWriteStream(flags['output-file']));
-    }
+    const jobInfo = await exportRecords(conn, queryJob, {
+      filePath: flags['output-file'],
+      format: flags['result-format'],
+    });
 
     ms.stop();
-
-    this.log(ansis.bold(`${jobInfo.numberRecordsProcessed} records saved to ${flags['output-file']}`));
 
     return {
       totalSize: jobInfo.numberRecordsProcessed,
