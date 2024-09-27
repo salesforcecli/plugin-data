@@ -325,6 +325,8 @@ export async function exportRecords(
 
   let locator: string | undefined;
 
+  let recordsWritten = 0;
+
   while (locator !== 'null') {
     // we can't parallelize this because we:
     // 1. need to get 1 batch to know the locator for the next one
@@ -338,25 +340,30 @@ export async function exportRecords(
 
     if (outputInfo.format === 'json') {
       const jsonWritable = fs.createWriteStream(outputInfo.filePath, {
-        flags: 'a', // append mode
+        flags: 'a', // append mode. TODO: maybe make this append + fail if path exists?
       });
 
+      const totalRecords = jobInfo.numberRecordsProcessed;
+
       if (!locator) {
-        // first write
+        // first write, start JSON array
         jsonWritable.write(`[${EOL}`);
       }
 
       // eslint-disable-next-line no-await-in-loop
       await pipeline(
-        Readable.from(locator ? res.body.slice(res.body.indexOf(EOL) + 1) : res.body),
+        Readable.from(res.body),
         new csvParse({ columns: true }), // TODO: handle other delimitators here
         new Transform({
           objectMode: true,
           // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
           transform(chunk, _encoding, callback) {
-            // TODO:
-            // handle EOL/closing json here!
-            callback(null, `  ${JSON.stringify(chunk)},${EOL}`);
+            if (recordsWritten === totalRecords - 1) {
+              callback(null, `  ${JSON.stringify(chunk)}${EOL}]`);
+            } else {
+              recordsWritten++;
+              callback(null, `  ${JSON.stringify(chunk)},${EOL}`);
+            }
           },
         }),
         jsonWritable
@@ -376,31 +383,7 @@ export async function exportRecords(
       );
     }
 
-    // if (locator) {
-    //   // eslint-disable-next-line no-await-in-loop
-    //   await pipeline(
-    //     // strip the first line (CSV header) of the batches
-    //     Readable.from(res.body.slice(res.body.indexOf(EOL) + 1)),
-    //     fs.createWriteStream(outputInfo.filePath, {
-    //       flags: 'a', // append mode
-    //     })
-    //   );
-    // } else {
-    //   // first batch, include CSV header
-    //   // eslint-disable-next-line no-await-in-loop
-    //   if (outputInfo.format == 'csv') {
-    //     await pipeline(Readable.from(res.body), fs.createWriteStream(outputInfo.filePath));
-    //   } else {
-    //     await pipeline(
-    //       Readable.from(res.body),
-    //       new csvParse({ columns: true }),
-    //       new JsonWritable(outputInfo.filePath, 248_783)
-    //     );
-    //   }
-    // }
-
     locator = res.headers['sforce-locator'];
-    // locator = 'null';
   }
 
   return jobInfo;
