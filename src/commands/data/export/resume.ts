@@ -7,11 +7,10 @@
 
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Logger, Messages } from '@salesforce/core';
-import { QueryJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
-import ansis from 'ansis';
+import { QueryJobInfoV2, QueryJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
+import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { BulkExportRequestCache } from '../../../bulkDataRequestCache.js';
 import { exportRecords } from '../../../bulkUtils.js';
-// import { getQueryStream, JsonWritable } from '../../../bulkUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'data.export.resume');
@@ -68,9 +67,30 @@ export default class DataExportResume extends SfCommand<DataExportResumeResult> 
       },
     });
 
+    const ms = new MultiStageOutput<QueryJobInfoV2>({
+      title: 'Exporting data',
+      jsonEnabled: flags.json ?? false,
+      stages: ['checking query job status', 'exporting records'],
+      stageSpecificBlock: [
+        {
+          get: (data) => data?.state,
+          label: 'Status',
+          stage: 'checking query job status',
+          type: 'dynamic-key-value',
+        },
+      ],
+    });
+    ms.goto('checking query job status');
+
+    queryJob.on('jobComplete', (jobInfo: QueryJobInfoV2) => {
+      ms.goto('exporting records', { state: jobInfo.state });
+    });
+
     const jobInfo = await exportRecords(resumeOpts.options.connection, queryJob, resumeOpts.outputInfo);
 
-    this.log(ansis.bold(`${jobInfo.numberRecordsProcessed} records written to ${resumeOpts.outputInfo.filePath}`));
+    ms.stop();
+
+    this.log(`${jobInfo.numberRecordsProcessed} records written to ${resumeOpts.outputInfo.filePath}`);
 
     return {
       totalSize: jobInfo.numberRecordsProcessed,
