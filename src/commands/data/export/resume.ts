@@ -26,7 +26,6 @@ export default class DataExportResume extends SfCommand<DataExportResumeResult> 
   public static readonly examples = messages.getMessages('examples');
 
   public static readonly flags = {
-    'target-org': Flags.requiredOrg(),
     'bulk-query-id': Flags.salesforceId({
       length: 18,
       char: 'i',
