@@ -301,6 +301,7 @@ export async function exportRecords(
   outputInfo: {
     filePath: string;
     format: 'csv' | 'json';
+    columnDelimiter: ColumnDelimiterKeys;
   }
 ): Promise<QueryJobInfoV2> {
   let jobInfo: QueryJobInfoV2 | undefined;
@@ -353,7 +354,7 @@ export async function exportRecords(
       // eslint-disable-next-line no-await-in-loop
       await pipeline(
         Readable.from(res.body),
-        new csvParse({ columns: true }), // TODO: handle other delimitators here
+        new csvParse({ columns: true, delimiter: ColumnDelimiter[outputInfo.columnDelimiter] }),
         new Transform({
           objectMode: true,
           // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
