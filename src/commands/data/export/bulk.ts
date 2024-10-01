@@ -70,6 +70,18 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
       options: ['BACKQUOTE', 'CARET', 'COMMA', 'PIPE', 'SEMICOLON', 'TAB'] as const,
       default: 'COMMA',
       summary: messages.getMessage('flags.column-delimiter.summary'),
+      relationships: [
+        {
+          type: 'some',
+          flags: [
+            {
+              name: 'result-format',
+              // eslint-disable-next-line @typescript-eslint/require-await
+              when: async (flags): Promise<boolean> => flags['result-format'] === 'csv',
+            },
+          ],
+        },
+      ]
     })(),
     'line-ending': Flags.option({
       summary: messages.getMessage('flags.line-ending.summary'),
@@ -212,6 +224,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
     const jobInfo = await exportRecords(conn, queryJob, {
       filePath: flags['output-file'],
       format: flags['result-format'],
+      columnDelimiter: flags['column-delimiter']
     });
 
     ms.stop();
