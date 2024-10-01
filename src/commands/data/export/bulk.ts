@@ -68,7 +68,6 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
     })(),
     'column-delimiter': Flags.option({
       options: ['BACKQUOTE', 'CARET', 'COMMA', 'PIPE', 'SEMICOLON', 'TAB'] as const,
-      default: 'COMMA',
       summary: messages.getMessage('flags.column-delimiter.summary'),
       relationships: [
         {
@@ -81,7 +80,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
             },
           ],
         },
-      ]
+      ],
     })(),
     'line-ending': Flags.option({
       summary: messages.getMessage('flags.line-ending.summary'),
@@ -117,6 +116,8 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
 
     const lineEnding = flags['line-ending'] ?? platform() === 'win32' ? 'CRLF' : 'LF';
 
+    const columnDelimiter = flags['column-delimiter'] ?? 'COMMA';
+
     const async = timeout.milliseconds === 0;
 
     const baseUrl = flags['target-org'].getField<string>(Org.Fields.INSTANCE_URL).toString();
@@ -124,10 +125,16 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
     const ms = new MultiStageOutput<QueryJobInfoV2>({
       jsonEnabled: flags.json ?? false,
       stages: async
-        ? ['creating query bulk job', 'done']
-        : ['creating query bulk job', 'processing job', 'saving records'],
+        ? ['creating query job', 'done']
+        : ['creating query job', 'processing the job', 'exporting records'],
       title: async ? 'Exporting data (async)' : 'Exporting data',
       postStagesBlock: [
+        {
+          label: 'Status',
+          type: 'dynamic-key-value',
+          bold: true,
+          get: (data) => data?.state,
+        },
         {
           label: 'Job Id',
           type: 'dynamic-key-value',
@@ -148,7 +155,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
         bodyParams: {
           query: soqlQuery,
           operation: flags['all-rows'] ? 'queryAll' : 'query',
-          columnDelimiter: flags['column-delimiter'],
+          columnDelimiter,
           lineEnding,
         },
         pollingOptions: {
@@ -162,7 +169,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
         ms.stop();
       });
 
-      ms.goto('creating query bulk job');
+      ms.goto('creating query job');
 
       try {
         const jobInfo = await job.open();
@@ -173,7 +180,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
           {
             filePath: flags['output-file'],
             format: flags['result-format'],
-            columnDelimiter: flags['column-delimiter'],
+            columnDelimiter,
           },
           conn.getUsername(),
           conn.getApiVersion()
@@ -210,24 +217,29 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
     });
 
     queryJob.on('open', (jobInfo: QueryJobInfoV2) => {
-      ms.goto('processing job', {
+      ms.goto('processing the job', {
+        state: jobInfo.state,
         id: jobInfo.id,
       });
     });
 
-    ms.goto('creating query bulk job');
+    ms.goto('creating query job');
+
+    queryJob.on('jobComplete', (jobInfo: QueryJobInfoV2) => {
+      ms.goto('exporting records', { state: jobInfo.state });
+    });
 
     await queryJob.open();
-
-    ms.goto('saving records');
 
     const jobInfo = await exportRecords(conn, queryJob, {
       filePath: flags['output-file'],
       format: flags['result-format'],
-      columnDelimiter: flags['column-delimiter']
+      columnDelimiter,
     });
 
     ms.stop();
+
+    this.log(`${jobInfo.numberRecordsProcessed} records written to ${flags['output-file']}`);
 
     return {
       totalSize: jobInfo.numberRecordsProcessed,
