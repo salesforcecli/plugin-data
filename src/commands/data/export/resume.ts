@@ -6,7 +6,7 @@
  */
 
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Logger, Messages } from '@salesforce/core';
+import { Messages } from '@salesforce/core';
 import { QueryJobInfoV2, QueryJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { BulkExportRequestCache } from '../../../bulkDataRequestCache.js';
@@ -40,13 +40,8 @@ export default class DataExportResume extends SfCommand<DataExportResumeResult> 
     'api-version': Flags.orgApiVersion(),
   };
 
-  private logger!: Logger;
-
   public async run(): Promise<DataExportResumeResult> {
     const { flags } = await this.parse(DataExportResume);
-
-    this.logger = await Logger.child('data:export:resume');
-    this.logger.debug('wooho');
 
     const cache = await BulkExportRequestCache.create();
 
@@ -85,15 +80,21 @@ export default class DataExportResume extends SfCommand<DataExportResumeResult> 
       ms.goto('exporting records', { state: jobInfo.state });
     });
 
-    const jobInfo = await exportRecords(resumeOpts.options.connection, queryJob, resumeOpts.outputInfo);
+    try {
+      const jobInfo = await exportRecords(resumeOpts.options.connection, queryJob, resumeOpts.outputInfo);
 
-    ms.stop();
+      ms.stop();
 
-    this.log(`${jobInfo.numberRecordsProcessed} records written to ${resumeOpts.outputInfo.filePath}`);
+      this.log(`${jobInfo.numberRecordsProcessed} records written to ${resumeOpts.outputInfo.filePath}`);
 
-    return {
-      totalSize: jobInfo.numberRecordsProcessed,
-      filePath: resumeOpts.outputInfo.filePath,
-    };
+      return {
+        totalSize: jobInfo.numberRecordsProcessed,
+        filePath: resumeOpts.outputInfo.filePath,
+      };
+    } catch (err) {
+      const error = err as Error;
+      ms.stop(error);
+      throw error;
+    }
   }
 }

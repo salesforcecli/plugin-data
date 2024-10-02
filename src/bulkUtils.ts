@@ -306,22 +306,14 @@ export async function exportRecords(
 ): Promise<QueryJobInfoV2> {
   let jobInfo: QueryJobInfoV2 | undefined;
 
-  try {
-    queryJob.on('jobComplete', (completedJob: QueryJobInfoV2) => {
-      jobInfo = completedJob;
-    });
-    await queryJob.poll();
-    if (jobInfo === undefined) {
-      throw new Error('could not get job info after polling');
-    }
-  } catch (err) {
-    const error = err as Error;
-    if (error.name !== 'JobPollingTimeoutError') {
-      // fires off one last attempt to clean up and ignores the result | error
-      queryJob.delete().catch((ignored: Error) => ignored);
-    }
+  queryJob.on('jobComplete', (completedJob: QueryJobInfoV2) => {
+    jobInfo = completedJob;
+  });
 
-    throw err;
+  await queryJob.poll();
+
+  if (jobInfo === undefined) {
+    throw new Error('could not get job info after polling');
   }
 
   let locator: string | undefined;

@@ -164,6 +164,11 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
         },
       });
 
+      job.on('error', (err) => {
+        ms.stop(err as Error);
+        throw err;
+      });
+
       job.on('open', (jobInfo: QueryJobInfoV2) => {
         ms.goto('done', { id: jobInfo.id });
         ms.stop();
@@ -231,19 +236,25 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
 
     await queryJob.open();
 
-    const jobInfo = await exportRecords(conn, queryJob, {
-      filePath: flags['output-file'],
-      format: flags['result-format'],
-      columnDelimiter,
-    });
+    try {
+      const jobInfo = await exportRecords(conn, queryJob, {
+        filePath: flags['output-file'],
+        format: flags['result-format'],
+        columnDelimiter,
+      });
 
-    ms.stop();
+      ms.stop();
 
-    this.log(`${jobInfo.numberRecordsProcessed} records written to ${flags['output-file']}`);
+      this.log(`${jobInfo.numberRecordsProcessed} records written to ${flags['output-file']}`);
 
-    return {
-      totalSize: jobInfo.numberRecordsProcessed,
-      filePath: flags['output-file'],
-    };
+      return {
+        totalSize: jobInfo.numberRecordsProcessed,
+        filePath: flags['output-file'],
+      };
+    } catch (err) {
+      const error = err as Error;
+      ms.stop(error);
+      throw error;
+    }
   }
 }
