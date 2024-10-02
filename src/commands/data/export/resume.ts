@@ -70,12 +70,12 @@ export default class DataExportResume extends SfCommand<DataExportResumeResult> 
       title: 'Exporting data',
       jsonEnabled: flags.json ?? false,
       stages: ['checking query job status', 'exporting records'],
-      stageSpecificBlock: [
+      postStagesBlock: [
         {
-          get: (data) => data?.state,
           label: 'Status',
-          stage: 'checking query job status',
           type: 'dynamic-key-value',
+          bold: true,
+          get: (data) => data?.state,
         },
       ],
     });
