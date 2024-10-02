@@ -106,8 +106,8 @@
     "alias": [],
     "command": "data:export:resume",
     "flagAliases": [],
-    "flagChars": ["i", "o"],
-    "flags": ["api-version", "bulk-query-id", "flags-dir", "json", "target-org", "use-most-recent"],
+    "flagChars": ["i"],
+    "flags": ["api-version", "bulk-query-id", "flags-dir", "json", "use-most-recent"],
     "plugin": "@salesforce/plugin-data"
   },
   {
