@@ -89,7 +89,10 @@ describe('data export bulk NUTs', () => {
         session.dir,
         'data-project',
         outputFile
-      )}`
+      )}`,
+      {
+        shell: 'pwsh',
+      }
     );
     expect(res.stdout.trim()).equal('true');
   });
