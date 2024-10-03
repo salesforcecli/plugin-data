@@ -45,7 +45,7 @@ describe('data export bulk NUTs', () => {
       }
     );
 
-    totalAccountRecords = execCmd<{ totalSize: number }>("data query -q 'select count() from account' --json", {
+    totalAccountRecords = execCmd<{ totalSize: number }>('data query -q "select count() from account" --json', {
       ensureExitCode: 0,
       cli: 'sf',
     }).jsonOutput?.result.totalSize;
