@@ -191,7 +191,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
           conn.getApiVersion()
         );
 
-        this.log(messages.getMessage('export.timeout', [jobInfo.id, conn.getUsername()]));
+        this.log(messages.getMessage('export.timeout', [jobInfo.id]));
 
         return {
           totalSize: 0,
