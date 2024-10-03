@@ -85,7 +85,11 @@ describe('data export bulk NUTs', () => {
     expect(result.filePath).to.equal(outputFile);
 
     const res = await exec(
-      `jq 'map(has("Id") and has("Name") and has("Phone") and has("AnnualRevenue")) | all' ${outputFile}`
+      `jq 'map(has("Id") and has("Name") and has("Phone") and has("AnnualRevenue")) | all' ${path.join(
+        session.dir,
+        'data-project',
+        outputFile
+      )}`
     );
     expect(res.stdout.trim()).equal('true');
   });
