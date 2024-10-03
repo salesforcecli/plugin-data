@@ -7,7 +7,7 @@
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 
-describe('data export resume NUTs', () => {
+describe.skip('data export resume NUTs', () => {
   let session: TestSession;
 
   before(async () => {

@@ -69,7 +69,7 @@ describe('data export bulk NUTs', () => {
     expect(result.totalSize).to.equal(totalAccountRecords);
     expect(result.filePath).to.equal(outputFile);
 
-    await validateCsv(result.filePath, result.totalSize);
+    await validateCsv(path.join(session.dir, 'data-project', outputFile), result.totalSize);
   });
 
   it('should export records in json format', async () => {

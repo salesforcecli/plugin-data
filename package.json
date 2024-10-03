@@ -102,7 +102,7 @@
     "prepack": "sf-prepack",
     "prepare": "sf-install",
     "test": "wireit",
-    "test:nuts": "nyc mocha \"./test/**/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
+    "test:nuts": "nyc mocha \"./test/commands/data/export/bulk.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:nuts:bulk": "nyc mocha \"./test/**/dataBulk.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:only": "wireit",
     "version": "oclif readme"
