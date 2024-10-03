@@ -59,7 +59,7 @@ describe('data export bulk NUTs', () => {
 
   it('should export records in csv format', async () => {
     const outputFile = 'export-accounts.csv';
-    const command = `data export bulk -q '${soqlQuery}' --output-file ${outputFile} --wait 10 --json`;
+    const command = `data export bulk -q "${soqlQuery}" --output-file ${outputFile} --wait 10 --json`;
 
     // about the type assertion at the end:
     // I'm passing `--json` in and `ensureExitCode: 0` so I should always have a JSON result.
@@ -74,7 +74,7 @@ describe('data export bulk NUTs', () => {
 
   it('should export records in json format', async () => {
     const outputFile = 'export-accounts.json';
-    const command = `data export bulk -q '${soqlQuery}' --output-file ${outputFile} --wait 10 --result-format json --json`;
+    const command = `data export bulk -q "${soqlQuery}" --output-file ${outputFile} --wait 10 --result-format json --json`;
 
     // about the type assertion at the end:
     // I'm passing `--json` in and `ensureExitCode: 0` so I should always have a JSON result.
