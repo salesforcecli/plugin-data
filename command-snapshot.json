@@ -214,9 +214,9 @@
   {
     "alias": [],
     "command": "data:search",
-    "flagAliases": ["apiversion", "resultformat", "targetusername", "u"],
+    "flagAliases": [],
     "flagChars": ["f", "o", "q", "r"],
-    "flags": ["api-version", "file", "flags-dir", "json", "loglevel", "query", "result-format", "target-org"],
+    "flags": ["api-version", "file", "flags-dir", "json", "query", "result-format", "target-org"],
     "plugin": "@salesforce/plugin-data"
   },
   {

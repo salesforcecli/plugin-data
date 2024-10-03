@@ -25,6 +25,7 @@ describe('data create file NUTs', () => {
     // create one record in the org that we'll use to attach stuff to
     acctId = execCmd<SaveResult>('data:create:record -s Account -v "Name=TestAccount" --json', {
       ensureExitCode: 0,
+      cli: 'sf',
     }).jsonOutput?.result.id;
     expect(acctId).to.be.a('string');
     // make a file we can upload
