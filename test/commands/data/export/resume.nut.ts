@@ -72,7 +72,11 @@ describe('data export resume NUTs', () => {
     expect(exportResumeResult.totalSize).to.be.equal(totalAccountRecords);
     expect(exportResumeResult.filePath).to.equal(outputFile);
 
-    await validateCsv(path.join(session.dir, 'data-project', outputFile), ensureNumber(exportAsyncResult.totalSize));
+    await validateCsv(
+      path.join(session.dir, 'data-project', outputFile),
+      'COMMA',
+      ensureNumber(exportAsyncResult.totalSize)
+    );
   });
 
   it('should resume export in json format', async () => {

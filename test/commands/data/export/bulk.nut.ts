@@ -63,7 +63,7 @@ describe('data export bulk NUTs', () => {
     expect(result.totalSize).to.equal(totalAccountRecords);
     expect(result.filePath).to.equal(outputFile);
 
-    await validateCsv(path.join(session.dir, 'data-project', outputFile), ensureNumber(result.totalSize));
+    await validateCsv(path.join(session.dir, 'data-project', outputFile), 'COMMA', ensureNumber(result.totalSize));
   });
 
   it('should export records in csv format with PIPE delimiter', async () => {
@@ -78,7 +78,7 @@ describe('data export bulk NUTs', () => {
     expect(result.totalSize).to.equal(totalAccountRecords);
     expect(result.filePath).to.equal(outputFile);
 
-    await validateCsv(path.join(session.dir, 'data-project', outputFile), ensureNumber(result.totalSize));
+    await validateCsv(path.join(session.dir, 'data-project', outputFile), 'PIPE', ensureNumber(result.totalSize));
   });
 
   it('should export records in json format', async () => {

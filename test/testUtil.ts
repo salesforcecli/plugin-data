@@ -16,6 +16,7 @@ import { Connection } from '@salesforce/core';
 import type { QueryResult, SaveResult, UpsertResult, UserInfo } from '@jsforce/jsforce-node';
 import { expect } from 'chai';
 import { Parser as csvParse } from 'csv-parse';
+import { ColumnDelimiterKeys, ColumnDelimiter } from '../src/bulkUtils.js';
 import EventEmitter = NodeJS.EventEmitter;
 
 const exec = promisify(execSync);
@@ -165,13 +166,17 @@ export const createFakeConnection = function (): Connection {
 /**
  * Validate that a CSV file has X records
  */
-export async function validateCsv(filePath: string, totalQty: number): Promise<void> {
+export async function validateCsv(
+  filePath: string,
+  columnDelimiter: ColumnDelimiterKeys,
+  totalQty: number
+): Promise<void> {
   const csvReadStream = fs.createReadStream(filePath);
   let recordCount = 0;
 
   await pipeline(
     csvReadStream,
-    new csvParse({ columns: true }),
+    new csvParse({ columns: true, delimiter: ColumnDelimiter[columnDelimiter] }),
     new PassThrough({
       objectMode: true,
       transform(_chunk, _encoding, callback) {
@@ -206,5 +211,5 @@ export async function validateJson(filePath: string, totalqty: number): Promise<
   // check all records were written
   const lengthRes = await exec(`jq length ${filePath}`, { shell: 'pwsh' });
 
-  expect(lengthRes.stdout.trim()).equal(totalqty);
+  expect(parseInt(lengthRes.stdout.trim(), 10)).equal(totalqty);
 }
