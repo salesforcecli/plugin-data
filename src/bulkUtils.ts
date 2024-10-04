@@ -5,11 +5,10 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { Transform, Readable, Writable } from 'node:stream';
+import { Transform, Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import * as fs from 'node:fs';
 import { EOL } from 'node:os';
-import { Record as SfRecord } from '@jsforce/jsforce-node';
 import { HttpApi } from '@jsforce/jsforce-node/lib/http-api.js';
 import { HttpResponse } from '@jsforce/jsforce-node';
 import {
@@ -194,82 +193,6 @@ export enum ColumnDelimiter {
 }
 
 export type ColumnDelimiterKeys = keyof typeof ColumnDelimiter;
-
-// export async function getQueryStream(
-//   queryJob: QueryJobV2<Schema>,
-//   columnDelimiter: ColumnDelimiterKeys,
-//   logger: Logger
-// ): Promise<[Parsable, QueryJobInfoV2]> {
-//   const recordStream = new Parsable();
-//   const dataStream = recordStream.stream('csv', {
-//     delimiter: ColumnDelimiter[columnDelimiter],
-//   });
-//
-//   let jobInfo: QueryJobInfoV2 | undefined;
-//
-//   try {
-//     queryJob.on('jobComplete', (completedJob: QueryJobInfoV2) => {
-//       jobInfo = completedJob;
-//     });
-//     await queryJob.poll();
-//
-//     const queryRecordsStream = await queryJob.result().then((s) => s.stream());
-//     console.log('starting pipeline from the plugin')
-//     pipeline(queryRecordsStream, dataStream, (err) => {
-//       if (err) {
-//         throw err
-//       } else {
-//         console.log('plugin pipeline succeeded.');
-//       }
-//     })
-//     console.log('pipeline done')
-//   } catch (error) {
-//     const err = error as Error;
-//     logger.error(`query job failed due to: ${err.message}`);
-//
-//     if (err.name !== 'JobPollingTimeoutError') {
-//       // fires off one last attempt to clean up and ignores the result | error
-//       queryJob.delete().catch((ignored: Error) => ignored);
-//     }
-//
-//     throw err;
-//   }
-//   if (!jobInfo) {
-//     throw messages.createError('error.noJobInfo');
-//   }
-//
-//   return [recordStream, jobInfo];
-// }
-
-export class JsonWritable extends Writable {
-  private recordsQty: number;
-  private recordsWritten = 0;
-  private filePath: fs.PathLike;
-  private fileStream!: fs.WriteStream;
-
-  public constructor(filePath: fs.PathLike, recordsQty: number) {
-    super({ objectMode: true });
-    this.recordsQty = recordsQty;
-    this.filePath = filePath;
-  }
-
-  public _construct(callback: () => void): void {
-    this.fileStream = fs.createWriteStream(this.filePath);
-    this.fileStream.write(`[${EOL}`);
-    callback();
-  }
-
-  public _write(chunk: SfRecord, encoding: BufferEncoding, callback: () => void): void {
-    if (this.recordsQty - 1 === this.recordsWritten) {
-      // last record, close JSON array
-      this.fileStream.write(`  ${JSON.stringify(chunk)}${EOL}]`, encoding, callback);
-      this.fileStream.end();
-    } else {
-      this.fileStream.write(`  ${JSON.stringify(chunk)},${EOL}`, encoding, callback);
-      this.recordsWritten++;
-    }
-  }
-}
 
 async function bulkRequest(conn: Connection, url: string): Promise<{ body: string; headers: HttpResponse['headers'] }> {
   const httpApi = new HttpApi(conn, {
