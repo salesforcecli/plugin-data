@@ -8,7 +8,7 @@ import path from 'node:path';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 import { ensureNumber } from '@salesforce/ts-types';
-import { validateCsv, validateJson } from 'test/testUtil.js';
+import { validateCsv, validateJson } from '../../../testUtil.js';
 import { DataExportBulkResult } from '../../../../src/commands/data/export/bulk.js';
 import { DataExportResumeResult } from '../../../../src/commands/data/export/resume.js';
 
