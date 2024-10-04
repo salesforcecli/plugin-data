@@ -36,6 +36,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
     wait: Flags.duration({
       summary: messages.getMessage('flags.wait.summary'),
       char: 'w',
+      helpValue: '<minutes>',
       unit: 'minutes',
       exclusive: ['async'],
     }),
