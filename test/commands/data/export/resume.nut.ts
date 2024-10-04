@@ -75,7 +75,7 @@ describe('data export resume NUTs', () => {
     await validateCsv(
       path.join(session.dir, 'data-project', outputFile),
       'COMMA',
-      ensureNumber(exportAsyncResult.totalSize)
+      ensureNumber(exportResumeResult.totalSize)
     );
   });
 

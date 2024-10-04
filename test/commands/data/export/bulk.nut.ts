@@ -51,7 +51,7 @@ describe('data export bulk NUTs', () => {
 
   const soqlQuery = 'select id,name,phone, annualrevenue from account';
 
-  it.only('should export records in csv format', async () => {
+  it('should export records in csv format', async () => {
     const outputFile = 'export-accounts.csv';
     const command = `data export bulk -q "${soqlQuery}" --output-file ${outputFile} --wait 10 --json`;
 
