@@ -172,7 +172,6 @@ You can safely remove \`--async\` (it never had any effect on the command withou
         (await bulk2.query(query, {
           pollTimeout: timeout.milliseconds ?? Duration.minutes(5).milliseconds,
           pollInterval: 5000,
-          columnDelimiter: 'PIPE',
           ...(allRows ? { scanAll: true } : {}),
         })) ?? [];
       return transformBulkResults((await res.toArray()) as jsforceRecord[], query);
