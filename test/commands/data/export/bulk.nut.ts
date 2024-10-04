@@ -66,6 +66,21 @@ describe('data export bulk NUTs', () => {
     await validateCsv(path.join(session.dir, 'data-project', outputFile), ensureNumber(result.totalSize));
   });
 
+  it('should export records in csv format with PIPE delimiter', async () => {
+    const outputFile = 'export-accounts.csv';
+    const command = `data export bulk -q "${soqlQuery}" --output-file ${outputFile} --wait 10 --column-delimiter PIPE --json`;
+
+    // about the type assertion at the end:
+    // I'm passing `--json` in and `ensureExitCode: 0` so I should always have a JSON result.
+    const result = execCmd<DataExportBulkResult>(command, { ensureExitCode: 0 }).jsonOutput
+      ?.result as DataExportBulkResult;
+
+    expect(result.totalSize).to.equal(totalAccountRecords);
+    expect(result.filePath).to.equal(outputFile);
+
+    await validateCsv(path.join(session.dir, 'data-project', outputFile), ensureNumber(result.totalSize));
+  });
+
   it('should export records in json format', async () => {
     const outputFile = 'export-accounts.json';
     const command = `data export bulk -q "${soqlQuery}" --output-file ${outputFile} --wait 10 --result-format json --json`;
