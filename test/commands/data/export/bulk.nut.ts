@@ -51,7 +51,7 @@ describe('data export bulk NUTs', () => {
 
   const soqlQuery = 'select id,name,phone, annualrevenue from account';
 
-  it('should export records in csv format', async () => {
+  it.only('should export records in csv format', async () => {
     const outputFile = 'export-accounts.csv';
     const command = `data export bulk -q "${soqlQuery}" --output-file ${outputFile} --wait 10 --json`;
 
@@ -59,6 +59,11 @@ describe('data export bulk NUTs', () => {
     // I'm passing `--json` in and `ensureExitCode: 0` so I should always have a JSON result.
     const result = execCmd<DataExportBulkResult>(command, { ensureExitCode: 0 }).jsonOutput
       ?.result as DataExportBulkResult;
+
+    // eslint-disable-next-line no-console
+    console.log(`result.totalSize: ${result.totalSize}`);
+    // eslint-disable-next-line no-console
+    console.log(`result.totalSize typeof: ${typeof result.totalSize}`);
 
     expect(result.totalSize).to.equal(totalAccountRecords);
     expect(result.filePath).to.equal(outputFile);
