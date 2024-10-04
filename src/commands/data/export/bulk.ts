@@ -20,7 +20,8 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'data.export.bulk');
 
 export type DataExportBulkResult = {
-  totalSize: number;
+  jobId?: string;
+  totalSize?: number;
   filePath: string;
 };
 
@@ -194,8 +195,8 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
         this.log(messages.getMessage('export.timeout', [jobInfo.id]));
 
         return {
-          totalSize: 0,
-          filePath: '',
+          jobId: jobInfo.id,
+          filePath: flags['output-file'],
         };
       } catch (err) {
         const error = err as Error;

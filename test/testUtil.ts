@@ -4,11 +4,21 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+import * as fs from 'node:fs';
+import { PassThrough, Writable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+import { promisify } from 'node:util';
+import { exec as execSync } from 'node:child_process';
+import { Connection } from '@salesforce/core';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { QueryResult, SaveResult, UpsertResult, UserInfo } from '@jsforce/jsforce-node';
-import { Connection } from '@salesforce/core';
+import { expect } from 'chai';
+import { Parser as csvParse } from 'csv-parse';
 import EventEmitter = NodeJS.EventEmitter;
+
+const exec = promisify(execSync);
 
 // needs an external _listeners object since its not included in the type definition
 /* eslint-disable @typescript-eslint/no-unsafe-return,@typescript-eslint/ban-types */
@@ -152,3 +162,49 @@ export const createFakeConnection = function (): Connection {
     },
   } as any;
 };
+/**
+ * Validate that a CSV file has X records
+ */
+export async function validateCsv(filePath: string, totalQty: number): Promise<void> {
+  const csvReadStream = fs.createReadStream(filePath);
+  let recordCount = 0;
+
+  await pipeline(
+    csvReadStream,
+    new csvParse({ columns: true }),
+    new PassThrough({
+      objectMode: true,
+      transform(_chunk, _encoding, callback) {
+        recordCount++;
+        callback(null, null);
+      },
+    }),
+    // dummy writable
+    new Writable({
+      write(_chunk, _encoding, callback) {
+        callback();
+      },
+    })
+  );
+
+  expect(totalQty).to.equal(recordCount);
+}
+
+/**
+ * Validate that a JSON file has X records
+ */
+export async function validateJson(filePath: string, totalqty: number): Promise<void> {
+  // check records have expected fields
+  const fieldsRes = await exec(
+    `jq 'map(has("Id") and has("Name") and has("Phone") and has("AnnualRevenue")) | all' ${filePath}`,
+    {
+      shell: 'pwsh',
+    }
+  );
+  expect(fieldsRes.stdout.trim()).equal('true');
+
+  // check all records were written
+  const lengthRes = await exec(`jq length ${filePath}`, { shell: 'pwsh' });
+
+  expect(lengthRes.stdout.trim()).equal(totalqty);
+}
