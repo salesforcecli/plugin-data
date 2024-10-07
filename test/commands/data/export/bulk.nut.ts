@@ -60,11 +60,6 @@ describe('data export bulk NUTs', () => {
     const result = execCmd<DataExportBulkResult>(command, { ensureExitCode: 0 }).jsonOutput
       ?.result as DataExportBulkResult;
 
-    // eslint-disable-next-line no-console
-    console.log(`result.totalSize: ${result.totalSize}`);
-    // eslint-disable-next-line no-console
-    console.log(`result.totalSize typeof: ${typeof result.totalSize}`);
-
     expect(result.totalSize).to.equal(totalAccountRecords);
     expect(result.filePath).to.equal(outputFile);
 
