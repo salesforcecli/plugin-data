@@ -1,6 +1,6 @@
 {
   "name": "@salesforce/plugin-data",
-  "version": "3.6.8",
+  "version": "3.6.9",
   "description": "Plugin for salesforce data commands",
   "author": "Salesforce",
   "homepage": "https://github.com/salesforcecli/plugin-data",
@@ -124,11 +124,11 @@
   "devDependencies": {
     "@oclif/core": "^4.0.19",
     "@oclif/plugin-command-snapshot": "^5.2.15",
-    "@salesforce/cli-plugins-testkit": "^5.3.32",
+    "@salesforce/cli-plugins-testkit": "^5.3.33",
     "@salesforce/dev-scripts": "^10.2.10",
-    "@salesforce/plugin-command-reference": "^3.1.26",
+    "@salesforce/plugin-command-reference": "^3.1.27",
     "@salesforce/types": "^1.2.0",
-    "eslint-plugin-sf-plugin": "^1.20.7",
+    "eslint-plugin-sf-plugin": "^1.20.8",
     "oclif": "^4.14.36",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2"
