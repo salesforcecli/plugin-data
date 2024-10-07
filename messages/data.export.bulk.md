@@ -6,7 +6,7 @@ Bulk export records from an org into a file using a SOQL query. Uses Bulk API 2.
 
 You can use this command to export millions of records from an org, either to migrate data or to back it up.
 
-Use a SOQL query to specify the fields of a standard or custom object that you want to export. Specify the SOQL query either at the command line with the --query flag or read it from a file with the --query-file flag; you can't specify both flags. You must write the records to a file, in either CSV or JSON format.
+Use a SOQL query to specify the fields of a standard or custom object that you want to export. Specify the SOQL query either at the command line with the --query flag or read it from a file with the --query-file flag; you can't specify both flags. The --output-file flag is required, which means you can only write the records to a file, in either CSV or JSON format. 
 
 Bulk exports can take a while, depending on how many records are returned by the SOQL query. If the command times out, or you specified the --async flag, the command displays the job ID. To see the status and get the results of the job, run "sf data export resume" and pass the job ID to the --job-id flag.
 
