@@ -256,7 +256,9 @@ export async function exportRecords(
 
     if (outputInfo.format === 'json') {
       const jsonWritable = fs.createWriteStream(outputInfo.filePath, {
-        flags: 'a', // append mode. TODO: maybe make this append + fail if path exists?
+        // Open file for reading and appending. The file is created if it does not exist but fails if the path exists.
+        // https://nodejs.org/api/fs.html#file-system-flags
+        flags: 'ax+',
       });
 
       const totalRecords = jobInfo.numberRecordsProcessed;
