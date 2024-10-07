@@ -102,12 +102,8 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
     })(),
   };
 
-  // private logger!: Logger;
-
   public async run(): Promise<DataExportBulkResult> {
     const { flags } = await this.parse(DataExportBulk);
-
-    // this.logger = await Logger.child('data:export:bulk');
 
     const conn = flags['target-org'].getConnection(flags['api-version']);
 
