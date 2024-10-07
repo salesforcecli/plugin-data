@@ -26,16 +26,16 @@ export default class DataExportResume extends SfCommand<DataExportResumeResult> 
   public static readonly examples = messages.getMessages('examples');
 
   public static readonly flags = {
-    'bulk-query-id': Flags.salesforceId({
+    'job-id': Flags.salesforceId({
       length: 18,
       char: 'i',
       startsWith: '750',
-      summary: messages.getMessage('flags.bulk-query-id.summary'),
-      exactlyOne: ['bulk-query-id', 'use-most-recent'],
+      summary: messages.getMessage('flags.job-id.summary'),
+      exactlyOne: ['job-id', 'use-most-recent'],
     }),
     'use-most-recent': Flags.boolean({
       summary: messages.getMessage('flags.use-most-recent.summary'),
-      exactlyOne: ['bulk-query-id', 'use-most-recent'],
+      exactlyOne: ['job-id', 'use-most-recent'],
     }),
     'api-version': Flags.orgApiVersion(),
   };
@@ -46,7 +46,7 @@ export default class DataExportResume extends SfCommand<DataExportResumeResult> 
     const cache = await BulkExportRequestCache.create();
 
     const resumeOpts = await cache.resolveResumeOptionsFromCache(
-      flags['bulk-query-id'],
+      flags['job-id'],
       flags['use-most-recent'],
       flags['api-version']
     );
