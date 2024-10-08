@@ -27,7 +27,7 @@ describe('data export bulk NUTs', () => {
       devhubAuthStrategy: 'AUTO',
     });
 
-    // TODO: make this use the new `data import bulk` command when its available
+    // TODO: make this use the new `data import bulk` command when its available (W-13656292)
     execCmd(
       `data:upsert:bulk --sobject Account --file ${path.join(
         'data',
