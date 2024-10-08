@@ -116,7 +116,7 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
         throw messages.createError('cannotCreateResumeOptionsWithoutAnOrg');
       }
     } else if (useMostRecent) {
-      throw messages.createError('cannotFindMostRecentCacheEntry');
+      throw messages.createError('error.missingCacheEntryError');
     } else {
       throw messages.createError('bulkRequestIdRequiredWhenNotUsingMostRecent');
     }
@@ -248,7 +248,7 @@ export class BulkExportRequestCache extends TTLConfig<TTLConfig.Options, BulkExp
     if (typeof jobIdOrMostRecent === 'boolean') {
       const key = this.getLatestKey();
       if (!key) {
-        throw messages.createError('cannotFindMostRecentCacheEntry');
+        throw messages.createError('error.missingCacheEntryError');
       }
       // key definitely exists because it came from the cache
       const entry = this.get(key);

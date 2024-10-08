@@ -56,7 +56,7 @@ The bulk request id must be supplied when not looking for most recent cache entr
 
 Could not find a cache entry for job ID %s
 
-# cannotFindMostRecentCacheEntry
+# error.missingCacheEntryError
 
 Could not load a most recent cache entry for a bulk request. Please rerun your command with a bulk request id.
 
@@ -71,7 +71,3 @@ A valid username is required when creating a cache entry.
 # invalidSobject
 
 The supplied SObject type "%s" is invalid. Error message: %s.
-
-# error.noJobInfo
-
-Failed to get job info after polling for the query job status.
