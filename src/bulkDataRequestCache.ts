@@ -73,7 +73,7 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
     if (!useMostRecent && !bulkJobId) {
       throw messages.createError('bulkRequestIdRequiredWhenNotUsingMostRecent');
     }
-    const resumeOptionsOptions = {
+    const resumeOptions = {
       operation: 'query',
       query: '',
       pollingOptions: { pollTimeout: 0, pollInterval: 0 },
@@ -88,7 +88,7 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
         return {
           jobInfo: { id: entry.jobId },
           options: {
-            ...resumeOptionsOptions,
+            ...resumeOptions,
             connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
           },
         };
@@ -100,7 +100,7 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
         return {
           jobInfo: { id: entry.jobId },
           options: {
-            ...resumeOptionsOptions,
+            ...resumeOptions,
             connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
           },
         };
@@ -108,7 +108,7 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
         return {
           jobInfo: { id: bulkJobId },
           options: {
-            ...resumeOptionsOptions,
+            ...resumeOptions,
             connection: org.getConnection(apiVersion),
           },
         };
