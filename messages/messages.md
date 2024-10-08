@@ -52,7 +52,11 @@ Format to display the results; the --json flag overrides this flag.
 
 The bulk request id must be supplied when not looking for most recent cache entry.
 
-# cannotFindMostRecentCacheEntry
+# error.bulkRequestIdNotFound
+
+Could not find a cache entry for job ID %s
+
+# error.missingCacheEntryError
 
 Could not load a most recent cache entry for a bulk request. Please rerun your command with a bulk request id.
 
