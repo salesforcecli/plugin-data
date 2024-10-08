@@ -236,20 +236,16 @@ export class BulkExportRequestCache extends TTLConfig<TTLConfig.Options, BulkExp
   }
 
   public async resolveResumeOptionsFromCache(
-    bulkJobId: string | undefined,
-    useMostRecent: boolean,
+    jobIdOrMostRecent: string | boolean,
     apiVersion: string | undefined
   ): Promise<ResumeBulkExportOptions> {
-    if (!useMostRecent && !bulkJobId) {
-      throw messages.createError('bulkRequestIdRequiredWhenNotUsingMostRecent');
-    }
     const resumeOptionsOptions = {
       operation: 'query',
       query: '',
       pollingOptions: { pollTimeout: 0, pollInterval: 0 },
     } satisfies Pick<ResumeOptions['options'], 'operation' | 'query' | 'pollingOptions'>;
 
-    if (useMostRecent) {
+    if (typeof jobIdOrMostRecent === 'boolean') {
       const key = this.getLatestKey();
       if (!key) {
         throw messages.createError('cannotFindMostRecentCacheEntry');
@@ -269,24 +265,20 @@ export class BulkExportRequestCache extends TTLConfig<TTLConfig.Options, BulkExp
           connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
         },
       };
-    }
+    } else {
+      const entry = this.get(jobIdOrMostRecent);
+      if (!entry) {
+        throw messages.createError('error.bulkRequestIdNotFound', [jobIdOrMostRecent]);
+      }
 
-    if (!bulkJobId) {
-      throw messages.createError('bulkRequestIdRequiredWhenNotUsingMostRecent');
+      return {
+        jobInfo: { id: entry.jobId },
+        outputInfo: entry.outputInfo,
+        options: {
+          ...resumeOptionsOptions,
+          connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
+        },
+      };
     }
-
-    const entry = this.get(bulkJobId);
-    if (!entry) {
-      throw messages.createError('error.bulkRequestIdNotFound', [bulkJobId]);
-    }
-
-    return {
-      jobInfo: { id: entry.jobId },
-      outputInfo: entry.outputInfo,
-      options: {
-        ...resumeOptionsOptions,
-        connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
-      },
-    };
   }
 }

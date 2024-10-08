@@ -46,8 +46,7 @@ export default class DataExportResume extends SfCommand<DataExportResumeResult> 
     const cache = await BulkExportRequestCache.create();
 
     const resumeOpts = await cache.resolveResumeOptionsFromCache(
-      flags['job-id'],
-      flags['use-most-recent'],
+      flags['job-id'] ?? flags['use-most-recent'],
       flags['api-version']
     );
 
