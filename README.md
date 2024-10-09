@@ -144,7 +144,7 @@ EXAMPLES
     $ sf data create file --file path/to/astro.png --parent-id a03fakeLoJWPIA3
 ```
 
-_See code: [src/commands/data/create/file.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.0/src/commands/data/create/file.ts)_
+_See code: [src/commands/data/create/file.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/create/file.ts)_
 
 ## `sf data create record`
 
@@ -200,7 +200,7 @@ EXAMPLES
       TracedEntityId=01p17000000R6bLAAS"
 ```
 
-_See code: [src/commands/data/create/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.0/src/commands/data/create/record.ts)_
+_See code: [src/commands/data/create/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/create/record.ts)_
 
 ## `sf data delete bulk`
 
@@ -258,7 +258,7 @@ FLAG DESCRIPTIONS
     and can be enabled only by a system administrator.
 ```
 
-_See code: [src/commands/data/delete/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.0/src/commands/data/delete/bulk.ts)_
+_See code: [src/commands/data/delete/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/delete/bulk.ts)_
 
 ## `sf data delete record`
 
@@ -319,7 +319,7 @@ EXAMPLES
     $ sf data delete record --use-tooling-api --sobject TraceFlag --record-id 7tf8c
 ```
 
-_See code: [src/commands/data/delete/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.0/src/commands/data/delete/record.ts)_
+_See code: [src/commands/data/delete/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/delete/record.ts)_
 
 ## `sf data delete resume`
 
@@ -358,7 +358,7 @@ EXAMPLES
     $ sf data delete resume --use-most-recent --target-org my-scratch
 ```
 
-_See code: [src/commands/data/delete/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.0/src/commands/data/delete/resume.ts)_
+_See code: [src/commands/data/delete/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/delete/resume.ts)_
 
 ## `sf data export bulk`
 
@@ -432,7 +432,7 @@ EXAMPLES
       --result-format json --async
 ```
 
-_See code: [src/commands/data/export/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.0/src/commands/data/export/bulk.ts)_
+_See code: [src/commands/data/export/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/export/bulk.ts)_
 
 ## `sf data export resume`
 
@@ -468,7 +468,7 @@ EXAMPLES
     $ sf data export resume --use-most-recent --target-org my-scratch
 ```
 
-_See code: [src/commands/data/export/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.0/src/commands/data/export/resume.ts)_
+_See code: [src/commands/data/export/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/export/resume.ts)_
 
 ## `sf data export tree`
 
@@ -529,7 +529,7 @@ EXAMPLES
       my-scratch
 ```
 
-_See code: [src/commands/data/export/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.0/src/commands/data/export/tree.ts)_
+_See code: [src/commands/data/export/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/export/tree.ts)_
 
 ## `sf data get record`
 
@@ -593,7 +593,7 @@ EXAMPLES
     $ sf data get record --use-tooling-api --sobject TraceFlag --record-id 7tf8c
 ```
 
-_See code: [src/commands/data/get/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.0/src/commands/data/get/record.ts)_
+_See code: [src/commands/data/get/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/get/record.ts)_
 
 ## `sf data import tree`
 
@@ -658,7 +658,7 @@ FLAG DESCRIPTIONS
     - files(array) - Files: An array of files paths to load
 ```
 
-_See code: [src/commands/data/import/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.0/src/commands/data/import/tree.ts)_
+_See code: [src/commands/data/import/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/import/tree.ts)_
 
 ## `sf data query`
 
@@ -722,7 +722,7 @@ EXAMPLES
     $ sf data query --query "SELECT Id FROM Contact" --bulk --wait 0
 ```
 
-_See code: [src/commands/data/query.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.0/src/commands/data/query.ts)_
+_See code: [src/commands/data/query.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/query.ts)_
 
 ## `sf data query resume`
 
@@ -760,7 +760,7 @@ EXAMPLES
     $ sf data query resume --bulk-query-id 7500x000005BdFzXXX
 ```
 
-_See code: [src/commands/data/query/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.0/src/commands/data/query/resume.ts)_
+_See code: [src/commands/data/query/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/query/resume.ts)_
 
 ## `sf data resume`
 
@@ -797,7 +797,7 @@ EXAMPLES
     $ sf data resume --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA
 ```
 
-_See code: [src/commands/data/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.0/src/commands/data/resume.ts)_
+_See code: [src/commands/data/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/resume.ts)_
 
 ## `sf data search`
 
@@ -847,7 +847,7 @@ EXAMPLES
     $ sf data search --file query.txt --target-org my-scratch --result-format csv
 ```
 
-_See code: [src/commands/data/search.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.0/src/commands/data/search.ts)_
+_See code: [src/commands/data/search.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/search.ts)_
 
 ## `sf data update record`
 
@@ -909,7 +909,7 @@ EXAMPLES
       "ExpirationDate=2017-12-01T00:58:04.000+0000"
 ```
 
-_See code: [src/commands/data/update/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.0/src/commands/data/update/record.ts)_
+_See code: [src/commands/data/update/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/update/record.ts)_
 
 ## `sf data upsert bulk`
 
@@ -962,7 +962,7 @@ EXAMPLES
       my-scratch
 ```
 
-_See code: [src/commands/data/upsert/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.0/src/commands/data/upsert/bulk.ts)_
+_See code: [src/commands/data/upsert/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/upsert/bulk.ts)_
 
 ## `sf data upsert resume`
 
@@ -1001,7 +1001,7 @@ EXAMPLES
     $ sf data upsert resume --use-most-recent --target-org my-scratch
 ```
 
-_See code: [src/commands/data/upsert/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.0/src/commands/data/upsert/resume.ts)_
+_See code: [src/commands/data/upsert/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/upsert/resume.ts)_
 
 ## `sf force data bulk delete`
 
@@ -1048,7 +1048,7 @@ EXAMPLES
     $ sf force data bulk delete --sobject MyObject__c --file files/delete.csv --wait 5 --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.0/src/commands/force/data/bulk/delete.ts)_
+_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/force/data/bulk/delete.ts)_
 
 ## `sf force data bulk status`
 
@@ -1085,7 +1085,7 @@ EXAMPLES
     $ sf force data bulk status --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.0/src/commands/force/data/bulk/status.ts)_
+_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/force/data/bulk/status.ts)_
 
 ## `sf force data bulk upsert`
 
@@ -1143,6 +1143,6 @@ EXAMPLES
       --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.0/src/commands/force/data/bulk/upsert.ts)_
+_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/force/data/bulk/upsert.ts)_
 
 <!-- commandsstop -->

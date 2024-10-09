@@ -1,3 +1,9 @@
+## [3.7.1](https://github.com/salesforcecli/plugin-data/compare/3.7.0...3.7.1) (2024-10-09)
+
+### Bug Fixes
+
+- bump oclif/mso ([#1085](https://github.com/salesforcecli/plugin-data/issues/1085)) ([ecccff7](https://github.com/salesforcecli/plugin-data/commit/ecccff7c7fe24d0a7db8687f842fe24d749ac86a))
+
 # [3.7.0](https://github.com/salesforcecli/plugin-data/compare/3.6.9...3.7.0) (2024-10-08)
 
 ### Bug Fixes
