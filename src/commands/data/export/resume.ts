@@ -79,6 +79,11 @@ export default class DataExportResume extends SfCommand<DataExportResumeResult> 
       ms.goto('exporting records', { state: jobInfo.state });
     });
 
+    queryJob.on('error', (err) => {
+      ms.stop('failed');
+      throw err;
+    });
+
     try {
       const jobInfo = await exportRecords(resumeOpts.options.connection, queryJob, resumeOpts.outputInfo);
 
@@ -91,9 +96,8 @@ export default class DataExportResume extends SfCommand<DataExportResumeResult> 
         filePath: resumeOpts.outputInfo.filePath,
       };
     } catch (err) {
-      const error = err as Error;
-      ms.stop(error);
-      throw error;
+      ms.stop('failed');
+      throw err;
     }
   }
 }

@@ -163,7 +163,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
       });
 
       job.on('error', (err) => {
-        ms.stop(err as Error);
+        ms.stop('failed');
         throw err;
       });
 
@@ -196,8 +196,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
           filePath: flags['output-file'],
         };
       } catch (err) {
-        const error = err as Error;
-        ms.stop(error);
+        ms.stop('failed');
         throw err;
       }
     }
@@ -215,8 +214,8 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
       },
     });
 
-    queryJob.on('error', (error: Error) => {
-      ms.stop(error);
+    queryJob.on('error', () => {
+      ms.stop('failed');
     });
 
     queryJob.on('open', (jobInfo: QueryJobInfoV2) => {
@@ -250,9 +249,8 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
         filePath: flags['output-file'],
       };
     } catch (err) {
-      const error = err as Error;
-      ms.stop(error);
-      throw error;
+      ms.stop('failed');
+      throw err;
     }
   }
 }
