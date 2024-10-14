@@ -91,7 +91,13 @@ export default class DataImportResume extends SfCommand<DataImportResumeResult> 
           stage: 'Processing the job',
           label: 'Failed records',
           type: 'dynamic-key-value',
-          get: (data): string => (data?.numberRecordsFailed ?? 0).toString(),
+          get: (data): string | undefined => {
+            const numberRecordsFailed = data?.numberRecordsFailed ?? 0;
+
+            if (data?.numberRecordsProcessed) {
+              return numberRecordsFailed.toString();
+            }
+          },
         },
       ],
       postStagesBlock: [
