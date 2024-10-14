@@ -37,6 +37,10 @@ API name of the Salesforce object, either standard or custom, that you want to i
 
 Time to wait for the command to finish, in minutes.
 
+# flags.line-ending.summary
+
+Line ending used in the CSV file. Default value on Windows is `CRLF`; on macOS and Linux it's `LR`.
+
 # export.resume
 
 Run "sf data import resume --job-id %s" to resume the operation.

@@ -6,6 +6,7 @@
  */
 
 import * as fs from 'node:fs';
+import { platform } from 'node:os';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { Connection, Messages, Org } from '@salesforce/core';
@@ -53,7 +54,11 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
       unit: 'minutes',
     }),
     'target-org': Flags.requiredOrg(),
-    // TODO: add --line-ending flag
+    'line-ending': Flags.option({
+      summary: messages.getMessage('flags.line-ending.summary'),
+      dependsOn: ['file'],
+      options: ['CRLF', 'LF'] as const,
+    })(),
   };
 
   public async run(): Promise<DataImportBulkResult> {
@@ -128,7 +133,7 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
     if (async) {
       ms.goto('creating ingest job');
 
-      const job = await createIngestJob(conn, flags.file, flags.sobject);
+      const job = await createIngestJob(conn, flags.file, flags.sobject, flags['line-ending']);
 
       ms.goto('creating ingest job', job.getInfo());
       ms.stop();
@@ -144,7 +149,7 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
     }
 
     // synchronous flow
-    const job = await createIngestJob(conn, flags.file, flags.sobject);
+    const job = await createIngestJob(conn, flags.file, flags.sobject, flags['line-ending']);
 
     ms.goto('processing the job');
 
@@ -214,9 +219,15 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
  * Create an ingest job, upload data and mark it as ready for processing
  *
  * */
-async function createIngestJob(conn: Connection, csvFile: string, object: string): Promise<IngestJobV2<Schema>> {
+async function createIngestJob(
+  conn: Connection,
+  csvFile: string,
+  object: string,
+  lineEnding: 'CRLF' | 'LF' | undefined
+): Promise<IngestJobV2<Schema>> {
   const job = conn.bulk2.createJob({
     operation: 'insert',
+    lineEnding: lineEnding ?? platform() === 'win32' ? 'CRLF' : 'LF',
     object,
   });
 
