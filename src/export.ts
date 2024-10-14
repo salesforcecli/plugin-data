@@ -8,21 +8,22 @@
 import path from 'node:path';
 import fs from 'node:fs';
 
-import { Logger, Messages, SfError, Lifecycle, Connection } from '@salesforce/core';
+import { Connection, Lifecycle, Logger, Messages, SfError } from '@salesforce/core';
 import type { DescribeSObjectResult, QueryResult } from '@jsforce/jsforce-node';
 import { Ux } from '@salesforce/sf-plugins-core';
 import { ensure } from '@salesforce/ts-types';
 import {
   BasicRecord,
   DataPlanPart,
-  hasNonEmptyNestedRecords,
-  hasNestedRecordsFilter,
-  SObjectTreeFileContents,
-  SObjectTreeInput,
   GenericEntry,
   hasNestedRecords,
+  hasNestedRecordsFilter,
+  hasNonEmptyNestedRecords,
+  SObjectTreeFileContents,
+  SObjectTreeInput,
 } from './types.js';
 import { hasUnresolvedRefs } from './api/data/tree/functions.js';
+import { ExportReturnType } from './commands/data/export/tree.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'exportApi');
@@ -30,7 +31,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'exportApi');
 const DATA_PLAN_FILENAME_PART = 'plan.json';
 
 export type ExportConfig = {
-  query: string;
+  queries: string[];
   outputDir?: string;
   plan?: boolean;
   prefix?: string;
@@ -44,62 +45,90 @@ export type RefFromIdByType = Map<string, Map<string, string>>;
 /** only used internally, but a more useful structure than the original */
 type PlanFile = Omit<DataPlanPart, 'files'> & { contents: SObjectTreeFileContents; file: string; dir: string };
 
-export const runExport = async (configInput: ExportConfig): Promise<DataPlanPart[] | SObjectTreeFileContents> => {
-  const { outputDir, plan, query, conn, prefix, ux } = validate(configInput);
-  const logger = Logger.childFromRoot('runExport');
-  const { records: recordsFromQuery } = await queryRecords(conn)(query);
-  const describe = await cacheAllMetadata(conn)(recordsFromQuery);
-
+export const runExport = async (configInput: ExportConfig): Promise<ExportReturnType> => {
+  const { outputDir, plan, queries, conn, prefix, ux } = validate(configInput);
   const refFromIdByType: RefFromIdByType = new Map();
-  const flatRecords = recordsFromQuery.flatMap(flattenNestedRecords);
-  flatRecords.map(buildRefMap(refFromIdByType)); // get a complete map of ID<->Ref
+  const logger = Logger.childFromRoot('runExport');
+  const allPlanFiles: PlanFile[][] = [];
+  const pathPlanMap = new Map<string, DataPlanPart[]>();
 
-  logger.debug(messages.getMessage('dataExportRecordCount', [flatRecords.length, query]));
+  const all = await Promise.all(
+    queries.map(async (query) => {
+      const { records: recordsFromQuery } = await queryRecords(conn)(query);
+      const describe = await cacheAllMetadata(conn)(recordsFromQuery);
 
-  if (outputDir) {
-    await fs.promises.mkdir(outputDir, { recursive: true });
+      const flatRecords = recordsFromQuery.flatMap(flattenNestedRecords);
+      flatRecords.map(buildRefMap(refFromIdByType)); // get a complete map of ID<->Ref
+
+      logger.debug(messages.getMessage('dataExportRecordCount', [flatRecords.length, query]));
+      if (outputDir) {
+        await fs.promises.mkdir(outputDir, { recursive: true });
+      }
+
+      if (plan) {
+        const planMap = reduceByType(
+          recordsFromQuery
+            .flatMap(flattenWithChildRelationships(describe)())
+            .map(addReferenceIdToAttributes(refFromIdByType))
+            .map(removeChildren)
+            .map(replaceParentReferences(describe)(refFromIdByType))
+            .map(removeNonPlanProperties)
+        );
+
+        const planFiles = [...planMap.entries()].map(
+          ([sobject, records]): PlanFile => ({
+            sobject,
+            contents: { records },
+            saveRefs: shouldSaveRefs(records, [...planMap.values()].flat()),
+            resolveRefs: hasUnresolvedRefs(records),
+            file: `${getPrefixedFileName(sobject, prefix)}.json`,
+            dir: outputDir ?? '',
+          })
+        );
+        const output = planFiles.map(planFileToDataPartPlan);
+        const planName = getPrefixedFileName([...describe.keys(), DATA_PLAN_FILENAME_PART].join('-'), prefix);
+        const location = path.join(outputDir ?? '', planName);
+
+        pathPlanMap.set(location, output);
+        allPlanFiles.push(planFiles);
+
+        if (plan && queries.length === 1) {
+          // if we're only querying in one, write the file now, otherwise we'll need to combine them later
+          await Promise.all([
+            ...planFiles.map(writePlanDataFile(ux)),
+            fs.promises.writeFile(location, JSON.stringify(output, null, 4)),
+          ]);
+        }
+
+        return output;
+      } else {
+        if (flatRecords.length > 200) {
+          // use lifecycle so warnings show up in stdout and in the json
+          await Lifecycle.getInstance().emitWarning(
+            messages.getMessage('dataExportRecordCountWarning', [flatRecords.length, query])
+          );
+        }
+        const contents = { records: processRecordsForNonPlan(describe)(refFromIdByType)(recordsFromQuery) };
+        const filename = path.join(
+          outputDir ?? '',
+          getPrefixedFileName(`${[...describe.keys()].join('-')}.json`, prefix)
+        );
+        ux.log(`wrote ${flatRecords.length} records to ${filename}`);
+        fs.writeFileSync(filename, JSON.stringify(contents, null, 4));
+        return contents;
+      }
+    })
+  );
+
+  if (queries.length > 1 && plan) {
+    const writes: Array<Promise<void>> = [];
+    pathPlanMap.forEach((k, v) => writes.push(fs.promises.writeFile(v, JSON.stringify(k, null, 4))));
+
+    // we've queried each query, and have the resulting data, combine the plan file
+    await Promise.all([...allPlanFiles.map(writePlanDataFiles(ux)), writes]);
   }
 
-  if (plan) {
-    const planMap = reduceByType(
-      recordsFromQuery
-        .flatMap(flattenWithChildRelationships(describe)())
-        .map(addReferenceIdToAttributes(refFromIdByType))
-        .map(removeChildren)
-        .map(replaceParentReferences(describe)(refFromIdByType))
-        .map(removeNonPlanProperties)
-    );
-
-    const planFiles = [...planMap.entries()].map(
-      ([sobject, records]): PlanFile => ({
-        sobject,
-        contents: { records },
-        saveRefs: shouldSaveRefs(records, [...planMap.values()].flat()),
-        resolveRefs: hasUnresolvedRefs(records),
-        file: `${getPrefixedFileName(sobject, prefix)}.json`,
-        dir: outputDir ?? '',
-      })
-    );
-    const output = planFiles.map(planFileToDataPartPlan);
-    const planName = getPrefixedFileName([...describe.keys(), DATA_PLAN_FILENAME_PART].join('-'), prefix);
-    await Promise.all([
-      ...planFiles.map(writePlanDataFile(ux)),
-      fs.promises.writeFile(path.join(outputDir ?? '', planName), JSON.stringify(output, null, 4)),
-    ]);
-    return output;
-  } else {
-    if (flatRecords.length > 200) {
-      // use lifecycle so warnings show up in stdout and in the json
-      await Lifecycle.getInstance().emitWarning(
-        messages.getMessage('dataExportRecordCountWarning', [flatRecords.length, query])
-      );
-    }
-    const contents = { records: processRecordsForNonPlan(describe)(refFromIdByType)(recordsFromQuery) };
-    const filename = path.join(outputDir ?? '', getPrefixedFileName(`${[...describe.keys()].join('-')}.json`, prefix));
-    ux.log(`wrote ${flatRecords.length} records to ${filename}`);
-    fs.writeFileSync(filename, JSON.stringify(contents, null, 4));
-    return contents;
-  }
+  return all;
 };
 
 // TODO: remove the saveRefs/resolveRefs from the types and all associated code.  It's not used by the updated `import` command
@@ -122,6 +151,26 @@ const writePlanDataFile =
   async (p: PlanFile): Promise<void> => {
     await fs.promises.writeFile(path.join(p.dir, p.file), JSON.stringify(p.contents, null, 4));
     ux.log(`wrote ${p.contents.records.length} records to ${p.file}`);
+  };
+
+const writePlanDataFiles =
+  (ux: Ux) =>
+  async (p: PlanFile[]): Promise<void> => {
+    if (p.length) {
+      await fs.promises.writeFile(
+        path.join(p[0].dir, p[0].file),
+        JSON.stringify(
+          p.map((x) => x.contents),
+          null,
+          4
+        )
+      );
+      ux.log(
+        `wrote ${p
+          .map((x) => x.contents.records.length)
+          .reduce((accumulator, currentValue) => accumulator + currentValue, 0)} records to ${p.at(0)?.file}`
+      );
+    }
   };
 
 // future: use Map.groupBy() when it's available
@@ -261,23 +310,26 @@ const addReferenceIdToAttributes =
  * @param config - The export configuration.
  */
 const validate = (config: ExportConfig): ExportConfig => {
-  if (!config.query) {
+  if (!config.queries) {
     throw new SfError(messages.getMessage('queryNotProvided'), 'queryNotProvided');
   }
+  const queries: string[] = [];
+  config.queries.map((q) => {
+    const filepath = path.resolve(process.cwd(), q);
+    if (fs.existsSync(filepath)) {
+      queries.push(fs.readFileSync(filepath, 'utf8'));
 
-  const filepath = path.resolve(process.cwd(), config.query);
-  if (fs.existsSync(filepath)) {
-    config.query = fs.readFileSync(filepath, 'utf8');
-
-    if (!config.query) {
-      throw messages.createError('queryNotProvided');
+      if (!config.queries) {
+        throw messages.createError('queryNotProvided');
+      }
     }
-  }
 
-  config.query = config.query.trim();
-  if (!config.query.toLowerCase().startsWith('select')) {
-    throw messages.createError('soqlInvalid', [config.query]);
-  }
+    if (!q.toLowerCase().startsWith('select')) {
+      throw messages.createError('soqlInvalid', [q]);
+    }
+    queries.push(q);
+  });
+  config.queries = queries;
 
   return config;
 };

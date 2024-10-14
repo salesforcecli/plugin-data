@@ -11,10 +11,15 @@ import { orgFlags, prefixValidation } from '../../../flags.js';
 import { ExportConfig, runExport } from '../../../export.js';
 import type { DataPlanPart, SObjectTreeFileContents } from '../../../types.js';
 
+export type ExportReturnType =
+  | Array<DataPlanPart[] | SObjectTreeFileContents>
+  | DataPlanPart[]
+  | SObjectTreeFileContents;
+
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.export');
 
-export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileContents> {
+export default class Export extends SfCommand<ExportReturnType> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -24,6 +29,7 @@ export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileCo
   public static readonly flags = {
     ...orgFlags,
     query: Flags.string({
+      multiple: true,
       char: 'q',
       summary: messages.getMessage('flags.query.summary'),
       required: true,
@@ -45,7 +51,7 @@ export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileCo
     }),
   };
 
-  public async run(): Promise<DataPlanPart[] | SObjectTreeFileContents> {
+  public async run(): Promise<ExportReturnType> {
     const { flags } = await this.parse(Export);
     if (flags.plan) {
       this.warn(messages.getMessage('PlanJsonWarning'));
@@ -54,7 +60,7 @@ export default class Export extends SfCommand<DataPlanPart[] | SObjectTreeFileCo
       outputDir: flags['output-dir'],
       plan: flags.plan,
       prefix: flags.prefix,
-      query: flags.query,
+      queries: flags.query,
       conn: flags['target-org'].getConnection(flags['api-version']),
       ux: new Ux({ jsonEnabled: this.jsonEnabled() }),
     };
