@@ -38,11 +38,10 @@ export default class DataImportResume extends SfCommand<DataImportResumeResult> 
       length: 18,
     }),
     wait: Flags.duration({
-      summary: messages.getMessage('flags.wait.summary'),
       char: 'w',
-      // TODO: check if other commands have the same default
-      defaultValue: 10,
       unit: 'minutes',
+      summary: messages.getMessage('flags.wait.summary'),
+      defaultValue: 5,
     }),
   };
 
