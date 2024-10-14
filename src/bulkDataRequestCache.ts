@@ -188,6 +188,28 @@ export class BulkUpsertRequestCache extends BulkDataRequestCache {
   }
 }
 
+export class BulkImportRequestCache extends BulkDataRequestCache {
+  public static getDefaultOptions(): TTLConfig.Options {
+    return {
+      isGlobal: true,
+      isState: true,
+      filename: BulkImportRequestCache.getFileName(),
+      stateFolder: Global.SF_STATE_FOLDER,
+      ttl: Duration.days(7),
+    };
+  }
+
+  public static getFileName(): string {
+    return 'bulk-data-import-cache.json';
+  }
+
+  public static async unset(key: string): Promise<void> {
+    const cache = await BulkImportRequestCache.create();
+    cache.unset(key);
+    await cache.write();
+  }
+}
+
 export class BulkExportRequestCache extends TTLConfig<TTLConfig.Options, BulkExportCacheConfig> {
   public static getDefaultOptions(): TTLConfig.Options {
     return {

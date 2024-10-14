@@ -60,7 +60,8 @@
             "description": "Get a single record."
           },
           "import": {
-            "description": "Import data to your org."
+            "description": "Import data to your org.",
+            "external": true
           },
           "query": {
             "description": "Query records."
