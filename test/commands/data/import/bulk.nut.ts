@@ -5,9 +5,11 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import path from 'node:path';
+import { platform } from 'node:os';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 import { DataImportBulkResult } from '../../../../src/commands/data/import/bulk.js';
+import { generateAccountsCsv } from './resume.nut.js';
 
 describe('data import bulk NUTs', () => {
   let session: TestSession;
@@ -29,16 +31,33 @@ describe('data import bulk NUTs', () => {
     await session?.clean();
   });
 
-  it('should import account records', () => {
+  it('should import account records', async () => {
+    const csvFile = await generateAccountsCsv(session.dir);
+
     const result = execCmd<DataImportBulkResult>(
-      `data import bulk --file ${path.join('data', 'bulkUpsertLarge.csv')} --sobject Account --wait 10 --json`,
+      `data import bulk --file ${csvFile} --sobject Account --wait 10 --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result as DataImportBulkResult;
 
     expect(result.jobId).not.be.undefined;
     expect(result.jobId.length).to.equal(18);
-    expect(result.processedRecords).to.equal(76_380);
-    expect(result.successfulRecords).to.equal(76_380);
+    expect(result.processedRecords).to.equal(10_000);
+    expect(result.successfulRecords).to.equal(10_000);
     expect(result.failedRecords).to.equal(0);
+  });
+
+  it('should report error msg from a failed job', async () => {
+    const csvFile = await generateAccountsCsv(session.dir);
+
+    // we pass the wrong line ending on purpose to make the job fail.
+    const wrongLineEnding = platform() === 'win32' ? 'LF' : 'CRLF';
+
+    const result = execCmd<DataImportBulkResult>(
+      `data import bulk --file ${csvFile} --sobject Account --wait 10 --json --line-ending ${wrongLineEnding}`,
+      { ensureExitCode: 1 }
+    ).jsonOutput;
+
+    expect(result?.name).to.equal('JobFailedError');
+    expect(result?.message).to.include('Job failed to be processed due to');
   });
 });

@@ -31,7 +31,7 @@ describe('data import resume NUTs', () => {
     await session?.clean();
   });
 
-  it('should resume bulk import', async () => {
+  it('should resume bulk import via --job-id', async () => {
     const csvFile = await generateAccountsCsv(session.dir);
 
     // about the type assertion at the end:
@@ -54,10 +54,8 @@ describe('data import resume NUTs', () => {
     expect(importResumeResult.failedRecords).to.equal(0);
   });
 
-  it('should resume bulk import, --use-most-recent', async () => {
+  it('should resume bulk import via--use-most-recent', async () => {
     const csvFile = await generateAccountsCsv(session.dir);
-    // eslint-disable-next-line no-console
-    console.log(`csvFile: ${csvFile}`);
 
     const command = `data import bulk --file ${csvFile} --sobject account --async --json`;
 
@@ -90,7 +88,7 @@ describe('data import resume NUTs', () => {
  *
  * Each `Account.name` field has a unique timestamp for idempotent runs.
  */
-async function generateAccountsCsv(savePath: string): Promise<string> {
+export async function generateAccountsCsv(savePath: string): Promise<string> {
   const id = Date.now();
 
   let csv = 'NAME,TYPE,PHONE,WEBSITE' + EOL;
