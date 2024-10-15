@@ -31,7 +31,6 @@ export default class DataImportResume extends SfCommand<DataImportResumeResult> 
     'use-most-recent': Flags.boolean({
       summary: messages.getMessage('flags.use-most-recent.summary'),
     }),
-    'api-version': Flags.orgApiVersion(),
     'job-id': Flags.salesforceId({
       summary: messages.getMessage('flags.job-id.summary'),
       char: 'i',

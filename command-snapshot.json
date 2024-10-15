@@ -168,7 +168,7 @@
     "command": "data:import:resume",
     "flagAliases": [],
     "flagChars": ["i", "w"],
-    "flags": ["api-version", "flags-dir", "job-id", "json", "use-most-recent", "wait"],
+    "flags": ["flags-dir", "job-id", "json", "use-most-recent", "wait"],
     "plugin": "@salesforce/plugin-data"
   },
   {
