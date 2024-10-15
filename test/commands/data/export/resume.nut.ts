@@ -30,7 +30,6 @@ describe('data export resume NUTs', () => {
 
     execCmd(`data:import:bulk --sobject Account --file ${path.join('data', 'bulkUpsertLarge.csv')} --json --wait 10`, {
       ensureExitCode: 0,
-      cli: 'sf',
     });
 
     totalAccountRecords = execCmd<{ totalSize: number }>('data query -q "select count() from account" --json', {
