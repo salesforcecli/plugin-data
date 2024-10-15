@@ -30,13 +30,14 @@ export default class DataImportResume extends SfCommand<DataImportResumeResult> 
   public static readonly flags = {
     'use-most-recent': Flags.boolean({
       summary: messages.getMessage('flags.use-most-recent.summary'),
-      exclusive: ['job-id'],
+      exactlyOne: ['job-id'],
     }),
     'job-id': Flags.salesforceId({
       summary: messages.getMessage('flags.job-id.summary'),
       char: 'i',
       length: 18,
-      exclusive: ['use-most-recent'],
+      startsWith: '750',
+      exactlyOne: ['use-most-recent'],
     }),
     wait: Flags.duration({
       char: 'w',
