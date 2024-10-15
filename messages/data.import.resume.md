@@ -1,26 +1,32 @@
 # summary
 
-Summary of a command.
+Resume a bulk import job that you previously started. Uses Bulk API 2.0.
 
 # description
 
-More information about a command. Don't repeat the summary.
+The command uses the job ID returned by the "sf data import bulk" command or the most recently-run bulk import job.
 
 # examples
 
-- <%= config.bin %> <%= command.id %>
+- Resume a bulk import job from your default org using an ID:
+
+  <%= config.bin %> <%= command.id %> --job-id 750xx000000005sAAA
+
+- Resume the most recently run bulk import job for an org with alias my-scratch:
+
+  <%= config.bin %> <%= command.id %> --use-most-recent --target-org my-scratch
 
 # flags.use-most-recent.summary
 
-Summary for use-most-recent.
+Use the job ID of the bulk import job that was most recently run.
 
 # flags.job-id.summary
 
-Summary for job-id.
+Job ID of the bulk import.
 
 # flags.wait.summary
 
-Summary for wait.
+Time to wait for the command to finish, in minutes.
 
 # error.failedRecordDetails
 
