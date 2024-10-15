@@ -49,13 +49,15 @@ export const runExport = async (configInput: ExportConfig): Promise<ExportReturn
   const { outputDir, plan, queries, conn, prefix, ux } = validate(configInput);
   const refFromIdByType: RefFromIdByType = new Map();
   const logger = Logger.childFromRoot('runExport');
-  const allPlanFiles: PlanFile[][] = [];
-  const pathPlanMap = new Map<string, DataPlanPart[]>();
+
+  const recordQueryMap = new Map<string, BasicRecord[]>();
 
   const all = await Promise.all(
     queries.map(async (query) => {
       const { records: recordsFromQuery } = await queryRecords(conn)(query);
       const describe = await cacheAllMetadata(conn)(recordsFromQuery);
+
+      recordQueryMap.set(recordsFromQuery.at(0)?.attributes.type ?? '', recordsFromQuery);
 
       const flatRecords = recordsFromQuery.flatMap(flattenNestedRecords);
       flatRecords.map(buildRefMap(refFromIdByType)); // get a complete map of ID<->Ref
@@ -65,69 +67,95 @@ export const runExport = async (configInput: ExportConfig): Promise<ExportReturn
         await fs.promises.mkdir(outputDir, { recursive: true });
       }
 
-      if (plan) {
-        const planMap = reduceByType(
-          recordsFromQuery
-            .flatMap(flattenWithChildRelationships(describe)())
-            .map(addReferenceIdToAttributes(refFromIdByType))
-            .map(removeChildren)
-            .map(replaceParentReferences(describe)(refFromIdByType))
-            .map(removeNonPlanProperties)
-        );
+      // we only have one query, we can generate everything we need as we go
+      if (queries.length === 1) {
+        if (plan) {
+          const planMap = reduceByType(
+            recordsFromQuery
+              .flatMap(flattenWithChildRelationships(describe)())
+              .map(addReferenceIdToAttributes(refFromIdByType))
+              .map(removeChildren)
+              .map(replaceParentReferences(describe)(refFromIdByType))
+              .map(removeNonPlanProperties)
+          );
 
-        const planFiles = [...planMap.entries()].map(
-          ([sobject, records]): PlanFile => ({
-            sobject,
-            contents: { records },
-            saveRefs: shouldSaveRefs(records, [...planMap.values()].flat()),
-            resolveRefs: hasUnresolvedRefs(records),
-            file: `${getPrefixedFileName(sobject, prefix)}.json`,
-            dir: outputDir ?? '',
-          })
-        );
-        const output = planFiles.map(planFileToDataPartPlan);
-        const planName = getPrefixedFileName([...describe.keys(), DATA_PLAN_FILENAME_PART].join('-'), prefix);
-        const location = path.join(outputDir ?? '', planName);
+          const planFiles = [...planMap.entries()].map(
+            ([sobject, records]): PlanFile => ({
+              sobject,
+              contents: { records },
+              saveRefs: shouldSaveRefs(records, [...planMap.values()].flat()),
+              resolveRefs: hasUnresolvedRefs(records),
+              file: `${getPrefixedFileName(sobject, prefix)}.json`,
+              dir: outputDir ?? '',
+            })
+          );
+          const output = planFiles.map(planFileToDataPartPlan);
+          const planName = getPrefixedFileName([...describe.keys(), DATA_PLAN_FILENAME_PART].join('-'), prefix);
+          const location = path.join(outputDir ?? '', planName);
 
-        pathPlanMap.set(location, output);
-        allPlanFiles.push(planFiles);
-
-        if (plan && queries.length === 1) {
-          // if we're only querying in one, write the file now, otherwise we'll need to combine them later
           await Promise.all([
             ...planFiles.map(writePlanDataFile(ux)),
             fs.promises.writeFile(location, JSON.stringify(output, null, 4)),
           ]);
-        }
 
-        return output;
-      } else {
-        if (flatRecords.length > 200) {
-          // use lifecycle so warnings show up in stdout and in the json
-          await Lifecycle.getInstance().emitWarning(
-            messages.getMessage('dataExportRecordCountWarning', [flatRecords.length, query])
+          return output;
+        } else {
+          if (flatRecords.length > 200) {
+            // use lifecycle so warnings show up in stdout and in the json
+            await Lifecycle.getInstance().emitWarning(
+              messages.getMessage('dataExportRecordCountWarning', [flatRecords.length, query])
+            );
+          }
+          const contents = { records: processRecordsForNonPlan(describe)(refFromIdByType)(recordsFromQuery) };
+          const filename = path.join(
+            outputDir ?? '',
+            getPrefixedFileName(`${[...describe.keys()].join('-')}.json`, prefix)
           );
+          ux.log(`wrote ${flatRecords.length} records to ${filename}`);
+          fs.writeFileSync(filename, JSON.stringify(contents, null, 4));
+          return contents;
         }
-        const contents = { records: processRecordsForNonPlan(describe)(refFromIdByType)(recordsFromQuery) };
-        const filename = path.join(
-          outputDir ?? '',
-          getPrefixedFileName(`${[...describe.keys()].join('-')}.json`, prefix)
-        );
-        ux.log(`wrote ${flatRecords.length} records to ${filename}`);
-        fs.writeFileSync(filename, JSON.stringify(contents, null, 4));
-        return contents;
       }
     })
   );
 
   if (queries.length > 1 && plan) {
-    const writes: Array<Promise<void>> = [];
-    pathPlanMap.forEach((k, v) => writes.push(fs.promises.writeFile(v, JSON.stringify(k, null, 4))));
+    const allQueryValues = Array.from(recordQueryMap.values()).flat();
+    const describe = await cacheAllMetadata(conn)(allQueryValues);
 
-    // we've queried each query, and have the resulting data, combine the plan file
-    await Promise.all([...allPlanFiles.map(writePlanDataFiles(ux)), writes]);
+    const planMap = reduceByType(
+      allQueryValues
+        .flatMap(flattenWithChildRelationships(describe)())
+        .map(addReferenceIdToAttributes(refFromIdByType))
+        .map(removeChildren)
+        .map(replaceParentReferences(describe)(refFromIdByType))
+        .map(removeNonPlanProperties)
+    );
+
+    const planFiles = [...planMap.entries()].map(
+      ([sobject, records]): PlanFile => ({
+        sobject,
+        contents: { records },
+        saveRefs: shouldSaveRefs(records, [...planMap.values()].flat()),
+        resolveRefs: hasUnresolvedRefs(records),
+        file: `${getPrefixedFileName(sobject, prefix)}.json`,
+        dir: outputDir ?? '',
+      })
+    );
+    const output = planFiles.map(planFileToDataPartPlan);
+    const planName = getPrefixedFileName([...describe.keys(), DATA_PLAN_FILENAME_PART].join('-'), prefix);
+    const location = path.join(outputDir ?? '', planName);
+
+    // if we're only querying in one, write the file now, otherwise we'll need to combine them later
+    await Promise.all([
+      ...planFiles.map(writePlanDataFile(ux)),
+      fs.promises.writeFile(location, JSON.stringify(output, null, 4)),
+    ]);
+
+    return output;
   }
 
+  // @ts-expect-error asdfasdf
   return all;
 };
 
@@ -150,27 +178,7 @@ const writePlanDataFile =
   (ux: Ux) =>
   async (p: PlanFile): Promise<void> => {
     await fs.promises.writeFile(path.join(p.dir, p.file), JSON.stringify(p.contents, null, 4));
-    ux.log(`wrote ${p.contents.records.length} records to ${p.file}`);
-  };
-
-const writePlanDataFiles =
-  (ux: Ux) =>
-  async (p: PlanFile[]): Promise<void> => {
-    if (p.length) {
-      await fs.promises.writeFile(
-        path.join(p[0].dir, p[0].file),
-        JSON.stringify(
-          p.map((x) => x.contents),
-          null,
-          4
-        )
-      );
-      ux.log(
-        `wrote ${p
-          .map((x) => x.contents.records.length)
-          .reduce((accumulator, currentValue) => accumulator + currentValue, 0)} records to ${p.at(0)?.file}`
-      );
-    }
+    ux.log(`wrote ${p.contents.records.length} records to ${path.join(p.dir, p.file)}`);
   };
 
 // future: use Map.groupBy() when it's available
@@ -256,7 +264,8 @@ export const replaceParentReferences =
     const typeDescribe = ensure(describe.get(record.attributes.type), `Missing describe for ${record.attributes.type}`);
     const replacedReferences = Object.fromEntries(
       Object.entries(record)
-        .filter(isRelationshipFieldFilter(typeDescribe)) // only look at the fields that are references
+        .filter(isRelationshipFieldFilter(typeDescribe))
+        // only look at the fields that are references
         // We can check describe to see what the type could be.
         // If it narrows to only 1 type, pass that to refFromId.
         // If it's polymorphic, don't pass a type because refFromId will need to check all the types.
