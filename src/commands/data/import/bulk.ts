@@ -35,6 +35,7 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
     async: Flags.boolean({
       summary: messages.getMessage('flags.async.summary'),
       char: 'a',
+      exclusive: ['wait'],
     }),
     file: Flags.file({
       summary: messages.getMessage('flags.file.summary'),
@@ -52,6 +53,7 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
       summary: messages.getMessage('flags.wait.summary'),
       char: 'w',
       unit: 'minutes',
+      exclusive: ['async'],
     }),
     'target-org': Flags.requiredOrg(),
     'line-ending': Flags.option({
