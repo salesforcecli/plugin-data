@@ -95,7 +95,7 @@ async function generateAccountsCsv(savePath: string): Promise<string> {
 
   let csv = 'NAME,TYPE,PHONE,WEBSITE' + EOL;
 
-  for (let i = 0; i <= 10_000; i++) {
+  for (let i = 1; i <= 10_000; i++) {
     csv += `account ${id} #${i},Account,415-555-0000,http://www.accountImport${i}.com${EOL}`;
   }
 
