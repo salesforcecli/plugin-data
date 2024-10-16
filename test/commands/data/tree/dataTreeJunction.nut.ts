@@ -8,6 +8,7 @@ import path from 'node:path';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { ImportResult } from '../../../../src/api/data/tree/importTypes.js';
+import { ExportReturnType } from '../../../../src/commands/data/export/tree.js';
 
 describe('data:tree commands', () => {
   let testSession: TestSession;
@@ -66,5 +67,29 @@ describe('data:tree commands', () => {
       }
     );
     expect(importResult.jsonOutput?.result.length).to.equal(12);
+  });
+
+  it('can export -> import junction with multiple queries', async () => {
+    const exportResult = execCmd<ExportReturnType>(
+      `data:export:tree --plan --output-dir ${path.join(
+        '.',
+        'junction'
+      )} --query "select AccountId, ContactId from AccountContactRole" --query "Select Id, AccountId, FirstName, LastName from Contact" --query "select Id, ContactId, AccountId from AccountContactRelation where Account.Name != 'We Know Everybody'" --query "select ID, Name from Account where Name != 'Sample Account for Entitlements'"`
+    );
+
+    expect(exportResult.shellOutput.stdout).to.include(
+      `records to ${path.join('.', 'junction', 'AccountContactRelation.json')}`
+    );
+    expect(exportResult.shellOutput.stdout).to.include(`records to ${path.join('junction', 'Account.json')}`);
+    expect(exportResult.shellOutput.stdout).to.include(`records to ${path.join('junction', 'Contact.json')}`);
+
+    execCmd<ImportResult[]>(
+      `data:import:tree --target-org importOrg --plan ${path.join(
+        '.',
+        'junction',
+        'AccountContactRelation-Account-Contact-plan.json'
+      )}`,
+      { ensureExitCode: 0 }
+    );
   });
 });
