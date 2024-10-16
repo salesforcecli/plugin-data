@@ -74,7 +74,7 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
     const baseUrl = flags['target-org'].getField<string>(Org.Fields.INSTANCE_URL).toString();
 
     const ms = new MultiStageOutput<JobInfoV2>({
-      jsonEnabled: flags.json ?? false,
+      jsonEnabled: this.jsonEnabled(),
       stages: async ? ['Creating ingest job'] : ['Creating ingest job', 'Processing the job'],
       title: async ? 'Importing data (async)' : 'Importing data',
       stageSpecificBlock: [

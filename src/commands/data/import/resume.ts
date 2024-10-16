@@ -62,7 +62,7 @@ export default class DataImportResume extends SfCommand<DataImportResumeResult> 
     const conn = resumeOpts.options.connection;
 
     const ms = new MultiStageOutput<JobInfoV2>({
-      jsonEnabled: flags.json ?? false,
+      jsonEnabled: this.jsonEnabled(),
       stages: ['Creating ingest job', 'Processing the job'],
       title: 'Importing data',
       stageSpecificBlock: [
