@@ -11,10 +11,7 @@ import { orgFlags, prefixValidation } from '../../../flags.js';
 import { ExportConfig, runExport } from '../../../export.js';
 import type { DataPlanPart, SObjectTreeFileContents } from '../../../types.js';
 
-export type ExportReturnType =
-  | Array<DataPlanPart[] | SObjectTreeFileContents>
-  | DataPlanPart[]
-  | SObjectTreeFileContents;
+export type ExportReturnType = DataPlanPart[] | SObjectTreeFileContents;
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.export');

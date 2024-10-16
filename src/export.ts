@@ -51,8 +51,10 @@ export const runExport = async (configInput: ExportConfig): Promise<ExportReturn
   const logger = Logger.childFromRoot('runExport');
 
   const recordQueryMap = new Map<string, BasicRecord[]>();
+  // set as an empty array to satisfy compiler, will be set with values as we find them
+  let result: ExportReturnType = [];
 
-  const exportInfo = await Promise.all(
+  await Promise.all(
     queries.map(async (query) => {
       const { records: recordsFromQuery } = await queryRecords(conn)(query);
       const describe = await cacheAllMetadata(conn)(recordsFromQuery);
@@ -98,7 +100,7 @@ export const runExport = async (configInput: ExportConfig): Promise<ExportReturn
             fs.promises.writeFile(location, JSON.stringify(output, null, 4)),
           ]);
 
-          return output;
+          result = output;
         } else {
           if (flatRecords.length > 200) {
             // use lifecycle so warnings show up in stdout and in the json
@@ -113,7 +115,7 @@ export const runExport = async (configInput: ExportConfig): Promise<ExportReturn
           );
           ux.log(`wrote ${flatRecords.length} records to ${filename}`);
           fs.writeFileSync(filename, JSON.stringify(contents, null, 4));
-          return contents;
+          result = contents;
         }
       }
     })
@@ -148,19 +150,20 @@ export const runExport = async (configInput: ExportConfig): Promise<ExportReturn
       const planName = getPrefixedFileName([...describe.keys(), DATA_PLAN_FILENAME_PART].join('-'), prefix);
       const planContent = contentFiles.map(planFileToDataPartPlan);
 
-      exportInfo.push(contentFiles.map(planFileToDataPartPlan));
+      result = contentFiles.map(planFileToDataPartPlan);
+
       filesToWrite.push(
         fs.promises.writeFile(path.join(outputDir ?? '', planName), JSON.stringify(planContent, null, 4))
       );
     } else {
-      exportInfo.push({ records: Array.from(planMap.values()).flat() });
+      result = { records: Array.from(planMap.values()).flat() };
     }
 
     // if we're only querying in one, write the file now, otherwise we'll need to combine them later
     await Promise.all(filesToWrite);
   }
 
-  return exportInfo.filter((f) => f !== undefined);
+  return result;
 };
 
 // TODO: remove the saveRefs/resolveRefs from the types and all associated code.  It's not used by the updated `import` command
