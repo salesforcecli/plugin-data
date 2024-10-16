@@ -84,11 +84,7 @@ describe('data:tree commands', () => {
     expect(exportResult.shellOutput.stdout).to.include(`records to ${path.join('junction', 'Contact.json')}`);
 
     execCmd<ImportResult[]>(
-      `data:import:tree --target-org importOrg --plan ${path.join(
-        '.',
-        'junction',
-        'AccountContactRelation-Account-Contact-plan.json'
-      )}`,
+      `data:import:tree --target-org importOrg --plan ${path.join('.', 'junction', 'plan.json')}`,
       { ensureExitCode: 0 }
     );
   });

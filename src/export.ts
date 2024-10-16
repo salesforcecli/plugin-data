@@ -147,13 +147,12 @@ export const runExport = async (configInput: ExportConfig): Promise<ExportReturn
 
     const filesToWrite = [...contentFiles.map(writePlanDataFile(ux))];
     if (plan) {
-      const planName = getPrefixedFileName([...describe.keys(), DATA_PLAN_FILENAME_PART].join('-'), prefix);
       const planContent = contentFiles.map(planFileToDataPartPlan);
 
       result = contentFiles.map(planFileToDataPartPlan);
 
       filesToWrite.push(
-        fs.promises.writeFile(path.join(outputDir ?? '', planName), JSON.stringify(planContent, null, 4))
+        fs.promises.writeFile(path.join(outputDir ?? '', DATA_PLAN_FILENAME_PART), JSON.stringify(planContent, null, 4))
       );
     } else {
       result = { records: Array.from(planMap.values()).flat() };
