@@ -7,10 +7,8 @@
 
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
-import { MultiStageOutput } from '@oclif/multi-stage-output';
-import terminalLink from 'terminal-link';
-import { JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { BulkImportRequestCache } from '../../../bulkDataRequestCache.js';
+import { BulkImportStages } from '../../../ux/bulkImportStages.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'data.import.resume');
@@ -61,78 +59,20 @@ export default class DataImportResume extends SfCommand<DataImportResumeResult> 
 
     const conn = resumeOpts.options.connection;
 
-    const ms = new MultiStageOutput<JobInfoV2>({
-      jsonEnabled: this.jsonEnabled(),
-      stages: ['Creating ingest job', 'Processing the job'],
+    const stages = new BulkImportStages({
+      resume: true,
       title: 'Importing data',
-      stageSpecificBlock: [
-        {
-          stage: 'Processing the job',
-          label: 'Processed records',
-          type: 'dynamic-key-value',
-          get: (data): string | undefined => {
-            if (data?.numberRecordsProcessed) {
-              return data.numberRecordsProcessed.toString();
-            }
-          },
-        },
-        {
-          stage: 'Processing the job',
-          label: 'Successful records',
-          type: 'dynamic-key-value',
-          get: (data): string | undefined => {
-            const numberRecordsFailed = data?.numberRecordsFailed ?? 0;
-
-            if (data?.numberRecordsProcessed) {
-              return (data.numberRecordsProcessed - numberRecordsFailed).toString();
-            }
-          },
-        },
-        {
-          stage: 'Processing the job',
-          label: 'Failed records',
-          type: 'dynamic-key-value',
-          get: (data): string | undefined => {
-            const numberRecordsFailed = data?.numberRecordsFailed ?? 0;
-
-            if (data?.numberRecordsProcessed) {
-              return numberRecordsFailed.toString();
-            }
-          },
-        },
-      ],
-      postStagesBlock: [
-        {
-          label: 'Status',
-          type: 'dynamic-key-value',
-          bold: true,
-          get: (data) => data?.state,
-        },
-        {
-          label: 'Job Id',
-          type: 'dynamic-key-value',
-          bold: true,
-          get: (data) =>
-            data?.id &&
-            terminalLink(
-              data.id,
-              `${
-                conn.getAuthInfoFields().instanceUrl as string
-              }/lightning/setup/AsyncApiJobStatus/page?address=${encodeURIComponent(`/${data.id}`)}`
-            ),
-        },
-      ],
+      baseUrl: 'hehe',
+      jsonEnabled: this.jsonEnabled(),
     });
 
-    ms.skipTo('Processing the job');
+    stages.start();
 
     const job = conn.bulk2.job('ingest', {
       id: resumeOpts.jobInfo.id,
     });
 
-    job.on('inProgress', (res: JobInfoV2) => {
-      ms.goto('Processing the job', res);
-    });
+    stages.setupJobListeners(job);
 
     try {
       await job.poll(5000, flags.wait.milliseconds);
@@ -140,10 +80,10 @@ export default class DataImportResume extends SfCommand<DataImportResumeResult> 
       const jobInfo = await job.check();
 
       // send last data update so job status/num. of records processed/failed represent the last update
-      ms.goto('Processing the job', jobInfo);
+      stages.update(jobInfo);
 
       if (jobInfo.numberRecordsFailed) {
-        ms.error();
+        stages.error();
         // TODO: replace this msg to point to `sf data bulk results` when it's added (W-12408034)
         throw messages.createError('error.failedRecordDetails', [
           jobInfo.numberRecordsFailed,
@@ -152,7 +92,7 @@ export default class DataImportResume extends SfCommand<DataImportResumeResult> 
         ]);
       }
 
-      ms.stop();
+      stages.stop();
 
       return {
         jobId: jobInfo.id,
@@ -164,15 +104,15 @@ export default class DataImportResume extends SfCommand<DataImportResumeResult> 
       const jobInfo = await job.check();
 
       // send last data update so job status/num. of records processed/failed represent the last update
-      ms.goto('Processing the job', jobInfo);
+      stages.update(jobInfo);
 
       if (err instanceof Error && err.name === 'JobPollingTimeout') {
-        ms.error();
+        stages.error();
         throw messages.createError('error.timeout', [flags.wait.minutes, job.id]);
       }
 
       if (jobInfo.state === 'Failed') {
-        ms.error();
+        stages.error();
         throw messages.createError(
           'error.jobFailed',
           [jobInfo.errorMessage, conn.getUsername(), job.id],
@@ -182,7 +122,7 @@ export default class DataImportResume extends SfCommand<DataImportResumeResult> 
       }
 
       if (jobInfo.state === 'Aborted') {
-        ms.error();
+        stages.error();
         // TODO: replace this msg to point to `sf data bulk results` when it's added (W-12408034)
         throw messages.createError('error.jobAborted', [conn.getUsername(), job.id], [], err as Error);
       }
