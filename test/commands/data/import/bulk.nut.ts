@@ -5,7 +5,6 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import path from 'node:path';
-import { platform } from 'node:os';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 import { DataImportBulkResult } from '../../../../src/commands/data/import/bulk.js';
@@ -49,11 +48,9 @@ describe('data import bulk NUTs', () => {
   it('should report error msg from a failed job', async () => {
     const csvFile = await generateAccountsCsv(session.dir);
 
-    // we pass the wrong line ending on purpose to make the job fail.
-    const wrongLineEnding = platform() === 'win32' ? 'LF' : 'CRLF';
-
+    // we pass `Contact` instead of `Account` on purpose to make the job fail
     const result = execCmd<DataImportBulkResult>(
-      `data import bulk --file ${csvFile} --sobject Account --wait 10 --json --line-ending ${wrongLineEnding}`,
+      `data import bulk --file ${csvFile} --sobject Contact --wait 10 --json`,
       { ensureExitCode: 1 }
     ).jsonOutput;
 
