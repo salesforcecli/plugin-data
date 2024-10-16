@@ -75,11 +75,11 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
 
     const ms = new MultiStageOutput<JobInfoV2>({
       jsonEnabled: flags.json ?? false,
-      stages: async ? ['creating ingest job'] : ['creating ingest job', 'processing the job'],
+      stages: async ? ['Creating ingest job'] : ['Creating ingest job', 'Processing the job'],
       title: async ? 'Importing data (async)' : 'Importing data',
       stageSpecificBlock: [
         {
-          stage: 'processing the job',
+          stage: 'Processing the job',
           label: 'Processed records',
           type: 'dynamic-key-value',
           get: (data): string | undefined => {
@@ -89,7 +89,7 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
           },
         },
         {
-          stage: 'processing the job',
+          stage: 'Processing the job',
           label: 'Successful records',
           type: 'dynamic-key-value',
           get: (data): string | undefined => {
@@ -101,7 +101,7 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
           },
         },
         {
-          stage: 'processing the job',
+          stage: 'Processing the job',
           label: 'Failed records',
           type: 'dynamic-key-value',
           get: (data): string | undefined => {
@@ -133,11 +133,11 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
     });
 
     if (async) {
-      ms.goto('creating ingest job');
+      ms.goto('Creating ingest job');
 
       const job = await createIngestJob(conn, flags.file, flags.sobject, flags['line-ending']);
 
-      ms.goto('creating ingest job', job.getInfo());
+      ms.goto('Creating ingest job', job.getInfo());
       ms.stop();
 
       const cache = await BulkImportRequestCache.create();
@@ -153,10 +153,10 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
     // synchronous flow
     const job = await createIngestJob(conn, flags.file, flags.sobject, flags['line-ending']);
 
-    ms.goto('processing the job');
+    ms.goto('Processing the job');
 
     job.on('inProgress', (res: JobInfoV2) => {
-      ms.goto('processing the job', res);
+      ms.goto('Processing the job', res);
     });
 
     try {
@@ -165,7 +165,7 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
       const jobInfo = job.getInfo();
 
       // send last data update so job status/num. of records processed/failed represent the last update
-      ms.goto('processing the job', jobInfo);
+      ms.goto('Processing the job', jobInfo);
 
       if (jobInfo.numberRecordsFailed) {
         ms.stop('failed');
@@ -189,7 +189,7 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
       const jobInfo = await job.check();
 
       // send last data update so job status/num. of records processed/failed represent the last update
-      ms.goto('processing the job', jobInfo);
+      ms.goto('Processing the job', jobInfo);
 
       if (err instanceof Error && err.name === 'JobPollingTimeout') {
         ms.stop('paused');
