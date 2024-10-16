@@ -143,7 +143,7 @@ export default class DataImportResume extends SfCommand<DataImportResumeResult> 
       ms.goto('Processing the job', jobInfo);
 
       if (jobInfo.numberRecordsFailed) {
-        ms.stop('failed');
+        ms.error();
         // TODO: replace this msg to point to `sf data bulk results` when it's added (W-12408034)
         throw messages.createError('error.failedRecordDetails', [
           jobInfo.numberRecordsFailed,
@@ -167,12 +167,12 @@ export default class DataImportResume extends SfCommand<DataImportResumeResult> 
       ms.goto('Processing the job', jobInfo);
 
       if (err instanceof Error && err.name === 'JobPollingTimeout') {
-        ms.stop('failed');
+        ms.error();
         throw messages.createError('error.timeout', [flags.wait.minutes, job.id]);
       }
 
       if (jobInfo.state === 'Failed') {
-        ms.stop('failed');
+        ms.error();
         throw messages.createError(
           'error.jobFailed',
           [jobInfo.errorMessage, conn.getUsername(), job.id],
@@ -182,7 +182,7 @@ export default class DataImportResume extends SfCommand<DataImportResumeResult> 
       }
 
       if (jobInfo.state === 'Aborted') {
-        ms.stop('failed');
+        ms.error();
         // TODO: replace this msg to point to `sf data bulk results` when it's added (W-12408034)
         throw messages.createError('error.jobAborted', [conn.getUsername(), job.id], [], err as Error);
       }
