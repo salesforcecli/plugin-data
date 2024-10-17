@@ -4,11 +4,11 @@ Resume a bulk import job that you previously started. Uses Bulk API 2.0.
 
 # description
 
-The command uses the job ID returned by the "sf data import bulk" command or the most recently-run bulk import job.
+When the original "sf data import bulk" command either times out or is run with the --async flag, it displays a job ID. To see the status and get the results of the bulk import, run this command by either passing it the job ID or using the --use-most-recent flag to specify the most recent bulk import job.
 
 # examples
 
-- Resume a bulk import job from your default org using an ID:
+- Resume a bulk import job to your default org using an ID:
 
   <%= config.bin %> <%= command.id %> --job-id 750xx000000005sAAA
 
@@ -32,7 +32,8 @@ Time to wait for the command to finish, in minutes.
 
 Job finished being processed but failed to import %s records.
 
-To review the details of this job, run:
+To review the details of this job, run this command:
+
 sf org open --target-org %s --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F%s"
 
 # error.timeout
@@ -44,14 +45,17 @@ Try re-running "sf data import resume --job-id %s" with a bigger wait time.
 # error.jobFailed
 
 Job failed to be processed due to:
+
 %s
 
-To review the details of this job, run:
+To review the details of this job, run this command:
+
 sf org open --target-org %s --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F%s"
 
 # error.jobAborted
 
 Job has been aborted.
 
-To review the details of this job, run:
+To review the details of this job, run this command:
+
 sf org open --target-org %s --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F%s"
