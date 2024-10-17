@@ -104,9 +104,6 @@ export class BulkImportStages {
     job.on('inProgress', (res: JobInfoV2) => {
       this.mso.updateData(res);
     });
-    job.on('error', () => {
-      this.mso.error();
-    });
   }
 
   public update(data: JobInfoV2): void {
