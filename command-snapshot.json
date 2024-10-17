@@ -139,6 +139,14 @@
   },
   {
     "alias": [],
+    "command": "data:import:bulk",
+    "flagAliases": [],
+    "flagChars": ["a", "f", "o", "s", "w"],
+    "flags": ["api-version", "async", "file", "flags-dir", "json", "line-ending", "sobject", "target-org", "wait"],
+    "plugin": "@salesforce/plugin-data"
+  },
+  {
+    "alias": [],
     "command": "data:import:legacy:tree",
     "flagAliases": ["apiversion", "confighelp", "contenttype", "sobjecttreefiles", "targetusername", "u"],
     "flagChars": ["c", "f", "o", "p"],
@@ -153,6 +161,14 @@
       "plan",
       "target-org"
     ],
+    "plugin": "@salesforce/plugin-data"
+  },
+  {
+    "alias": [],
+    "command": "data:import:resume",
+    "flagAliases": [],
+    "flagChars": ["i", "w"],
+    "flags": ["flags-dir", "job-id", "json", "use-most-recent", "wait"],
     "plugin": "@salesforce/plugin-data"
   },
   {

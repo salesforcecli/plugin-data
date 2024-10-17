@@ -7,7 +7,7 @@
 
 import { TTLConfig, Global, Logger, Messages, Org } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
-import type { ResumeBulkExportOptions, ResumeOptions } from './types.js';
+import type { ResumeBulkExportOptions, ResumeBulkImportOptions, ResumeOptions } from './types.js';
 import { ColumnDelimiterKeys } from './bulkUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -185,6 +185,75 @@ export class BulkUpsertRequestCache extends BulkDataRequestCache {
     const cache = await BulkUpsertRequestCache.create();
     cache.unset(key);
     await cache.write();
+  }
+}
+
+export class BulkImportRequestCache extends TTLConfig<TTLConfig.Options, BulkExportCacheConfig> {
+  public static getDefaultOptions(): TTLConfig.Options {
+    return {
+      isGlobal: true,
+      isState: true,
+      filename: BulkImportRequestCache.getFileName(),
+      stateFolder: Global.SF_STATE_FOLDER,
+      ttl: Duration.days(7),
+    };
+  }
+
+  public static getFileName(): string {
+    return 'bulk-data-import-cache.json';
+  }
+
+  public static async unset(key: string): Promise<void> {
+    const cache = await BulkImportRequestCache.create();
+    cache.unset(key);
+    await cache.write();
+  }
+
+  /**
+   * Creates a new bulk data import cache entry for the given bulk request id.
+   *
+   * @param bulkRequestId
+   * @param username
+   * @param apiVersion
+   */
+  public async createCacheEntryForRequest(bulkRequestId: string, username: string, apiVersion: string): Promise<void> {
+    this.set(bulkRequestId, {
+      jobId: bulkRequestId,
+      username,
+      apiVersion,
+    });
+    await this.write();
+    Logger.childFromRoot('BulkImportCache').debug(`bulk cache saved for ${bulkRequestId}`);
+  }
+
+  public async resolveResumeOptionsFromCache(jobIdOrMostRecent: string | boolean): Promise<ResumeBulkImportOptions> {
+    if (typeof jobIdOrMostRecent === 'boolean') {
+      const key = this.getLatestKey();
+      if (!key) {
+        throw messages.createError('error.missingCacheEntryError');
+      }
+      // key definitely exists because it came from the cache
+      const entry = this.get(key);
+
+      return {
+        jobInfo: { id: entry.jobId },
+        options: {
+          connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(),
+        },
+      };
+    } else {
+      const entry = this.get(jobIdOrMostRecent);
+      if (!entry) {
+        throw messages.createError('error.bulkRequestIdNotFound', [jobIdOrMostRecent]);
+      }
+
+      return {
+        jobInfo: { id: entry.jobId },
+        options: {
+          connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(),
+        },
+      };
+    }
   }
 }
 
