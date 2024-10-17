@@ -50,81 +50,38 @@ export const runExport = async (configInput: ExportConfig): Promise<ExportReturn
   const refFromIdByType: RefFromIdByType = new Map();
   const logger = Logger.childFromRoot('runExport');
 
-  const recordQueryMap = new Map<string, BasicRecord[]>();
+  const objectRecordMap = new Map<string, BasicRecord[]>();
+  if (outputDir) {
+    await fs.promises.mkdir(outputDir, { recursive: true });
+  }
+
   // set as an empty array to satisfy compiler, will be set with values as we find them
   let result: ExportReturnType = [];
 
   await Promise.all(
     queries.map(async (query) => {
       const { records: recordsFromQuery } = await queryRecords(conn)(query);
-      const describe = await cacheAllMetadata(conn)(recordsFromQuery);
+      await cacheAllMetadata(conn)(recordsFromQuery);
 
-      recordQueryMap.set(recordsFromQuery.at(0)?.attributes.type ?? '', recordsFromQuery);
+      objectRecordMap.set(
+        recordsFromQuery.at(0)?.attributes.type ??
+          // try to match the object being queried
+          new RegExp(/from (\w+)/gim).exec(query)?.at(1) ??
+          '',
+        recordsFromQuery
+      );
 
-      const flatRecords = recordsFromQuery.flatMap(flattenNestedRecords);
-      flatRecords.map(buildRefMap(refFromIdByType)); // get a complete map of ID<->Ref
+      // get a complete map of ID<->Ref
+      const flatRecords = recordsFromQuery.flatMap(flattenNestedRecords).map(buildRefMap(refFromIdByType));
 
       logger.debug(messages.getMessage('dataExportRecordCount', [flatRecords.length, query]));
-      if (outputDir) {
-        await fs.promises.mkdir(outputDir, { recursive: true });
-      }
-
-      // we only have one query, we can generate everything we need as we go
-      if (queries.length === 1) {
-        if (plan) {
-          const planMap = reduceByType(
-            recordsFromQuery
-              .flatMap(flattenWithChildRelationships(describe)())
-              .map(addReferenceIdToAttributes(refFromIdByType))
-              .map(removeChildren)
-              .map(replaceParentReferences(describe)(refFromIdByType))
-              .map(removeNonPlanProperties)
-          );
-
-          const planFiles = [...planMap.entries()].map(
-            ([sobject, records]): PlanFile => ({
-              sobject,
-              contents: { records },
-              saveRefs: shouldSaveRefs(records, [...planMap.values()].flat()),
-              resolveRefs: hasUnresolvedRefs(records),
-              file: `${getPrefixedFileName(sobject, prefix)}.json`,
-              dir: outputDir ?? '',
-            })
-          );
-          const output = planFiles.map(planFileToDataPartPlan);
-          const planName = getPrefixedFileName([...describe.keys(), DATA_PLAN_FILENAME_PART].join('-'), prefix);
-          const location = path.join(outputDir ?? '', planName);
-
-          await Promise.all([
-            ...planFiles.map(writePlanDataFile(ux)),
-            fs.promises.writeFile(location, JSON.stringify(output, null, 4)),
-          ]);
-
-          result = output;
-        } else {
-          if (flatRecords.length > 200) {
-            // use lifecycle so warnings show up in stdout and in the json
-            await Lifecycle.getInstance().emitWarning(
-              messages.getMessage('dataExportRecordCountWarning', [flatRecords.length, query])
-            );
-          }
-          const contents = { records: processRecordsForNonPlan(describe)(refFromIdByType)(recordsFromQuery) };
-          const filename = path.join(
-            outputDir ?? '',
-            getPrefixedFileName(`${[...describe.keys()].join('-')}.json`, prefix)
-          );
-          ux.log(`wrote ${flatRecords.length} records to ${filename}`);
-          fs.writeFileSync(filename, JSON.stringify(contents, null, 4));
-          result = contents;
-        }
-      }
     })
   );
 
-  if (queries.length > 1) {
-    const allQueryValues = Array.from(recordQueryMap.values()).flat();
-    const describe = await cacheAllMetadata(conn)(allQueryValues);
+  const allQueryValues = Array.from(objectRecordMap.values()).flat();
+  const describe = await cacheAllMetadata(conn)(allQueryValues);
 
+  if (plan) {
     const planMap = reduceByType(
       allQueryValues
         .flatMap(flattenWithChildRelationships(describe)())
@@ -145,21 +102,48 @@ export const runExport = async (configInput: ExportConfig): Promise<ExportReturn
       })
     );
 
-    const filesToWrite = [...contentFiles.map(writePlanDataFile(ux))];
-    if (plan) {
-      const planContent = contentFiles.map(planFileToDataPartPlan);
+    const planContent = contentFiles.map(planFileToDataPartPlan);
 
-      result = contentFiles.map(planFileToDataPartPlan);
+    result = contentFiles.map(planFileToDataPartPlan);
 
-      filesToWrite.push(
-        fs.promises.writeFile(path.join(outputDir ?? '', DATA_PLAN_FILENAME_PART), JSON.stringify(planContent, null, 4))
-      );
-    } else {
-      result = { records: Array.from(planMap.values()).flat() };
-    }
+    const planName =
+      queries.length > 1
+        ? DATA_PLAN_FILENAME_PART
+        : getPrefixedFileName([...describe.keys(), DATA_PLAN_FILENAME_PART].join('-'), prefix);
 
-    // if we're only querying in one, write the file now, otherwise we'll need to combine them later
-    await Promise.all(filesToWrite);
+    await Promise.all([
+      ...contentFiles.map(writePlanDataFile(ux)),
+      fs.promises.writeFile(path.join(outputDir ?? '', planName), JSON.stringify(planContent, null, 4)),
+    ]);
+  } else {
+    const records: SObjectTreeInput[] = [];
+    objectRecordMap.forEach((basicRecords, query) => {
+      if (basicRecords.length > 200) {
+        // use lifecycle so warnings show up in stdout and in the json
+        void Lifecycle.getInstance().emitWarning(
+          messages.getMessage('dataExportRecordCountWarning', [basicRecords.length, query])
+        );
+      }
+      if (!basicRecords.length) {
+        // use lifecycle so warnings show up in stdout and in the json
+        void Lifecycle.getInstance().emitWarning(messages.getMessage('noRecordsReturned', [query]));
+      } else {
+        const contents = { records: processRecordsForNonPlan(describe)(refFromIdByType)(basicRecords) };
+        // if we have multiple queries, we'll accumulate all the processed records
+        records.push(...contents.records);
+        const filename = path.join(
+          outputDir ?? '',
+          // if we have multiple queries, name each file according to the object being queried, otherwise, join them together for previous behavior
+          getPrefixedFileName(`${queries.length > 1 ? query : [...describe.keys()].join('-')}.json`, prefix)
+        );
+        ux.log(`wrote ${basicRecords.length} records to ${filename}`);
+        fs.writeFileSync(filename, JSON.stringify(contents, null, 4));
+      }
+    });
+
+    result = {
+      records,
+    };
   }
 
   return result;
