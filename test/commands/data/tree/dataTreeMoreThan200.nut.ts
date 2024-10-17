@@ -50,7 +50,7 @@ describe('data:tree commands with more than 200 records are batches in safe grou
     expect(importResult.jsonOutput?.result.length).to.equal(265, 'Expected 265 records to be imported');
 
     execCmd(
-      `data:export:tree --query "${query}" --prefix ${prefix} --outputdir ${path.join(
+      `data:export:tree --query "${query}" --prefix ${prefix} --output-dir ${path.join(
         '.',
         'export_data'
       )} --plan --json`,
