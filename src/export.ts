@@ -55,9 +55,6 @@ export const runExport = async (configInput: ExportConfig): Promise<ExportReturn
     await fs.promises.mkdir(outputDir, { recursive: true });
   }
 
-  // set as an empty array to satisfy compiler, will be set with values as we find them
-  let result: ExportReturnType = [];
-
   await Promise.all(
     queries.map(async (query) => {
       const { records: recordsFromQuery } = await queryRecords(conn)(query);
@@ -104,8 +101,6 @@ export const runExport = async (configInput: ExportConfig): Promise<ExportReturn
 
     const planContent = contentFiles.map(planFileToDataPartPlan);
 
-    result = contentFiles.map(planFileToDataPartPlan);
-
     const planName =
       queries.length > 1
         ? DATA_PLAN_FILENAME_PART
@@ -115,6 +110,7 @@ export const runExport = async (configInput: ExportConfig): Promise<ExportReturn
       ...contentFiles.map(writePlanDataFile(ux)),
       fs.promises.writeFile(path.join(outputDir ?? '', planName), JSON.stringify(planContent, null, 4)),
     ]);
+    return planContent;
   } else {
     const records: SObjectTreeInput[] = [];
     objectRecordMap.forEach((basicRecords, query) => {
@@ -141,12 +137,10 @@ export const runExport = async (configInput: ExportConfig): Promise<ExportReturn
       }
     });
 
-    result = {
+    return {
       records,
     };
   }
-
-  return result;
 };
 
 // TODO: remove the saveRefs/resolveRefs from the types and all associated code.  It's not used by the updated `import` command
