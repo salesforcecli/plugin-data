@@ -38,7 +38,7 @@ describe('data:tree beta commands with more than 2 levels', () => {
 
   it('should error with invalid soql', () => {
     const result = execCmd(
-      `data:export:tree --query 'SELECT' --prefix ${prefix} --outputdir ${path.join('.', 'export_data')}`
+      `data:export:tree --query 'SELECT' --prefix ${prefix} --output-dir ${path.join('.', 'export_data')}`
     );
     const stdError = getString(result, 'shellOutput.stderr', '').toLowerCase();
     const errorKeywords = ['malformed', 'check the soql', 'invalid soql query'];
@@ -55,7 +55,7 @@ describe('data:tree beta commands with more than 2 levels', () => {
     });
 
     execCmd(
-      `data:export:tree --query "${query}" --prefix ${prefix} --outputdir ${path.join(
+      `data:export:tree --query "${query}" --prefix ${prefix} --output-dir ${path.join(
         '.',
         'export_data'
       )} --plan --json`,

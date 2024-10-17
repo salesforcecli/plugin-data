@@ -51,7 +51,7 @@ describe('data:tree commands', () => {
     const query =
       "select Id, Name, (Select Id, FirstName, LastName, (select AccountId, ContactId from AccountContactRoles) from Contacts), (select Id, ContactId, AccountId from AccountContactRelations where Account.Name != 'We Know Everybody') from Account where Name != 'Sample Account for Entitlements'";
 
-    execCmd(`data:export:tree --query "${query}" --outputdir ${path.join('.', 'export_data')} --plan --json`, {
+    execCmd(`data:export:tree --query "${query}" --output-dir ${path.join('.', 'export_data')} --plan --json`, {
       ensureExitCode: 0,
     });
 
