@@ -316,11 +316,14 @@ const validate = (config: ExportConfig): ExportConfig => {
   config.queries.map((q) => {
     const filepath = path.resolve(process.cwd(), q);
     if (fs.existsSync(filepath)) {
-      queries.push(fs.readFileSync(filepath, 'utf8'));
+      const query = fs.readFileSync(filepath, 'utf8');
 
       if (!config.queries) {
         throw messages.createError('queryNotProvided');
       }
+      // we've validate that the passed file is a valid soql statement, continue the iteration based on the assumption
+      // that q is a soql string, rather than a file name - this combines logic for --query contact.txt and --query "SELECT..."
+      q = query;
     }
 
     if (!q.toLowerCase().startsWith('select')) {
