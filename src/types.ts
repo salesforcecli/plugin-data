@@ -124,6 +124,13 @@ export type ResumeBulkExportOptions = {
   };
 };
 
+export type ResumeBulkImportOptions = {
+  options: {
+    connection: Connection;
+  };
+  jobInfo: { id: string };
+};
+
 export type BulkResultV2 = {
   jobInfo: JobInfoV2;
   records?: BulkRecordsV2;

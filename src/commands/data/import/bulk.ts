@@ -12,6 +12,7 @@ import { Connection, Messages, Org } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { IngestJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { Schema } from '@jsforce/jsforce-node';
+import { ensureString } from '@salesforce/ts-types';
 import { BulkImportRequestCache } from '../../../bulkDataRequestCache.js';
 import { BulkImportStages } from '../../../ux/bulkImportStages.js';
 
@@ -89,7 +90,7 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
       stages.stop();
 
       const cache = await BulkImportRequestCache.create();
-      await cache.createCacheEntryForRequest(job.id, conn.getUsername(), conn.getApiVersion());
+      await cache.createCacheEntryForRequest(job.id, ensureString(conn.getUsername()), conn.getApiVersion());
 
       this.log(messages.getMessage('export.resume', [job.id]));
 

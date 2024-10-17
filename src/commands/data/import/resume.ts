@@ -51,12 +51,7 @@ export default class DataImportResume extends SfCommand<DataImportResumeResult> 
 
     const cache = await BulkImportRequestCache.create();
 
-    const resumeOpts = await cache.resolveResumeOptionsFromCache(
-      flags['job-id'],
-      flags['use-most-recent'],
-      undefined,
-      undefined
-    );
+    const resumeOpts = await cache.resolveResumeOptionsFromCache(flags['job-id'] ?? flags['use-most-recent']);
 
     const conn = resumeOpts.options.connection;
 
