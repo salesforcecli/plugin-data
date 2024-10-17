@@ -8,6 +8,7 @@
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { IngestJobV2, JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { Schema } from '@jsforce/jsforce-node';
+import terminalLink from 'terminal-link';
 
 type Options = {
   resume: boolean;
@@ -75,7 +76,13 @@ export class BulkImportStages {
           bold: true,
           get: (data): string | undefined =>
             data?.id &&
-            `${baseUrl}/lightning/setup/AsyncApiJobStatus/page?address=${encodeURIComponent(`/${data.id}`)}`,
+            terminalLink(
+              data.id,
+              `${baseUrl}/lightning/setup/AsyncApiJobStatus/page?address=${encodeURIComponent(`/${data.id}`)}`,
+              {
+                fallback: (text, url) => `${text} (${url})`,
+              }
+            ),
         },
       ],
     });
