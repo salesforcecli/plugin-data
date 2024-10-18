@@ -28,17 +28,9 @@ describe('data export resume NUTs', () => {
       devhubAuthStrategy: 'AUTO',
     });
 
-    // TODO: make this use the new `data import bulk` command when its available (W-13656292)
-    execCmd(
-      `data:upsert:bulk --sobject Account --file ${path.join(
-        'data',
-        'bulkUpsertLarge.csv'
-      )} --external-id Id --json --wait 10`,
-      {
-        ensureExitCode: 0,
-        cli: 'sf',
-      }
-    );
+    execCmd(`data:import:bulk --sobject Account --file ${path.join('data', 'bulkUpsertLarge.csv')} --json --wait 10`, {
+      ensureExitCode: 0,
+    });
 
     totalAccountRecords = execCmd<{ totalSize: number }>('data query -q "select count() from account" --json', {
       ensureExitCode: 0,
