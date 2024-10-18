@@ -81,6 +81,8 @@ sf plugins
 - [`sf data delete bulk`](#sf-data-delete-bulk)
 - [`sf data delete record`](#sf-data-delete-record)
 - [`sf data delete resume`](#sf-data-delete-resume)
+- [`sf data export bulk`](#sf-data-export-bulk)
+- [`sf data export resume`](#sf-data-export-resume)
 - [`sf data export tree`](#sf-data-export-tree)
 - [`sf data get record`](#sf-data-get-record)
 - [`sf data import tree`](#sf-data-import-tree)
@@ -142,7 +144,7 @@ EXAMPLES
     $ sf data create file --file path/to/astro.png --parent-id a03fakeLoJWPIA3
 ```
 
-_See code: [src/commands/data/create/file.ts](https://github.com/salesforcecli/plugin-data/blob/3.6.8/src/commands/data/create/file.ts)_
+_See code: [src/commands/data/create/file.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/create/file.ts)_
 
 ## `sf data create record`
 
@@ -198,7 +200,7 @@ EXAMPLES
       TracedEntityId=01p17000000R6bLAAS"
 ```
 
-_See code: [src/commands/data/create/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.6.8/src/commands/data/create/record.ts)_
+_See code: [src/commands/data/create/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/create/record.ts)_
 
 ## `sf data delete bulk`
 
@@ -256,7 +258,7 @@ FLAG DESCRIPTIONS
     and can be enabled only by a system administrator.
 ```
 
-_See code: [src/commands/data/delete/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.6.8/src/commands/data/delete/bulk.ts)_
+_See code: [src/commands/data/delete/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/delete/bulk.ts)_
 
 ## `sf data delete record`
 
@@ -317,7 +319,7 @@ EXAMPLES
     $ sf data delete record --use-tooling-api --sobject TraceFlag --record-id 7tf8c
 ```
 
-_See code: [src/commands/data/delete/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.6.8/src/commands/data/delete/record.ts)_
+_See code: [src/commands/data/delete/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/delete/record.ts)_
 
 ## `sf data delete resume`
 
@@ -356,7 +358,117 @@ EXAMPLES
     $ sf data delete resume --use-most-recent --target-org my-scratch
 ```
 
-_See code: [src/commands/data/delete/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.6.8/src/commands/data/delete/resume.ts)_
+_See code: [src/commands/data/delete/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/delete/resume.ts)_
+
+## `sf data export bulk`
+
+Bulk export records from an org into a file using a SOQL query. Uses Bulk API 2.0.
+
+```
+USAGE
+  $ sf data export bulk -o <value> --output-file <value> -r csv|json [--json] [--flags-dir <value>] [--api-version
+    <value>] [-w <minutes> | --async] [-q <value> | --query-file <value>] [--all-rows] [--column-delimiter
+    BACKQUOTE|CARET|COMMA|PIPE|SEMICOLON|TAB] [--line-ending LF|CRLF]
+
+FLAGS
+  -o, --target-org=<value>         (required) Username or alias of the target org. Not required if the `target-org`
+                                   configuration variable is already set.
+  -q, --query=<value>              SOQL query to execute.
+  -r, --result-format=<option>     (required) [default: csv] Format to write the results.
+                                   <options: csv|json>
+  -w, --wait=<minutes>             Time to wait for the command to finish, in minutes.
+      --all-rows                   Include records that have been soft-deleted due to a merge or delete. By default,
+                                   deleted records are not returned.
+      --api-version=<value>        Override the api version used for api requests made by this command
+      --async                      Don't wait for the job to complete.
+      --column-delimiter=<option>  Column delimiter to be used when writing CSV output. Default is COMMA.
+                                   <options: BACKQUOTE|CARET|COMMA|PIPE|SEMICOLON|TAB>
+      --line-ending=<option>       Line ending to be used when writing CSV output. Default value on Windows is is
+                                   `CRLF`; on macOS and Linux it's `LR`.
+                                   <options: LF|CRLF>
+      --output-file=<value>        (required) File where records are written.
+      --query-file=<value>         File that contains the SOQL query.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Bulk export records from an org into a file using a SOQL query. Uses Bulk API 2.0.
+
+  You can use this command to export millions of records from an org, either to migrate data or to back it up.
+
+  Use a SOQL query to specify the fields of a standard or custom object that you want to export. Specify the SOQL query
+  either at the command line with the --query flag or read it from a file with the --query-file flag; you can't specify
+  both flags. The --output-file flag is required, which means you can only write the records to a file, in either CSV or
+  JSON format.
+
+  Bulk exports can take a while, depending on how many records are returned by the SOQL query. If the command times out,
+  or you specified the --async flag, the command displays the job ID. To see the status and get the results of the job,
+  run "sf data export resume" and pass the job ID to the --job-id flag.
+
+  IMPORTANT: This command uses Bulk API 2.0, which limits the type of SOQL queries you can run. For example, you can't
+  use aggregate functions such as count(). For the complete list of limitations, see the "SOQL Considerations" section
+  in the "Bulk API 2.0 and Bulk API Developer Guide"
+  (https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/queries.htm).
+
+EXAMPLES
+  Export the Id, Name, and Account.Name fields of the Contact object into a CSV-formatted file; if the export doesn't
+  complete in 10 minutes, the command ends and displays a job ID. Use the org with alias "my-scratch":
+
+    $ sf data export bulk --query "SELECT Id, Name, Account.Name FROM Contact" --output-file export-accounts.csv \
+      --wait 10 --target-org my-scratch
+
+  Similar to previous example, but use the default org, export the records into a JSON-formatted file, and include
+  records that have been soft deleted:
+
+    $ sf data export bulk --query "SELECT Id, Name, Account.Name FROM Contact" --output-file export-accounts.json \
+      --result-format json --wait 10 --all-rows
+
+  Export asynchronously; the command immediately returns a job ID that you then pass to the "sf data export resume"
+  command:
+
+    $ sf data export bulk --query "SELECT Id, Name, Account.Name FROM Contact" --output-file export-accounts.json \
+      --result-format json --async
+```
+
+_See code: [src/commands/data/export/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/export/bulk.ts)_
+
+## `sf data export resume`
+
+Resume a bulk export job that you previously started.
+
+```
+USAGE
+  $ sf data export resume [--json] [--flags-dir <value>] [-i <value>] [--use-most-recent] [--api-version <value>]
+
+FLAGS
+  -i, --job-id=<value>       Job ID of the bulk export.
+      --api-version=<value>  Override the api version used for api requests made by this command
+      --use-most-recent      Use the job ID of the bulk export job that was most recently run.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Resume a bulk export job that you previously started.
+
+  When the original "data export bulk" command either times out or is run with the --async flag, it displays a job ID.
+  To see the status and get the results of the bulk export, run this command by either passing it the job ID or using
+  the --use-most-recent flag to specify the most recent bulk export job.
+
+EXAMPLES
+  Resume a bulk export job run on your default org by specifying a job ID:
+
+    $ sf data export resume --job-id 750xx000000005sAAA
+
+  Resume the most recently-run bulk export job for an org with alias my-scratch:
+
+    $ sf data export resume --use-most-recent --target-org my-scratch
+```
+
+_See code: [src/commands/data/export/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/export/resume.ts)_
 
 ## `sf data export tree`
 
@@ -417,7 +529,7 @@ EXAMPLES
       my-scratch
 ```
 
-_See code: [src/commands/data/export/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.6.8/src/commands/data/export/tree.ts)_
+_See code: [src/commands/data/export/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/export/tree.ts)_
 
 ## `sf data get record`
 
@@ -481,7 +593,7 @@ EXAMPLES
     $ sf data get record --use-tooling-api --sobject TraceFlag --record-id 7tf8c
 ```
 
-_See code: [src/commands/data/get/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.6.8/src/commands/data/get/record.ts)_
+_See code: [src/commands/data/get/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/get/record.ts)_
 
 ## `sf data import tree`
 
@@ -546,7 +658,7 @@ FLAG DESCRIPTIONS
     - files(array) - Files: An array of files paths to load
 ```
 
-_See code: [src/commands/data/import/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.6.8/src/commands/data/import/tree.ts)_
+_See code: [src/commands/data/import/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/import/tree.ts)_
 
 ## `sf data query`
 
@@ -610,7 +722,7 @@ EXAMPLES
     $ sf data query --query "SELECT Id FROM Contact" --bulk --wait 0
 ```
 
-_See code: [src/commands/data/query.ts](https://github.com/salesforcecli/plugin-data/blob/3.6.8/src/commands/data/query.ts)_
+_See code: [src/commands/data/query.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/query.ts)_
 
 ## `sf data query resume`
 
@@ -648,7 +760,7 @@ EXAMPLES
     $ sf data query resume --bulk-query-id 7500x000005BdFzXXX
 ```
 
-_See code: [src/commands/data/query/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.6.8/src/commands/data/query/resume.ts)_
+_See code: [src/commands/data/query/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/query/resume.ts)_
 
 ## `sf data resume`
 
@@ -685,7 +797,7 @@ EXAMPLES
     $ sf data resume --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA
 ```
 
-_See code: [src/commands/data/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.6.8/src/commands/data/resume.ts)_
+_See code: [src/commands/data/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/resume.ts)_
 
 ## `sf data search`
 
@@ -735,7 +847,7 @@ EXAMPLES
     $ sf data search --file query.txt --target-org my-scratch --result-format csv
 ```
 
-_See code: [src/commands/data/search.ts](https://github.com/salesforcecli/plugin-data/blob/3.6.8/src/commands/data/search.ts)_
+_See code: [src/commands/data/search.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/search.ts)_
 
 ## `sf data update record`
 
@@ -797,7 +909,7 @@ EXAMPLES
       "ExpirationDate=2017-12-01T00:58:04.000+0000"
 ```
 
-_See code: [src/commands/data/update/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.6.8/src/commands/data/update/record.ts)_
+_See code: [src/commands/data/update/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/update/record.ts)_
 
 ## `sf data upsert bulk`
 
@@ -850,7 +962,7 @@ EXAMPLES
       my-scratch
 ```
 
-_See code: [src/commands/data/upsert/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.6.8/src/commands/data/upsert/bulk.ts)_
+_See code: [src/commands/data/upsert/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/upsert/bulk.ts)_
 
 ## `sf data upsert resume`
 
@@ -889,7 +1001,7 @@ EXAMPLES
     $ sf data upsert resume --use-most-recent --target-org my-scratch
 ```
 
-_See code: [src/commands/data/upsert/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.6.8/src/commands/data/upsert/resume.ts)_
+_See code: [src/commands/data/upsert/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/data/upsert/resume.ts)_
 
 ## `sf force data bulk delete`
 
@@ -936,7 +1048,7 @@ EXAMPLES
     $ sf force data bulk delete --sobject MyObject__c --file files/delete.csv --wait 5 --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/3.6.8/src/commands/force/data/bulk/delete.ts)_
+_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/force/data/bulk/delete.ts)_
 
 ## `sf force data bulk status`
 
@@ -973,7 +1085,7 @@ EXAMPLES
     $ sf force data bulk status --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/3.6.8/src/commands/force/data/bulk/status.ts)_
+_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/force/data/bulk/status.ts)_
 
 ## `sf force data bulk upsert`
 
@@ -1031,6 +1143,6 @@ EXAMPLES
       --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/3.6.8/src/commands/force/data/bulk/upsert.ts)_
+_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/3.7.1/src/commands/force/data/bulk/upsert.ts)_
 
 <!-- commandsstop -->

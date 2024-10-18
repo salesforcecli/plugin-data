@@ -9,6 +9,7 @@ import { JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import type { QueryResult, Record as jsRecord } from '@jsforce/jsforce-node';
 import { Optional } from '@salesforce/ts-types';
 import { Connection } from '@salesforce/core';
+import { ColumnDelimiterKeys } from './bulkUtils.js';
 
 export type GenericEntry = [string, unknown];
 export type GenericObject = Record<string, unknown>;
@@ -106,6 +107,21 @@ export type ResumeOptions = {
     connection: Connection;
   };
   jobInfo: { id: string };
+};
+
+export type ResumeBulkExportOptions = {
+  options: {
+    operation: BulkOperation;
+    pollingOptions: { pollTimeout: number; pollInterval: number };
+    query: string;
+    connection: Connection;
+  };
+  jobInfo: { id: string };
+  outputInfo: {
+    filePath: string;
+    format: 'csv' | 'json';
+    columnDelimiter: ColumnDelimiterKeys;
+  };
 };
 
 export type BulkResultV2 = {

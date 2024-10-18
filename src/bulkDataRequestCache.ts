@@ -7,13 +7,25 @@
 
 import { TTLConfig, Global, Logger, Messages, Org } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
-import type { ResumeOptions } from './types.js';
+import type { ResumeBulkExportOptions, ResumeOptions } from './types.js';
+import { ColumnDelimiterKeys } from './bulkUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'messages');
 
 export type BulkDataCacheConfig = {
   username: string;
+  jobId: string;
+  apiVersion: string;
+};
+
+export type BulkExportCacheConfig = {
+  username: string;
+  outputInfo: {
+    filePath: string;
+    format: 'csv' | 'json';
+    columnDelimiter: ColumnDelimiterKeys;
+  };
   jobId: string;
   apiVersion: string;
 };
@@ -61,7 +73,7 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
     if (!useMostRecent && !bulkJobId) {
       throw messages.createError('bulkRequestIdRequiredWhenNotUsingMostRecent');
     }
-    const resumeOptionsOptions = {
+    const resumeOptions = {
       operation: 'query',
       query: '',
       pollingOptions: { pollTimeout: 0, pollInterval: 0 },
@@ -76,7 +88,7 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
         return {
           jobInfo: { id: entry.jobId },
           options: {
-            ...resumeOptionsOptions,
+            ...resumeOptions,
             connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
           },
         };
@@ -88,7 +100,7 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
         return {
           jobInfo: { id: entry.jobId },
           options: {
-            ...resumeOptionsOptions,
+            ...resumeOptions,
             connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
           },
         };
@@ -96,7 +108,7 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
         return {
           jobInfo: { id: bulkJobId },
           options: {
-            ...resumeOptionsOptions,
+            ...resumeOptions,
             connection: org.getConnection(apiVersion),
           },
         };
@@ -104,7 +116,7 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
         throw messages.createError('cannotCreateResumeOptionsWithoutAnOrg');
       }
     } else if (useMostRecent) {
-      throw messages.createError('cannotFindMostRecentCacheEntry');
+      throw messages.createError('error.missingCacheEntryError');
     } else {
       throw messages.createError('bulkRequestIdRequiredWhenNotUsingMostRecent');
     }
@@ -173,5 +185,100 @@ export class BulkUpsertRequestCache extends BulkDataRequestCache {
     const cache = await BulkUpsertRequestCache.create();
     cache.unset(key);
     await cache.write();
+  }
+}
+
+export class BulkExportRequestCache extends TTLConfig<TTLConfig.Options, BulkExportCacheConfig> {
+  public static getDefaultOptions(): TTLConfig.Options {
+    return {
+      isGlobal: true,
+      isState: true,
+      filename: BulkExportRequestCache.getFileName(),
+      stateFolder: Global.SF_STATE_FOLDER,
+      ttl: Duration.days(7),
+    };
+  }
+
+  public static getFileName(): string {
+    return 'bulk-data-export-cache.json';
+  }
+
+  public static async unset(key: string): Promise<void> {
+    const cache = await BulkUpsertRequestCache.create();
+    cache.unset(key);
+    await cache.write();
+  }
+
+  /**
+   * Creates a new bulk export request cache entry for the given id.
+   */
+  public async createCacheEntryForRequest(
+    bulkRequestId: string,
+    outputInfo: {
+      filePath: string;
+      format: 'csv' | 'json';
+      columnDelimiter: ColumnDelimiterKeys;
+    },
+    username: string | undefined,
+    apiVersion: string | undefined
+  ): Promise<void> {
+    if (!username) {
+      throw messages.createError('usernameRequired');
+    }
+    this.set(bulkRequestId, {
+      jobId: bulkRequestId,
+      outputInfo,
+      username,
+      apiVersion,
+    });
+    await this.write();
+    Logger.childFromRoot('BulkExportCache').debug(`bulk cache saved for ${bulkRequestId}`);
+  }
+
+  public async resolveResumeOptionsFromCache(
+    jobIdOrMostRecent: string | boolean,
+    apiVersion: string | undefined
+  ): Promise<ResumeBulkExportOptions> {
+    const resumeOptionsOptions = {
+      operation: 'query',
+      query: '',
+      pollingOptions: { pollTimeout: 0, pollInterval: 0 },
+    } satisfies Pick<ResumeOptions['options'], 'operation' | 'query' | 'pollingOptions'>;
+
+    if (typeof jobIdOrMostRecent === 'boolean') {
+      const key = this.getLatestKey();
+      if (!key) {
+        throw messages.createError('error.missingCacheEntryError');
+      }
+      // key definitely exists because it came from the cache
+      const entry = this.get(key);
+
+      return {
+        jobInfo: { id: entry.jobId },
+        outputInfo: {
+          filePath: entry.outputInfo.filePath,
+          format: entry.outputInfo.format,
+          columnDelimiter: entry.outputInfo.columnDelimiter,
+        },
+        options: {
+          ...resumeOptionsOptions,
+          connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
+        },
+      };
+    } else {
+      const entry = this.get(jobIdOrMostRecent);
+      if (!entry) {
+        throw messages.createError('error.bulkRequestIdNotFound', [jobIdOrMostRecent]);
+      }
+
+      return {
+        jobInfo: { id: entry.jobId },
+        outputInfo: entry.outputInfo,
+        options: {
+          ...resumeOptionsOptions,
+          connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
+        },
+      };
+    }
   }
 }

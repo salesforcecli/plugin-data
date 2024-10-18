@@ -1,3 +1,35 @@
+## [3.7.1](https://github.com/salesforcecli/plugin-data/compare/3.7.0...3.7.1) (2024-10-09)
+
+### Bug Fixes
+
+- bump oclif/mso ([#1085](https://github.com/salesforcecli/plugin-data/issues/1085)) ([ecccff7](https://github.com/salesforcecli/plugin-data/commit/ecccff7c7fe24d0a7db8687f842fe24d749ac86a))
+
+# [3.7.0](https://github.com/salesforcecli/plugin-data/compare/3.6.9...3.7.0) (2024-10-08)
+
+### Bug Fixes
+
+- `--line-ending` depends on `--result-format=csv` ([ecb9ce8](https://github.com/salesforcecli/plugin-data/commit/ecb9ce8fc82130be64ebb17bb588c40f4d959ed7))
+- `export bulk resume` doesn't have target-org ([fc50451](https://github.com/salesforcecli/plugin-data/commit/fc504514c4ac6b3cdad89a3e348f978555b774b6))
+- allow resul-format=json without column-delimiter ([76dcf9b](https://github.com/salesforcecli/plugin-data/commit/76dcf9b92ed48e6e38d2ba6acdbd9aeccdfa4b20))
+- create/append but fail if exists ([bb8f0a3](https://github.com/salesforcecli/plugin-data/commit/bb8f0a32276c8d74222670b8002d55cc8d44df47))
+- **export:resume:** better polling options ([5770277](https://github.com/salesforcecli/plugin-data/commit/57702776436b9e284ed89d665b33e4af1b6395b3))
+- remove hardcoded PIPE ([7f91c09](https://github.com/salesforcecli/plugin-data/commit/7f91c0954db4510686e72dbfa86a5c2c7a5b1d78))
+- support all CSV delimiters ([cd073f6](https://github.com/salesforcecli/plugin-data/commit/cd073f612ce0a6a7489ece6d7509f8b30213a5cd))
+- support JSON export ([b23e1c0](https://github.com/salesforcecli/plugin-data/commit/b23e1c01306a255f35a11a0c2a0f0606d6d577a7))
+
+### Features
+
+- multi-stage-output, part 1 ([976d500](https://github.com/salesforcecli/plugin-data/commit/976d50064d57f6b232a41367ddc6714e5a8083c6))
+- support `--line-ending` ([de4ccb9](https://github.com/salesforcecli/plugin-data/commit/de4ccb9c138f27e1e09816c5dfa9c60d6b2689bb))
+- support `--query-file` ([af0edb9](https://github.com/salesforcecli/plugin-data/commit/af0edb97e5669567d7daa8ab5bc173345d90a515))
+- support `column-delimiter` ([398bc3c](https://github.com/salesforcecli/plugin-data/commit/398bc3ce7706ba8548854e904f3e133f68f7546d))
+
+## [3.6.9](https://github.com/salesforcecli/plugin-data/compare/3.6.8...3.6.9) (2024-10-06)
+
+### Bug Fixes
+
+- **deps:** bump @jsforce/jsforce-node from 3.4.1 to 3.5.1 ([c68f53d](https://github.com/salesforcecli/plugin-data/commit/c68f53d2f535e9c85da346ec887e2cf37c8bf6c1))
+
 ## [3.6.8](https://github.com/salesforcecli/plugin-data/compare/3.6.7...3.6.8) (2024-09-29)
 
 ### Bug Fixes

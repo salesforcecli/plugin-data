@@ -1,6 +1,6 @@
 {
   "name": "@salesforce/plugin-data",
-  "version": "3.6.8",
+  "version": "3.7.1",
   "description": "Plugin for salesforce data commands",
   "author": "Salesforce",
   "homepage": "https://github.com/salesforcecli/plugin-data",
@@ -53,7 +53,8 @@
             "description": "Delete a single record or multiple records in bulk."
           },
           "export": {
-            "description": "Export data from your org."
+            "description": "Export data from your org.",
+            "external": true
           },
           "get": {
             "description": "Get a single record."
@@ -107,7 +108,8 @@
     "version": "oclif readme"
   },
   "dependencies": {
-    "@jsforce/jsforce-node": "^3.4.1",
+    "@jsforce/jsforce-node": "^3.5.1",
+    "@oclif/multi-stage-output": "^0.7.5",
     "@salesforce/core": "^8.6.1",
     "@salesforce/kit": "^3.2.2",
     "@salesforce/sf-plugins-core": "^11.3.10",
@@ -116,16 +118,17 @@
     "change-case": "^5.4.4",
     "csv-parse": "^5.5.6",
     "csv-stringify": "^6.5.1",
-    "form-data": "^4.0.0"
+    "form-data": "^4.0.0",
+    "terminal-link": "^3.0.0"
   },
   "devDependencies": {
     "@oclif/core": "^4.0.19",
     "@oclif/plugin-command-snapshot": "^5.2.15",
-    "@salesforce/cli-plugins-testkit": "^5.3.32",
+    "@salesforce/cli-plugins-testkit": "^5.3.34",
     "@salesforce/dev-scripts": "^10.2.10",
-    "@salesforce/plugin-command-reference": "^3.1.26",
+    "@salesforce/plugin-command-reference": "^3.1.27",
     "@salesforce/types": "^1.2.0",
-    "eslint-plugin-sf-plugin": "^1.20.7",
+    "eslint-plugin-sf-plugin": "^1.20.8",
     "oclif": "^4.14.36",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2"
