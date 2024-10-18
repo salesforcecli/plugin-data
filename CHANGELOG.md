@@ -1,3 +1,9 @@
+# [3.8.0](https://github.com/salesforcecli/plugin-data/compare/3.7.1...3.8.0) (2024-10-18)
+
+### Features
+
+- add `import bulk/resume` commands ([#1091](https://github.com/salesforcecli/plugin-data/issues/1091)) ([b379335](https://github.com/salesforcecli/plugin-data/commit/b379335eb6e832de2abd8a144bc3b09c16bb70cd)), closes [#1093](https://github.com/salesforcecli/plugin-data/issues/1093)
+
 ## [3.7.1](https://github.com/salesforcecli/plugin-data/compare/3.7.0...3.7.1) (2024-10-09)
 
 ### Bug Fixes
