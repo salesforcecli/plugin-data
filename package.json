@@ -123,7 +123,7 @@
     "terminal-link": "^3.0.0"
   },
   "devDependencies": {
-    "@oclif/core": "^4.0.19",
+    "@oclif/core": "^4.0.29",
     "@oclif/plugin-command-snapshot": "^5.2.19",
     "@salesforce/cli-plugins-testkit": "^5.3.34",
     "@salesforce/dev-scripts": "^10.2.10",
