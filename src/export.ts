@@ -8,21 +8,22 @@
 import path from 'node:path';
 import fs from 'node:fs';
 
-import { Logger, Messages, SfError, Lifecycle, Connection } from '@salesforce/core';
+import { Connection, Lifecycle, Logger, Messages, SfError } from '@salesforce/core';
 import type { DescribeSObjectResult, QueryResult } from '@jsforce/jsforce-node';
 import { Ux } from '@salesforce/sf-plugins-core';
 import { ensure } from '@salesforce/ts-types';
 import {
   BasicRecord,
   DataPlanPart,
-  hasNonEmptyNestedRecords,
-  hasNestedRecordsFilter,
-  SObjectTreeFileContents,
-  SObjectTreeInput,
   GenericEntry,
   hasNestedRecords,
+  hasNestedRecordsFilter,
+  hasNonEmptyNestedRecords,
+  SObjectTreeFileContents,
+  SObjectTreeInput,
 } from './types.js';
 import { hasUnresolvedRefs } from './api/data/tree/functions.js';
+import { ExportTreeResult } from './commands/data/export/tree.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'exportApi');
@@ -30,7 +31,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'exportApi');
 const DATA_PLAN_FILENAME_PART = 'plan.json';
 
 export type ExportConfig = {
-  query: string;
+  queries: string[];
   outputDir?: string;
   plan?: boolean;
   prefix?: string;
@@ -44,25 +45,42 @@ export type RefFromIdByType = Map<string, Map<string, string>>;
 /** only used internally, but a more useful structure than the original */
 type PlanFile = Omit<DataPlanPart, 'files'> & { contents: SObjectTreeFileContents; file: string; dir: string };
 
-export const runExport = async (configInput: ExportConfig): Promise<DataPlanPart[] | SObjectTreeFileContents> => {
-  const { outputDir, plan, query, conn, prefix, ux } = validate(configInput);
-  const logger = Logger.childFromRoot('runExport');
-  const { records: recordsFromQuery } = await queryRecords(conn)(query);
-  const describe = await cacheAllMetadata(conn)(recordsFromQuery);
-
+export const runExport = async (configInput: ExportConfig): Promise<ExportTreeResult> => {
+  const { outputDir, plan, queries, conn, prefix, ux } = validate(configInput);
   const refFromIdByType: RefFromIdByType = new Map();
-  const flatRecords = recordsFromQuery.flatMap(flattenNestedRecords);
-  flatRecords.map(buildRefMap(refFromIdByType)); // get a complete map of ID<->Ref
+  const logger = Logger.childFromRoot('runExport');
 
-  logger.debug(messages.getMessage('dataExportRecordCount', [flatRecords.length, query]));
-
+  const objectRecordMap = new Map<string, BasicRecord[]>();
   if (outputDir) {
     await fs.promises.mkdir(outputDir, { recursive: true });
   }
 
+  await Promise.all(
+    queries.map(async (query) => {
+      const { records: recordsFromQuery } = await queryRecords(conn)(query);
+      await cacheAllMetadata(conn)(recordsFromQuery);
+
+      objectRecordMap.set(
+        recordsFromQuery.at(0)?.attributes.type ??
+          // try to match the object being queried
+          new RegExp(/from (\w+)/gim).exec(query)?.at(1) ??
+          '',
+        recordsFromQuery
+      );
+
+      // get a complete map of ID<->Ref
+      const flatRecords = recordsFromQuery.flatMap(flattenNestedRecords).map(buildRefMap(refFromIdByType));
+
+      logger.debug(messages.getMessage('dataExportRecordCount', [flatRecords.length, query]));
+    })
+  );
+
+  const allQueryValues = Array.from(objectRecordMap.values()).flat();
+  const describe = await cacheAllMetadata(conn)(allQueryValues);
+
   if (plan) {
     const planMap = reduceByType(
-      recordsFromQuery
+      allQueryValues
         .flatMap(flattenWithChildRelationships(describe)())
         .map(addReferenceIdToAttributes(refFromIdByType))
         .map(removeChildren)
@@ -70,7 +88,7 @@ export const runExport = async (configInput: ExportConfig): Promise<DataPlanPart
         .map(removeNonPlanProperties)
     );
 
-    const planFiles = [...planMap.entries()].map(
+    const contentFiles = [...planMap.entries()].map(
       ([sobject, records]): PlanFile => ({
         sobject,
         contents: { records },
@@ -80,25 +98,48 @@ export const runExport = async (configInput: ExportConfig): Promise<DataPlanPart
         dir: outputDir ?? '',
       })
     );
-    const output = planFiles.map(planFileToDataPartPlan);
-    const planName = getPrefixedFileName([...describe.keys(), DATA_PLAN_FILENAME_PART].join('-'), prefix);
+
+    const planContent = contentFiles.map(planFileToDataPartPlan);
+
+    const planName =
+      queries.length > 1
+        ? DATA_PLAN_FILENAME_PART
+        : getPrefixedFileName([...describe.keys(), DATA_PLAN_FILENAME_PART].join('-'), prefix);
+
     await Promise.all([
-      ...planFiles.map(writePlanDataFile(ux)),
-      fs.promises.writeFile(path.join(outputDir ?? '', planName), JSON.stringify(output, null, 4)),
+      ...contentFiles.map(writePlanDataFile(ux)),
+      fs.promises.writeFile(path.join(outputDir ?? '', planName), JSON.stringify(planContent, null, 4)),
     ]);
-    return output;
+    return planContent;
   } else {
-    if (flatRecords.length > 200) {
-      // use lifecycle so warnings show up in stdout and in the json
-      await Lifecycle.getInstance().emitWarning(
-        messages.getMessage('dataExportRecordCountWarning', [flatRecords.length, query])
-      );
-    }
-    const contents = { records: processRecordsForNonPlan(describe)(refFromIdByType)(recordsFromQuery) };
-    const filename = path.join(outputDir ?? '', getPrefixedFileName(`${[...describe.keys()].join('-')}.json`, prefix));
-    ux.log(`wrote ${flatRecords.length} records to ${filename}`);
-    fs.writeFileSync(filename, JSON.stringify(contents, null, 4));
-    return contents;
+    const records: SObjectTreeInput[] = [];
+    objectRecordMap.forEach((basicRecords, query) => {
+      if (basicRecords.length > 200) {
+        // use lifecycle so warnings show up in stdout and in the json
+        void Lifecycle.getInstance().emitWarning(
+          messages.getMessage('dataExportRecordCountWarning', [basicRecords.length, query])
+        );
+      }
+      if (!basicRecords.length) {
+        // use lifecycle so warnings show up in stdout and in the json
+        void Lifecycle.getInstance().emitWarning(messages.getMessage('noRecordsReturned', [query]));
+      } else {
+        const contents = { records: processRecordsForNonPlan(describe)(refFromIdByType)(basicRecords) };
+        // if we have multiple queries, we'll accumulate all the processed records
+        records.push(...contents.records);
+        const filename = path.join(
+          outputDir ?? '',
+          // if we have multiple queries, name each file according to the object being queried, otherwise, join them together for previous behavior
+          getPrefixedFileName(`${queries.length > 1 ? query : [...describe.keys()].join('-')}.json`, prefix)
+        );
+        ux.log(`wrote ${basicRecords.length} records to ${filename}`);
+        fs.writeFileSync(filename, JSON.stringify(contents, null, 4));
+      }
+    });
+
+    return {
+      records,
+    };
   }
 };
 
@@ -121,7 +162,7 @@ const writePlanDataFile =
   (ux: Ux) =>
   async (p: PlanFile): Promise<void> => {
     await fs.promises.writeFile(path.join(p.dir, p.file), JSON.stringify(p.contents, null, 4));
-    ux.log(`wrote ${p.contents.records.length} records to ${p.file}`);
+    ux.log(`wrote ${p.contents.records.length} records to ${path.join(p.dir, p.file)}`);
   };
 
 // future: use Map.groupBy() when it's available
@@ -207,7 +248,8 @@ export const replaceParentReferences =
     const typeDescribe = ensure(describe.get(record.attributes.type), `Missing describe for ${record.attributes.type}`);
     const replacedReferences = Object.fromEntries(
       Object.entries(record)
-        .filter(isRelationshipFieldFilter(typeDescribe)) // only look at the fields that are references
+        .filter(isRelationshipFieldFilter(typeDescribe))
+        // only look at the fields that are references
         // We can check describe to see what the type could be.
         // If it narrows to only 1 type, pass that to refFromId.
         // If it's polymorphic, don't pass a type because refFromId will need to check all the types.
@@ -261,23 +303,29 @@ const addReferenceIdToAttributes =
  * @param config - The export configuration.
  */
 const validate = (config: ExportConfig): ExportConfig => {
-  if (!config.query) {
+  if (!config.queries) {
     throw new SfError(messages.getMessage('queryNotProvided'), 'queryNotProvided');
   }
+  const queries: string[] = [];
+  config.queries.map((q) => {
+    const filepath = path.resolve(process.cwd(), q);
+    if (fs.existsSync(filepath)) {
+      const query = fs.readFileSync(filepath, 'utf8');
 
-  const filepath = path.resolve(process.cwd(), config.query);
-  if (fs.existsSync(filepath)) {
-    config.query = fs.readFileSync(filepath, 'utf8');
-
-    if (!config.query) {
-      throw messages.createError('queryNotProvided');
+      if (!config.queries) {
+        throw messages.createError('queryNotProvided');
+      }
+      // we've validate that the passed file is a valid soql statement, continue the iteration based on the assumption
+      // that q is a soql string, rather than a file name - this combines logic for --query contact.txt and --query "SELECT..."
+      q = query;
     }
-  }
 
-  config.query = config.query.trim();
-  if (!config.query.toLowerCase().startsWith('select')) {
-    throw messages.createError('soqlInvalid', [config.query]);
-  }
+    if (!q.toLowerCase().startsWith('select')) {
+      throw messages.createError('soqlInvalid', [q]);
+    }
+    queries.push(q);
+  });
+  config.queries = queries;
 
   return config;
 };

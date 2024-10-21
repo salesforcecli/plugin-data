@@ -23,3 +23,7 @@ Processed %s records from query: %s
 Query returned more than 200 records. Run the command using the --plan flag instead.
 Record Count: %s
 Query: %s
+
+# noRecordsReturned
+
+The query for %s returned 0 records.

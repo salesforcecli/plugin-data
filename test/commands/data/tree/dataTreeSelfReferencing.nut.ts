@@ -44,7 +44,7 @@ describe('data:tree commands with records that refer to other records of the sam
     });
 
     execCmd(
-      `data:export:tree --query "${query}" --prefix INT --outputdir ${path.join('.', 'export_data')} --plan --json`,
+      `data:export:tree --query "${query}" --prefix INT --output-dir ${path.join('.', 'export_data')} --plan --json`,
       { ensureExitCode: 0 }
     );
 
