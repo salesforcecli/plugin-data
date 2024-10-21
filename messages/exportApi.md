@@ -26,4 +26,4 @@ Query: %s
 
 # noRecordsReturned
 
-The query for, %s, returned 0 records.
+The query for %s returned 0 records.
