@@ -9,8 +9,8 @@ import path from 'node:path';
 import { EOL } from 'node:os';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
-import { validateCsv } from 'test/testUtil.js';
 import { ensureString } from '@salesforce/ts-types';
+import { validateCsv } from '../../../testUtil.js';
 import { DataImportBulkResult } from '../../../../src/commands/data/import/bulk.js';
 import { DataBulkResultsResult } from '../../../../src/commands/data/bulk/results.js';
 
