@@ -23,7 +23,7 @@ import {
   SObjectTreeInput,
 } from './types.js';
 import { hasUnresolvedRefs } from './api/data/tree/functions.js';
-import { ExportReturnType } from './commands/data/export/tree.js';
+import { ExportTreeResult } from './commands/data/export/tree.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'exportApi');
@@ -45,7 +45,7 @@ export type RefFromIdByType = Map<string, Map<string, string>>;
 /** only used internally, but a more useful structure than the original */
 type PlanFile = Omit<DataPlanPart, 'files'> & { contents: SObjectTreeFileContents; file: string; dir: string };
 
-export const runExport = async (configInput: ExportConfig): Promise<ExportReturnType> => {
+export const runExport = async (configInput: ExportConfig): Promise<ExportTreeResult> => {
   const { outputDir, plan, queries, conn, prefix, ux } = validate(configInput);
   const refFromIdByType: RefFromIdByType = new Map();
   const logger = Logger.childFromRoot('runExport');

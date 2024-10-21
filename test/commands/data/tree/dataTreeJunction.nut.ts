@@ -8,7 +8,7 @@ import path from 'node:path';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { ImportResult } from '../../../../src/api/data/tree/importTypes.js';
-import { ExportReturnType } from '../../../../src/commands/data/export/tree.js';
+import { ExportTreeResult } from '../../../../src/commands/data/export/tree.js';
 
 describe('data:tree commands', () => {
   let testSession: TestSession;
@@ -70,7 +70,7 @@ describe('data:tree commands', () => {
   });
 
   it('can export -> import junction with multiple queries', async () => {
-    const exportResult = execCmd<ExportReturnType>(
+    const exportResult = execCmd<ExportTreeResult>(
       `data:export:tree --plan --output-dir ${path.join(
         '.',
         'junction'

@@ -11,12 +11,12 @@ import { orgFlags, prefixValidation } from '../../../flags.js';
 import { ExportConfig, runExport } from '../../../export.js';
 import type { DataPlanPart, SObjectTreeFileContents } from '../../../types.js';
 
-export type ExportReturnType = DataPlanPart[] | SObjectTreeFileContents;
+export type ExportTreeResult = DataPlanPart[] | SObjectTreeFileContents;
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.export');
 
-export default class Export extends SfCommand<ExportReturnType> {
+export default class Export extends SfCommand<ExportTreeResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -48,7 +48,7 @@ export default class Export extends SfCommand<ExportReturnType> {
     }),
   };
 
-  public async run(): Promise<ExportReturnType> {
+  public async run(): Promise<ExportTreeResult> {
     const { flags } = await this.parse(Export);
     if (flags.plan) {
       this.warn(messages.getMessage('PlanJsonWarning'));
