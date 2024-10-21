@@ -1,6 +1,14 @@
 [
   {
     "alias": [],
+    "command": "data:bulk:results",
+    "flagAliases": [],
+    "flagChars": ["i", "o"],
+    "flags": ["api-version", "flags-dir", "job-id", "json", "target-org"],
+    "plugin": "@salesforce/plugin-data"
+  },
+  {
+    "alias": [],
     "command": "data:create:file",
     "flagAliases": [],
     "flagChars": ["f", "i", "o", "t"],
