@@ -1,3 +1,10 @@
+## [3.8.1](https://github.com/salesforcecli/plugin-data/compare/3.8.0...3.8.1) (2024-10-21)
+
+### Bug Fixes
+
+- change plan name to plan.json - avoids really long concats ([d7dd1ea](https://github.com/salesforcecli/plugin-data/commit/d7dd1ea69e4abaa0660d8090ecf6f582f13fc22b))
+- multi queries working ([ca9fbee](https://github.com/salesforcecli/plugin-data/commit/ca9fbeebfc357ad8af144235581295f1c0c38500))
+
 # [3.8.0](https://github.com/salesforcecli/plugin-data/compare/3.7.1...3.8.0) (2024-10-18)
 
 ### Features
