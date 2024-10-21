@@ -1,10 +1,12 @@
 # summary
 
-Summary of a command.
+Get the results of a Bulk API 2.0 ingest job.
 
 # description
 
-More information about a command. Don't repeat the summary.
+You can use this command to get successful/failed/unprocessed results of a bulk 2.0 ingest job written to different files in comma-separated values (CSV) format.
+
+If the job was aborted/failed you might also get unprocessed results.
 
 # flags.job-id.summary
 
@@ -12,7 +14,9 @@ Job ID of the bulk job.
 
 # examples
 
-- <%= config.bin %> <%= command.id %>
+- Get results from a bulk import job. Use the org with alias "my-scratch"
+
+  <%= config.bin %> <%= command.id %> --job-id 7507i000008341G --target-org my-scratch
 
 # error.jobInProgress
 
