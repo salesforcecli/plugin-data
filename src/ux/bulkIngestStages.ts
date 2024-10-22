@@ -17,7 +17,7 @@ type Options = {
   jsonEnabled: boolean;
 };
 
-export class BulkImportStages {
+export class BulkIngestStages {
   private mso: MultiStageOutput<JobInfoV2>;
   private resume: boolean;
 

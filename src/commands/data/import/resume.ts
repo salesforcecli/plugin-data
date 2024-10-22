@@ -9,7 +9,7 @@ import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
 import { ensureString } from '@salesforce/ts-types';
 import { BulkImportRequestCache } from '../../../bulkDataRequestCache.js';
-import { BulkImportStages } from '../../../ux/bulkImportStages.js';
+import { BulkIngestStages } from '../../../ux/bulkIngestStages.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'data.import.resume');
@@ -55,7 +55,7 @@ export default class DataImportResume extends SfCommand<DataImportResumeResult> 
 
     const conn = resumeOpts.options.connection;
 
-    const stages = new BulkImportStages({
+    const stages = new BulkIngestStages({
       resume: true,
       title: 'Importing data',
       baseUrl: ensureString(conn.getAuthInfoFields().instanceUrl),

@@ -5,16 +5,13 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import * as fs from 'node:fs';
-import { platform } from 'node:os';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Connection, Messages, Org } from '@salesforce/core';
+import { Messages, Org } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
-import { IngestJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
-import { Schema } from '@jsforce/jsforce-node';
 import { ensureString } from '@salesforce/ts-types';
 import { BulkImportRequestCache } from '../../../bulkDataRequestCache.js';
-import { BulkImportStages } from '../../../ux/bulkImportStages.js';
+import { BulkIngestStages } from '../../../ux/bulkIngestStages.js';
+import { createIngestJob } from '../../../bulkUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'data.import.bulk');
@@ -73,7 +70,7 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
 
     const baseUrl = flags['target-org'].getField<string>(Org.Fields.INSTANCE_URL).toString();
 
-    const stages = new BulkImportStages({
+    const stages = new BulkIngestStages({
       resume: false,
       title: async ? 'Importing data (async)' : 'Importing data',
       baseUrl,
@@ -83,7 +80,7 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
     stages.start();
 
     if (async) {
-      const job = await createIngestJob(conn, flags.file, flags.sobject, flags['line-ending']);
+      const job = await createIngestJob(conn, 'insert',flags.sobject,flags.file, flags['line-ending']);
 
       stages.update(job.getInfo());
 
@@ -100,7 +97,7 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
     }
 
     // synchronous flow
-    const job = await createIngestJob(conn, flags.file, flags.sobject, flags['line-ending']);
+    const job = await createIngestJob(conn, 'insert', flags.sobject, flags.file, flags['line-ending']);
 
     stages.setupJobListeners(job);
     stages.processingJob();
@@ -161,32 +158,4 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
       throw err;
     }
   }
-}
-
-/**
- * Create an ingest job, upload data and mark it as ready for processing
- *
- * */
-async function createIngestJob(
-  conn: Connection,
-  csvFile: string,
-  object: string,
-  lineEnding: 'CRLF' | 'LF' | undefined
-): Promise<IngestJobV2<Schema>> {
-  const job = conn.bulk2.createJob({
-    operation: 'insert',
-    lineEnding: lineEnding ?? platform() === 'win32' ? 'CRLF' : 'LF',
-    object,
-  });
-
-  // create the job in the org
-  await job.open();
-
-  // upload data
-  await job.uploadData(fs.createReadStream(csvFile));
-
-  // mark the job to be ready to be processed
-  await job.close();
-
-  return job;
 }
