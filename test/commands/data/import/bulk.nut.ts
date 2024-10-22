@@ -8,7 +8,7 @@ import path from 'node:path';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 import { DataImportBulkResult } from '../../../../src/commands/data/import/bulk.js';
-import { generateAccountsCsv } from './resume.nut.js';
+import { generateAccountsCsv } from '../../../testUtil.js';
 
 describe('data import bulk NUTs', () => {
   let session: TestSession;
