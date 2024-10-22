@@ -80,7 +80,7 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
     stages.start();
 
     if (async) {
-      const job = await createIngestJob(conn, 'insert',flags.sobject,flags.file, flags['line-ending']);
+      const job = await createIngestJob(conn, 'insert', flags.sobject, flags.file, flags['line-ending']);
 
       stages.update(job.getInfo());
 
