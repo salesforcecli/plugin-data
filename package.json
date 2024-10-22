@@ -67,7 +67,8 @@
             "description": "Query records."
           },
           "update": {
-            "description": "Update a single record."
+            "description": "Update many records.",
+            "external": true
           },
           "upsert": {
             "description": "Upsert many records."
