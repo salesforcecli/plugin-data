@@ -26,6 +26,7 @@ type ResumeCommandIDs = 'data import resume' | 'data update resume';
 
 export async function bulkIngest(opts: {
   resumeCmdId: ResumeCommandIDs;
+  stageTitle: string;
   object: string;
   operation: JobInfoV2['operation'];
   lineEnding: JobInfoV2['lineEnding'] | undefined;
@@ -46,8 +47,7 @@ export async function bulkIngest(opts: {
 
   const stages = new BulkIngestStages({
     resume: false,
-    // TODO: make titles job-specific
-    title: async ? 'Updating data (async)' : 'Updating data',
+    title: async ? `${opts.stageTitle} (async)` : opts.stageTitle,
     baseUrl,
     jsonEnabled: opts.jsonEnabled,
   });
@@ -135,6 +135,7 @@ export async function bulkIngest(opts: {
 
 export async function bulkIngestResume(opts: {
   cmdId: ResumeCommandIDs;
+  stageTitle: string;
   cache: BulkUpdateRequestCache;
   jobIdOrMostRecent: string | boolean;
   jsonEnabled: boolean;
@@ -146,7 +147,7 @@ export async function bulkIngestResume(opts: {
 
   const stages = new BulkIngestStages({
     resume: true,
-    title: 'Updating data',
+    title: opts.stageTitle,
     baseUrl: ensureString(conn.getAuthInfoFields().instanceUrl),
     jsonEnabled: opts.jsonEnabled,
   });

@@ -60,6 +60,7 @@ export default class DataUpdateBulk extends SfCommand<DataUpdateBulkResult> {
 
     return bulkIngest({
       resumeCmdId: 'data update resume',
+      stageTitle: 'Updating data',
       object: flags.sobject,
       operation: 'update',
       lineEnding: flags['line-ending'],

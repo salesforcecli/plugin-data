@@ -62,6 +62,7 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
 
     return bulkIngest({
       resumeCmdId: 'data import resume',
+      stageTitle: 'Importing data',
       object: flags.sobject,
       operation: 'insert',
       lineEnding: flags['line-ending'],

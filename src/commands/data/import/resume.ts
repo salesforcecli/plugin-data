@@ -50,6 +50,7 @@ export default class DataImportResume extends SfCommand<DataImportResumeResult> 
 
     return bulkIngestResume({
       cmdId: 'data import resume',
+      stageTitle: 'Updating data',
       cache: await BulkImportRequestCache.create(),
       jobIdOrMostRecent: flags['job-id'] ?? flags['use-most-recent'],
       jsonEnabled: this.jsonEnabled(),
