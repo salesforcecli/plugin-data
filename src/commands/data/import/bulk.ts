@@ -62,7 +62,7 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
 
     return bulkIngest({
       object: flags.sobject,
-      operation: 'update',
+      operation: 'insert',
       lineEnding: flags['line-ending'],
       conn: flags['target-org'].getConnection(flags['api-version']),
       cache: await BulkImportRequestCache.create(),
