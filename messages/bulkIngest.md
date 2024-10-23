@@ -1,12 +1,12 @@
 # export.resume
 
-Run "sf data import resume --job-id %s" to resume the operation.
+Run "sf %s --job-id %s" to resume the operation.
 
 # error.timeout
 
 The operation timed out after %s minutes.
 
-Run "sf data import resume --job-id %s" to resume it.
+Run "sf %s --job-id %s" to resume it.
 
 # error.failedRecordDetails
 

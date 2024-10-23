@@ -22,7 +22,10 @@ type BulkIngestInfo = {
   failedRecords?: number;
 };
 
+type ResumeCommandIDs = 'data import resume' | 'data update resume';
+
 export async function bulkIngest(opts: {
+  resumeCmdId: ResumeCommandIDs;
   object: string;
   operation: JobInfoV2['operation'];
   lineEnding: JobInfoV2['lineEnding'] | undefined;
@@ -60,7 +63,7 @@ export async function bulkIngest(opts: {
 
     await opts.cache.createCacheEntryForRequest(job.id, ensureString(conn.getUsername()), conn.getApiVersion());
 
-    logFn(messages.getMessage('export.resume', [job.id]));
+    logFn(messages.getMessage('export.resume', [opts.resumeCmdId, job.id]));
 
     return {
       jobId: job.id,
@@ -107,7 +110,7 @@ export async function bulkIngest(opts: {
 
     if (err instanceof Error && err.name === 'JobPollingTimeout') {
       stages.stop();
-      throw messages.createError('error.timeout', [timeout.minutes, job.id]);
+      throw messages.createError('error.timeout', [timeout.minutes, opts.resumeCmdId, job.id]);
     }
 
     if (jobInfo.state === 'Failed') {
@@ -131,6 +134,7 @@ export async function bulkIngest(opts: {
 }
 
 export async function bulkIngestResume(opts: {
+  cmdId: ResumeCommandIDs;
   cache: BulkUpdateRequestCache;
   jobIdOrMostRecent: string | boolean;
   jsonEnabled: boolean;
@@ -189,7 +193,7 @@ export async function bulkIngestResume(opts: {
 
     if (err instanceof Error && err.name === 'JobPollingTimeout') {
       stages.error();
-      throw messages.createError('error.timeout', [opts.wait.minutes, job.id]);
+      throw messages.createError('error.timeout', [opts.wait.minutes, opts.cmdId, job.id]);
     }
 
     if (jobInfo.state === 'Failed') {

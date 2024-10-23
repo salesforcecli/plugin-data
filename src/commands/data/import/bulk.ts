@@ -61,6 +61,7 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
     const { flags } = await this.parse(DataImportBulk);
 
     return bulkIngest({
+      resumeCmdId: 'data import resume',
       object: flags.sobject,
       operation: 'insert',
       lineEnding: flags['line-ending'],

@@ -49,6 +49,7 @@ export default class DataUpdateResume extends SfCommand<DataUpdateResumeResult> 
     const { flags } = await this.parse(DataUpdateResume);
 
     return bulkIngestResume({
+      cmdId: 'data update resume',
       cache: await BulkUpdateRequestCache.create(),
       jobIdOrMostRecent: flags['job-id'] ?? flags['use-most-recent'],
       jsonEnabled: this.jsonEnabled(),

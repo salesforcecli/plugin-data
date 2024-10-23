@@ -59,6 +59,7 @@ export default class DataUpdateBulk extends SfCommand<DataUpdateBulkResult> {
     const { flags } = await this.parse(DataUpdateBulk);
 
     return bulkIngest({
+      resumeCmdId: 'data update resume',
       object: flags.sobject,
       operation: 'update',
       lineEnding: flags['line-ending'],
