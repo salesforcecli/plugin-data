@@ -55,7 +55,7 @@ export async function bulkIngest(opts: {
   stages.start();
 
   if (async) {
-    const job = await createIngestJob(conn, 'update', opts.object, opts.file, opts.lineEnding);
+    const job = await createIngestJob(conn, opts.operation, opts.object, opts.file, opts.lineEnding);
 
     stages.update(job.getInfo());
 
@@ -71,7 +71,7 @@ export async function bulkIngest(opts: {
   }
 
   // synchronous flow
-  const job = await createIngestJob(conn, 'update', opts.object, opts.file, opts.lineEnding);
+  const job = await createIngestJob(conn, opts.operation, opts.object, opts.file, opts.lineEnding);
 
   stages.setupJobListeners(job);
   stages.processingJob();
