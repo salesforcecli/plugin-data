@@ -24,6 +24,7 @@ jobs:
         command:
           - 'yarn test:nuts:bulk:export'
           - 'yarn test:nuts:bulk:import'
+          - 'yarn test:nuts:bulk:update'
           - 'yarn test:nuts:data:bulk-upsert-delete'
           - 'yarn test:nuts:data:create'
           - 'yarn test:nuts:data:query'
