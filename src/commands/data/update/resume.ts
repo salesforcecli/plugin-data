@@ -7,9 +7,8 @@
 
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
-import { ensureString } from '@salesforce/ts-types';
 import { BulkUpdateRequestCache } from '../../../bulkDataRequestCache.js';
-import { BulkIngestStages } from '../../../ux/bulkIngestStages.js';
+import { bulkIngestResume } from '../../../bulkIngest.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'data.update.resume');
@@ -49,81 +48,11 @@ export default class DataUpdateResume extends SfCommand<DataUpdateResumeResult> 
   public async run(): Promise<DataUpdateResumeResult> {
     const { flags } = await this.parse(DataUpdateResume);
 
-    const cache = await BulkUpdateRequestCache.create();
-
-    const resumeOpts = await cache.resolveResumeOptionsFromCache(flags['job-id'] ?? flags['use-most-recent']);
-
-    const conn = resumeOpts.options.connection;
-
-    const stages = new BulkIngestStages({
-      resume: true,
-      title: 'Updating data',
-      baseUrl: ensureString(conn.getAuthInfoFields().instanceUrl),
+    return bulkIngestResume({
+      cache: await BulkUpdateRequestCache.create(),
+      jobIdOrMostRecent: flags['job-id'] ?? flags['use-most-recent'],
       jsonEnabled: this.jsonEnabled(),
+      wait: flags.wait,
     });
-
-    stages.start();
-
-    const job = conn.bulk2.job('ingest', {
-      id: resumeOpts.jobInfo.id,
-    });
-
-    stages.setupJobListeners(job);
-
-    try {
-      await job.poll(5000, flags.wait.milliseconds);
-
-      const jobInfo = await job.check();
-
-      // send last data update so job status/num. of records processed/failed represent the last update
-      stages.update(jobInfo);
-
-      if (jobInfo.numberRecordsFailed) {
-        stages.error();
-        // TODO: replace this msg to point to `sf data bulk results` when it's added (W-12408034)
-        throw messages.createError('error.failedRecordDetails', [
-          jobInfo.numberRecordsFailed,
-          conn.getUsername(),
-          job.id,
-        ]);
-      }
-
-      stages.stop();
-
-      return {
-        jobId: jobInfo.id,
-        processedRecords: jobInfo.numberRecordsProcessed,
-        successfulRecords: jobInfo.numberRecordsProcessed - (jobInfo.numberRecordsFailed ?? 0),
-        failedRecords: jobInfo.numberRecordsFailed,
-      };
-    } catch (err) {
-      const jobInfo = await job.check();
-
-      // send last data update so job status/num. of records processed/failed represent the last update
-      stages.update(jobInfo);
-
-      if (err instanceof Error && err.name === 'JobPollingTimeout') {
-        stages.error();
-        throw messages.createError('error.timeout', [flags.wait.minutes, job.id]);
-      }
-
-      if (jobInfo.state === 'Failed') {
-        stages.error();
-        throw messages.createError(
-          'error.jobFailed',
-          [jobInfo.errorMessage, conn.getUsername(), job.id],
-          [],
-          err as Error
-        );
-      }
-
-      if (jobInfo.state === 'Aborted') {
-        stages.error();
-        // TODO: replace this msg to point to `sf data bulk results` when it's added (W-12408034)
-        throw messages.createError('error.jobAborted', [conn.getUsername(), job.id], [], err as Error);
-      }
-
-      throw err;
-    }
   }
 }

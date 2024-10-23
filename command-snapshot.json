@@ -239,19 +239,8 @@
     "alias": [],
     "command": "data:update:bulk",
     "flagAliases": [],
-    "flagChars": ["a", "f", "n", "o", "s", "w"],
-    "flags": [
-      "api-version",
-      "async",
-      "file",
-      "flags-dir",
-      "json",
-      "line-ending",
-      "name",
-      "sobject",
-      "target-org",
-      "wait"
-    ],
+    "flagChars": ["a", "f", "o", "s", "w"],
+    "flags": ["api-version", "async", "file", "flags-dir", "json", "line-ending", "sobject", "target-org", "wait"],
     "plugin": "@salesforce/plugin-data"
   },
   {
