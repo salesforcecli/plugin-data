@@ -1,12 +1,12 @@
 # summary
 
-Get the results of a Bulk API 2.0 ingest job.
+Get the results of a bulk ingest command that you previously ran.
 
 # description
 
-You can use this command to get successful/failed/unprocessed results of a bulk 2.0 ingest job written to different files in comma-separated values (CSV) format.
+Use this command to get the complete results after running one of the CLI commands that uses Bulk API 2.0 to ingest (import, upsert, or delete) large datasets to your org, such as "data import bulk". The previously-run bulk command must have completed; if it's still processing, run the corresponding resume command first, such as "data import resume." Make note of the job ID of the previous bulk command because you use it to run this command.
 
-If the job was aborted/failed you might also get unprocessed results.
+This command first displays the status of the previous bulk command, the operation that was executed in the org (such as insert or hard delete), and the updated Salesforce object. The command then displays how many records were processed in total, and how many were successful or failed. Finally, the output displays the names of the generated CSV-formatted files that contain the specific results for each ingested record. Depending on the success or failure of the bulk command, the results files can include the IDs of inserted records or the specific errors. When possible, if the ingest job failed or was aborted, you also get a CSV file with the unprocessed results.
 
 # flags.job-id.summary
 
@@ -14,9 +14,9 @@ Job ID of the bulk job.
 
 # examples
 
-- Get results from a bulk import job. Use the org with alias "my-scratch"
+- Get results from a bulk import command; use the org with alias "my-scratch":
 
-  <%= config.bin %> <%= command.id %> --job-id 7507i000008341G --target-org my-scratch
+  <%= config.bin %> <%= command.id %> --job-id 7507i000fake341G --target-org my-scratch
 
 # error.jobInProgress
 
@@ -28,9 +28,9 @@ Can't find a bulk job with ID %s.
 
 # error.invalidId.actions
 
-- Ensure the ID isn't from a query job.
+- Ensure the ID is from a previously run bulk ingest command, and not a query command.
 
-- Check the job for the ID shows up in the org:
+- Run this command and verify that the job ID for the bulk command exists in your org:
 
 sf org open --target-org %s --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F750"
 
