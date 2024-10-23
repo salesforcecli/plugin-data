@@ -8,7 +8,7 @@ import path from 'node:path';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { ImportResult } from '../../../../src/api/data/tree/importTypes.js';
-import { QueryResult } from '../dataSoqlQuery.nut.js';
+import { QueryResult } from '../query/query.nut.js';
 
 describe('data:tree commands with a polymorphic whatId (on tasks) shared between multiple parents', () => {
   let testSession: TestSession;
