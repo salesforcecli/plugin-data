@@ -142,7 +142,18 @@
     "command": "data:import:bulk",
     "flagAliases": [],
     "flagChars": ["a", "f", "o", "s", "w"],
-    "flags": ["api-version", "async", "file", "flags-dir", "json", "line-ending", "sobject", "target-org", "wait"],
+    "flags": [
+      "api-version",
+      "async",
+      "column-delimiter",
+      "file",
+      "flags-dir",
+      "json",
+      "line-ending",
+      "sobject",
+      "target-org",
+      "wait"
+    ],
     "plugin": "@salesforce/plugin-data"
   },
   {
@@ -240,7 +251,18 @@
     "command": "data:update:bulk",
     "flagAliases": [],
     "flagChars": ["a", "f", "o", "s", "w"],
-    "flags": ["api-version", "async", "file", "flags-dir", "json", "line-ending", "sobject", "target-org", "wait"],
+    "flags": [
+      "api-version",
+      "async",
+      "column-delimiter",
+      "file",
+      "flags-dir",
+      "json",
+      "line-ending",
+      "sobject",
+      "target-org",
+      "wait"
+    ],
     "plugin": "@salesforce/plugin-data"
   },
   {
