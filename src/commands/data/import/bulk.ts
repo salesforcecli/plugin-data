@@ -55,6 +55,11 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
       dependsOn: ['file'],
       options: ['CRLF', 'LF'] as const,
     })(),
+    'column-delimiter': Flags.option({
+      summary: messages.getMessage('flags.column-delimiter.summary'),
+      options: ['BACKQUOTE', 'CARET', 'COMMA', 'PIPE', 'SEMICOLON', 'TAB'] as const,
+      default: 'COMMA',
+    })(),
   };
 
   public async run(): Promise<DataImportBulkResult> {
@@ -66,6 +71,7 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
       object: flags.sobject,
       operation: 'insert',
       lineEnding: flags['line-ending'],
+      columnDelimiter: flags['column-delimiter'],
       conn: flags['target-org'].getConnection(flags['api-version']),
       cache: await BulkImportRequestCache.create(),
       async: flags.async,

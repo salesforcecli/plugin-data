@@ -45,6 +45,21 @@ describe('data import bulk NUTs', () => {
     expect(result.failedRecords).to.equal(0);
   });
 
+  it('should import account records in csv format with PIPE delimiter', async () => {
+    const csvFile = await generateAccountsCsv(session.dir, 'PIPE');
+
+    const result = execCmd<DataImportBulkResult>(
+      `data import bulk --file ${csvFile} --sobject Account --wait 10 --column-delimiter PIPE --json`,
+      { ensureExitCode: 0 }
+    ).jsonOutput?.result as DataImportBulkResult;
+
+    expect(result.jobId).not.be.undefined;
+    expect(result.jobId.length).to.equal(18);
+    expect(result.processedRecords).to.equal(10_000);
+    expect(result.successfulRecords).to.equal(10_000);
+    expect(result.failedRecords).to.equal(0);
+  });
+
   it('should report error msg from a failed job', async () => {
     const csvFile = await generateAccountsCsv(session.dir);
 

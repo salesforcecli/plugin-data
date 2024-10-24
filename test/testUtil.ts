@@ -274,13 +274,18 @@ export async function generateUpdatedCsv(sourceCsv: string, ids: string[], saveP
  *
  * Each `Account.name` field has a unique timestamp for idempotent runs.
  */
-export async function generateAccountsCsv(savePath: string): Promise<string> {
+export async function generateAccountsCsv(
+  savePath: string,
+  columnDelimiter: ColumnDelimiterKeys = 'COMMA'
+): Promise<string> {
   const id = Date.now();
 
-  let csv = 'NAME,TYPE,PHONE,WEBSITE' + EOL;
+  const delimiter = ColumnDelimiter[columnDelimiter];
+
+  let csv = `NAME${delimiter}TYPE${delimiter}PHONE${delimiter}WEBSITE${EOL}`;
 
   for (let i = 1; i <= 10_000; i++) {
-    csv += `account ${id} #${i},Account,415-555-0000,http://www.accountImport${i}.com${EOL}`;
+    csv += `account ${id} #${i}${delimiter}Account${delimiter}415-555-0000${delimiter}http://www.accountImport${i}.com${EOL}`;
   }
 
   const accountsCsv = path.join(savePath, 'bulkImportAccounts.csv');

@@ -41,6 +41,7 @@ export async function bulkIngest(opts: {
   object: string;
   operation: JobInfoV2['operation'];
   lineEnding: JobInfoV2['lineEnding'] | undefined;
+  columnDelimiter: JobInfoV2['columnDelimiter'];
   conn: Connection;
   cache: BulkUpdateRequestCache | BulkImportRequestCache;
   async: boolean;
@@ -49,7 +50,15 @@ export async function bulkIngest(opts: {
   jsonEnabled: boolean;
   logFn: (message: string) => void;
 }): Promise<BulkIngestInfo> {
-  const { conn, operation, object, lineEnding = platform() === 'win32' ? 'CRLF' : 'LF', file, logFn } = opts;
+  const {
+    conn,
+    operation,
+    object,
+    lineEnding = platform() === 'win32' ? 'CRLF' : 'LF',
+    columnDelimiter,
+    file,
+    logFn,
+  } = opts;
 
   const timeout = opts.async ? Duration.minutes(0) : opts.wait ?? Duration.minutes(0);
   const async = timeout.milliseconds === 0;
@@ -67,9 +76,10 @@ export async function bulkIngest(opts: {
 
   if (async) {
     const job = await createIngestJob(conn, file, {
-      operation,
       object,
+      operation,
       lineEnding,
+      columnDelimiter,
     });
 
     stages.update(job.getInfo());
@@ -87,9 +97,10 @@ export async function bulkIngest(opts: {
 
   // synchronous flow
   const job = await createIngestJob(conn, file, {
-    operation,
     object,
+    operation,
     lineEnding,
+    columnDelimiter,
   });
 
   stages.setupJobListeners(job);
@@ -251,9 +262,10 @@ export async function createIngestJob(
   conn: Connection,
   csvFile: string,
   jobOpts: {
-    operation: JobInfoV2['operation'];
     object: string;
+    operation: JobInfoV2['operation'];
     lineEnding: JobInfoV2['lineEnding'];
+    columnDelimiter: JobInfoV2['columnDelimiter'];
   }
 ): Promise<IngestJobV2<Schema>> {
   const job = conn.bulk2.createJob(jobOpts);

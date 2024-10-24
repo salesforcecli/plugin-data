@@ -41,3 +41,7 @@ API name of the Salesforce object, either standard or custom, which you are upda
 # flags.line-ending.summary
 
 Line ending used in the CSV file. Default value on Windows is `CRLF`; on macOS and Linux it's `LF`.
+
+# flags.column-delimiter.summary
+
+Column delimiter used in CSV file. Default is COMMA.

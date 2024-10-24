@@ -53,6 +53,11 @@ export default class DataUpdateBulk extends SfCommand<DataUpdateBulkResult> {
       dependsOn: ['file'],
       options: ['CRLF', 'LF'] as const,
     })(),
+    'column-delimiter': Flags.option({
+      summary: messages.getMessage('flags.column-delimiter.summary'),
+      options: ['BACKQUOTE', 'CARET', 'COMMA', 'PIPE', 'SEMICOLON', 'TAB'] as const,
+      default: 'COMMA',
+    })(),
   };
 
   public async run(): Promise<DataUpdateBulkResult> {
@@ -64,6 +69,7 @@ export default class DataUpdateBulk extends SfCommand<DataUpdateBulkResult> {
       object: flags.sobject,
       operation: 'update',
       lineEnding: flags['line-ending'],
+      columnDelimiter: flags['column-delimiter'],
       conn: flags['target-org'].getConnection(flags['api-version']),
       cache: await BulkUpdateRequestCache.create(),
       async: flags.async,
