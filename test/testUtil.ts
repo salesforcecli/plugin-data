@@ -4,9 +4,11 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+
+/* eslint-disable camelcase */
 import path from 'node:path';
 import * as fs from 'node:fs';
-import { EOL } from 'node:os';
+import { EOL, platform } from 'node:os';
 import { writeFile } from 'node:fs/promises';
 import { PassThrough, Writable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
@@ -248,6 +250,8 @@ export async function generateUpdatedCsv(sourceCsv: string, ids: string[], saveP
     savePath,
     csvStringify(modifiedRows, {
       header: true,
+      // `csv-stringify` doesn't follow camelCase for its opts: https://csv.js.org/stringify/options/record_delimiter/
+      record_delimiter: platform() === 'win32' ? 'windows' : 'unix',
     })
   );
 
