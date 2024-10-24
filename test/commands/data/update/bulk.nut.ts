@@ -40,13 +40,9 @@ describe('data update bulk NUTs', () => {
       { ensureExitCode: 0 }
     ).jsonOutput?.result as DataImportBulkResult;
 
-    // TODO: set org username above like here:
-    // https://github.com/salesforcecli/cli-plugins-testkit/blob/main/SAMPLES.md#testing-with-multiple-scratch-orgs
-    const username = [...session.orgs.keys()][0];
-
     const conn = (
       await Org.create({
-        aliasOrUsername: username,
+        aliasOrUsername: session.orgs.get('default')?.username,
       })
     ).getConnection();
 

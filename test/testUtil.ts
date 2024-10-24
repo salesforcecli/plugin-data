@@ -220,6 +220,15 @@ export async function validateJson(filePath: string, totalqty: number): Promise<
   expect(parseInt(lengthRes.stdout.trim(), 10)).equal(totalqty);
 }
 
+/**
+ * Takes a CSV with account records and insert the `ID` column for a bulk update operation
+ *
+ * @param sourceCsv CSV file with imported account records, shouldn't have an `ID` column.
+ * @param ids Array of IDs of records inserted from sourceCsv.
+ * @param savePath path where to save the new CSV.
+ *
+ * Each `Account.name` field has a unique timestamp for idempotent runs.
+ */
 export async function generateUpdatedCsv(sourceCsv: string, ids: string[], savePath: string) {
   const csvReadStream = fs.createReadStream(sourceCsv);
   const modifiedRows: Array<{ NAME: string; ID?: string }> = [];
@@ -261,6 +270,8 @@ export async function generateUpdatedCsv(sourceCsv: string, ids: string[], saveP
 /**
  * Generates a CSV file with 10_000 account records to insert
  *
+ * @param savePath path where to save the new CSV.
+ *
  * Each `Account.name` field has a unique timestamp for idempotent runs.
  */
 export async function generateAccountsCsv(savePath: string): Promise<string> {
@@ -272,7 +283,7 @@ export async function generateAccountsCsv(savePath: string): Promise<string> {
     csv += `account ${id} #${i},Account,415-555-0000,http://www.accountImport${i}.com${EOL}`;
   }
 
-  const accountsCsv = path.join(savePath, 'bulkImportAccounts1.csv');
+  const accountsCsv = path.join(savePath, 'bulkImportAccounts.csv');
 
   await writeFile(accountsCsv, csv);
 
