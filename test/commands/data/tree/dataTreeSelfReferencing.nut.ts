@@ -7,7 +7,7 @@
 import path from 'node:path';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-import { QueryResult } from '../dataSoqlQuery.nut.js';
+import { QueryResult } from '../query/query.nut.js';
 
 describe('data:tree commands with records that refer to other records of the same type in the same file', () => {
   let testSession: TestSession;

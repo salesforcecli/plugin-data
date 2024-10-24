@@ -142,7 +142,18 @@
     "command": "data:import:bulk",
     "flagAliases": [],
     "flagChars": ["a", "f", "o", "s", "w"],
-    "flags": ["api-version", "async", "file", "flags-dir", "json", "line-ending", "sobject", "target-org", "wait"],
+    "flags": [
+      "api-version",
+      "async",
+      "column-delimiter",
+      "file",
+      "flags-dir",
+      "json",
+      "line-ending",
+      "sobject",
+      "target-org",
+      "wait"
+    ],
     "plugin": "@salesforce/plugin-data"
   },
   {
@@ -236,6 +247,25 @@
     "plugin": "@salesforce/plugin-data"
   },
   {
+    "alias": [],
+    "command": "data:update:bulk",
+    "flagAliases": [],
+    "flagChars": ["a", "f", "o", "s", "w"],
+    "flags": [
+      "api-version",
+      "async",
+      "column-delimiter",
+      "file",
+      "flags-dir",
+      "json",
+      "line-ending",
+      "sobject",
+      "target-org",
+      "wait"
+    ],
+    "plugin": "@salesforce/plugin-data"
+  },
+  {
     "alias": ["force:data:record:update"],
     "command": "data:update:record",
     "flagAliases": ["apiversion", "sobjectid", "sobjecttype", "targetusername", "u", "usetoolingapi"],
@@ -253,6 +283,14 @@
       "values",
       "where"
     ],
+    "plugin": "@salesforce/plugin-data"
+  },
+  {
+    "alias": [],
+    "command": "data:update:resume",
+    "flagAliases": [],
+    "flagChars": ["i", "w"],
+    "flags": ["flags-dir", "job-id", "json", "use-most-recent", "wait"],
     "plugin": "@salesforce/plugin-data"
   },
   {

@@ -12,7 +12,7 @@ import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { sleep } from '@salesforce/kit';
 import { BatcherReturnType } from '../../../../../src/batcher.js';
 import { StatusResult } from '../../../../../src/types.js';
-import { QueryResult } from '../../../data/dataSoqlQuery.nut.js';
+import { QueryResult } from '../../../data/query/query.nut.js';
 
 let testSession: TestSession;
 

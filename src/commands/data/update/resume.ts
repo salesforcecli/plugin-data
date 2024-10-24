@@ -7,20 +7,20 @@
 
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
-import { BulkImportRequestCache } from '../../../bulkDataRequestCache.js';
+import { BulkUpdateRequestCache } from '../../../bulkDataRequestCache.js';
 import { bulkIngestResume } from '../../../bulkIngest.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-data', 'data.import.resume');
+const messages = Messages.loadMessages('@salesforce/plugin-data', 'data.update.resume');
 
-export type DataImportResumeResult = {
+export type DataUpdateResumeResult = {
   jobId: string;
   processedRecords?: number;
   successfulRecords?: number;
   failedRecords?: number;
 };
 
-export default class DataImportResume extends SfCommand<DataImportResumeResult> {
+export default class DataUpdateResume extends SfCommand<DataUpdateResumeResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -45,13 +45,13 @@ export default class DataImportResume extends SfCommand<DataImportResumeResult> 
     }),
   };
 
-  public async run(): Promise<DataImportResumeResult> {
-    const { flags } = await this.parse(DataImportResume);
+  public async run(): Promise<DataUpdateResumeResult> {
+    const { flags } = await this.parse(DataUpdateResume);
 
     return bulkIngestResume({
-      cmdId: 'data import resume',
+      cmdId: 'data update resume',
       stageTitle: 'Updating data',
-      cache: await BulkImportRequestCache.create(),
+      cache: await BulkUpdateRequestCache.create(),
       jobIdOrMostRecent: flags['job-id'] ?? flags['use-most-recent'],
       jsonEnabled: this.jsonEnabled(),
       wait: flags.wait,
