@@ -5,7 +5,6 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { platform } from 'node:os';
 import { Transform, Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import * as fs from 'node:fs';
@@ -306,33 +305,4 @@ export async function exportRecords(
   }
 
   return jobInfo;
-}
-
-/**
- * Create an ingest job, upload data and mark it as ready for processing
- *
- * */
-export async function createIngestJob(
-  conn: Connection,
-  operation: JobInfoV2['operation'],
-  object: string,
-  csvFile: string,
-  lineEnding: JobInfoV2['lineEnding'] | undefined
-): Promise<IngestJobV2<Schema>> {
-  const job = conn.bulk2.createJob({
-    operation,
-    object,
-    lineEnding: lineEnding ?? platform() === 'win32' ? 'CRLF' : 'LF',
-  });
-
-  // create the job in the org
-  await job.open();
-
-  // upload data
-  await job.uploadData(fs.createReadStream(csvFile));
-
-  // mark the job to be ready to be processed
-  await job.close();
-
-  return job;
 }

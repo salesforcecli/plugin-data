@@ -5,12 +5,14 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
+import * as fs from 'node:fs';
+import { platform } from 'node:os';
+import { IngestJobV2, JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { Connection, Messages } from '@salesforce/core';
+import { Schema } from '@jsforce/jsforce-node';
 import { Duration } from '@salesforce/kit';
 import { ensureString } from '@salesforce/ts-types';
 import { BulkIngestStages } from './ux/bulkIngestStages.js';
-import { createIngestJob } from './bulkUtils.js'; // TODO: move this function here?
 import { BulkUpdateRequestCache, BulkImportRequestCache } from './bulkDataRequestCache.js';
 
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulkIngest');
@@ -24,6 +26,15 @@ type BulkIngestInfo = {
 
 type ResumeCommandIDs = 'data import resume' | 'data update resume';
 
+/**
+ * Bulk API 2.0 ingest handler for `sf` bulk commands
+ *
+ * This function should be used exclusively by `sf data bulk` commands that:
+ * - do a bulk ingest operation
+ * - have a `resume` command
+ *
+ * It will create the specified bulk ingest job, set up the oclif/MSO stages and return the job info.
+ * */
 export async function bulkIngest(opts: {
   resumeCmdId: ResumeCommandIDs;
   stageTitle: string;
@@ -38,7 +49,7 @@ export async function bulkIngest(opts: {
   jsonEnabled: boolean;
   logFn: (message: string) => void;
 }): Promise<BulkIngestInfo> {
-  const { conn, logFn } = opts;
+  const { conn, operation, object, lineEnding = platform() === 'win32' ? 'CRLF' : 'LF', file, logFn } = opts;
 
   const timeout = opts.async ? Duration.minutes(0) : opts.wait ?? Duration.minutes(0);
   const async = timeout.milliseconds === 0;
@@ -55,7 +66,11 @@ export async function bulkIngest(opts: {
   stages.start();
 
   if (async) {
-    const job = await createIngestJob(conn, opts.operation, opts.object, opts.file, opts.lineEnding);
+    const job = await createIngestJob(conn, file, {
+      operation,
+      object,
+      lineEnding,
+    });
 
     stages.update(job.getInfo());
 
@@ -71,7 +86,11 @@ export async function bulkIngest(opts: {
   }
 
   // synchronous flow
-  const job = await createIngestJob(conn, opts.operation, opts.object, opts.file, opts.lineEnding);
+  const job = await createIngestJob(conn, file, {
+    operation,
+    object,
+    lineEnding,
+  });
 
   stages.setupJobListeners(job);
   stages.processingJob();
@@ -133,6 +152,13 @@ export async function bulkIngest(opts: {
   }
 }
 
+/**
+ * Bulk API 2.0 ingest resume handler for `sf` bulk commands
+ *
+ * This function should be used exclusively by `sf data bulk` commands that can resume a bulk ingest operation.
+ *
+ * It will set up the oclif/MSO stages, poll for the job status and return the job info.
+ * */
 export async function bulkIngestResume(opts: {
   cmdId: ResumeCommandIDs;
   stageTitle: string;
@@ -215,4 +241,31 @@ export async function bulkIngestResume(opts: {
 
     throw err;
   }
+}
+
+/**
+ * Create an ingest job, upload data and mark it as ready for processing
+ *
+ * */
+export async function createIngestJob(
+  conn: Connection,
+  csvFile: string,
+  jobOpts: {
+    operation: JobInfoV2['operation'];
+    object: string;
+    lineEnding: JobInfoV2['lineEnding'];
+  }
+): Promise<IngestJobV2<Schema>> {
+  const job = conn.bulk2.createJob(jobOpts);
+
+  // create the job in the org
+  await job.open();
+
+  // upload data
+  await job.uploadData(fs.createReadStream(csvFile));
+
+  // mark the job to be ready to be processed
+  await job.close();
+
+  return job;
 }
