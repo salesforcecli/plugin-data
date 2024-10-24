@@ -1,22 +1,26 @@
 # summary
 
-Summary of a command.
+Bulk update records to an org from a CSV file. Uses Bulk API 2.0.
 
 # description
 
-More information about a command. Don't repeat the summary.
+You can use this command to update millions of records into the object from a file in comma-separated values (CSV) format.
 
-# flags.name.summary
+All the records in the CSV file must be for the same Salesforce object. Specify the object with the `--sobject` flag.
 
-Description of a flag.
+Bulk updates can take a while, depending on how many records are in the CSV file. If the command times out, or you specified the --async flag, the command displays the job ID. To see the status and get the results of the job, run "sf data update resume" and pass the job ID to the --job-id flag.
 
-# flags.name.description
-
-More information about a flag. Don't repeat the summary.
+For information and examples about how to prepare your CSV files, see "Prepare Data to Ingest" in the "Bulk API 2.0 and Bulk API Developer Guide" (https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/datafiles_prepare_data.htm).
 
 # examples
 
-- <%= config.bin %> <%= command.id %>
+- Update Account records from a CSV-formatted file into an org with alias "my-scratch"; if the update doesn't complete in 10 minutes, the command ends and displays a job ID:
+
+  <%= config.bin %> <%= command.id %> --file accounts.csv --sobject Account --wait 10 --target-org my-scratch
+
+- Update asynchronously and use the default org; the command immediately returns a job ID that you then pass to the "sf data update resume" command:
+
+  <%= config.bin %> <%= command.id %> --file accounts.csv --sobject Account --async
 
 # flags.async.summary
 
@@ -37,39 +41,3 @@ API name of the Salesforce object, either standard or custom, which you are upda
 # flags.line-ending.summary
 
 Line ending used in the CSV file. Default value on Windows is `CRLF`; on macOS and Linux it's `LF`.
-
-# export.resume
-
-Run "sf data import resume --job-id %s" to resume the operation.
-
-# error.timeout
-
-The operation timed out after %s minutes.
-
-Run "sf data import resume --job-id %s" to resume it.
-
-# error.failedRecordDetails
-
-Job finished being processed but failed to update %s records.
-
-To review the details of this job, run this command:
-
-sf org open --target-org %s --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F%s"
-
-# error.jobFailed
-
-Job failed to be processed due to:
-
-%s
-
-To review the details of this job, run this command:
-
-sf org open --target-org %s --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F%s"
-
-# error.jobAborted
-
-Job has been aborted.
-
-To review the details of this job, run this command:
-
-sf org open --target-org %s --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F%s"

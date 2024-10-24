@@ -27,35 +27,3 @@ Job ID of the bulk import.
 # flags.wait.summary
 
 Time to wait for the command to finish, in minutes.
-
-# error.failedRecordDetails
-
-Job finished being processed but failed to import %s records.
-
-To review the details of this job, run this command:
-
-sf org open --target-org %s --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F%s"
-
-# error.timeout
-
-The operation timed out after %s minutes.
-
-Try re-running "sf data import resume --job-id %s" with a bigger wait time.
-
-# error.jobFailed
-
-Job failed to be processed due to:
-
-%s
-
-To review the details of this job, run this command:
-
-sf org open --target-org %s --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F%s"
-
-# error.jobAborted
-
-Job has been aborted.
-
-To review the details of this job, run this command:
-
-sf org open --target-org %s --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F%s"
