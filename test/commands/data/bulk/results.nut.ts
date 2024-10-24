@@ -85,8 +85,8 @@ describe('data bulk results NUTs', () => {
     expect(results.successfulRecords).to.equal(5000);
     expect(results.failedRecords).to.equal(5000);
 
-    await validateCsv(results.successFilePath, 'COMMA', 5000);
-    await validateCsv(ensureString(results.failedFilePath), 'COMMA', 5000);
+    await validateCsv(path.join(session.project.dir, results.successFilePath), 'COMMA', 5000);
+    await validateCsv(path.join(session.project.dir, ensureString(results.failedFilePath)), 'COMMA', 5000);
   });
 });
 
