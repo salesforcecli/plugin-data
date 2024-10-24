@@ -115,12 +115,12 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
 
       if (jobInfo.numberRecordsFailed) {
         stages.error();
-        // TODO: replace this msg to point to `sf data bulk results` when it's added (W-12408034)
-        throw messages.createError('error.failedRecordDetails', [
-          jobInfo.numberRecordsFailed,
-          conn.getUsername(),
-          job.id,
-        ]);
+        throw messages.createError(
+          'error.failedRecordDetails',
+          [jobInfo.numberRecordsFailed],
+          // eslint-disable-next-line sf-plugin/no-missing-messages
+          [conn.getUsername(), job.id]
+        );
       }
 
       stages.stop();
@@ -144,18 +144,14 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
 
       if (jobInfo.state === 'Failed') {
         stages.error();
-        throw messages.createError(
-          'error.jobFailed',
-          [jobInfo.errorMessage, conn.getUsername(), job.id],
-          [],
-          err as Error
-        );
+        // eslint-disable-next-line sf-plugin/no-missing-messages
+        throw messages.createError('error.jobFailed', [jobInfo.errorMessage], [conn.getUsername(), job.id]);
       }
 
       if (jobInfo.state === 'Aborted') {
         stages.error();
-        // TODO: replace this msg to point to `sf data bulk results` when it's added (W-12408034)
-        throw messages.createError('error.jobAborted', [conn.getUsername(), job.id], [], err as Error);
+        // eslint-disable-next-line sf-plugin/no-missing-messages
+        throw messages.createError('error.jobAborted', [], [conn.getUsername(), job.id]);
       }
 
       throw err;
