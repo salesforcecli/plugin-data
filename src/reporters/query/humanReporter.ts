@@ -55,26 +55,6 @@ export const parseFields = (fields: Field[]): ParsedFields => ({
   aggregates: fields.filter(isAggregate),
 });
 
-export const prepColumns = (columns: Array<Optional<string>>): Ux.Table.Columns<GenericObject> => {
-  const formattedColumns: Ux.Table.Columns<GenericObject> = {};
-  columns.filter(isString).map(
-    (field) =>
-      (formattedColumns[field] = {
-        header: field.toUpperCase(),
-        get: (row): string => {
-          // first test if key exists, if so, return value
-          if (Reflect.has(row, field)) {
-            return (Reflect.get(row, field) as string) ?? '';
-          } else {
-            // if not, try to find it query
-            return (get(row, field) as string) ?? '';
-          }
-        },
-      })
-  );
-  return formattedColumns;
-};
-
 /** find null/undefined and replace it with a styled string */
 export const prepNullValues = <T>(record: T): T =>
   isPlainObject(record)
@@ -86,9 +66,33 @@ export const prepNullValues = <T>(record: T): T =>
 const maybeReplaceNulls = <T>(value: T): T | string => value ?? nullString;
 const maybeRecurseNestedObjects = <T>(value: T): T => (isPlainObject(value) ? prepNullValues(value) : value);
 
-const printTable = (records: GenericObject[], columns: Array<Optional<string>>, totalCount: number): void => {
+function prepData(
+  records: GenericObject[],
+  columns: Array<Optional<string>>
+): { data: Array<Record<string, unknown>>; columns: Array<{ key: string; name: string }> } {
+  const fields = columns.filter(isString);
+  const data = records.map(prepNullValues).map((record) => {
+    const row: Record<string, unknown> = {};
+    fields.forEach((field) => {
+      if (field in record) {
+        row[field] = (record[field] as string) ?? '';
+      } else {
+        // if not, try to find it query
+        row[field] = (get(record, field) as string) ?? '';
+      }
+    });
+    return row;
+  });
+  return { data, columns: fields.map((field) => ({ key: field, name: field.toUpperCase() })) };
+}
+
+const printTable = (records: GenericObject[], cols: Array<Optional<string>>, totalCount: number): void => {
   const ux = new Ux();
-  ux.table(records.map(prepNullValues), prepColumns(columns));
+  const { data, columns } = prepData(records, cols);
+  ux.table({
+    data,
+    columns,
+  });
   ux.log(ansis.bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
 };
 

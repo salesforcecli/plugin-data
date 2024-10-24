@@ -200,17 +200,12 @@ const executeBulkV2DataRequest = async <J extends Schema>(
 };
 
 const printBulkErrors = (failedResults: IngestJobV2FailedResults<Schema>): void => {
-  const columns = {
-    id: { header: 'Id' },
-    sfId: { header: 'Sf_Id' },
-    error: { header: 'Error' },
-  };
-  const options = { title: `Bulk Failures [${failedResults.length}]` };
   const ux = new Ux();
   ux.log();
-  ux.table(
-    failedResults.map((f) => ({ id: 'Id' in f ? f.Id : '', sfId: f.sf__Id, error: f.sf__Error })),
-    columns,
-    options
-  );
+  ux.table({
+    // eslint-disable-next-line camelcase
+    data: failedResults.map((f) => ({ id: 'Id' in f ? f.Id : '', sfId: f.sf__Id, error: f.sf__Error })),
+    columns: ['id', { key: 'sfId', name: 'Sf_Id' }, 'error'],
+    title: `Bulk Failures [${failedResults.length}]`,
+  });
 };

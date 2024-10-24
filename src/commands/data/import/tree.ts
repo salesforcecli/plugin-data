@@ -53,11 +53,14 @@ export default class Import extends SfCommand<ImportResult[]> {
       ? await importFromPlan(conn, flags.plan)
       : await importFromFiles(conn, flags.files ?? []);
 
-    this.styledHeader('Import Results');
-    this.table(results, {
-      refId: { header: 'Reference ID' },
-      type: { header: 'Type' },
-      id: { header: 'ID' },
+    this.table({
+      data: results,
+      columns: [
+        { key: 'refId', name: 'Reference ID' },
+        { key: 'type', name: 'Type' },
+        { key: 'id', name: 'ID' },
+      ],
+      title: 'Import Results',
     });
     return results;
   }

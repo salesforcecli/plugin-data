@@ -17,9 +17,9 @@ export class HumanSearchReporter extends SearchReporter {
       this.ux.log('No Records Found');
     }
     this.typeRecordsMap.forEach((records, type) => {
-      // to find the columns of the query, parse the keys of the first record
-      this.ux.table(records, Object.fromEntries(Object.keys(records[0]).map((k) => [k, { header: k }])), {
-        'no-truncate': true,
+      this.ux.table({
+        data: records,
+        overflow: 'wrap',
         title: type,
       });
       this.ux.log();
