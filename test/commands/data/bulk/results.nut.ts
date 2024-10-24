@@ -55,7 +55,7 @@ describe('data bulk results NUTs', () => {
     expect(dataBulkResultsRes.operation).to.equal('insert');
     expect(dataBulkResultsRes.object).to.equal('Account');
 
-    await validateCsv(dataBulkResultsRes.successFilePath, 'COMMA', 10_000);
+    await validateCsv(path.join(session.project.dir, dataBulkResultsRes.successFilePath), 'COMMA', 10_000);
   });
 
   it('should get success/failure results from a bulk import', async () => {
@@ -92,6 +92,9 @@ describe('data bulk results NUTs', () => {
 
 /**
  * Generates a CSV file with 10_000 account records to insert
+ *
+ * @param savePath path where to save the CSV.
+ * @param [badRows=0] Qty of rows with errors.
  *
  * Each `Account.name` field has a unique timestamp for idempotent runs.
  */
