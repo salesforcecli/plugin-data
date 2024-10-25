@@ -1,0 +1,46 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "Travel_Expense__c",
+        "referenceId": "Travel_Expense__cRef1"
+      },
+      "RecordType": {
+        "attributes": {
+          "type": "RecordType",
+          "url": "/services/data/v62.0/sobjects/RecordType/012D6000004PyzjIAC"
+        },
+        "Name": "food"
+      },
+      "Name": "lunch"
+    },
+    {
+      "attributes": {
+        "type": "Travel_Expense__c",
+        "referenceId": "Travel_Expense__cRef2"
+      },
+      "RecordType": {
+        "attributes": {
+          "type": "RecordType",
+          "url": "/services/data/v62.0/sobjects/RecordType/012D6000004PyztIAC"
+        },
+        "Name": "flights"
+      },
+      "Name": "BOI-STX"
+    },
+    {
+      "attributes": {
+        "type": "Travel_Expense__c",
+        "referenceId": "Travel_Expense__cRef3"
+      },
+      "RecordType": {
+        "attributes": {
+          "type": "RecordType",
+          "url": "/services/data/v62.0/sobjects/RecordType/012D6000004PyzjIAC"
+        },
+        "Name": "food"
+      },
+      "Name": "dinner"
+    }
+  ]
+}

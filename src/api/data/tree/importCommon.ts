@@ -5,6 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { Connection, SfError, Messages } from '@salesforce/core';
+import { getObject, getString } from '@salesforce/ts-types';
 import type { SObjectTreeInput, SObjectTreeFileContents } from '../../../types.js';
 import type { ResponseRefs, TreeResponse } from './importTypes.js';
 
@@ -25,6 +26,30 @@ export const sendSObjectTreeRequest =
         'content-type': 'application/json',
       },
     });
+
+export const transformRecordTypeEntries = async (
+  conn: Connection,
+  records: SObjectTreeInput[]
+): Promise<SObjectTreeInput[]> => {
+  await Promise.all(
+    records.map(async (record) => {
+      const recordName = getString(record, 'RecordType.Name');
+      if (recordName) {
+        const targetRecordTypeId = (
+          await conn.singleRecordQuery<{ Id: string }>(
+            `SELECT Id FROM RecordType WHERE Name = '${recordName}' AND SobjectType='${record.attributes.type}'`
+          )
+        ).Id;
+        delete record['RecordType'];
+        record['RecordTypeId'] = targetRecordTypeId;
+      } else if (getObject(record, 'RecordType') && !recordName) {
+        throw messages.createError('error.noRecordTypeName');
+      }
+    })
+  );
+
+  return records;
+};
 
 /** handle an error throw by sendSObjectTreeRequest.  Always throws */
 export const treeSaveErrorHandler = (error: unknown): never => {
