@@ -92,6 +92,7 @@ const printTable = (records: GenericObject[], cols: Array<Optional<string>>, tot
   ux.table({
     data,
     columns,
+    overflow: 'wrap',
   });
   ux.log(ansis.bold(messages.getMessage('displayQueryRecordsRetrieved', [totalCount])));
 };
