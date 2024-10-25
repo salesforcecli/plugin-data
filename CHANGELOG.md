@@ -1,3 +1,9 @@
+## [3.8.2](https://github.com/salesforcecli/plugin-data/compare/3.8.1...3.8.2) (2024-10-25)
+
+### Bug Fixes
+
+- add ability to import RecordTypeId when RecordType.Name is present ([720a434](https://github.com/salesforcecli/plugin-data/commit/720a434cb8b1d29f8b37f514bdc18bc03f11254d))
+
 ## [3.8.1](https://github.com/salesforcecli/plugin-data/compare/3.8.0...3.8.1) (2024-10-21)
 
 ### Bug Fixes
