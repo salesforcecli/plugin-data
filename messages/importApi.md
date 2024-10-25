@@ -81,3 +81,7 @@ There are references in a data file %s that can't be resolved:
 # error.RefsInFiles
 
 The file %s includes references (ex: '@AccountRef1'). Those are only supported with --plan, not --files.`
+
+# error.noRecordTypeName
+
+This file contains an unresolvable RecordType ID, try exporting data with RecordType.Name in the query

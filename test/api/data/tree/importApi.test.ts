@@ -18,8 +18,10 @@ import path, { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { Messages, Org } from '@salesforce/core';
+import { Connection, Messages, Org } from '@salesforce/core';
 import { ImportApi, ImportConfig } from '../../../../src/api/data/tree/importApi.js';
+import { SObjectTreeInput } from '../../../../src/types.js';
+import { transformRecordTypeEntries } from '../../../../src/api/data/tree/importCommon.js';
 // Json files
 const accountsContactsTreeJSON = JSON.parse(
   fs.readFileSync('test/api/data/tree/test-files/accounts-contacts-tree.json', 'utf-8')
@@ -620,6 +622,32 @@ describe('ImportApi', () => {
           args.refMap
         )
       ).to.equal(true);
+    });
+
+    it("should convert RecordType Name's to IDs", async () => {
+      const travelExpenseJson = JSON.parse(
+        fs.readFileSync('test/api/data/tree/test-files/travel-expense.json', 'utf-8')
+      ) as { records: SObjectTreeInput[] };
+      sandbox.stub(Connection.prototype, 'singleRecordQuery').resolves({ Id: 'updatedIdHere' });
+      const updated = await transformRecordTypeEntries(Connection.prototype, travelExpenseJson.records);
+      expect(updated.length).to.equal(3);
+      expect(updated.every((e) => e.RecordTypeId === 'updatedIdHere')).to.be.true;
+      expect(updated.every((e) => e.RecordType === undefined)).to.be.true;
+    });
+
+    it('should throw an error when RecordType.Name is not available', async () => {
+      const travelExpenseJson = JSON.parse(
+        fs.readFileSync('test/api/data/tree/test-files/travel-expense.json', 'utf-8')
+      ) as { records: SObjectTreeInput[] };
+      // @ts-ignore - just delete the entry, regardless of types
+      delete travelExpenseJson.records[0].RecordType.Name;
+      try {
+        await transformRecordTypeEntries(Connection.prototype, travelExpenseJson.records);
+      } catch (e) {
+        expect((e as Error).message).to.equal(
+          'This file contains an unresolvable RecordType ID, try exporting data with RecordType.Name in the query'
+        );
+      }
     });
 
     it('should call sendSObjectTreeRequest 3rd with correct args', async () => {
