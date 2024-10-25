@@ -84,4 +84,4 @@ The file %s includes references (ex: '@AccountRef1'). Those are only supported w
 
 # error.noRecordTypeName
 
-This file contains an unresolvable RecordType ID, try exporting data with RecordType.Name in the query
+This file contains an unresolvable RecordType ID. Try exporting the data by specifying RecordType.Name in the SOQL query, and then run the data import again.

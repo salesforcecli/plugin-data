@@ -645,7 +645,7 @@ describe('ImportApi', () => {
         await transformRecordTypeEntries(Connection.prototype, travelExpenseJson.records);
       } catch (e) {
         expect((e as Error).message).to.equal(
-          'This file contains an unresolvable RecordType ID, try exporting data with RecordType.Name in the query'
+          'This file contains an unresolvable RecordType ID. Try exporting the data by specifying RecordType.Name in the SOQL query, and then run the data import again.'
         );
       }
     });

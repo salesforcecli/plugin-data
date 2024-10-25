@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { Connection, SfError, Messages } from '@salesforce/core';
-import { getString } from '@salesforce/ts-types';
+import { getObject, getString } from '@salesforce/ts-types';
 import type { SObjectTreeInput, SObjectTreeFileContents } from '../../../types.js';
 import type { ResponseRefs, TreeResponse } from './importTypes.js';
 
@@ -61,7 +61,7 @@ TODO: figure out a generic way to import records queried like
         ).Id;
         delete record['RecordType'];
         record['RecordTypeId'] = targetRecordTypeId;
-      } else {
+      } else if (getObject(record, 'RecordType') && !recordName) {
         throw messages.createError('error.noRecordTypeName');
       }
     })
