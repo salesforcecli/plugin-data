@@ -44,4 +44,4 @@ Line ending used in the CSV file. Default value on Windows is `CRLF`; on macOS a
 
 # flags.column-delimiter.summary
 
-Column delimiter used in CSV file. Default is COMMA.
+Column delimiter used in the CSV file. Default is COMMA.

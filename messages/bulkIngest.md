@@ -10,7 +10,7 @@ Run "sf %s --job-id %s" to resume it.
 
 # error.failedRecordDetails
 
-Job finished being processed but failed to update %s records.
+Job finished being processed but failed to process %s records.
 
 To review the details of this job, run this command:
 
