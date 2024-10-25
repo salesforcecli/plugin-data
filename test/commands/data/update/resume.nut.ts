@@ -8,7 +8,7 @@ import path from 'node:path';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 import { Org } from '@salesforce/core';
-import { generateUpdatedCsv, generateAccountsCsv } from '../../../testUtil.js';
+import { generateUpdatedCsv, generateAccountsCsv, validateCacheFile } from '../../../testUtil.js';
 import { DataUpdateBulkResult } from '../../../../src/commands/data/update/bulk.js';
 import { DataImportBulkResult } from '../../../../src/commands/data/import/bulk.js';
 
@@ -40,13 +40,9 @@ describe('data update resume NUTs', () => {
       { ensureExitCode: 0 }
     ).jsonOutput?.result as DataImportBulkResult;
 
-    // TODO: set org username above like here:
-    // https://github.com/salesforcecli/cli-plugins-testkit/blob/main/SAMPLES.md#testing-with-multiple-scratch-orgs
-    const username = [...session.orgs.keys()][0];
-
     const conn = (
       await Org.create({
-        aliasOrUsername: username,
+        aliasOrUsername: session.orgs.get('default')?.username,
       })
     ).getConnection();
 
@@ -68,6 +64,8 @@ describe('data update resume NUTs', () => {
     ).jsonOutput?.result as DataUpdateBulkResult;
 
     expect(dataUpdateAsyncRes.jobId).to.be.length(18);
+
+    await validateCacheFile(path.join(session.homeDir, '.sf', 'bulk-data-update-cache.json'), dataUpdateAsyncRes.jobId);
 
     const dataUpdateResumeRes = execCmd<DataUpdateBulkResult>(
       `data update resume -i ${dataUpdateAsyncRes.jobId} --wait 10 --json`,

@@ -8,7 +8,7 @@ import path from 'node:path';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 import { DataImportBulkResult } from '../../../../src/commands/data/import/bulk.js';
-import { generateAccountsCsv } from '../../../testUtil.js';
+import { generateAccountsCsv, validateCacheFile } from '../../../testUtil.js';
 
 describe('data import resume NUTs', () => {
   let session: TestSession;
@@ -35,18 +35,19 @@ describe('data import resume NUTs', () => {
 
     // about the type assertion at the end:
     // I'm passing `--json` in and `ensureExitCode: 0` so I should always have a JSON result.
-    const exportAsyncResult = execCmd<DataImportBulkResult>(
+    const importAsyncRes = execCmd<DataImportBulkResult>(
       `data import bulk --file ${csvFile} --sobject account --async --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result as DataImportBulkResult;
 
-    expect(exportAsyncResult.jobId).not.to.be.undefined;
-    expect(exportAsyncResult.jobId).to.be.length(18);
+    expect(importAsyncRes.jobId).not.to.be.undefined;
+    expect(importAsyncRes.jobId).to.be.length(18);
 
-    const importResumeResult = execCmd<DataImportBulkResult>(
-      `data import resume -i ${exportAsyncResult.jobId} --json`,
-      { ensureExitCode: 0 }
-    ).jsonOutput?.result as DataImportBulkResult;
+    await validateCacheFile(path.join(session.homeDir, '.sf', 'bulk-data-import-cache.json'), importAsyncRes.jobId);
+
+    const importResumeResult = execCmd<DataImportBulkResult>(`data import resume -i ${importAsyncRes.jobId} --json`, {
+      ensureExitCode: 0,
+    }).jsonOutput?.result as DataImportBulkResult;
 
     expect(importResumeResult.processedRecords).to.equal(10_000);
     expect(importResumeResult.successfulRecords).to.equal(10_000);

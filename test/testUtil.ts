@@ -8,7 +8,7 @@
 import path from 'node:path';
 import * as fs from 'node:fs';
 import { EOL, platform } from 'node:os';
-import { writeFile } from 'node:fs/promises';
+import { writeFile, stat, readFile } from 'node:fs/promises';
 import { PassThrough, Writable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { promisify } from 'node:util';
@@ -293,4 +293,28 @@ export async function generateAccountsCsv(
   await writeFile(accountsCsv, csv);
 
   return accountsCsv;
+}
+
+/**
+ * Validate that the cache created by a data command (async/timed out) exists has expected properties
+ *
+ * @param filePath cache file path
+ * @param jobId job ID
+ */
+export async function validateCacheFile(filePath: string, jobId: string) {
+  let fileStat: fs.Stats;
+  try {
+    fileStat = await stat(filePath);
+  } catch {
+    throw new Error(`No file found at ${filePath}`);
+  }
+
+  if (!fileStat.isFile()) {
+    throw new Error(`${filePath} exists but is not a file`);
+  }
+
+  const parsed = JSON.parse(await readFile(filePath, 'utf8')) as Record<string, unknown>;
+
+  expect(parsed[jobId]).to.exist;
+  expect(parsed[jobId]).to.have.all.keys(['jobId', 'username', 'apiVersion', 'timestamp']);
 }
