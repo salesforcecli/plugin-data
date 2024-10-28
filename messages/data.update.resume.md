@@ -8,11 +8,11 @@ When the original "sf data update bulk" command either times out or is run with 
 
 # examples
 
-- Resume a bulk update job to your default org using an ID:
+- Resume a bulk update job of your default org using a job ID:
 
   <%= config.bin %> <%= command.id %> --job-id 750xx000000005sAAA
 
-- Resume the most recently run bulk update job for an org with alias my-scratch:
+- Resume the most recently run bulk update job for an org with alias "my-scratch":
 
   <%= config.bin %> <%= command.id %> --use-most-recent --target-org my-scratch
 

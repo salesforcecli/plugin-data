@@ -1,6 +1,6 @@
 # summary
 
-Resume a bulk export job that you previously started.
+Resume a bulk export job that you previously started. Uses Bulk API 2.0.
 
 # description
 
