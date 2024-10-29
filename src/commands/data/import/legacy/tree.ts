@@ -85,11 +85,10 @@ export default class Import extends SfCommand<ImportResult[] | JsonMap> {
       return { refId: ref.referenceId, type, id: ref.id };
     });
 
-    this.styledHeader('Import Results');
-    this.table(processedResult, {
-      refId: { header: 'Reference ID' },
-      type: { header: 'Type' },
-      id: { header: 'ID' },
+    this.table({
+      data: processedResult,
+      columns: [{ key: 'refId', name: 'Reference ID' }, 'type', { key: 'id', name: 'ID' }],
+      title: 'Import Results',
     });
 
     return processedResult;

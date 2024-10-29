@@ -1,3 +1,22 @@
+# [3.9.0](https://github.com/salesforcecli/plugin-data/compare/3.8.2...3.9.0) (2024-10-29)
+
+### Features
+
+- use new table ([#1100](https://github.com/salesforcecli/plugin-data/issues/1100)) ([38a638b](https://github.com/salesforcecli/plugin-data/commit/38a638b245d0400bbb94faa280ef6c6b4e439ddf))
+
+## [3.8.2](https://github.com/salesforcecli/plugin-data/compare/3.8.1...3.8.2) (2024-10-25)
+
+### Bug Fixes
+
+- add ability to import RecordTypeId when RecordType.Name is present ([720a434](https://github.com/salesforcecli/plugin-data/commit/720a434cb8b1d29f8b37f514bdc18bc03f11254d))
+
+## [3.8.1](https://github.com/salesforcecli/plugin-data/compare/3.8.0...3.8.1) (2024-10-21)
+
+### Bug Fixes
+
+- change plan name to plan.json - avoids really long concats ([d7dd1ea](https://github.com/salesforcecli/plugin-data/commit/d7dd1ea69e4abaa0660d8090ecf6f582f13fc22b))
+- multi queries working ([ca9fbee](https://github.com/salesforcecli/plugin-data/commit/ca9fbeebfc357ad8af144235581295f1c0c38500))
+
 # [3.8.0](https://github.com/salesforcecli/plugin-data/compare/3.7.1...3.8.0) (2024-10-18)
 
 ### Features

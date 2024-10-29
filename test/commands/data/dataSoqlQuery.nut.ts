@@ -214,7 +214,7 @@ describe('data:query command', () => {
 
       const queryResult = runQuery(query, { ensureExitCode: 0, json: false }) as string;
 
-      expect(queryResult).to.match(/ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY/g);
+      expect(queryResult).to.match(/ID.*?NAME.*?PHONE.*?WEBSITE.*?NUMBEROFEMPLOYEES.*?INDUSTRY/g);
       expect(queryResult).to.match(/Total number of records retrieved: 1\./g);
     });
 
@@ -226,7 +226,7 @@ describe('data:query command', () => {
 
       const queryResult = execCmd(`data:query --file ${filepath}`, { ensureExitCode: 0 }).shellOutput.stdout;
 
-      expect(queryResult).to.match(/ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY/g);
+      expect(queryResult).to.match(/ID.*?NAME.*?PHONE.*?WEBSITE.*?NUMBEROFEMPLOYEES.*?INDUSTRY/g);
       expect(queryResult).to.match(/Total number of records retrieved: 1\./g);
     });
 
@@ -237,7 +237,7 @@ describe('data:query command', () => {
       const queryResult = runQuery(query, { ensureExitCode: 0, json: false }) as string;
 
       expect(queryResult).to.match(
-        /ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY\s+?CONTACTS.LASTNAME\s+?CONTACTS.TITLE\s+?CONTACTS.EMAIL/g
+        /ID.*?NAME.*?PHONE.*?WEBSITE.*?NUMBEROFEMPLOYEES.*?INDUSTRY.*?CONTACTS.LASTNAME.*?CONTACTS.TITLE.*?CONTACTS.EMAIL/g
       );
       expect(queryResult).to.match(/\sSmith/g);
       expect(queryResult).to.match(/Total number of records retrieved: 2\./g);
@@ -260,17 +260,22 @@ describe('data:query command', () => {
     it('should print JSON output correctly', () => {
       const result = runQuery('select id, isActive, Metadata from RemoteProxy', {
         ensureExitCode: 0,
-        json: false,
+        json: true,
         toolingApi: true,
       });
 
-      expect(result).to.not.include('[object Object]');
+      expect(result).to.be.ok;
+      expect(result).to.be.an('object');
+
       // the Metadata object parsed correctly
-      expect(result).to.include('disableProtocolSecurity');
-      expect(result).to.include('isActive');
-      expect(result).to.include('url');
-      expect(result).to.include('urls');
-      expect(result).to.include('description');
+      // @ts-expect-error typescript doesn't know the shape of the Metadata object
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+      const metadataObject = result?.records[0].Metadata;
+      expect(metadataObject).to.have.property('disableProtocolSecurity');
+      expect(metadataObject).to.have.property('isActive');
+      expect(metadataObject).to.have.property('url');
+      expect(metadataObject).to.have.property('urls');
+      expect(metadataObject).to.have.property('description');
     });
   });
   describe('data:query --bulk', () => {
@@ -300,7 +305,7 @@ describe('data:query command', () => {
 
       const queryResult = runQuery(query, { ensureExitCode: 0, json: false, bulk: true });
 
-      expect(queryResult).to.match(/ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY/g);
+      expect(queryResult).to.match(/ID.*?NAME.*?PHONE.*?WEBSITE.*?NUMBEROFEMPLOYEES.*?INDUSTRY/g);
       expect(queryResult).to.match(/Total number of records retrieved: 1\./g);
     });
 

@@ -98,7 +98,7 @@ describe('data:query:resume command', () => {
       await isCompleted(`data:query:resume -i ${bulkQueryId} --json`);
 
       const result = execCmd(`data:query:resume -i ${bulkQueryId}`, { ensureExitCode: 0 }).shellOutput.stdout;
-      expect(result).to.match(/ID\s+?NAME\s+?PHONE\s+?WEBSITE\s+?NUMBEROFEMPLOYEES\s+?INDUSTRY/g);
+      expect(result).to.match(/ID.*?NAME.*?PHONE.*?WEBSITE.*?NUMBEROFEMPLOYEES.*?INDUSTRY/g);
       expect(result).to.match(/Total number of records retrieved: 1\./g);
     });
 

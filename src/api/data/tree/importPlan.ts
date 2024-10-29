@@ -18,6 +18,7 @@ import {
   getResultsIfNoError,
   parseDataFileContents,
   sendSObjectTreeRequest,
+  transformRecordTypeEntries,
   treeSaveErrorHandler,
 } from './importCommon.js';
 import { isUnresolvedRef } from './functions.js';
@@ -109,6 +110,7 @@ const getResults =
       `Sending ${partWithRefsReplaced.filePath} (${partWithRefsReplaced.records.length} records for ${partWithRefsReplaced.sobject}) to the API`
     );
     try {
+      partWithRefsReplaced.records = await transformRecordTypeEntries(conn, partWithRefsReplaced.records);
       const contents = JSON.stringify({ records: partWithRefsReplaced.records });
       const newResults = getResultsIfNoError(partWithRefsReplaced.filePath)(
         await sendSObjectTreeRequest(conn)(partWithRefsReplaced.sobject)(contents)

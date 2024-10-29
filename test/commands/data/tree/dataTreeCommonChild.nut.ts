@@ -55,7 +55,7 @@ describe('data:tree commands with a polymorphic whatId (on tasks) shared between
     );
 
     execCmd(
-      `data:export:tree --query "${query}" --prefix ${prefix} --outputdir ${path.join(
+      `data:export:tree --query "${query}" --prefix ${prefix} --output-dir ${path.join(
         '.',
         'export_data'
       )} --plan --json`,
