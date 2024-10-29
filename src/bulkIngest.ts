@@ -63,7 +63,7 @@ export async function bulkIngest(opts: {
   const timeout = opts.async ? Duration.minutes(0) : opts.wait ?? Duration.minutes(0);
   const async = timeout.milliseconds === 0;
 
-  const baseUrl = opts.conn.getAuthInfoFields().instanceUrl as string;
+  const baseUrl = ensureString(opts.conn.getAuthInfoFields().instanceUrl);
 
   const stages = new BulkIngestStages({
     resume: false,
