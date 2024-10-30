@@ -8,19 +8,19 @@
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
 import { bulkIngest, columnDelimiterFlag } from '../../../bulkIngest.js';
-import { BulkImportRequestCache } from '../../../bulkDataRequestCache.js';
+import { BulkUpdateRequestCache } from '../../../bulkDataRequestCache.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-data', 'data.import.bulk');
+const messages = Messages.loadMessages('@salesforce/plugin-data', 'data.update.bulk');
 
-export type DataImportBulkResult = {
+export type DataUpdateBulkResult = {
   jobId: string;
   processedRecords?: number;
   successfulRecords?: number;
   failedRecords?: number;
 };
 
-export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
+export default class DataUpdateBulk extends SfCommand<DataUpdateBulkResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -29,7 +29,11 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
     async: Flags.boolean({
       summary: messages.getMessage('flags.async.summary'),
       char: 'a',
-      exclusive: ['wait'],
+    }),
+    wait: Flags.duration({
+      summary: messages.getMessage('flags.wait.summary'),
+      char: 'w',
+      unit: 'minutes',
     }),
     file: Flags.file({
       summary: messages.getMessage('flags.file.summary'),
@@ -43,12 +47,6 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
       required: true,
     }),
     'api-version': Flags.orgApiVersion(),
-    wait: Flags.duration({
-      summary: messages.getMessage('flags.wait.summary'),
-      char: 'w',
-      unit: 'minutes',
-      exclusive: ['async'],
-    }),
     'target-org': Flags.requiredOrg(),
     'line-ending': Flags.option({
       summary: messages.getMessage('flags.line-ending.summary'),
@@ -58,18 +56,18 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
     'column-delimiter': columnDelimiterFlag,
   };
 
-  public async run(): Promise<DataImportBulkResult> {
-    const { flags } = await this.parse(DataImportBulk);
+  public async run(): Promise<DataUpdateBulkResult> {
+    const { flags } = await this.parse(DataUpdateBulk);
 
     return bulkIngest({
-      resumeCmdId: 'data import resume',
-      stageTitle: 'Importing data',
+      resumeCmdId: 'data update resume',
+      stageTitle: 'Updating data',
       object: flags.sobject,
-      operation: 'insert',
+      operation: 'update',
       lineEnding: flags['line-ending'],
       columnDelimiter: flags['column-delimiter'],
       conn: flags['target-org'].getConnection(flags['api-version']),
-      cache: await BulkImportRequestCache.create(),
+      cache: await BulkUpdateRequestCache.create(),
       async: flags.async,
       wait: flags.wait,
       file: flags.file,

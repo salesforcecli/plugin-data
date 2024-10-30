@@ -27,38 +27,3 @@ Job ID of the bulk import.
 # flags.wait.summary
 
 Time to wait for the command to finish, in minutes.
-
-# error.failedRecordDetails
-
-Job finished being processed but failed to import %s records.
-
-# error.failedRecordDetails.actions
-
-- Get the job results by running: "sf data bulk results -o %s --job-id %s".
-- View the job in the org: "sf org open -o %s --path '/lightning/setup/AsyncApiJobStatus/page?address=%2F%s'".
-
-# error.jobFailed
-
-Job failed to be processed due to:
-
-%s
-
-# error.jobFailed.actions
-
-- Get the job results by running: "sf data bulk results -o %s --job-id %s".
-- View the job in the org: "sf org open -o %s --path '/lightning/setup/AsyncApiJobStatus/page?address=%2F%s'".
-
-# error.jobAborted
-
-Job has been aborted.
-
-# error.jobAborted.actions
-
-- Get the job results by running: "sf data bulk results -o %s --job-id %s".
-- View the job in the org: "sf org open -o %s --path '/lightning/setup/AsyncApiJobStatus/page?address=%2F%s'".
-
-# error.timeout
-
-The operation timed out after %s minutes.
-
-Try re-running "sf data import resume --job-id %s" with a bigger wait time.

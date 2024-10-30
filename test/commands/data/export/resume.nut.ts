@@ -48,26 +48,23 @@ describe('data export resume NUTs', () => {
     const outputFile = 'export-accounts.csv';
     const command = `data export bulk -q "${soqlQuery}" --output-file ${outputFile} --async --json`;
 
-    // about the type assertion at the end:
-    // I'm passing `--json` in and `ensureExitCode: 0` so I should always have a JSON result.
-    const exportAsyncResult = execCmd<DataExportBulkResult>(command, { ensureExitCode: 0 }).jsonOutput
-      ?.result as DataExportBulkResult;
+    const exportAsyncResult = execCmd<DataExportBulkResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
 
-    expect(exportAsyncResult.jobId).to.be.length(18);
-    expect(exportAsyncResult.filePath).to.equal(outputFile);
+    expect(exportAsyncResult?.jobId).to.be.length(18);
+    expect(exportAsyncResult?.filePath).to.equal(outputFile);
 
     const exportResumeResult = execCmd<DataExportResumeResult>(
-      `data export resume -i ${exportAsyncResult.jobId} --json`,
+      `data export resume -i ${exportAsyncResult?.jobId} --json`,
       { ensureExitCode: 0 }
-    ).jsonOutput?.result as DataExportResumeResult;
+    ).jsonOutput?.result;
 
-    expect(exportResumeResult.totalSize).to.be.equal(totalAccountRecords);
-    expect(exportResumeResult.filePath).to.equal(outputFile);
+    expect(exportResumeResult?.totalSize).to.be.equal(totalAccountRecords);
+    expect(exportResumeResult?.filePath).to.equal(outputFile);
 
     await validateCsv(
       path.join(session.dir, 'data-project', outputFile),
       'COMMA',
-      ensureNumber(exportResumeResult.totalSize)
+      ensureNumber(exportResumeResult?.totalSize)
     );
   });
 
@@ -75,21 +72,18 @@ describe('data export resume NUTs', () => {
     const outputFile = 'export-accounts.json';
     const command = `data export bulk -q "${soqlQuery}" --output-file ${outputFile} --async --result-format json --json`;
 
-    // about the type assertion at the end:
-    // I'm passing `--json` in and `ensureExitCode: 0` so I should always have a JSON result.
-    const exportAsyncResult = execCmd<DataExportBulkResult>(command, { ensureExitCode: 0 }).jsonOutput
-      ?.result as DataExportBulkResult;
+    const exportAsyncResult = execCmd<DataExportBulkResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
 
-    expect(exportAsyncResult.jobId).to.be.length(18);
-    expect(exportAsyncResult.filePath).to.equal(outputFile);
+    expect(exportAsyncResult?.jobId).to.be.length(18);
+    expect(exportAsyncResult?.filePath).to.equal(outputFile);
 
     const exportResumeResult = execCmd<DataExportResumeResult>(
-      `data export resume -i ${exportAsyncResult.jobId} --json`,
+      `data export resume -i ${exportAsyncResult?.jobId} --json`,
       { ensureExitCode: 0 }
-    ).jsonOutput?.result as DataExportResumeResult;
+    ).jsonOutput?.result;
 
-    expect(exportResumeResult.totalSize).to.be.equal(totalAccountRecords);
-    expect(exportResumeResult.filePath).to.equal(outputFile);
+    expect(exportResumeResult?.totalSize).to.be.equal(totalAccountRecords);
+    expect(exportResumeResult?.filePath).to.equal(outputFile);
 
     await validateJson(path.join(session.dir, 'data-project', outputFile), ensureNumber(totalAccountRecords));
   });

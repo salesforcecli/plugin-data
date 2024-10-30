@@ -14,7 +14,7 @@ import { sleep } from '@salesforce/kit';
 import { ensurePlainObject } from '@salesforce/ts-types';
 import type { SaveResult } from '@jsforce/jsforce-node';
 import { BulkResultV2 } from '../../../src/types.js';
-import { QueryResult } from './dataSoqlQuery.nut.js';
+import { QueryResult } from '../data/query/query.nut.js';
 
 chaiConfig.truncateThreshold = 0;
 

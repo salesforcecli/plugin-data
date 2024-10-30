@@ -5,11 +5,11 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import path from 'node:path';
-import { writeFile } from 'node:fs/promises';
-import { EOL } from 'node:os';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import { ensureString } from '@salesforce/ts-types';
 import { DataImportBulkResult } from '../../../../src/commands/data/import/bulk.js';
+import { generateAccountsCsv, validateCacheFile } from '../../../testUtil.js';
 
 describe('data import resume NUTs', () => {
   let session: TestSession;
@@ -34,24 +34,26 @@ describe('data import resume NUTs', () => {
   it('should resume bulk import via --job-id', async () => {
     const csvFile = await generateAccountsCsv(session.dir);
 
-    // about the type assertion at the end:
-    // I'm passing `--json` in and `ensureExitCode: 0` so I should always have a JSON result.
-    const exportAsyncResult = execCmd<DataImportBulkResult>(
+    const importAsyncRes = execCmd<DataImportBulkResult>(
       `data import bulk --file ${csvFile} --sobject account --async --json`,
       { ensureExitCode: 0 }
-    ).jsonOutput?.result as DataImportBulkResult;
+    ).jsonOutput?.result;
 
-    expect(exportAsyncResult.jobId).not.to.be.undefined;
-    expect(exportAsyncResult.jobId).to.be.length(18);
+    expect(importAsyncRes?.jobId).not.to.be.undefined;
+    expect(importAsyncRes?.jobId).to.be.length(18);
 
-    const importResumeResult = execCmd<DataImportBulkResult>(
-      `data import resume -i ${exportAsyncResult.jobId} --json`,
-      { ensureExitCode: 0 }
-    ).jsonOutput?.result as DataImportBulkResult;
+    await validateCacheFile(
+      path.join(session.homeDir, '.sf', 'bulk-data-import-cache.json'),
+      ensureString(importAsyncRes?.jobId)
+    );
 
-    expect(importResumeResult.processedRecords).to.equal(10_000);
-    expect(importResumeResult.successfulRecords).to.equal(10_000);
-    expect(importResumeResult.failedRecords).to.equal(0);
+    const importResumeResult = execCmd<DataImportBulkResult>(`data import resume -i ${importAsyncRes?.jobId} --json`, {
+      ensureExitCode: 0,
+    }).jsonOutput?.result;
+
+    expect(importResumeResult?.processedRecords).to.equal(10_000);
+    expect(importResumeResult?.successfulRecords).to.equal(10_000);
+    expect(importResumeResult?.failedRecords).to.equal(0);
   });
 
   it('should resume bulk import via--use-most-recent', async () => {
@@ -59,47 +61,23 @@ describe('data import resume NUTs', () => {
 
     const command = `data import bulk --file ${csvFile} --sobject account --async --json`;
 
-    // about the type assertion at the end:
-    // I'm passing `--json` in and `ensureExitCode: 0` so I should always have a JSON result.
-    const exportAsyncResult = execCmd<DataImportBulkResult>(command, { ensureExitCode: 0 }).jsonOutput
-      ?.result as DataImportBulkResult;
+    const exportAsyncResult = execCmd<DataImportBulkResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
 
-    expect(exportAsyncResult.jobId).not.to.be.undefined;
-    expect(exportAsyncResult.jobId).to.be.length(18);
+    expect(exportAsyncResult?.jobId).not.to.be.undefined;
+    expect(exportAsyncResult?.jobId).to.be.length(18);
 
     const importResumeResult = execCmd<DataImportBulkResult>('data import resume --use-most-recent --json', {
       ensureExitCode: 0,
-    }).jsonOutput?.result as DataImportBulkResult;
+    }).jsonOutput?.result;
 
-    expect(importResumeResult.jobId).not.to.be.undefined;
-    expect(importResumeResult.jobId).to.be.length(18);
+    expect(importResumeResult?.jobId).not.to.be.undefined;
+    expect(importResumeResult?.jobId).to.be.length(18);
 
     // validate the cache is returning the job ID from the last async import
-    expect(importResumeResult.jobId).to.equal(exportAsyncResult.jobId);
+    expect(importResumeResult?.jobId).to.equal(exportAsyncResult?.jobId);
 
-    expect(importResumeResult.processedRecords).to.equal(10_000);
-    expect(importResumeResult.successfulRecords).to.equal(10_000);
-    expect(importResumeResult.failedRecords).to.equal(0);
+    expect(importResumeResult?.processedRecords).to.equal(10_000);
+    expect(importResumeResult?.successfulRecords).to.equal(10_000);
+    expect(importResumeResult?.failedRecords).to.equal(0);
   });
 });
-
-/**
- * Generates a CSV file with 10_000 account records to insert
- *
- * Each `Account.name` field has a unique timestamp for idempotent runs.
- */
-export async function generateAccountsCsv(savePath: string): Promise<string> {
-  const id = Date.now();
-
-  let csv = 'NAME,TYPE,PHONE,WEBSITE' + EOL;
-
-  for (let i = 1; i <= 10_000; i++) {
-    csv += `account ${id} #${i},Account,415-555-0000,http://www.accountImport${i}.com${EOL}`;
-  }
-
-  const accountsCsv = path.join(savePath, 'bulkImportAccounts1.csv');
-
-  await writeFile(accountsCsv, csv);
-
-  return accountsCsv;
-}

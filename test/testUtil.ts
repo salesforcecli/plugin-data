@@ -4,12 +4,17 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+
+import path from 'node:path';
 import * as fs from 'node:fs';
+import { EOL, platform } from 'node:os';
+import { writeFile, stat, readFile } from 'node:fs/promises';
 import { PassThrough, Writable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { promisify } from 'node:util';
 import { exec as execSync } from 'node:child_process';
 import { Connection } from '@salesforce/core';
+import { stringify as csvStringify } from 'csv-stringify/sync';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -212,4 +217,104 @@ export async function validateJson(filePath: string, totalqty: number): Promise<
   const lengthRes = await exec(`jq length ${filePath}`, { shell: 'pwsh' });
 
   expect(parseInt(lengthRes.stdout.trim(), 10)).equal(totalqty);
+}
+
+/**
+ * Takes a CSV with account records and insert the `ID` column for a bulk update operation
+ *
+ * @param sourceCsv CSV file with imported account records, shouldn't have an `ID` column.
+ * @param ids Array of IDs of records inserted from sourceCsv.
+ * @param savePath path where to save the new CSV.
+ *
+ * Each `Account.name` field has a unique timestamp for idempotent runs.
+ */
+export async function generateUpdatedCsv(sourceCsv: string, ids: string[], savePath: string) {
+  const csvReadStream = fs.createReadStream(sourceCsv);
+  const modifiedRows: Array<{ NAME: string; ID?: string }> = [];
+  let counter = 0;
+
+  await pipeline(
+    csvReadStream,
+    new csvParse({ columns: true, delimiter: ',' }),
+    new PassThrough({
+      objectMode: true,
+      transform(row: { NAME: string; ID?: string }, _encoding, callback) {
+        row.ID = ids[counter];
+        const modifiedRow = { ID: row['ID'], ...row };
+        modifiedRows.push(modifiedRow);
+        counter++;
+        callback(null, null);
+      },
+    }),
+    // dummy writable
+    new Writable({
+      write(_chunk, _encoding, callback) {
+        callback();
+      },
+    })
+  );
+
+  await writeFile(
+    savePath,
+    csvStringify(modifiedRows, {
+      header: true,
+      // `csv-stringify` doesn't follow camelCase for its opts: https://csv.js.org/stringify/options/record_delimiter/
+      /* eslint-disable-next-line camelcase */
+      record_delimiter: platform() === 'win32' ? 'windows' : 'unix',
+    })
+  );
+
+  return savePath;
+}
+
+/**
+ * Generates a CSV file with 10_000 account records to insert
+ *
+ * @param savePath path where to save the new CSV.
+ *
+ * Each `Account.name` field has a unique timestamp for idempotent runs.
+ */
+export async function generateAccountsCsv(
+  savePath: string,
+  columnDelimiter: ColumnDelimiterKeys = 'COMMA'
+): Promise<string> {
+  const id = Date.now();
+
+  const delimiter = ColumnDelimiter[columnDelimiter];
+
+  let csv = `NAME${delimiter}TYPE${delimiter}PHONE${delimiter}WEBSITE${EOL}`;
+
+  for (let i = 1; i <= 10_000; i++) {
+    csv += `account ${id} #${i}${delimiter}Account${delimiter}415-555-0000${delimiter}http://www.accountImport${i}.com${EOL}`;
+  }
+
+  const accountsCsv = path.join(savePath, 'bulkImportAccounts.csv');
+
+  await writeFile(accountsCsv, csv);
+
+  return accountsCsv;
+}
+
+/**
+ * Validate that the cache created by a data command (async/timed out) exists has expected properties
+ *
+ * @param filePath cache file path
+ * @param jobId job ID
+ */
+export async function validateCacheFile(filePath: string, jobId: string) {
+  let fileStat: fs.Stats;
+  try {
+    fileStat = await stat(filePath);
+  } catch {
+    throw new Error(`No file found at ${filePath}`);
+  }
+
+  if (!fileStat.isFile()) {
+    throw new Error(`${filePath} exists but is not a file`);
+  }
+
+  const parsed = JSON.parse(await readFile(filePath, 'utf8')) as Record<string, unknown>;
+
+  expect(parsed[jobId]).to.exist;
+  expect(parsed[jobId]).to.have.all.keys(['jobId', 'username', 'apiVersion', 'timestamp']);
 }

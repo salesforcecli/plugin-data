@@ -8,7 +8,7 @@ import path from 'node:path';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { Dictionary, get, getString } from '@salesforce/ts-types';
-import { QueryResult } from '../dataSoqlQuery.nut.js';
+import { QueryResult } from '../query/query.nut.js';
 
 describe('data:tree beta commands with more than 2 levels', () => {
   const prefix = 'DEEP';

@@ -1,3 +1,9 @@
+# [3.10.0](https://github.com/salesforcecli/plugin-data/compare/3.9.0...3.10.0) (2024-10-30)
+
+### Features
+
+- add `data update bulk/resume` commands ([#1098](https://github.com/salesforcecli/plugin-data/issues/1098)) ([5ef1b55](https://github.com/salesforcecli/plugin-data/commit/5ef1b550d5971f6eb7c5dc028ad6994e81b3feff)), closes [#1099](https://github.com/salesforcecli/plugin-data/issues/1099) [#1106](https://github.com/salesforcecli/plugin-data/issues/1106)
+
 # [3.9.0](https://github.com/salesforcecli/plugin-data/compare/3.8.2...3.9.0) (2024-10-29)
 
 ### Features
