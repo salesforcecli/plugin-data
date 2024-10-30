@@ -6,6 +6,7 @@
  */
 
 import { Transform, Readable } from 'node:stream';
+import { createInterface } from 'node:readline';
 import { pipeline } from 'node:stream/promises';
 import * as fs from 'node:fs';
 import { EOL } from 'node:os';
@@ -22,7 +23,7 @@ import {
 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { Parser as csvParse } from 'csv-parse';
 import type { Schema } from '@jsforce/jsforce-node';
-import { Connection, Messages } from '@salesforce/core';
+import { Connection, Messages, SfError } from '@salesforce/core';
 import { IngestJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { SfCommand, Spinner } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
@@ -305,4 +306,75 @@ export async function exportRecords(
   }
 
   return jobInfo;
+}
+
+async function readFirstFiveLines(filePath: string): Promise<string[]> {
+  const fileStream = fs.createReadStream(filePath);
+
+  const rl = createInterface({
+    input: fileStream,
+    crlfDelay: Infinity, // Recognizes both CRLF and LF line endings
+  });
+
+  const lines = [];
+
+  for await (const line of rl) {
+    lines.push(line);
+    if (lines.length === 5) break;
+  }
+
+  return lines;
+}
+
+export async function detectDelimiter(filePath: string): Promise<ColumnDelimiterKeys> {
+  const delimiterMap = new Map<string, ColumnDelimiterKeys>();
+  delimiterMap.set('`', 'BACKQUOTE');
+  delimiterMap.set('^', 'CARET');
+  delimiterMap.set(',', 'COMMA');
+  delimiterMap.set('|', 'PIPE');
+  delimiterMap.set(';', 'SEMICOLON');
+  delimiterMap.set('	', 'TAB');
+
+  const delimiters = ['`', '^', ',', '|', ';', '	'];
+  const delimiterCounts: { [key: string]: number } = {};
+
+  // Initialize counts
+  for (const delimiter of delimiters) {
+    delimiterCounts[delimiter] = 0;
+  }
+
+  // Read the first few lines of the file
+  const data = await readFirstFiveLines(filePath);
+
+  data.forEach((line) => {
+    // Ignore empty lines
+    if (line.trim() === '') return;
+
+    delimiters.forEach((delimiter) => {
+      // Use regex to avoid counting delimiters inside quotes
+      const regexDelimiter = delimiter === '^' || delimiter === '|' ? `\\${delimiter}` : delimiter;
+      const regex = new RegExp(`(?<=^|[^"'])${regexDelimiter}(?=[^"']*$)`, 'g');
+      const count = (line.match(regex) ?? []).length;
+      delimiterCounts[delimiter] += count;
+    });
+  });
+
+  // Find the delimiter with the highest count
+  let detectedDelimiter: string | undefined;
+  let maxCount = 0;
+
+  for (const [delimiter, count] of Object.entries(delimiterCounts)) {
+    if (count > maxCount) {
+      maxCount = count;
+      detectedDelimiter = delimiter;
+    }
+  }
+
+  const columDelimiter = delimiterMap.get(detectedDelimiter ?? '');
+
+  if (columDelimiter === undefined) {
+    throw new SfError(`Failed to detect column delimiter used in ${filePath}.`);
+  }
+
+  return columDelimiter;
 }

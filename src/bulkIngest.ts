@@ -15,6 +15,7 @@ import { Duration } from '@salesforce/kit';
 import { ensureString } from '@salesforce/ts-types';
 import { BulkIngestStages } from './ux/bulkIngestStages.js';
 import { BulkUpdateRequestCache, BulkImportRequestCache } from './bulkDataRequestCache.js';
+import { detectDelimiter } from './bulkUtils.js';
 
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulkIngest');
 
@@ -42,7 +43,7 @@ export async function bulkIngest(opts: {
   object: string;
   operation: JobInfoV2['operation'];
   lineEnding: JobInfoV2['lineEnding'] | undefined;
-  columnDelimiter: JobInfoV2['columnDelimiter'];
+  columnDelimiter: JobInfoV2['columnDelimiter'] | undefined;
   conn: Connection;
   cache: BulkUpdateRequestCache | BulkImportRequestCache;
   async: boolean;
@@ -80,7 +81,7 @@ export async function bulkIngest(opts: {
       object,
       operation,
       lineEnding,
-      columnDelimiter,
+      columnDelimiter: columnDelimiter ?? (await detectDelimiter(file)),
     });
 
     stages.update(job.getInfo());
@@ -101,7 +102,7 @@ export async function bulkIngest(opts: {
     object,
     operation,
     lineEnding,
-    columnDelimiter,
+    columnDelimiter: columnDelimiter ?? (await detectDelimiter(file)),
   });
 
   stages.setupJobListeners(job);
@@ -286,5 +287,4 @@ export async function createIngestJob(
 export const columnDelimiterFlag = Flags.option({
   summary: messages.getMessage('flags.column-delimiter.summary'),
   options: ['BACKQUOTE', 'CARET', 'COMMA', 'PIPE', 'SEMICOLON', 'TAB'] as const,
-  default: 'COMMA',
 })();
