@@ -154,7 +154,7 @@ export async function bulkIngest(opts: {
     }
 
     if (jobInfo.state === 'Aborted') {
-      stages.error();
+      stages.stop('aborted');
       // TODO: replace this msg to point to `sf data bulk results` when it's added (W-12408034)
       throw messages.createError('error.jobAborted', [conn.getUsername(), job.id], [], err as Error);
     }
@@ -245,7 +245,7 @@ export async function bulkIngestResume(opts: {
     }
 
     if (jobInfo.state === 'Aborted') {
-      stages.error();
+      stages.stop('aborted');
       // TODO: replace this msg to point to `sf data bulk results` when it's added (W-12408034)
       throw messages.createError('error.jobAborted', [conn.getUsername(), job.id], [], err as Error);
     }
