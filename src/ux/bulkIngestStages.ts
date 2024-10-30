@@ -9,6 +9,7 @@ import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { IngestJobV2, JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { Schema } from '@jsforce/jsforce-node';
 import terminalLink from 'terminal-link';
+import { StageStatus } from 'node_modules/@oclif/multi-stage-output/lib/stage-tracker.js';
 
 type Options = {
   resume: boolean;
@@ -17,7 +18,7 @@ type Options = {
   jsonEnabled: boolean;
 };
 
-export class BulkImportStages {
+export class BulkIngestStages {
   private mso: MultiStageOutput<JobInfoV2>;
   private resume: boolean;
 
@@ -110,8 +111,8 @@ export class BulkImportStages {
     this.mso.updateData(data);
   }
 
-  public stop(): void {
-    this.mso.stop();
+  public stop(finalStatus?: StageStatus): void {
+    this.mso.stop(finalStatus);
   }
 
   public error(): void {

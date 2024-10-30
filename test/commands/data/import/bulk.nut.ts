@@ -8,7 +8,7 @@ import path from 'node:path';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 import { DataImportBulkResult } from '../../../../src/commands/data/import/bulk.js';
-import { generateAccountsCsv } from './resume.nut.js';
+import { generateAccountsCsv } from '../../../testUtil.js';
 
 describe('data import bulk NUTs', () => {
   let session: TestSession;
@@ -36,13 +36,28 @@ describe('data import bulk NUTs', () => {
     const result = execCmd<DataImportBulkResult>(
       `data import bulk --file ${csvFile} --sobject Account --wait 10 --json`,
       { ensureExitCode: 0 }
-    ).jsonOutput?.result as DataImportBulkResult;
+    ).jsonOutput?.result;
 
-    expect(result.jobId).not.be.undefined;
-    expect(result.jobId.length).to.equal(18);
-    expect(result.processedRecords).to.equal(10_000);
-    expect(result.successfulRecords).to.equal(10_000);
-    expect(result.failedRecords).to.equal(0);
+    expect(result?.jobId).not.be.undefined;
+    expect(result?.jobId.length).to.equal(18);
+    expect(result?.processedRecords).to.equal(10_000);
+    expect(result?.successfulRecords).to.equal(10_000);
+    expect(result?.failedRecords).to.equal(0);
+  });
+
+  it('should import account records in csv format with PIPE delimiter', async () => {
+    const csvFile = await generateAccountsCsv(session.dir, 'PIPE');
+
+    const result = execCmd<DataImportBulkResult>(
+      `data import bulk --file ${csvFile} --sobject Account --wait 10 --json`,
+      { ensureExitCode: 0 }
+    ).jsonOutput?.result;
+
+    expect(result?.jobId).not.be.undefined;
+    expect(result?.jobId.length).to.equal(18);
+    expect(result?.processedRecords).to.equal(10_000);
+    expect(result?.successfulRecords).to.equal(10_000);
+    expect(result?.failedRecords).to.equal(0);
   });
 
   it('should report error msg from a failed job', async () => {
