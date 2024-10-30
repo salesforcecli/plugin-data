@@ -75,6 +75,10 @@ export const baseFlags = {
   }),
   verbose: Flags.boolean({
     summary: messages.getMessage('flags.verbose.summary'),
+    deprecated: {
+      message:
+        'The --verbose flag is deprecated and will be removed after March 2025, use "sf data bulk results" to get job results instead.',
+    },
   }),
 };
 
@@ -141,9 +145,6 @@ export const runBulkOperation = async ({
       // We only print human readable error outputs if --json is not specified.
       // The JSON result itself will already contain the error information (see above).
       else if (verbose) {
-        cmd.warn(
-          `The --verbose flag is deprecated and will be removed after March 2025, run "sf data bulk results -i ${jobInfo.id}" to get job results instead.`
-        );
         const records = await job.getAllResults();
         if (records?.failedResults?.length > 0) {
           printBulkErrors(records.failedResults);
