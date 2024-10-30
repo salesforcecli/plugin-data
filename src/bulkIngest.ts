@@ -121,6 +121,7 @@ export async function bulkIngest(opts: {
       throw messages.createError(
         'error.failedRecordDetails',
         [jobInfo.numberRecordsFailed],
+        // remove after W-17099874 gets fixed
         // eslint-disable-next-line sf-plugin/no-missing-messages
         [conn.getUsername(), job.id]
       );
