@@ -33,3 +33,7 @@ Job has been aborted.
 To review the details of this job, run this command:
 
 sf org open --target-org %s --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F%s"
+
+# flags.column-delimiter.summary
+
+Column delimiter used in the CSV file. Default is COMMA.

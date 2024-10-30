@@ -7,7 +7,7 @@
 
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
-import { bulkIngest } from '../../../bulkIngest.js';
+import { bulkIngest, columnDelimiterFlag } from '../../../bulkIngest.js';
 import { BulkUpdateRequestCache } from '../../../bulkDataRequestCache.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -53,11 +53,7 @@ export default class DataUpdateBulk extends SfCommand<DataUpdateBulkResult> {
       dependsOn: ['file'],
       options: ['CRLF', 'LF'] as const,
     })(),
-    'column-delimiter': Flags.option({
-      summary: messages.getMessage('flags.column-delimiter.summary'),
-      options: ['BACKQUOTE', 'CARET', 'COMMA', 'PIPE', 'SEMICOLON', 'TAB'] as const,
-      default: 'COMMA',
-    })(),
+    'column-delimiter': columnDelimiterFlag,
   };
 
   public async run(): Promise<DataUpdateBulkResult> {

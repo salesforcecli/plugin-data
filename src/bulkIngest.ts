@@ -7,6 +7,7 @@
 
 import * as fs from 'node:fs';
 import { platform } from 'node:os';
+import { Flags } from '@salesforce/sf-plugins-core';
 import { IngestJobV2, JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { Connection, Messages } from '@salesforce/core';
 import { Schema } from '@jsforce/jsforce-node';
@@ -281,3 +282,9 @@ export async function createIngestJob(
 
   return job;
 }
+
+export const columnDelimiterFlag = Flags.option({
+  summary: messages.getMessage('flags.column-delimiter.summary'),
+  options: ['BACKQUOTE', 'CARET', 'COMMA', 'PIPE', 'SEMICOLON', 'TAB'] as const,
+  default: 'COMMA',
+})();
