@@ -104,6 +104,7 @@
     "prepack": "sf-prepack",
     "prepare": "sf-install",
     "test": "wireit",
+    "test:nuts": "nyc mocha \"./test/**/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:nuts:bulk:import": "nyc mocha \"./test/commands/data/import/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:nuts:bulk:export": "nyc mocha \"./test/commands/data/export/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:nuts:bulk:update": "nyc mocha \"./test/commands/data/update/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
