@@ -1,3 +1,9 @@
+# [3.11.0](https://github.com/salesforcecli/plugin-data/compare/3.10.0...3.11.0) (2024-10-30)
+
+### Features
+
+- add `data bulk results` ([#1097](https://github.com/salesforcecli/plugin-data/issues/1097)) ([1113705](https://github.com/salesforcecli/plugin-data/commit/1113705c8afc619e0f197416b08cd6e1c5e124a2)), closes [#1101](https://github.com/salesforcecli/plugin-data/issues/1101)
+
 # [3.10.0](https://github.com/salesforcecli/plugin-data/compare/3.9.0...3.10.0) (2024-10-30)
 
 ### Features
