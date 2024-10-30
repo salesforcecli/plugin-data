@@ -49,7 +49,7 @@ describe('data import bulk NUTs', () => {
     const csvFile = await generateAccountsCsv(session.dir, 'PIPE');
 
     const result = execCmd<DataImportBulkResult>(
-      `data import bulk --file ${csvFile} --sobject Account --wait 10 --column-delimiter PIPE --json`,
+      `data import bulk --file ${csvFile} --sobject Account --wait 10 --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result;
 
