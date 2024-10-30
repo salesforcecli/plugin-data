@@ -14,6 +14,7 @@ import {
   treeSaveErrorHandler,
   parseDataFileContents,
   getResultsIfNoError,
+  transformRecordTypeEntries,
 } from './importCommon.js';
 import type { ImportResult, ResponseRefs, TreeResponse } from './importTypes.js';
 import { hasUnresolvedRefs } from './functions.js';
@@ -28,9 +29,10 @@ export type FileInfo = {
 export const importFromFiles = async (conn: Connection, dataFilePaths: string[]): Promise<ImportResult[]> => {
   const logger = Logger.childFromRoot('data:import:tree:importSObjectTreeFile');
   const fileInfos = (await Promise.all(dataFilePaths.map(parseFile))).map(logFileInfo(logger)).map(validateNoRefs);
+  await Promise.all(fileInfos.map(async (fi) => transformRecordTypeEntries(conn, fi.records)));
   const refMap = createSObjectTypeMap(fileInfos.flatMap((fi) => fi.records));
   const results = await Promise.allSettled(
-    fileInfos.map((fi) => sendSObjectTreeRequest(conn)(fi.sobject)(fi.rawContents))
+    fileInfos.map((fi) => sendSObjectTreeRequest(conn)(fi.sobject)(JSON.stringify({ records: fi.records })))
   );
   return results.map(getSuccessOrThrow).flatMap(getValueOrThrow(fileInfos)).map(addObjectTypes(refMap));
 };

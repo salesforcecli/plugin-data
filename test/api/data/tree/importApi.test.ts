@@ -18,8 +18,10 @@ import path, { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { Messages, Org } from '@salesforce/core';
+import { Connection, Messages, Org } from '@salesforce/core';
 import { ImportApi, ImportConfig } from '../../../../src/api/data/tree/importApi.js';
+import { SObjectTreeInput } from '../../../../src/types.js';
+import { transformRecordTypeEntries } from '../../../../src/api/data/tree/importCommon.js';
 // Json files
 const accountsContactsTreeJSON = JSON.parse(
   fs.readFileSync('test/api/data/tree/test-files/accounts-contacts-tree.json', 'utf-8')
@@ -29,28 +31,12 @@ const accountsContactsPlanJSON = JSON.parse(
 );
 const dataImportPlanSchema = JSON.parse(fs.readFileSync('schema/dataImportPlanSchema.json', 'utf-8'));
 
-// Sample response data
-// const sampleResponseData = [
-//   { referenceId: 'SampleAccountRef', id: '001xx000003DKpJAAW' },
-//   { referenceId: 'SampleAcct2Ref', id: '001xx000003DKpKAAW' },
-//   { referenceId: 'PresidentSmithRef', id: '003xx000004TtqCAAS' },
-//   { referenceId: 'VPEvansRef', id: '003xx000004TtqIAAS' }
-// ];
-
 const sampleSObjectTypes = {
   SampleAccountRef: 'Account',
   SampleAcct2Ref: 'Account',
   PresidentSmithRef: 'Contact',
   VPEvansRef: 'Contact',
 };
-
-// Sample command display data
-// const sampleDisplayData = [
-//   { refId: 'SampleAccountRef', type: 'Account', id: '001xx000003DKpJAAW' },
-//   { refId: 'SampleAcct2Ref', type: 'Account', id: '001xx000003DKpKAAW' },
-//   { refId: 'PresidentSmithRef', type: 'Contact', id: '003xx000004TtqCAAS' },
-//   { refId: 'VPEvansRef', type: 'Contact', id: '003xx000004TtqIAAS' }
-// ];
 
 const jsonRefRegex = /[.]*["|'][A-Z0-9_]*["|'][ ]*:[ ]*["|']@([A-Z0-9_]*)["|'][.]*/gim;
 
@@ -622,6 +608,32 @@ describe('ImportApi', () => {
       ).to.equal(true);
     });
 
+    it("should convert RecordType Name's to IDs", async () => {
+      const travelExpenseJson = JSON.parse(
+        fs.readFileSync('test/api/data/tree/test-files/travel-expense.json', 'utf-8')
+      ) as { records: SObjectTreeInput[] };
+      sandbox.stub(Connection.prototype, 'singleRecordQuery').resolves({ Id: 'updatedIdHere' });
+      const updated = await transformRecordTypeEntries(Connection.prototype, travelExpenseJson.records);
+      expect(updated.length).to.equal(3);
+      expect(updated.every((e) => e.RecordTypeId === 'updatedIdHere')).to.be.true;
+      expect(updated.every((e) => e.RecordType === undefined)).to.be.true;
+    });
+
+    it('should throw an error when RecordType.Name is not available', async () => {
+      const travelExpenseJson = JSON.parse(
+        fs.readFileSync('test/api/data/tree/test-files/travel-expense.json', 'utf-8')
+      ) as { records: SObjectTreeInput[] };
+      // @ts-ignore - just delete the entry, regardless of types
+      delete travelExpenseJson.records[0].RecordType.Name;
+      try {
+        await transformRecordTypeEntries(Connection.prototype, travelExpenseJson.records);
+      } catch (e) {
+        expect((e as Error).message).to.equal(
+          'This file contains an unresolvable RecordType ID. Try exporting the data by specifying RecordType.Name in the SOQL query, and then run the data import again.'
+        );
+      }
+    });
+
     it('should call sendSObjectTreeRequest 3rd with correct args', async () => {
       // @ts-ignore
       await ImportApi.prototype.importSObjectTreeFile.call(context, args);
@@ -652,134 +664,3 @@ describe('ImportApi', () => {
     });
   });
 });
-
-/**
- * Use these as the basis for integration tests.
- */
-// describe('data:import', () => {
-//   let force;
-//   let org;
-
-//   before(() => {
-//     workspace = new TestWorkspace();
-//     org = new Org();
-//     force = org.force;
-
-//     sandbox.stub(force, 'describeData').callsFake(() => Promise.resolve());
-
-//     // copy data files to workspace
-//     fse.copySync(path.join(dir, 'data'), path.join(workspace.getWorkspacePath(), 'data'));
-
-//     // Some test require a scratch org config in the workspace
-//     return workspace
-//       .configureHubOrg()
-//       .then(() => org.saveConfig(orgConfig))
-//       .then(() => workspace.configureWorkspaceScratchOrg());
-//   });
-
-//   after(() => {
-//     workspace.clean();
-//   });
-
-//   afterEach(() => {
-//     sandbox.restore();
-//   });
-
-//   describe('DataTreeImportCommand run()', () => {
-//     it('should output the plan schema when confighelp flag specified', async () => {
-//       const context = {
-//         flags: {
-//           confighelp: true,
-//           json: true
-//         },
-//         org: new Org()
-//       };
-//       const dataTreeImportCommand = new DataTreeImportCommand([], null);
-//       set(dataTreeImportCommand, 'ux', { log: sandbox.spy() });
-//       sandbox.stub(dataTreeImportCommand as any, 'resolveLegacyContext').callsFake(() => Promise.resolve(context));
-
-//       const outputJson = await dataTreeImportCommand.run();
-//       expect(outputJson).to.deep.equal(dataImportPlanSchema);
-//     });
-//   });
-
-//   // Test importing a single data file
-//   describe('#File', () => {
-//     beforeEach(() => {
-//       sandbox.stub(force, 'request').callsFake(() =>
-//         Promise.resolve({
-//           hasErrors: false,
-//           results: sampleResponseData
-//         })
-//       );
-//     });
-
-//     it('API: Should insert Accounts and child Contacts', () => {
-//       const dataImportCmd = new DataImportApi(org);
-//       const config = {
-//         json: true,
-//         username,
-//         sobjecttreefiles: './data/accounts-contacts-tree.json'
-//       };
-
-//       return dataImportCmd.execute(config).then(result => {
-//         expect(result).to.eql(sampleDisplayData);
-//       });
-//     });
-//   });
-
-//   // test importing via plan
-//   describe('#Plan', () => {
-//     const contactsOnly1 = [
-//       { referenceId: 'FrontDeskRef', id: '003xx000004TtqwAAC' },
-//       { referenceId: 'ManagerRef', id: '003xx000004TtqxAAC' }
-//     ];
-//     const contactsOnly2 = [
-//       { referenceId: 'JanitorRef', id: '003xx000004Ttr1AAC' },
-//       { referenceId: 'DeveloperRef', id: '003xx000004Ttr2AAC' }
-//     ];
-
-//     const sampleDisplayContacts1 = [
-//       { refId: 'FrontDeskRef', type: 'Contact', id: '003xx000004TtqwAAC' },
-//       { refId: 'ManagerRef', type: 'Contact', id: '003xx000004TtqxAAC' }
-//     ];
-
-//     const sampleDisplayContacts2 = [
-//       { refId: 'JanitorRef', type: 'Contact', id: '003xx000004Ttr1AAC' },
-//       { refId: 'DeveloperRef', type: 'Contact', id: '003xx000004Ttr2AAC' }
-//     ];
-
-//     let requestStub;
-
-//     beforeEach(() => {
-//       requestStub = sandbox.stub(force, 'request');
-//       requestStub.onCall(0).returns(Promise.resolve({ hasErrors: false, results: sampleResponseData }));
-//       requestStub.onCall(1).returns(Promise.resolve({ hasErrors: false, results: contactsOnly1 }));
-//       requestStub.onCall(2).returns(Promise.resolve({ hasErrors: false, results: contactsOnly2 }));
-//     });
-
-//     it('API: Should insert Accounts and child Contacts', () => {
-//       const dataImportCmd = new DataImportApi(org);
-//       const config = {
-//         json: true,
-//         username,
-//         plan: './data/accounts-contacts-plan.json',
-//         importPlanConfig: accountsContactsPlanJSON
-//       };
-//       const expected = [...sampleDisplayData, ...sampleDisplayContacts1, ...sampleDisplayContacts2];
-
-//       return dataImportCmd.execute(config).then(result => {
-//         expect(result).to.eql(expected);
-//       });
-//     });
-//   });
-
-//   describe('DataImportConfigHelpCommand', () => {
-//     it('should return the schema', () => {
-//       const dataImportConfigHelpCommand = new DataImportConfigHelpCommand();
-//       return dataImportConfigHelpCommand.execute({ org }).then(result => {
-//         expect(result).to.deep.equal(dataImportPlanSchema);
-//       });
-//     });
-//   });
-// });
