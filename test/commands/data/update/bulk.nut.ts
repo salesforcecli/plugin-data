@@ -8,6 +8,7 @@ import path from 'node:path';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 import { Org } from '@salesforce/core';
+import { ensureString } from '@salesforce/ts-types';
 import { generateUpdatedCsv, generateAccountsCsv } from '../../../testUtil.js';
 import { DataUpdateBulkResult } from '../../../../src/commands/data/update/bulk.js';
 import { DataImportBulkResult } from '../../../../src/commands/data/import/bulk.js';
@@ -38,7 +39,7 @@ describe('data update bulk NUTs', () => {
     const result = execCmd<DataImportBulkResult>(
       `data import bulk --file ${csvFile} --sobject Account --wait 10 --json`,
       { ensureExitCode: 0 }
-    ).jsonOutput?.result as DataImportBulkResult;
+    ).jsonOutput?.result;
 
     const conn = (
       await Org.create({
@@ -47,7 +48,7 @@ describe('data update bulk NUTs', () => {
     ).getConnection();
 
     const importJob = conn.bulk2.job('ingest', {
-      id: result.jobId,
+      id: ensureString(result?.jobId),
     });
 
     const successfulIds = (await importJob.getSuccessfulResults()).map((r) => r.sf__Id);
@@ -61,10 +62,10 @@ describe('data update bulk NUTs', () => {
     const dataUpdateResult = execCmd<DataUpdateBulkResult>(
       `data update bulk --file ${updatedCsv} --sobject account --wait 10 --json`,
       { ensureExitCode: 0 }
-    ).jsonOutput?.result as DataUpdateBulkResult;
+    ).jsonOutput?.result;
 
-    expect(dataUpdateResult.processedRecords).to.equal(10_000);
-    expect(dataUpdateResult.successfulRecords).to.equal(10_000);
-    expect(dataUpdateResult.failedRecords).to.equal(0);
+    expect(dataUpdateResult?.processedRecords).to.equal(10_000);
+    expect(dataUpdateResult?.successfulRecords).to.equal(10_000);
+    expect(dataUpdateResult?.failedRecords).to.equal(0);
   });
 });

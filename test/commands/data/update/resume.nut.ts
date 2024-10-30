@@ -8,6 +8,7 @@ import path from 'node:path';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 import { Org } from '@salesforce/core';
+import { ensureString } from '@salesforce/ts-types';
 import { generateUpdatedCsv, generateAccountsCsv, validateCacheFile } from '../../../testUtil.js';
 import { DataUpdateBulkResult } from '../../../../src/commands/data/update/bulk.js';
 import { DataImportBulkResult } from '../../../../src/commands/data/import/bulk.js';
@@ -38,7 +39,7 @@ describe('data update resume NUTs', () => {
     const result = execCmd<DataImportBulkResult>(
       `data import bulk --file ${csvFile} --sobject Account --wait 10 --json`,
       { ensureExitCode: 0 }
-    ).jsonOutput?.result as DataImportBulkResult;
+    ).jsonOutput?.result;
 
     const conn = (
       await Org.create({
@@ -47,7 +48,7 @@ describe('data update resume NUTs', () => {
     ).getConnection();
 
     const importJob = conn.bulk2.job('ingest', {
-      id: result.jobId,
+      id: ensureString(result?.jobId),
     });
 
     const successfulIds = (await importJob.getSuccessfulResults()).map((r) => r.sf__Id);
@@ -61,19 +62,22 @@ describe('data update resume NUTs', () => {
     const dataUpdateAsyncRes = execCmd<DataUpdateBulkResult>(
       `data update bulk --file ${updatedCsv} --sobject account --async --json`,
       { ensureExitCode: 0 }
-    ).jsonOutput?.result as DataUpdateBulkResult;
+    ).jsonOutput?.result;
 
-    expect(dataUpdateAsyncRes.jobId).to.be.length(18);
+    expect(dataUpdateAsyncRes?.jobId).to.be.length(18);
 
-    await validateCacheFile(path.join(session.homeDir, '.sf', 'bulk-data-update-cache.json'), dataUpdateAsyncRes.jobId);
+    await validateCacheFile(
+      path.join(session.homeDir, '.sf', 'bulk-data-update-cache.json'),
+      ensureString(dataUpdateAsyncRes?.jobId)
+    );
 
     const dataUpdateResumeRes = execCmd<DataUpdateBulkResult>(
-      `data update resume -i ${dataUpdateAsyncRes.jobId} --wait 10 --json`,
+      `data update resume -i ${ensureString(dataUpdateAsyncRes?.jobId)} --wait 10 --json`,
       { ensureExitCode: 0 }
-    ).jsonOutput?.result as DataUpdateBulkResult;
+    ).jsonOutput?.result;
 
-    expect(dataUpdateResumeRes.processedRecords).to.equal(10_000);
-    expect(dataUpdateResumeRes.successfulRecords).to.equal(10_000);
-    expect(dataUpdateResumeRes.failedRecords).to.equal(0);
+    expect(dataUpdateResumeRes?.processedRecords).to.equal(10_000);
+    expect(dataUpdateResumeRes?.successfulRecords).to.equal(10_000);
+    expect(dataUpdateResumeRes?.failedRecords).to.equal(0);
   });
 });
