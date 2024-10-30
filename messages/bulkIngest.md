@@ -12,9 +12,10 @@ Run "sf %s --job-id %s" to resume it.
 
 Job finished being processed but failed to process %s records.
 
-To review the details of this job, run this command:
+# error.failedRecordDetails.actions
 
-sf org open --target-org %s --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F%s"
+- Get the job results by running: "sf data bulk results -o %s --job-id %s".
+- View the job in the org: "sf org open -o %s --path '/lightning/setup/AsyncApiJobStatus/page?address=%2F%s'".
 
 # error.jobFailed
 
@@ -22,17 +23,19 @@ Job failed to be processed due to:
 
 %s
 
-To review the details of this job, run this command:
+# error.jobFailed.actions
 
-sf org open --target-org %s --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F%s"
+- Get the job results by running: "sf data bulk results -o %s --job-id %s".
+- View the job in the org: "sf org open -o %s --path '/lightning/setup/AsyncApiJobStatus/page?address=%2F%s'".
 
 # error.jobAborted
 
 Job has been aborted.
 
-To review the details of this job, run this command:
+# error.jobAborted.actions
 
-sf org open --target-org %s --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F%s"
+- Get the job results by running: "sf data bulk results -o %s --job-id %s".
+- View the job in the org: "sf org open -o %s --path '/lightning/setup/AsyncApiJobStatus/page?address=%2F%s'".
 
 # flags.column-delimiter.summary
 

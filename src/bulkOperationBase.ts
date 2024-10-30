@@ -75,6 +75,10 @@ export const baseFlags = {
   }),
   verbose: Flags.boolean({
     summary: messages.getMessage('flags.verbose.summary'),
+    deprecated: {
+      message:
+        'The --verbose flag is deprecated and will be removed after March 2025, use "sf data bulk results" to get job results instead.',
+    },
   }),
 };
 
