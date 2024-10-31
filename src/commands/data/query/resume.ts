@@ -15,7 +15,6 @@ import {
   orgApiVersionFlagWithDeprecations,
   SfCommand,
 } from '@salesforce/sf-plugins-core';
-import type { ResumeOptions } from '../../../types.js';
 import { resultFormatFlag } from '../../../flags.js';
 import { displayResults, transformBulkResults } from '../../../queryUtils.js';
 import { BulkQueryRequestCache } from '../../../bulkDataRequestCache.js';
@@ -54,19 +53,18 @@ export class BulkQueryReport extends SfCommand<unknown> {
 
   public async run(): Promise<unknown> {
     const [{ flags }, cache] = await Promise.all([this.parse(BulkQueryReport), BulkQueryRequestCache.create()]);
-    const resumeOptions = await cache.resolveResumeOptionsFromCache(
-      flags['bulk-query-id'],
-      flags['use-most-recent'],
-      flags['target-org'],
-      flags['api-version']
-    );
+    const resumeOptions = await cache.resolveResumeOptionsFromCache(flags['bulk-query-id'] ?? flags['use-most-recent']);
     const job = new QueryJobV2(resumeOptions.options.connection, {
       id: resumeOptions.jobInfo.id,
-      pollingOptions: getNonZeroTimeoutPollingOptions(resumeOptions.options.pollingOptions),
+      pollingOptions: getNonZeroTimeoutPollingOptions({
+        pollTimeout: 0,
+        pollInterval: 0,
+      }),
     });
     await job.poll();
     const results = await job.result();
-    const queryResult = transformBulkResults((await results.toArray()) as jsforceRecord[], resumeOptions.options.query);
+    // TODO: I think `resumeOptions.options.query` used to be hardcoded to `query`, maybe remove it?
+    const queryResult = transformBulkResults((await results.toArray()) as jsforceRecord[], '');
 
     if (!this.jsonEnabled()) {
       displayResults({ ...queryResult }, flags['result-format']);
@@ -80,13 +78,15 @@ export class BulkQueryReport extends SfCommand<unknown> {
   }
 }
 
+// TODO: I'm pretty sure we never saved `--wait` value in cache, see if this still makes sense after cache refactor
 /**
  * polling options are retrieved from the cache.
  * If the data:query used `--async` or `--wait` 0, we'd be passing that to the jsforce poll method,
  * which means it would never check the actual result, and always throw a timeout error */
-const getNonZeroTimeoutPollingOptions = (
-  pollingOptions: ResumeOptions['options']['pollingOptions']
-): ResumeOptions['options']['pollingOptions'] => ({
+const getNonZeroTimeoutPollingOptions = (pollingOptions: {
+  pollInterval: number;
+  pollTimeout: number;
+}): { pollInterval: number; pollTimeout: number } => ({
   ...pollingOptions,
   pollTimeout: Math.max(pollingOptions.pollTimeout, 1000),
 });

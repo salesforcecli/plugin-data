@@ -26,7 +26,7 @@ type BulkIngestInfo = {
   failedRecords?: number;
 };
 
-type ResumeCommandIDs = 'data import resume' | 'data update resume' | 'data upsert resume';
+type ResumeCommandIDs = 'data import resume' | 'data update resume' | 'data upsert resume' | 'data delete resume';
 
 /**
  * Bulk API 2.0 ingest handler for `sf` bulk commands
@@ -181,7 +181,7 @@ export async function bulkIngest(opts: {
 export async function bulkIngestResume(opts: {
   cmdId: ResumeCommandIDs;
   stageTitle: string;
-  cache: BulkUpdateRequestCache;
+  cache: BulkUpdateRequestCache | BulkUpsertRequestCache;
   jobIdOrMostRecent: string | boolean;
   jsonEnabled: boolean;
   wait: Duration;
