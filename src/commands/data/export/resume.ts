@@ -53,10 +53,8 @@ export default class DataExportResume extends SfCommand<DataExportResumeResult> 
     const queryJob = new QueryJobV2(resumeOpts.options.connection, {
       id: resumeOpts.jobInfo.id,
       pollingOptions: {
-        // both `pollInterval` and `pollTimeout` values are 0 (set in BulkExportRequestCache.resolveResumeOptionsFromCache).
-        // So we set the interval to 5s and timeout to 30s (otherwise jsforce would throw a timeout err if passed 0ms).
-        pollInterval: Math.max(resumeOpts.options.pollingOptions.pollInterval, 5000),
-        pollTimeout: Math.max(resumeOpts.options.pollingOptions.pollTimeout, 30_000),
+        pollInterval: Math.max(5000),
+        pollTimeout: Math.max(30_000),
       },
     });
 

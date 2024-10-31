@@ -9,12 +9,12 @@ import * as fs from 'node:fs';
 import { platform } from 'node:os';
 import { Flags } from '@salesforce/sf-plugins-core';
 import { IngestJobV2, JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
-import { Connection, Messages } from '@salesforce/core';
+import { Connection, Messages, SfError } from '@salesforce/core';
 import { Schema } from '@jsforce/jsforce-node';
 import { Duration } from '@salesforce/kit';
 import { ensureString } from '@salesforce/ts-types';
 import { BulkIngestStages } from './ux/bulkIngestStages.js';
-import { BulkUpdateRequestCache, BulkImportRequestCache } from './bulkDataRequestCache.js';
+import { BulkUpdateRequestCache, BulkImportRequestCache, BulkUpsertRequestCache } from './bulkDataRequestCache.js';
 import { detectDelimiter } from './bulkUtils.js';
 
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulkIngest');
@@ -26,7 +26,7 @@ type BulkIngestInfo = {
   failedRecords?: number;
 };
 
-type ResumeCommandIDs = 'data import resume' | 'data update resume';
+type ResumeCommandIDs = 'data import resume' | 'data update resume' | 'data upsert resume';
 
 /**
  * Bulk API 2.0 ingest handler for `sf` bulk commands
@@ -44,8 +44,9 @@ export async function bulkIngest(opts: {
   operation: JobInfoV2['operation'];
   lineEnding: JobInfoV2['lineEnding'] | undefined;
   columnDelimiter: JobInfoV2['columnDelimiter'] | undefined;
+  externalId?: JobInfoV2['externalIdFieldName'];
   conn: Connection;
-  cache: BulkUpdateRequestCache | BulkImportRequestCache;
+  cache: BulkUpdateRequestCache | BulkImportRequestCache | BulkUpsertRequestCache;
   async: boolean;
   wait: Duration;
   file: string;
@@ -61,6 +62,12 @@ export async function bulkIngest(opts: {
     file,
     logFn,
   } = opts;
+
+  // validation
+  if (opts.externalId && opts.operation !== 'upsert') {
+    // TODO: update error msg
+    throw new SfError('yadayadayda');
+  }
 
   const timeout = opts.async ? Duration.minutes(0) : opts.wait ?? Duration.minutes(0);
   const async = timeout.milliseconds === 0;
@@ -81,6 +88,7 @@ export async function bulkIngest(opts: {
       object,
       operation,
       lineEnding,
+      externalIdFieldName: opts.externalId,
       columnDelimiter: columnDelimiter ?? (await detectDelimiter(file)),
     });
 
@@ -102,6 +110,7 @@ export async function bulkIngest(opts: {
     object,
     operation,
     lineEnding,
+    externalIdFieldName: opts.externalId,
     columnDelimiter: columnDelimiter ?? (await detectDelimiter(file)),
   });
 
@@ -265,6 +274,7 @@ export async function createIngestJob(
     object: string;
     operation: JobInfoV2['operation'];
     lineEnding: JobInfoV2['lineEnding'];
+    externalIdFieldName?: JobInfoV2['externalIdFieldName'];
     columnDelimiter: JobInfoV2['columnDelimiter'];
   }
 ): Promise<IngestJobV2<Schema>> {
@@ -285,4 +295,10 @@ export async function createIngestJob(
 export const columnDelimiterFlag = Flags.option({
   summary: messages.getMessage('flags.column-delimiter.summary'),
   options: ['BACKQUOTE', 'CARET', 'COMMA', 'PIPE', 'SEMICOLON', 'TAB'] as const,
+})();
+
+export const lineEndingFlag = Flags.option({
+  summary: messages.getMessage('flags.line-ending.summary'),
+  dependsOn: ['file'],
+  options: ['CRLF', 'LF'] as const,
 })();
