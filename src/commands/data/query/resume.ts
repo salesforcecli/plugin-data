@@ -70,10 +70,6 @@ export class BulkQueryReport extends SfCommand<unknown> {
       displayResults({ ...queryResult }, flags['result-format']);
     }
 
-    if (queryResult.result.done) {
-      await BulkQueryRequestCache.unset(resumeOptions.jobInfo.id);
-    }
-
     return queryResult.result;
   }
 }

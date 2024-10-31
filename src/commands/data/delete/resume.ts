@@ -9,7 +9,6 @@ import { Messages } from '@salesforce/core';
 import type { BulkResultV2 } from '../../../types.js';
 import { BulkDeleteRequestCache } from '../../../bulkDataRequestCache.js';
 import { ResumeBulkCommand } from '../../../resumeBulkBaseCommand.js';
-import { isBulkV2RequestDone } from '../../../bulkUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.delete.resume');
@@ -24,9 +23,6 @@ export default class DeleteResume extends ResumeBulkCommand {
     const [{ flags }, cache] = await Promise.all([this.parse(DeleteResume), BulkDeleteRequestCache.create()]);
     const resumeOptions = await cache.resolveResumeOptionsFromCache(flags['job-id'] ?? flags['use-most-recent']);
     const resumeResults = await this.resume(resumeOptions, flags.wait);
-    if (isBulkV2RequestDone(resumeResults.jobInfo)) {
-      await BulkDeleteRequestCache.unset(resumeOptions.jobInfo.id);
-    }
     return resumeResults;
   }
 }
