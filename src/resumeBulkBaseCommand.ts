@@ -43,7 +43,7 @@ export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
       summary: messages.getMessage('flags.wait.summary'),
       unit: 'minutes',
       min: 0,
-      defaultValue: 0,
+      defaultValue: 5,
     }),
     'api-version': Flags.orgApiVersion(),
     loglevel,

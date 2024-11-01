@@ -89,7 +89,8 @@ export async function bulkIngest(opts: {
       operation,
       lineEnding,
       externalIdFieldName: opts.externalId,
-      columnDelimiter: columnDelimiter ?? (await detectDelimiter(file)),
+      columnDelimiter:
+        columnDelimiter ?? (['delete', 'hardDelete'].includes(operation) ? 'COMMA' : await detectDelimiter(file)),
     });
 
     stages.update(job.getInfo());
@@ -111,7 +112,9 @@ export async function bulkIngest(opts: {
     operation,
     lineEnding,
     externalIdFieldName: opts.externalId,
-    columnDelimiter: columnDelimiter ?? (await detectDelimiter(file)),
+    // TODO: inline this at the top-level, CSV for deletes only have one column so we can't detect the delimiter
+    columnDelimiter:
+      columnDelimiter ?? (['delete', 'hardDelete'].includes(operation) ? 'COMMA' : await detectDelimiter(file)),
   });
 
   stages.setupJobListeners(job);
@@ -137,6 +140,15 @@ export async function bulkIngest(opts: {
     }
 
     stages.stop();
+
+    // always create a cache for `bulk upsert/delete` (even if not async).
+    // This keeps backwards-compat with the previous cache resolver that always returned
+    // a valid cache entry even if the ID didn't exist in it.
+    //
+    // TODO: talk with Vivek if we can deprecate this odd behavior.
+    if (['upsert', 'delete', 'hardDelete'].includes(operation)) {
+      await opts.cache.createCacheEntryForRequest(job.id, ensureString(conn.getUsername()), conn.getApiVersion());
+    }
 
     return {
       jobId: jobInfo.id,

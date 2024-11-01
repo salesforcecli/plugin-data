@@ -56,7 +56,7 @@ const checkBulkStatusHumanResponse = (statusCommand: string): void => {
     ensureExitCode: 0,
   }).shellOutput.stdout.split(os.EOL);
   const jobState = statusResponse.find((line) => line.includes('Status'));
-  expect(jobState).to.include('Job Complete');
+  expect(jobState).to.include('JobComplete');
 };
 
 describe('data:bulk commands', () => {
