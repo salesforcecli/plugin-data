@@ -22,7 +22,7 @@ export default class Import extends SfCommand<ImportResult[]> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
-  public static readonly aliases = ['force:data:tree:import', 'data:import:beta:tree'];
+  public static readonly aliases = ['force:data:tree:import'];
   public static readonly deprecateAliases = true;
 
   public static readonly flags = {
