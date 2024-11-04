@@ -43,7 +43,3 @@ Directory in which to generate the JSON files; default is current directory.
 # PrefixSlashError
 
 `--prefix` cannot contain a forward slash or backslash.
-
-# PlanJsonWarning
-
-Starting on Nov 10, 2024, the JSON output for `--plan` will no longer include the `saveRefs` and `resolveRefs` properties.

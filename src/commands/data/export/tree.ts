@@ -50,9 +50,6 @@ export default class Export extends SfCommand<ExportTreeResult> {
 
   public async run(): Promise<ExportTreeResult> {
     const { flags } = await this.parse(Export);
-    if (flags.plan) {
-      this.warn(messages.getMessage('PlanJsonWarning'));
-    }
     const exportConfig: ExportConfig = {
       outputDir: flags['output-dir'],
       plan: flags.plan,

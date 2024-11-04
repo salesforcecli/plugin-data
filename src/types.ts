@@ -53,8 +53,6 @@ export type SObjectTreeInput = Omit<BasicRecord, 'attributes'> & {
 };
 export type DataPlanPart = {
   sobject: string;
-  saveRefs: boolean;
-  resolveRefs: boolean;
   files: Array<string | (DataPlanPart & { file: string })>;
 };
 
