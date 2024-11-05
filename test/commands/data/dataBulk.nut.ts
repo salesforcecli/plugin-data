@@ -7,7 +7,7 @@
 import path from 'node:path';
 import { strict as assert } from 'node:assert/strict';
 import fs from 'node:fs';
-import os from 'node:os';
+import os, { EOL } from 'node:os';
 import { expect, config as chaiConfig } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { sleep } from '@salesforce/kit';
@@ -138,7 +138,8 @@ describe('data:bulk commands', () => {
       const result = execCmd('data:delete:bulk --sobject Account --file account.csv --wait 10 --verbose', {
         ensureExitCode: 0,
       }).shellOutput.stdout; // eslint-disable-next-line no-console
-      expect(result).to.include('| Status Job Complete | Records processed 1 | Records failed 0');
+      expect(result).to.include(`Successful records: 1${EOL}   Failed records: 0${EOL}   Status: JobComplete${EOL}`);
+      expect(result).to.not.include('Bulk Failures');
     });
 
     it('should have information in --json', () => {
