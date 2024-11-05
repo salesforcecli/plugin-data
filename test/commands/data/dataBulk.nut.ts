@@ -7,7 +7,7 @@
 import path from 'node:path';
 import { strict as assert } from 'node:assert/strict';
 import fs from 'node:fs';
-import os, { EOL } from 'node:os';
+import os from 'node:os';
 import { expect, config as chaiConfig } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { sleep } from '@salesforce/kit';
@@ -137,8 +137,8 @@ describe('data:bulk commands', () => {
       fs.writeFileSync(path.join(testSession.project.dir, 'account.csv'), `Id${os.EOL}${accountId}`);
       const result = execCmd('data:delete:bulk --sobject Account --file account.csv --wait 10 --verbose', {
         ensureExitCode: 0,
-      }).shellOutput.stdout; // eslint-disable-next-line no-console
-      expect(result).to.include(`Successful records: 1${EOL}   Failed records: 0${EOL}   Status: JobComplete${EOL}`);
+      }).shellOutput.stdout;
+      expect(result).to.match(/Successful records: 1\s*Failed records: 0\s*Status: JobComplete/s);
       expect(result).to.not.include('Bulk Failures');
     });
 
