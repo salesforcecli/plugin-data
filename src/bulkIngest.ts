@@ -143,6 +143,14 @@ export async function bulkIngest(opts: {
           printBulkErrors(records);
         }
       }
+      if (opts.operation === 'delete') {
+        return {
+          jobId: jobInfo.id,
+          processedRecords: jobInfo.numberRecordsProcessed,
+          successfulRecords: jobInfo.numberRecordsProcessed - (jobInfo.numberRecordsFailed ?? 0),
+          failedRecords: jobInfo.numberRecordsFailed,
+        };
+      }
       throw messages.createError(
         'error.failedRecordDetails',
         [jobInfo.numberRecordsFailed],
