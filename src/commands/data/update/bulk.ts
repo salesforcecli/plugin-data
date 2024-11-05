@@ -68,6 +68,7 @@ export default class DataUpdateBulk extends SfCommand<DataUpdateBulkResult> {
       wait: flags.wait,
       file: flags.file,
       jsonEnabled: this.jsonEnabled(),
+      verbose: false,
       logFn: (...args) => {
         this.log(...args);
       },

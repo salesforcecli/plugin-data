@@ -7,8 +7,8 @@
 
 import * as fs from 'node:fs';
 import { platform } from 'node:os';
-import { Flags } from '@salesforce/sf-plugins-core';
-import { IngestJobV2, JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
+import { Flags, Ux } from '@salesforce/sf-plugins-core';
+import { IngestJobV2, IngestJobV2FailedResults, JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { Schema } from '@jsforce/jsforce-node';
 import { Duration } from '@salesforce/kit';
@@ -37,6 +37,7 @@ type ResumeCommandIDs = 'data import resume' | 'data update resume' | 'data upse
  *
  * It will create the specified bulk ingest job, set up the oclif/MSO stages and return the job info.
  * */
+// eslint-disable-next-line complexity
 export async function bulkIngest(opts: {
   resumeCmdId: ResumeCommandIDs;
   stageTitle: string;
@@ -51,6 +52,7 @@ export async function bulkIngest(opts: {
   wait: Duration;
   file: string;
   jsonEnabled: boolean;
+  verbose: boolean;
   logFn: (message: string) => void;
 }): Promise<BulkIngestInfo> {
   const {
@@ -65,6 +67,11 @@ export async function bulkIngest(opts: {
 
   // validation
   if (opts.externalId && opts.operation !== 'upsert') {
+    // TODO: update error msg
+    throw new SfError('yadayadayda');
+  }
+
+  if (opts.verbose && !['delete', 'hardDelete', 'upsert'].includes(opts.operation)) {
     // TODO: update error msg
     throw new SfError('yadayadayda');
   }
@@ -130,6 +137,12 @@ export async function bulkIngest(opts: {
 
     if (jobInfo.numberRecordsFailed) {
       stages.error();
+      if (opts.verbose && !opts.jsonEnabled) {
+        const records = await job.getFailedResults();
+        if (records.length > 0) {
+          printBulkErrors(records);
+        }
+      }
       throw messages.createError(
         'error.failedRecordDetails',
         [jobInfo.numberRecordsFailed],
@@ -314,3 +327,15 @@ export const lineEndingFlag = Flags.option({
   dependsOn: ['file'],
   options: ['CRLF', 'LF'] as const,
 })();
+
+// TODO: should be deprecated
+export const printBulkErrors = (failedResults: IngestJobV2FailedResults<Schema>): void => {
+  const ux = new Ux();
+  ux.log();
+  ux.table({
+    // eslint-disable-next-line camelcase
+    data: failedResults.map((f) => ({ id: 'Id' in f ? f.Id : '', sfId: f.sf__Id, error: f.sf__Error })),
+    columns: ['id', { key: 'sfId', name: 'Sf_Id' }, 'error'],
+    title: `Bulk Failures [${failedResults.length}]`,
+  });
+};
