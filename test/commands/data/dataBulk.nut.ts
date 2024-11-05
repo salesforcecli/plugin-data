@@ -142,7 +142,7 @@ describe('data:bulk commands', () => {
       expect(result).to.not.include('Bulk Failures');
     });
 
-    it('should have information in --json', () => {
+    it('bulk delete should have information in --json', () => {
       fs.writeFileSync(path.join(testSession.project.dir, 'data.csv'), `Id${os.EOL}001000000000000AAA`);
 
       const result = execCmd<BulkResultV2>(
@@ -181,6 +181,32 @@ describe('data:bulk commands', () => {
       // expect(result?.failedResults[0].sf__Error).to.equal('MALFORMED_ID:bad id       001000000000000AAA:--')
       expect(result?.failedResults[0].Id).to.equal('001000000000000AAA');
       expect(result?.successfulResults.length).to.equal(0);
+    });
+
+    it('bulk upsert should have information in --json', () => {
+      const result = execCmd<BulkResultV2>(
+        `data:upsert:bulk --sobject Account --file ${path.join(
+          '.',
+          'data',
+          'bulkUpsert.csv'
+        )} --external-id Id --wait 10 --json`,
+        { ensureExitCode: 0 }
+      ).jsonOutput?.result.records;
+
+      expect(result?.successfulResults.length).to.equal(10);
+      expect(result?.failedResults.length).to.equal(0);
+      expect(result?.unprocessedRecords.length).to.equal(0);
+
+      expect(result?.successfulResults[0]).to.have.all.keys(
+        'sf__Id',
+        'sf__Created',
+        'ANNUALREVENUE',
+        'NAME',
+        'PHONE',
+        'TYPE',
+        'WEBSITE'
+      );
+      expect(result?.successfulResults[0].sf__Id?.length).to.equal(18);
     });
 
     it('should print verbose success with json', () => {

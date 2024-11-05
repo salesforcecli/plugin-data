@@ -61,6 +61,10 @@ export default class Upsert extends SfCommand<BulkResultV2> {
       id: res.jobId,
     });
 
+    if (res.failedRecords && res.failedRecords > 0) {
+      process.exitCode = 1;
+    }
+
     return {
       jobInfo: await job.check(),
       records: transformResults(await job.getAllResults()),

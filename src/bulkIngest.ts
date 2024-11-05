@@ -143,7 +143,8 @@ export async function bulkIngest(opts: {
           printBulkErrors(records);
         }
       }
-      if (opts.operation === 'delete') {
+      // TODO: deprecate this and point users to `data bulk results`
+      if (['delete', 'hardDelete', 'upsert'].includes(opts.operation)) {
         return {
           jobId: jobInfo.id,
           processedRecords: jobInfo.numberRecordsProcessed,
