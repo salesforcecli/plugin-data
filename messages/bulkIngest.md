@@ -37,6 +37,10 @@ Job has been aborted.
 - Get the job results by running: "sf data bulk results -o %s --job-id %s".
 - View the job in the org: "sf org open -o %s --path '/lightning/setup/AsyncApiJobStatus/page?address=%2F%s'".
 
+# error.hardDeletePermission
+
+You must have the "Bulk API Hard Delete" system permission to use the --hard-delete flag. This permission is disabled by default and can be enabled only by a system administrator.
+
 # flags.column-delimiter.summary
 
 Column delimiter used in the CSV file.
@@ -64,7 +68,3 @@ Run the command asynchronously.
 # flags.verbose.summary
 
 Print verbose output of failed records if result is available.
-
-# hard-delete-permission-error
-
-You must have the "Bulk API Hard Delete" system permission to use the --hard-delete flag. This permission is disabled by default and can be enabled only by a system administrator.

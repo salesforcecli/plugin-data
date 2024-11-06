@@ -99,6 +99,9 @@ export async function bulkIngest(opts: {
       externalIdFieldName: opts.externalId,
       columnDelimiter:
         columnDelimiter ?? (['delete', 'hardDelete'].includes(operation) ? 'COMMA' : await detectDelimiter(file)),
+    }).catch((err) => {
+      stages.stop('failed');
+      throw err;
     });
 
     stages.update(job.getInfo());
@@ -123,6 +126,9 @@ export async function bulkIngest(opts: {
     // TODO: inline this at the top-level, CSV for deletes only have one column so we can't detect the delimiter
     columnDelimiter:
       columnDelimiter ?? (['delete', 'hardDelete'].includes(operation) ? 'COMMA' : await detectDelimiter(file)),
+  }).catch((err) => {
+    stages.stop('failed');
+    throw err;
   });
 
   stages.setupJobListeners(job);
@@ -313,18 +319,26 @@ export async function createIngestJob(
     columnDelimiter: JobInfoV2['columnDelimiter'];
   }
 ): Promise<IngestJobV2<Schema>> {
-  const job = conn.bulk2.createJob(jobOpts);
+  try {
+    const job = conn.bulk2.createJob(jobOpts);
 
-  // create the job in the org
-  await job.open();
+    // create the job in the org
+    await job.open();
 
-  // upload data
-  await job.uploadData(fs.createReadStream(csvFile));
+    // upload data
+    await job.uploadData(fs.createReadStream(csvFile));
 
-  // mark the job to be ready to be processed
-  await job.close();
+    // mark the job to be ready to be processed
+    await job.close();
 
-  return job;
+    return job;
+  } catch (err) {
+    if (jobOpts.operation === 'hardDelete' && err instanceof Error && err.name === 'FEATURENOTENABLED') {
+      throw messages.createError('error.hardDeletePermission');
+    }
+
+    throw err;
+  }
 }
 
 export const columnDelimiterFlag = Flags.option({
