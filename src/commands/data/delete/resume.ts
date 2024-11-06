@@ -6,6 +6,7 @@
  */
 
 import { Messages } from '@salesforce/core';
+import { SfCommand } from '@salesforce/sf-plugins-core';
 import type { BulkResultV2 } from '../../../types.js';
 import { BulkDeleteRequestCache } from '../../../bulkDataRequestCache.js';
 import { ResumeBulkCommand } from '../../../resumeBulkBaseCommand.js';
@@ -26,12 +27,14 @@ export default class DeleteResume extends ResumeBulkCommand {
 
     const res = await bulkIngestResume({
       cmdId: 'data delete resume',
-      // TODO: should be `Deleting` or `HardDeleting`
       stageTitle: 'Deleting data',
       cache,
       jobIdOrMostRecent: flags['job-id'] ?? flags['use-most-recent'],
       jsonEnabled: this.jsonEnabled(),
       wait: flags.wait,
+      warnFn: (arg: SfCommand.Warning) => {
+        this.warn(arg);
+      },
     });
 
     const {

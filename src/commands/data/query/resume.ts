@@ -56,14 +56,14 @@ export class BulkQueryReport extends SfCommand<unknown> {
     const resumeOptions = await cache.resolveResumeOptionsFromCache(flags['bulk-query-id'] ?? flags['use-most-recent']);
     const job = new QueryJobV2(resumeOptions.options.connection, {
       id: resumeOptions.jobInfo.id,
-      pollingOptions: getNonZeroTimeoutPollingOptions({
-        pollTimeout: 0,
-        pollInterval: 0,
-      }),
+      pollingOptions: {
+        pollTimeout: 30_000,
+        pollInterval: 1000,
+      },
     });
     await job.poll();
     const results = await job.result();
-    // TODO: I think `resumeOptions.options.query` used to be hardcoded to `query`, maybe remove it?
+    // we don't have access to the SOQL query here so we pass an empty string.
     const queryResult = transformBulkResults((await results.toArray()) as jsforceRecord[], '');
 
     if (!this.jsonEnabled()) {
@@ -73,16 +73,3 @@ export class BulkQueryReport extends SfCommand<unknown> {
     return queryResult.result;
   }
 }
-
-// TODO: I'm pretty sure we never saved `--wait` value in cache, see if this still makes sense after cache refactor
-/**
- * polling options are retrieved from the cache.
- * If the data:query used `--async` or `--wait` 0, we'd be passing that to the jsforce poll method,
- * which means it would never check the actual result, and always throw a timeout error */
-const getNonZeroTimeoutPollingOptions = (pollingOptions: {
-  pollInterval: number;
-  pollTimeout: number;
-}): { pollInterval: number; pollTimeout: number } => ({
-  ...pollingOptions,
-  pollTimeout: Math.max(pollingOptions.pollTimeout, 1000),
-});

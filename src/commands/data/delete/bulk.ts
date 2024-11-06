@@ -7,7 +7,7 @@
 
 import { Messages } from '@salesforce/core';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { baseUpsertDeleteFlags, bulkIngest, columnDelimiterFlag, lineEndingFlag } from '../../../bulkIngest.js';
+import { baseUpsertDeleteFlags, columnDelimiterFlag, lineEndingFlag, bulkIngest } from '../../../bulkIngest.js';
 import { BulkDeleteRequestCache } from '../../../bulkDataRequestCache.js';
 import { BulkResultV2 } from '../../../types.js';
 import { transformResults } from '../../../bulkUtils.js';
@@ -48,8 +48,11 @@ export default class Delete extends SfCommand<BulkResultV2> {
       file: flags.file,
       jsonEnabled: this.jsonEnabled(),
       verbose: flags.verbose,
-      logFn: (...args) => {
-        this.log(...args);
+      logFn: (arg: string) => {
+        this.log(arg);
+      },
+      warnFn: (arg: SfCommand.Warning) => {
+        this.warn(arg);
       },
     });
 

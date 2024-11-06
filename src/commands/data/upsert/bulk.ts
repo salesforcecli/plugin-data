@@ -51,8 +51,11 @@ export default class Upsert extends SfCommand<BulkResultV2> {
       file: flags.file,
       jsonEnabled: this.jsonEnabled(),
       verbose: flags.verbose,
-      logFn: (...args) => {
-        this.log(...args);
+      logFn: (arg: string) => {
+        this.log(arg);
+      },
+      warnFn: (arg: SfCommand.Warning) => {
+        this.warn(arg);
       },
     });
 

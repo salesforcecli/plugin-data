@@ -6,6 +6,7 @@
  */
 
 import { Messages } from '@salesforce/core';
+import { SfCommand } from '@salesforce/sf-plugins-core';
 import type { BulkResultV2 } from '../../../types.js';
 import { BulkUpsertRequestCache } from '../../../bulkDataRequestCache.js';
 import { ResumeBulkCommand } from '../../../resumeBulkBaseCommand.js';
@@ -30,6 +31,9 @@ export default class UpsertResume extends ResumeBulkCommand {
       jobIdOrMostRecent: flags['job-id'] ?? flags['use-most-recent'],
       jsonEnabled: this.jsonEnabled(),
       wait: flags.wait,
+      warnFn: (arg: SfCommand.Warning) => {
+        this.warn(arg);
+      },
     });
 
     const {

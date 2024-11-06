@@ -7,7 +7,7 @@
 
 import * as fs from 'node:fs';
 import { platform } from 'node:os';
-import { Flags, Ux } from '@salesforce/sf-plugins-core';
+import { Flags, SfCommand, Ux } from '@salesforce/sf-plugins-core';
 import { IngestJobV2, IngestJobV2FailedResults, JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { Schema } from '@jsforce/jsforce-node';
@@ -55,30 +55,27 @@ export async function bulkIngest(opts: {
   jsonEnabled: boolean;
   verbose: boolean;
   logFn: (message: string) => void;
+  warnFn: (message: SfCommand.Warning) => void;
 }): Promise<BulkIngestInfo> {
-  const {
-    conn,
-    operation,
-    object,
-    lineEnding = platform() === 'win32' ? 'CRLF' : 'LF',
-    columnDelimiter,
-    file,
-    logFn,
-  } = opts;
+  const { conn, operation, object, lineEnding = platform() === 'win32' ? 'CRLF' : 'LF', file, logFn } = opts;
 
   // validation
   if (opts.externalId && opts.operation !== 'upsert') {
-    // TODO: update error msg
-    throw new SfError('yadayadayda');
+    throw new SfError('External ID is only required for `sf data upsert bulk.');
   }
 
   if (opts.verbose && !['delete', 'hardDelete', 'upsert'].includes(opts.operation)) {
-    // TODO: update error msg
-    throw new SfError('yadayadayda');
+    throw new SfError(
+      'Verbose mode is limited for `sf data delete/upsert bulk` for backwards-compat only and will be removed after March 2025.'
+    );
   }
 
   const timeout = opts.async ? Duration.minutes(0) : opts.wait ?? Duration.minutes(0);
   const async = timeout.milliseconds === 0;
+
+  // CSV file for `delete/HardDelete` operations only have 1 column (ID), we set it to `COMMA` if not specified but any delimiter works.
+  const columnDelimiter =
+    opts.columnDelimiter ?? (['delete', 'hardDelete'].includes(operation) ? 'COMMA' : await detectDelimiter(file));
 
   const baseUrl = ensureString(opts.conn.getAuthInfoFields().instanceUrl);
 
@@ -97,8 +94,7 @@ export async function bulkIngest(opts: {
       operation,
       lineEnding,
       externalIdFieldName: opts.externalId,
-      columnDelimiter:
-        columnDelimiter ?? (['delete', 'hardDelete'].includes(operation) ? 'COMMA' : await detectDelimiter(file)),
+      columnDelimiter,
     }).catch((err) => {
       stages.stop('failed');
       throw err;
@@ -123,9 +119,7 @@ export async function bulkIngest(opts: {
     operation,
     lineEnding,
     externalIdFieldName: opts.externalId,
-    // TODO: inline this at the top-level, CSV for deletes only have one column so we can't detect the delimiter
-    columnDelimiter:
-      columnDelimiter ?? (['delete', 'hardDelete'].includes(operation) ? 'COMMA' : await detectDelimiter(file)),
+    columnDelimiter,
   }).catch((err) => {
     stages.stop('failed');
     throw err;
@@ -133,6 +127,20 @@ export async function bulkIngest(opts: {
 
   stages.setupJobListeners(job);
   stages.processingJob();
+
+  // always create a cache for `bulk upsert/delete` (even if not async).
+  // This keeps backwards-compat with the previous cache resolver that always returned
+  // a valid cache entry even if the ID didn't exist in it and allowed the scenario below:
+  //
+  // `sf data delete bulk --wait 10` -> sync operation (successful or not) never created a cache
+  // `sf data delete resume -i <job-id>` worked b/c the cache resolver returned the ID as a cache entry
+  // `sf data delete resume --use-most-recent` was never supported for sync runs.
+  if (['upsert', 'delete', 'hardDelete'].includes(operation)) {
+    opts.warnFn(
+      'Resuming a synchronous operation via `sf data upsert/delete resume` will not be supported after March 2025.'
+    );
+    await opts.cache.createCacheEntryForRequest(job.id, ensureString(conn.getUsername()), conn.getApiVersion());
+  }
 
   try {
     await job.poll(5000, timeout.milliseconds);
@@ -150,8 +158,11 @@ export async function bulkIngest(opts: {
           printBulkErrors(records);
         }
       }
-      // TODO: deprecate this and point users to `data bulk results`
-      if (['delete', 'hardDelete', 'upsert'].includes(opts.operation)) {
+
+      if (['delete', 'hardDelete', 'upsert'].includes(opts.operation) && opts.jsonEnabled) {
+        opts.warnFn(
+          'Record failures will not be included in JSON output after March 2025, use `sf data bulk results` to get results instead.'
+        );
         return {
           jobId: jobInfo.id,
           processedRecords: jobInfo.numberRecordsProcessed,
@@ -159,6 +170,7 @@ export async function bulkIngest(opts: {
           failedRecords: jobInfo.numberRecordsFailed,
         };
       }
+
       throw messages.createError(
         'error.failedRecordDetails',
         [jobInfo.numberRecordsFailed],
@@ -169,15 +181,6 @@ export async function bulkIngest(opts: {
     }
 
     stages.stop();
-
-    // always create a cache for `bulk upsert/delete` (even if not async).
-    // This keeps backwards-compat with the previous cache resolver that always returned
-    // a valid cache entry even if the ID didn't exist in it.
-    //
-    // TODO: talk with Vivek if we can deprecate this odd behavior.
-    if (['upsert', 'delete', 'hardDelete'].includes(operation)) {
-      await opts.cache.createCacheEntryForRequest(job.id, ensureString(conn.getUsername()), conn.getApiVersion());
-    }
 
     return {
       jobId: jobInfo.id,
@@ -226,6 +229,7 @@ export async function bulkIngestResume(opts: {
   jobIdOrMostRecent: string | boolean;
   jsonEnabled: boolean;
   wait: Duration;
+  warnFn: (message: SfCommand.Warning) => void;
 }): Promise<BulkIngestInfo> {
   const resumeOpts = await opts.cache.resolveResumeOptionsFromCache(opts.jobIdOrMostRecent);
 
@@ -256,6 +260,19 @@ export async function bulkIngestResume(opts: {
 
     if (jobInfo.numberRecordsFailed) {
       stages.error();
+
+      if (['delete', 'hardDelete', 'upsert'].includes(jobInfo.operation) && opts.jsonEnabled) {
+        opts.warnFn(
+          'Record failures will not be included in JSON output after March 2025, use `sf data bulk results` to get results instead.'
+        );
+        return {
+          jobId: jobInfo.id,
+          processedRecords: jobInfo.numberRecordsProcessed,
+          successfulRecords: jobInfo.numberRecordsProcessed - (jobInfo.numberRecordsFailed ?? 0),
+          failedRecords: jobInfo.numberRecordsFailed,
+        };
+      }
+
       throw messages.createError(
         'error.failedRecordDetails',
         [jobInfo.numberRecordsFailed],
