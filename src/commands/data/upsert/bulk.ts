@@ -7,8 +7,7 @@
 
 import { Messages } from '@salesforce/core';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { baseFlags } from '../../../bulkOperationBase.js';
-import { bulkIngest, columnDelimiterFlag, lineEndingFlag } from '../../../bulkIngest.js';
+import { baseUpsertDeleteFlags, bulkIngest, columnDelimiterFlag, lineEndingFlag } from '../../../bulkIngest.js';
 import type { BulkResultV2 } from '../../../types.js';
 import { BulkUpsertRequestCache } from '../../../bulkDataRequestCache.js';
 import { transformResults } from '../../../bulkUtils.js';
@@ -22,7 +21,7 @@ export default class Upsert extends SfCommand<BulkResultV2> {
   public static readonly examples = messages.getMessages('examples');
 
   public static readonly flags = {
-    ...baseFlags,
+    ...baseUpsertDeleteFlags,
     'line-ending': lineEndingFlag,
     'column-delimiter': columnDelimiterFlag,
     'external-id': Flags.string({

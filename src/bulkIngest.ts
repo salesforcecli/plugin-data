@@ -16,6 +16,7 @@ import { ensureString } from '@salesforce/ts-types';
 import { BulkIngestStages } from './ux/bulkIngestStages.js';
 import { BulkUpdateRequestCache, BulkImportRequestCache, BulkUpsertRequestCache } from './bulkDataRequestCache.js';
 import { detectDelimiter } from './bulkUtils.js';
+import { orgFlags } from './flags.js';
 
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulkIngest');
 
@@ -337,7 +338,9 @@ export const lineEndingFlag = Flags.option({
   options: ['CRLF', 'LF'] as const,
 })();
 
-// TODO: should be deprecated
+/**
+ * @deprecated
+ */
 export const printBulkErrors = (failedResults: IngestJobV2FailedResults<Schema>): void => {
   const ux = new Ux();
   ux.log();
@@ -347,4 +350,48 @@ export const printBulkErrors = (failedResults: IngestJobV2FailedResults<Schema>)
     columns: ['id', { key: 'sfId', name: 'Sf_Id' }, 'error'],
     title: `Bulk Failures [${failedResults.length}]`,
   });
+};
+
+/**
+ * Use only for commands that maintain sfdx compatibility.
+ *
+ * @deprecated
+ */
+export const baseUpsertDeleteFlags = {
+  ...orgFlags,
+  file: Flags.file({
+    char: 'f',
+    summary: messages.getMessage('flags.csvfile.summary'),
+    required: true,
+    exists: true,
+    aliases: ['csvfile'],
+    deprecateAliases: true,
+  }),
+  sobject: Flags.string({
+    char: 's',
+    summary: messages.getMessage('flags.sobject.summary'),
+    required: true,
+    aliases: ['sobjecttype'],
+    deprecateAliases: true,
+  }),
+  wait: Flags.duration({
+    char: 'w',
+    unit: 'minutes',
+    summary: messages.getMessage('flags.wait.summary'),
+    min: 0,
+    defaultValue: 0,
+    exclusive: ['async'],
+  }),
+  async: Flags.boolean({
+    char: 'a',
+    summary: messages.getMessage('flags.async.summary'),
+    exclusive: ['wait'],
+  }),
+  verbose: Flags.boolean({
+    summary: messages.getMessage('flags.verbose.summary'),
+    deprecated: {
+      message:
+        'The --verbose flag is deprecated and will be removed after March 2025, use "sf data bulk results" to get job results instead.',
+    },
+  }),
 };

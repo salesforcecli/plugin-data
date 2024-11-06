@@ -7,8 +7,7 @@
 
 import { Messages } from '@salesforce/core';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { baseFlags } from '../../../bulkOperationBase.js';
-import { bulkIngest, columnDelimiterFlag, lineEndingFlag } from '../../../bulkIngest.js';
+import { baseUpsertDeleteFlags, bulkIngest, columnDelimiterFlag, lineEndingFlag } from '../../../bulkIngest.js';
 import { BulkDeleteRequestCache } from '../../../bulkDataRequestCache.js';
 import { BulkResultV2 } from '../../../types.js';
 import { transformResults } from '../../../bulkUtils.js';
@@ -22,7 +21,7 @@ export default class Delete extends SfCommand<BulkResultV2> {
   public static readonly description = messages.getMessage('description');
 
   public static readonly flags = {
-    ...baseFlags,
+    ...baseUpsertDeleteFlags,
     'line-ending': lineEndingFlag,
     'column-delimiter': columnDelimiterFlag,
     'hard-delete': Flags.boolean({
