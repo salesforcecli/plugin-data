@@ -1261,13 +1261,13 @@
     wordwrap "^1.0.0"
     wrap-ansi "^7.0.0"
 
-"@oclif/multi-stage-output@^0.7.5":
-  version "0.7.5"
-  resolved "https://registry.yarnpkg.com/@oclif/multi-stage-output/-/multi-stage-output-0.7.5.tgz#e4ba79995e261912b52b5a0701ab2f4ccddebba4"
-  integrity sha512-9DSPryrL6Qx7jWz7BGBdSyokmUUbrp8z3kRZpfIbA0vqZ/zqYDdW2tO2hlplb74Sr8FUiiwE0FcvRTYZWEmb9Q==
+"@oclif/multi-stage-output@^0.7.12":
+  version "0.7.12"
+  resolved "https://registry.yarnpkg.com/@oclif/multi-stage-output/-/multi-stage-output-0.7.12.tgz#04df5efb6dce527920cf475c9ad9f20236803ccd"
+  integrity sha512-MmCgqPb7jC7QUOiX9jMik2njplCO+tRybGxiB55OXDmZ7osifM3KuQb/ykgP4XYn559k3DXeNLFS0NpokuH+mw==
   dependencies:
     "@oclif/core" "^4"
-    "@types/react" "^18.3.11"
+    "@types/react" "^18.3.12"
     cli-spinners "^2"
     figures "^6.1.0"
     ink "^5.0.1"
@@ -2220,14 +2220,6 @@
   version "15.7.12"
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.12.tgz#12bb1e2be27293c1406acb6af1c3f3a1481d98c6"
   integrity sha512-5zvhXYtRNRluoE/jAp4GVsSduVUzNWKkOZrCDBWYtE7biZywwdC2AcEzg+cSMLFRfVgeAFqpfNabiPjxFddV1Q==
-
-"@types/react@^18.3.11":
-  version "18.3.11"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.3.11.tgz#9d530601ff843ee0d7030d4227ea4360236bd537"
-  integrity sha512-r6QZ069rFTjrEYgFdOck1gK7FLVsgJE7tTz0pQBczlBNUhBNk0MQH4UbnFSwjpQLMkLzgqvBBa+qGpLje16eTQ==
-  dependencies:
-    "@types/prop-types" "*"
-    csstype "^3.0.2"
 
 "@types/react@^18.3.12":
   version "18.3.12"
