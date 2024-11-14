@@ -188,8 +188,8 @@ describe('data:bulk commands', () => {
         `data:upsert:bulk --sobject Account --file ${path.join(
           '.',
           'data',
-          'bulkUpsert.csv'
-        )} --external-id Id --wait 10 --json`,
+          'bulkUpsertBackquote.csv'
+        )} --external-id Id --wait 10 --json --column-delimiter BACKQUOTE`,
         { ensureExitCode: 0 }
       ).jsonOutput?.result.records;
 
@@ -249,7 +249,9 @@ const queryAndBulkDelete = (): BulkResultV2 => {
 
   // Run bulk delete
   const deleteResponse: BulkResultV2 | undefined = execCmd<Awaited<BulkResultV2>>(
-    `data:delete:bulk --sobject Account --file ${idsFile} --json --wait 10`,
+    `data:delete:bulk --sobject Account --file ${idsFile} --json --wait 10 --line-ending ${
+      os.platform() === 'win32' ? 'CRLF' : 'LF'
+    }`,
     {
       ensureExitCode: 0,
     }
@@ -267,7 +269,7 @@ const bulkInsertAccounts = (): BulkResultV2 => {
     '.',
     'data',
     'bulkUpsert.csv'
-  )} --external-id Id --json --wait 10`;
+  )} --external-id Id --json --wait 10 --column-delimiter COMMA`;
   const rawResponse = execCmd(cmd);
   const response: BulkResultV2 | undefined = rawResponse.jsonOutput?.result as BulkResultV2;
   if (response?.records) {
