@@ -65,9 +65,7 @@ export async function bulkIngest(opts: {
   }
 
   if (opts.verbose && !['delete', 'hardDelete', 'upsert'].includes(opts.operation)) {
-    throw new SfError(
-      'Verbose mode is limited for `sf data delete/upsert bulk` for backwards-compat only and will be removed after March 2025.'
-    );
+    throw new SfError('Verbose mode is limited for `sf data delete/upsert bulk` and will be removed after March 2025.');
   }
 
   const timeout = opts.async ? Duration.minutes(0) : opts.wait ?? Duration.minutes(0);
