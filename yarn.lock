@@ -612,20 +612,12 @@
     "@smithy/types" "^3.5.0"
     tslib "^2.6.2"
 
-"@aws-sdk/types@3.679.0":
+"@aws-sdk/types@3.679.0", "@aws-sdk/types@^3.222.0":
   version "3.679.0"
   resolved "https://registry.yarnpkg.com/@aws-sdk/types/-/types-3.679.0.tgz#3737bb0f190add9e788b838a24cd5d8106dbed4f"
   integrity sha512-NwVq8YvInxQdJ47+zz4fH3BRRLC6lL+WLkvr242PVBbUOLRyK/lkwHlfiKUoeVIMyK5NF+up6TRg71t/8Bny6Q==
   dependencies:
     "@smithy/types" "^3.5.0"
-    tslib "^2.6.2"
-
-"@aws-sdk/types@^3.222.0":
-  version "3.654.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/types/-/types-3.654.0.tgz#d368dda5e8aff9e7b6575985bb425bbbaf67aa97"
-  integrity sha512-VWvbED3SV+10QJIcmU/PKjsKilsTV16d1I7/on4bvD/jo1qGeMXqLDBSen3ks/tuvXZF/mFc7ZW/W2DiLVtO7A==
-  dependencies:
-    "@smithy/types" "^3.4.2"
     tslib "^2.6.2"
 
 "@aws-sdk/util-arn-parser@3.679.0":
@@ -1413,10 +1405,10 @@
   resolved "https://registry.yarnpkg.com/@salesforce/dev-config/-/dev-config-4.3.1.tgz#4dac8245df79d675258b50e1d24e8c636eaa5e10"
   integrity sha512-rO6axodoRF2SA1kknGttIWuL7HhIwSmweGlBzM8y2m5TH8DeIv4xsqYc8Cu+SrR3JT1FN4nh6XgrogI83AJfKg==
 
-"@salesforce/dev-scripts@^10.2.10":
-  version "10.2.10"
-  resolved "https://registry.yarnpkg.com/@salesforce/dev-scripts/-/dev-scripts-10.2.10.tgz#6aca3c6a0926b5ed0710d1f21a940687ff994e58"
-  integrity sha512-4vYRV5PvssKWfsnOOAXDvYfHaj2M3bCprlGcZBGnPAi52cNzoj9GcOmC1RRrPdQmHL4vWZvSiqgRgVLKQQdfkw==
+"@salesforce/dev-scripts@^10.2.11":
+  version "10.2.11"
+  resolved "https://registry.yarnpkg.com/@salesforce/dev-scripts/-/dev-scripts-10.2.11.tgz#7f041c258bf8588f9847115cc7ad5a59b9865232"
+  integrity sha512-LyX8njw21aKsDbpKDDJwtjX2n+V2OvS3vLg9zXLYlZvy8c2Lu8TfKSsXHS7jGhRLkBEYkJ4cJR+ClHuB2xo81A==
   dependencies:
     "@commitlint/cli" "^17.1.2"
     "@commitlint/config-conventional" "^17.8.1"
@@ -1934,13 +1926,6 @@
     "@smithy/protocol-http" "^4.1.5"
     "@smithy/types" "^3.6.0"
     "@smithy/util-stream" "^3.2.1"
-    tslib "^2.6.2"
-
-"@smithy/types@^3.4.2":
-  version "3.4.2"
-  resolved "https://registry.yarnpkg.com/@smithy/types/-/types-3.4.2.tgz#aa2d087922d57205dbad68df8a45c848699c551e"
-  integrity sha512-tHiFcfcVedVBHpmHUEUHOCCih8iZbIAYn9NvPsNzaPm/237I3imdDdZoOC8c87H5HBAVEa06tTgb+OcSWV9g5w==
-  dependencies:
     tslib "^2.6.2"
 
 "@smithy/types@^3.5.0", "@smithy/types@^3.6.0":
