@@ -41,7 +41,6 @@
     "flags": [
       "api-version",
       "async",
-      "column-delimiter",
       "file",
       "flags-dir",
       "hard-delete",

@@ -7,7 +7,7 @@
 
 import { Messages } from '@salesforce/core';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { baseUpsertDeleteFlags, columnDelimiterFlag, lineEndingFlag, bulkIngest } from '../../../bulkIngest.js';
+import { baseUpsertDeleteFlags, lineEndingFlag, bulkIngest } from '../../../bulkIngest.js';
 import { BulkDeleteRequestCache } from '../../../bulkDataRequestCache.js';
 import { BulkResultV2 } from '../../../types.js';
 import { transformResults } from '../../../bulkUtils.js';
@@ -23,7 +23,6 @@ export default class Delete extends SfCommand<BulkResultV2> {
   public static readonly flags = {
     ...baseUpsertDeleteFlags,
     'line-ending': lineEndingFlag,
-    'column-delimiter': columnDelimiterFlag,
     'hard-delete': Flags.boolean({
       summary: messages.getMessage('flags.hard-delete.summary'),
       description: messages.getMessage('flags.hard-delete.description'),
@@ -40,7 +39,7 @@ export default class Delete extends SfCommand<BulkResultV2> {
       object: flags.sobject,
       operation: flags['hard-delete'] ? 'hardDelete' : 'delete',
       lineEnding: flags['line-ending'],
-      columnDelimiter: flags['column-delimiter'],
+      columnDelimiter: undefined,
       conn: flags['target-org'].getConnection(flags['api-version']),
       cache: await BulkDeleteRequestCache.create(),
       async: flags.async,
