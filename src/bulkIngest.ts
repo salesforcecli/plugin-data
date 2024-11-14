@@ -61,7 +61,7 @@ export async function bulkIngest(opts: {
 
   // validation
   if (opts.externalId && opts.operation !== 'upsert') {
-    throw new SfError('External ID is only required for `sf data upsert bulk.');
+    throw new SfError('External ID is only required for `sf data upsert bulk`.');
   }
 
   if (opts.verbose && !['delete', 'hardDelete', 'upsert'].includes(opts.operation)) {

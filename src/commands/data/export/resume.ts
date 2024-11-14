@@ -53,8 +53,8 @@ export default class DataExportResume extends SfCommand<DataExportResumeResult> 
     const queryJob = new QueryJobV2(resumeOpts.options.connection, {
       id: resumeOpts.jobInfo.id,
       pollingOptions: {
-        pollInterval: Math.max(5000),
-        pollTimeout: Math.max(30_000),
+        pollInterval: 5000,
+        pollTimeout: 30_000,
       },
     });
 
