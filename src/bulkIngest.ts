@@ -7,7 +7,7 @@
 
 import * as fs from 'node:fs';
 import { platform } from 'node:os';
-import { Flags, SfCommand, Ux } from '@salesforce/sf-plugins-core';
+import { Flags, SfCommand, Ux, optionalOrgFlagWithDeprecations, loglevel } from '@salesforce/sf-plugins-core';
 import { IngestJobV2, IngestJobV2FailedResults, JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { Schema } from '@jsforce/jsforce-node';
@@ -423,4 +423,35 @@ export const baseUpsertDeleteFlags = {
         'The --verbose flag is deprecated and will be removed after March 2025, use "sf data bulk results" to get job results instead.',
     },
   }),
+};
+
+/**
+ * Should be used only for `data upsert/delete resume` (keep old flag aliases)
+ *
+ * @deprecated
+ */
+export const baseUpsertDeleteResumeFlags = {
+  'target-org': { ...optionalOrgFlagWithDeprecations, summary: messages.getMessage('flags.targetOrg.summary') },
+  'job-id': Flags.salesforceId({
+    length: 18,
+    char: 'i',
+    startsWith: '750',
+    summary: messages.getMessage('flags.jobid'),
+    aliases: ['jobid'],
+    deprecateAliases: true,
+  }),
+  'use-most-recent': Flags.boolean({
+    summary: messages.getMessage('flags.useMostRecent.summary'),
+    // don't use `exactlyOne` because this defaults to true
+    default: true,
+    exclusive: ['job-id'],
+  }),
+  wait: Flags.duration({
+    summary: messages.getMessage('flags.wait.summary'),
+    unit: 'minutes',
+    min: 0,
+    defaultValue: 5,
+  }),
+  'api-version': Flags.orgApiVersion(),
+  loglevel,
 };

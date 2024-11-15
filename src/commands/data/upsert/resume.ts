@@ -9,17 +9,18 @@ import { Messages } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import type { BulkResultV2 } from '../../../types.js';
 import { BulkUpsertRequestCache } from '../../../bulkDataRequestCache.js';
-import { ResumeBulkCommand } from '../../../resumeBulkBaseCommand.js';
 import { transformResults } from '../../../bulkUtils.js';
-import { bulkIngestResume } from '../../../bulkIngest.js';
+import { baseUpsertDeleteResumeFlags, bulkIngestResume } from '../../../bulkIngest.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.upsert.resume');
 
-export default class UpsertResume extends ResumeBulkCommand {
+export default class UpsertResume extends SfCommand<BulkResultV2> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+
+  public static readonly flags = baseUpsertDeleteResumeFlags;
 
   public async run(): Promise<BulkResultV2> {
     const [{ flags }, cache] = await Promise.all([this.parse(UpsertResume), BulkUpsertRequestCache.create()]);
