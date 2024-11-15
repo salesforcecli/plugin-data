@@ -1,28 +1,3 @@
-# success
-
-Bulk %s request %s started successfully.
-
-# checkStatus
-
-Run the command "sf data %s resume -i %s -o %s" to check the status.
-
-# checkJobViaUi
-
-To review the details of this job, run:
-sf org open --target-org %s --path "/lightning/setup/AsyncApiJobStatus/page?address=%2F%s"
-
-# remainingTimeStatus
-
-Remaining time: %d minutes.
-
-# remainingRecordsStatus
-
-Processed %d | Success %d | Fail %d
-
-# bulkJobFailed
-
-The bulk job %s failed. Check the job status for more information.
-
 # perfLogLevelOption
 
 Get API performance data.
@@ -48,10 +23,6 @@ Malformed key=value pair for value: %s.
 
 Format to display the results; the --json flag overrides this flag.
 
-# bulkRequestIdRequiredWhenNotUsingMostRecent
-
-The bulk request id must be supplied when not looking for most recent cache entry.
-
 # error.bulkRequestIdNotFound
 
 Could not find a cache entry for job ID %s.
@@ -59,10 +30,6 @@ Could not find a cache entry for job ID %s.
 # error.missingCacheEntryError
 
 Could not load a most recent cache entry for a bulk request. Please rerun your command with a bulk request id.
-
-# cannotCreateResumeOptionsWithoutAnOrg
-
-Cannot create a cache entry without a valid org.
 
 # usernameRequired
 

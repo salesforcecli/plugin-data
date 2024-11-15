@@ -7,7 +7,7 @@
 
 import { expect } from 'chai';
 
-import { remainingTime, detectDelimiter } from '../src/bulkUtils.js';
+import { detectDelimiter } from '../src/bulkUtils.js';
 
 describe('bulkUtils', () => {
   describe('csv', () => {
@@ -19,25 +19,6 @@ describe('bulkUtils', () => {
       expect(await detectDelimiter('./test/test-files/csv/pipe.csv')).to.equal('PIPE');
       expect(await detectDelimiter('./test/test-files/csv/semicolon.csv')).to.equal('SEMICOLON');
       expect(await detectDelimiter('./test/test-files/csv/tab.csv')).to.equal('TAB');
-    });
-  });
-  describe('remainingTime', () => {
-    it('returns the remaining time when endWaitTime is defined', () => {
-      const now = Date.now();
-      const endWaitTime = now + 1000;
-      const result = remainingTime(now)(endWaitTime);
-      expect(result).to.equal(1000);
-    });
-    it('returns the remaining time when endWaitTime is undefined', () => {
-      const now = Date.now();
-      const result = remainingTime(now)();
-      expect(result).to.equal(0);
-    });
-    it('does not return less than 0', () => {
-      const now = Date.now();
-      const endWaitTime = now - 1000;
-      const result = remainingTime(now)(endWaitTime);
-      expect(result).to.equal(0);
     });
   });
 });

@@ -37,7 +37,3 @@ CSV file that contains the Salesforce object records you want to update.
 # flags.sobject.summary
 
 API name of the Salesforce object, either standard or custom, which you are updating.
-
-# flags.column-delimiter.summary
-
-Column delimiter used in the CSV file. Default is COMMA.

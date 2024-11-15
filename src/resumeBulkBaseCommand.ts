@@ -7,18 +7,7 @@
 
 import { Flags, SfCommand, loglevel, optionalOrgFlagWithDeprecations } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
-import { Duration } from '@salesforce/kit';
-import { BulkV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
-import type { BulkResultV2, ResumeOptions } from './types.js';
-import {
-  POLL_FREQUENCY_MS,
-  displayBulkV2Result,
-  getRemainingTimeStatus,
-  setupLifecycleListeners,
-  isBulkV2RequestDone,
-  remainingTime,
-  transformResults,
-} from './bulkUtils.js';
+import type { BulkResultV2 } from './types.js';
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.resume.command');
 
@@ -48,34 +37,4 @@ export abstract class ResumeBulkCommand extends SfCommand<BulkResultV2> {
     'api-version': Flags.orgApiVersion(),
     loglevel,
   };
-
-  protected async resume(resumeOptions: ResumeOptions, wait: Duration): Promise<BulkResultV2> {
-    const endWaitTime = Date.now() + wait.milliseconds;
-    this.spinner.start('Getting status');
-    const conn = resumeOptions.options.connection;
-    const isAsync = wait.milliseconds === 0;
-    const bulk2 = new BulkV2(conn);
-    const job = bulk2.job('ingest', { id: resumeOptions.jobInfo.id });
-    this.spinner.status = getRemainingTimeStatus({ isAsync, endWaitTime });
-    setupLifecycleListeners({
-      job,
-      cmd: this,
-      isAsync,
-      apiVersion: conn.getApiVersion(),
-      username: conn.getUsername(),
-      endWaitTime,
-    });
-    if (Date.now() < endWaitTime) {
-      await job.poll(POLL_FREQUENCY_MS, remainingTime(Date.now())(endWaitTime));
-    }
-    const jobInfo = await job.check();
-    this.spinner.stop();
-    displayBulkV2Result({ jobInfo, username: conn.getUsername(), isAsync, cmd: this });
-    const result = { jobInfo } as BulkResultV2;
-    if (!isBulkV2RequestDone(jobInfo) || !this.jsonEnabled()) {
-      return result;
-    }
-    result.records = transformResults(await job.getAllResults());
-    return result;
-  }
 }
