@@ -22,7 +22,6 @@ import { BulkQueryRequestCache } from '../../../bulkDataRequestCache.js';
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const reportMessages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.report');
 // needed by the flags loaded from the other command
-const queryMessages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.resume.command');
 
 export class BulkQueryReport extends SfCommand<unknown> {
   public static readonly summary = reportMessages.getMessage('summary');
@@ -32,7 +31,7 @@ export class BulkQueryReport extends SfCommand<unknown> {
   public static readonly deprecateAliases = true;
 
   public static readonly flags = {
-    'target-org': { ...optionalOrgFlagWithDeprecations, summary: queryMessages.getMessage('flags.targetOrg.summary') },
+    'target-org': { ...optionalOrgFlagWithDeprecations },
     'api-version': orgApiVersionFlagWithDeprecations,
     loglevel,
     'result-format': resultFormatFlag(),
