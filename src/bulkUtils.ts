@@ -353,7 +353,7 @@ export async function detectDelimiter(filePath: string): Promise<ColumnDelimiter
     delimiters.forEach((delimiter) => {
       // Use regex to avoid counting delimiters inside quotes
       const regexDelimiter = delimiter === '^' || delimiter === '|' ? `\\${delimiter}` : delimiter;
-      const regex = new RegExp(`(?<=^|[^"'])${regexDelimiter}(?=[^"']*$)`, 'g');
+      const regex = new RegExp(`(?<=^|[^"']|")${regexDelimiter}(?=(?:(?:[^"]*"[^"]*")*[^"]*$))`, 'g');
       const count = (line.match(regex) ?? []).length;
       delimiterCounts[delimiter] += count;
     });
