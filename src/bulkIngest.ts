@@ -148,6 +148,13 @@ export async function bulkIngest(opts: {
     // send last data update so job status/num. of records processed/failed represent the last update
     stages.update(jobInfo);
 
+    if (jobInfo.numberRecordsProcessed === 0) {
+      stages.error();
+      // remove after W-17099874 gets fixed
+      // eslint-disable-next-line sf-plugin/no-missing-messages
+      throw messages.createError('error.noProcessedRecords');
+    }
+
     if (jobInfo.numberRecordsFailed) {
       stages.error();
       if (opts.verbose && !opts.jsonEnabled) {
@@ -255,6 +262,13 @@ export async function bulkIngestResume(opts: {
 
     // send last data update so job status/num. of records processed/failed represent the last update
     stages.update(jobInfo);
+
+    if (jobInfo.numberRecordsProcessed === 0) {
+      stages.error();
+      // remove after W-17099874 gets fixed
+      // eslint-disable-next-line sf-plugin/no-missing-messages
+      throw messages.createError('error.noProcessedRecords');
+    }
 
     if (jobInfo.numberRecordsFailed) {
       stages.error();

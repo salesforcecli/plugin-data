@@ -41,6 +41,15 @@ Job has been aborted.
 
 You must have the "Bulk API Hard Delete" system permission to use the --hard-delete flag. This permission is disabled by default and can be enabled only by a system administrator.
 
+# error.noProcessedRecords
+
+Job finished successfully but it didn't process any record.
+
+# error.noProcessedRecords.actions
+
+- Check that the provided CSV file is valid.
+- View the job in the org: "sf org open -o %s --path '/lightning/setup/AsyncApiJobStatus/page?address=%2F%s'".
+
 # flags.column-delimiter.summary
 
 Column delimiter used in the CSV file.
