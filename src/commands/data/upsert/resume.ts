@@ -39,7 +39,7 @@ export default class UpsertResume extends SfCommand<BulkResultV2> {
 
     const {
       options: { connection: conn },
-    } = await cache.resolveResumeOptionsFromCache(flags['job-id'] ?? flags['use-most-recent']);
+    } = await cache.resolveResumeOptionsFromCache(flags['job-id'] ?? flags['use-most-recent'], true);
 
     const job = conn.bulk2.job('ingest', {
       id: res.jobId,

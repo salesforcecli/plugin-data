@@ -31,6 +31,10 @@ Could not find a cache entry for job ID %s.
 
 Could not load a most recent cache entry for a bulk request. Please rerun your command with a bulk request id.
 
+# error.skipCacheValidateNoOrg
+
+A default target org for the job %s is required to be set because the job isn't in the local cache.
+
 # usernameRequired
 
 A valid username is required when creating a cache entry.

@@ -126,18 +126,18 @@ export async function bulkIngest(opts: {
   stages.setupJobListeners(job);
   stages.processingJob();
 
-  // always create a cache for `bulk upsert/delete` (even if not async).
-  // This keeps backwards-compat with the previous cache resolver that always returned
-  // a valid cache entry even if the ID didn't exist in it and allowed the scenario below:
+  //  cache.resolveResumeOptionsFromCache for `delete/upsert resume --job-id <ID>`
+  //  will not throw if the ID isn't in the cache to support the following scenario:
   //
   // `sf data delete bulk --wait 10` -> sync operation (successful or not) never created a cache
   // `sf data delete resume -i <job-id>` worked b/c the cache resolver returned the ID as a cache entry
   // `sf data delete resume --use-most-recent` was never supported for sync runs.
+  //
+  //  We plan to remove this behavior in March 2025 (only these 2 commands supported this, `resume` commands should only resume jobs started by `sf`)
   if (['upsert', 'delete', 'hardDelete'].includes(operation)) {
     opts.warnFn(
       'Resuming a synchronous operation via `sf data upsert/delete resume` will not be supported after March 2025.'
     );
-    await opts.cache.createCacheEntryForRequest(job.id, ensureString(conn.getUsername()), conn.getApiVersion());
   }
 
   try {
@@ -234,7 +234,11 @@ export async function bulkIngestResume(opts: {
   wait: Duration;
   warnFn: (message: SfCommand.Warning) => void;
 }): Promise<BulkIngestInfo> {
-  const resumeOpts = await opts.cache.resolveResumeOptionsFromCache(opts.jobIdOrMostRecent);
+  const resumeOpts = await opts.cache.resolveResumeOptionsFromCache(
+    opts.jobIdOrMostRecent,
+    // skip cache validation for only for these 2 commands for backwards compatibility.
+    ['data upsert resume', 'data delete resume'].includes(opts.cmdId) ? true : false
+  );
 
   const conn = resumeOpts.options.connection;
 
