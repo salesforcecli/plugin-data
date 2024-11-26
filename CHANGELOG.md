@@ -1,3 +1,39 @@
+## [3.11.6](https://github.com/salesforcecli/plugin-data/compare/3.11.5...3.11.6) (2024-11-24)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/sf-plugins-core from 12.0.11 to 12.0.13 ([67d011c](https://github.com/salesforcecli/plugin-data/commit/67d011c0e9b5443528e90162702edb41e2ca50b4))
+
+## [3.11.5](https://github.com/salesforcecli/plugin-data/compare/3.11.4...3.11.5) (2024-11-24)
+
+### Bug Fixes
+
+- **deps:** bump csv-stringify from 6.5.1 to 6.5.2 ([edcc212](https://github.com/salesforcecli/plugin-data/commit/edcc2121e9b4a6776e1d8cd5b9596989ff1de307))
+
+## [3.11.4](https://github.com/salesforcecli/plugin-data/compare/3.11.3...3.11.4) (2024-11-17)
+
+### Bug Fixes
+
+- **deps:** bump cross-spawn from 7.0.3 to 7.0.5 ([8c84d03](https://github.com/salesforcecli/plugin-data/commit/8c84d03d46a760876caf64a2e30b7cce16f6b524))
+
+## [3.11.3](https://github.com/salesforcecli/plugin-data/compare/3.11.2...3.11.3) (2024-11-10)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/multi-stage-output from 0.7.5 to 0.7.12 ([798977d](https://github.com/salesforcecli/plugin-data/commit/798977dfeeca0df2e29dfcd8f239bb0243ca0ef4))
+
+## [3.11.2](https://github.com/salesforcecli/plugin-data/compare/3.11.1...3.11.2) (2024-11-03)
+
+### Bug Fixes
+
+- **deps:** bump @jsforce/jsforce-node from 3.6.0 to 3.6.2 ([007976e](https://github.com/salesforcecli/plugin-data/commit/007976e738a62c3cdb98157d827a9ba58b98efd3))
+
+## [3.11.1](https://github.com/salesforcecli/plugin-data/compare/3.11.0...3.11.1) (2024-11-03)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/sf-plugins-core from 12.0.10 to 12.0.11 ([0936c54](https://github.com/salesforcecli/plugin-data/commit/0936c54ccd30d008268ee7571dea89b5eb906fbf))
+
 # [3.11.0](https://github.com/salesforcecli/plugin-data/compare/3.10.0...3.11.0) (2024-10-30)
 
 ### Features

@@ -1,6 +1,6 @@
 {
   "name": "@salesforce/plugin-data",
-  "version": "3.11.0",
+  "version": "3.11.6",
   "description": "Plugin for salesforce data commands",
   "author": "Salesforce",
   "homepage": "https://github.com/salesforcecli/plugin-data",
@@ -120,29 +120,30 @@
   "dependencies": {
     "@jsforce/jsforce-node": "^3.6.3",
     "@oclif/multi-stage-output": "^0.7.5",
+    "@oclif/multi-stage-output": "^0.7.12",
     "@salesforce/core": "^8.6.1",
     "@salesforce/kit": "^3.2.2",
-    "@salesforce/sf-plugins-core": "^12.0.10",
+    "@salesforce/sf-plugins-core": "^12.0.13",
     "@salesforce/ts-types": "^2.0.11",
     "ansis": "^3.2.0",
     "change-case": "^5.4.4",
     "csv-parse": "^5.5.6",
-    "csv-stringify": "^6.5.1",
+    "csv-stringify": "^6.5.2",
     "form-data": "^4.0.0",
     "terminal-link": "^3.0.0"
   },
   "devDependencies": {
     "@oclif/core": "^4.0.19",
-    "@oclif/plugin-command-snapshot": "^5.2.15",
+    "@oclif/plugin-command-snapshot": "^5.2.22",
     "@oclif/test": "^4.1.0",
-    "@salesforce/cli-plugins-testkit": "^5.3.34",
-    "@salesforce/dev-scripts": "^10.2.10",
-    "@salesforce/plugin-command-reference": "^3.1.27",
+    "@salesforce/cli-plugins-testkit": "^5.3.37",
+    "@salesforce/dev-scripts": "^10.2.11",
+    "@salesforce/plugin-command-reference": "^3.1.33",
     "@salesforce/types": "^1.3.0",
-    "eslint-plugin-sf-plugin": "^1.20.8",
-    "oclif": "^4.15.16",
+    "eslint-plugin-sf-plugin": "^1.20.13",
+    "oclif": "^4.15.25",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.3"
   },
   "resolutions": {
     "@jsforce/jsforce-node/node-fetch/whatwg-url": "^14.0.0"
