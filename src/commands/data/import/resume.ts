@@ -55,6 +55,9 @@ export default class DataImportResume extends SfCommand<DataImportResumeResult> 
       jobIdOrMostRecent: flags['job-id'] ?? flags['use-most-recent'],
       jsonEnabled: this.jsonEnabled(),
       wait: flags.wait,
+      warnFn: (arg: SfCommand.Warning) => {
+        this.warn(arg);
+      },
     });
   }
 }

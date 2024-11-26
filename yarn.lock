@@ -614,20 +614,12 @@
     "@smithy/types" "^3.7.0"
     tslib "^2.6.2"
 
-"@aws-sdk/types@3.692.0":
+"@aws-sdk/types@3.692.0", "@aws-sdk/types@^3.222.0":
   version "3.692.0"
   resolved "https://registry.yarnpkg.com/@aws-sdk/types/-/types-3.692.0.tgz#c8f6c75b6ad659865b72759796d4d92c1b72069b"
   integrity sha512-RpNvzD7zMEhiKgmlxGzyXaEcg2khvM7wd5sSHVapOcrde1awQSOMGI4zKBQ+wy5TnDfrm170ROz/ERLYtrjPZA==
   dependencies:
     "@smithy/types" "^3.7.0"
-    tslib "^2.6.2"
-
-"@aws-sdk/types@^3.222.0":
-  version "3.679.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/types/-/types-3.679.0.tgz#3737bb0f190add9e788b838a24cd5d8106dbed4f"
-  integrity sha512-NwVq8YvInxQdJ47+zz4fH3BRRLC6lL+WLkvr242PVBbUOLRyK/lkwHlfiKUoeVIMyK5NF+up6TRg71t/8Bny6Q==
-  dependencies:
-    "@smithy/types" "^3.5.0"
     tslib "^2.6.2"
 
 "@aws-sdk/util-arn-parser@3.693.0":
@@ -1139,12 +1131,7 @@
     "@inquirer/type" "^3.0.1"
     yoctocolors-cjs "^2.1.2"
 
-"@inquirer/figures@^1.0.5", "@inquirer/figures@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@inquirer/figures/-/figures-1.0.6.tgz#1a562f916da39888c56b65b78259d2261bd7d40b"
-  integrity sha512-yfZzps3Cso2UbM7WlxKwZQh2Hs6plrbjs1QnzQDZhK2DgyCo6D8AaHps9olkNcUFlcYERMqU3uJSp1gmy3s/qQ==
-
-"@inquirer/figures@^1.0.8":
+"@inquirer/figures@^1.0.5", "@inquirer/figures@^1.0.6", "@inquirer/figures@^1.0.8":
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/@inquirer/figures/-/figures-1.0.8.tgz#d9e414a1376a331a0e71b151fea27c48845788b0"
   integrity sha512-tKd+jsmhq21AP1LhexC0pPwsCxEhGgAkg28byjJAd+xhmIs8LUX8JbUc3vBf3PhLxWiB5EvyBE5X7JSPAqMAqg==
@@ -1335,10 +1322,10 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@jsforce/jsforce-node@^3.6.1", "@jsforce/jsforce-node@^3.6.2":
-  version "3.6.2"
-  resolved "https://registry.yarnpkg.com/@jsforce/jsforce-node/-/jsforce-node-3.6.2.tgz#5d8509aaeb161f1d6658e4ce737948a04d3ce3a6"
-  integrity sha512-bBWRCZl4kVRnYLHRSzl4piqowM3GeTW2yBoKo+WnMGAw36uGjyMq/9z9yAaA+0AmpHFaI4po7/0PrAMdEU/AGA==
+"@jsforce/jsforce-node@^3.6.1", "@jsforce/jsforce-node@^3.6.3":
+  version "3.6.3"
+  resolved "https://registry.yarnpkg.com/@jsforce/jsforce-node/-/jsforce-node-3.6.3.tgz#a5c984b6deffac01ddabc3f4b48374408c5cd194"
+  integrity sha512-sNUeBzfUv57uH0AiYuAOO8yjBP7lNY33mWybrjvBud8gMFVWozY6UAWU1DUk/dpqZ0+FK3iqB++nOQRczj1nSg==
   dependencies:
     "@sindresorhus/is" "^4"
     base64url "^3.0.1"
@@ -2058,13 +2045,6 @@
     "@smithy/protocol-http" "^4.1.7"
     "@smithy/types" "^3.7.1"
     "@smithy/util-stream" "^3.3.1"
-    tslib "^2.6.2"
-
-"@smithy/types@^3.5.0":
-  version "3.6.0"
-  resolved "https://registry.yarnpkg.com/@smithy/types/-/types-3.6.0.tgz#03a52bfd62ee4b7b2a1842c8ae3ada7a0a5ff3a4"
-  integrity sha512-8VXK/KzOHefoC65yRgCn5vG1cysPJjHnOVt9d0ybFQSmJgQj152vMn4EkYhGuaOmnnZvCPav/KnYyE6/KsNZ2w==
-  dependencies:
     tslib "^2.6.2"
 
 "@smithy/types@^3.7.0", "@smithy/types@^3.7.1":

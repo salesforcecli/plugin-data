@@ -15,7 +15,6 @@ import {
   orgApiVersionFlagWithDeprecations,
   SfCommand,
 } from '@salesforce/sf-plugins-core';
-import type { ResumeOptions } from '../../../types.js';
 import { resultFormatFlag } from '../../../flags.js';
 import { displayResults, transformBulkResults } from '../../../queryUtils.js';
 import { BulkQueryRequestCache } from '../../../bulkDataRequestCache.js';
@@ -23,7 +22,6 @@ import { BulkQueryRequestCache } from '../../../bulkDataRequestCache.js';
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const reportMessages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.report');
 // needed by the flags loaded from the other command
-const queryMessages = Messages.loadMessages('@salesforce/plugin-data', 'bulk.resume.command');
 
 export class BulkQueryReport extends SfCommand<unknown> {
   public static readonly summary = reportMessages.getMessage('summary');
@@ -33,7 +31,7 @@ export class BulkQueryReport extends SfCommand<unknown> {
   public static readonly deprecateAliases = true;
 
   public static readonly flags = {
-    'target-org': { ...optionalOrgFlagWithDeprecations, summary: queryMessages.getMessage('flags.targetOrg.summary') },
+    'target-org': { ...optionalOrgFlagWithDeprecations },
     'api-version': orgApiVersionFlagWithDeprecations,
     loglevel,
     'result-format': resultFormatFlag(),
@@ -54,39 +52,23 @@ export class BulkQueryReport extends SfCommand<unknown> {
 
   public async run(): Promise<unknown> {
     const [{ flags }, cache] = await Promise.all([this.parse(BulkQueryReport), BulkQueryRequestCache.create()]);
-    const resumeOptions = await cache.resolveResumeOptionsFromCache(
-      flags['bulk-query-id'],
-      flags['use-most-recent'],
-      flags['target-org'],
-      flags['api-version']
-    );
+    const resumeOptions = await cache.resolveResumeOptionsFromCache(flags['bulk-query-id'] ?? flags['use-most-recent']);
     const job = new QueryJobV2(resumeOptions.options.connection, {
       id: resumeOptions.jobInfo.id,
-      pollingOptions: getNonZeroTimeoutPollingOptions(resumeOptions.options.pollingOptions),
+      pollingOptions: {
+        pollTimeout: 30_000,
+        pollInterval: 1000,
+      },
     });
     await job.poll();
     const results = await job.result();
-    const queryResult = transformBulkResults((await results.toArray()) as jsforceRecord[], resumeOptions.options.query);
+    // we don't have access to the SOQL query here so we pass an empty string.
+    const queryResult = transformBulkResults((await results.toArray()) as jsforceRecord[], '');
 
     if (!this.jsonEnabled()) {
       displayResults({ ...queryResult }, flags['result-format']);
     }
 
-    if (queryResult.result.done) {
-      await BulkQueryRequestCache.unset(resumeOptions.jobInfo.id);
-    }
-
     return queryResult.result;
   }
 }
-
-/**
- * polling options are retrieved from the cache.
- * If the data:query used `--async` or `--wait` 0, we'd be passing that to the jsforce poll method,
- * which means it would never check the actual result, and always throw a timeout error */
-const getNonZeroTimeoutPollingOptions = (
-  pollingOptions: ResumeOptions['options']['pollingOptions']
-): ResumeOptions['options']['pollingOptions'] => ({
-  ...pollingOptions,
-  pollTimeout: Math.max(pollingOptions.pollTimeout, 1000),
-});

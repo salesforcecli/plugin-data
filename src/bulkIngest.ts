@@ -7,15 +7,16 @@
 
 import * as fs from 'node:fs';
 import { platform } from 'node:os';
-import { Flags } from '@salesforce/sf-plugins-core';
-import { IngestJobV2, JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
-import { Connection, Messages } from '@salesforce/core';
+import { Flags, SfCommand, Ux, optionalOrgFlagWithDeprecations, loglevel } from '@salesforce/sf-plugins-core';
+import { IngestJobV2, IngestJobV2FailedResults, JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
+import { Connection, Messages, SfError } from '@salesforce/core';
 import { Schema } from '@jsforce/jsforce-node';
 import { Duration } from '@salesforce/kit';
 import { ensureString } from '@salesforce/ts-types';
 import { BulkIngestStages } from './ux/bulkIngestStages.js';
-import { BulkUpdateRequestCache, BulkImportRequestCache } from './bulkDataRequestCache.js';
+import { BulkUpdateRequestCache, BulkImportRequestCache, BulkUpsertRequestCache } from './bulkDataRequestCache.js';
 import { detectDelimiter } from './bulkUtils.js';
+import { orgFlags } from './flags.js';
 
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulkIngest');
 
@@ -26,7 +27,7 @@ type BulkIngestInfo = {
   failedRecords?: number;
 };
 
-type ResumeCommandIDs = 'data import resume' | 'data update resume';
+type ResumeCommandIDs = 'data import resume' | 'data update resume' | 'data upsert resume' | 'data delete resume';
 
 /**
  * Bulk API 2.0 ingest handler for `sf` bulk commands
@@ -37,6 +38,7 @@ type ResumeCommandIDs = 'data import resume' | 'data update resume';
  *
  * It will create the specified bulk ingest job, set up the oclif/MSO stages and return the job info.
  * */
+// eslint-disable-next-line complexity
 export async function bulkIngest(opts: {
   resumeCmdId: ResumeCommandIDs;
   stageTitle: string;
@@ -44,26 +46,34 @@ export async function bulkIngest(opts: {
   operation: JobInfoV2['operation'];
   lineEnding: JobInfoV2['lineEnding'] | undefined;
   columnDelimiter: JobInfoV2['columnDelimiter'] | undefined;
+  externalId?: JobInfoV2['externalIdFieldName'];
   conn: Connection;
-  cache: BulkUpdateRequestCache | BulkImportRequestCache;
+  cache: BulkUpdateRequestCache | BulkImportRequestCache | BulkUpsertRequestCache;
   async: boolean;
   wait: Duration;
   file: string;
   jsonEnabled: boolean;
+  verbose: boolean;
   logFn: (message: string) => void;
+  warnFn: (message: SfCommand.Warning) => void;
 }): Promise<BulkIngestInfo> {
-  const {
-    conn,
-    operation,
-    object,
-    lineEnding = platform() === 'win32' ? 'CRLF' : 'LF',
-    columnDelimiter,
-    file,
-    logFn,
-  } = opts;
+  const { conn, operation, object, lineEnding = platform() === 'win32' ? 'CRLF' : 'LF', file, logFn } = opts;
+
+  // validation
+  if (opts.externalId && opts.operation !== 'upsert') {
+    throw new SfError('External ID is only required for `sf data upsert bulk`.');
+  }
+
+  if (opts.verbose && !['delete', 'hardDelete', 'upsert'].includes(opts.operation)) {
+    throw new SfError('Verbose mode is limited for `sf data delete/upsert bulk` and will be removed after March 2025.');
+  }
 
   const timeout = opts.async ? Duration.minutes(0) : opts.wait ?? Duration.minutes(0);
   const async = timeout.milliseconds === 0;
+
+  // CSV file for `delete/HardDelete` operations only have 1 column (ID), we set it to `COMMA` if not specified but any delimiter works.
+  const columnDelimiter =
+    opts.columnDelimiter ?? (['delete', 'hardDelete'].includes(operation) ? 'COMMA' : await detectDelimiter(file));
 
   const baseUrl = ensureString(opts.conn.getAuthInfoFields().instanceUrl);
 
@@ -81,7 +91,11 @@ export async function bulkIngest(opts: {
       object,
       operation,
       lineEnding,
-      columnDelimiter: columnDelimiter ?? (await detectDelimiter(file)),
+      externalIdFieldName: opts.externalId,
+      columnDelimiter,
+    }).catch((err) => {
+      stages.stop('failed');
+      throw err;
     });
 
     stages.update(job.getInfo());
@@ -102,11 +116,29 @@ export async function bulkIngest(opts: {
     object,
     operation,
     lineEnding,
-    columnDelimiter: columnDelimiter ?? (await detectDelimiter(file)),
+    externalIdFieldName: opts.externalId,
+    columnDelimiter,
+  }).catch((err) => {
+    stages.stop('failed');
+    throw err;
   });
 
   stages.setupJobListeners(job);
   stages.processingJob();
+
+  //  cache.resolveResumeOptionsFromCache for `delete/upsert resume --job-id <ID>`
+  //  will not throw if the ID isn't in the cache to support the following scenario:
+  //
+  // `sf data delete bulk --wait 10` -> sync operation (successful or not) never created a cache
+  // `sf data delete resume -i <job-id>` worked b/c the cache resolver returned the ID as a cache entry
+  // `sf data delete resume --use-most-recent` was never supported for sync runs.
+  //
+  //  We plan to remove this behavior in March 2025 (only these 2 commands supported this, `resume` commands should only resume jobs started by `sf`)
+  if (['upsert', 'delete', 'hardDelete'].includes(operation)) {
+    opts.warnFn(
+      'Resuming a synchronous operation via `sf data upsert/delete resume` will not be supported after March 2025.'
+    );
+  }
 
   try {
     await job.poll(5000, timeout.milliseconds);
@@ -116,8 +148,32 @@ export async function bulkIngest(opts: {
     // send last data update so job status/num. of records processed/failed represent the last update
     stages.update(jobInfo);
 
+    if (jobInfo.numberRecordsProcessed === 0) {
+      stages.error();
+      throw messages.createError('error.noProcessedRecords', [], [conn.getUsername(), jobInfo.id]);
+    }
+
     if (jobInfo.numberRecordsFailed) {
       stages.error();
+      if (opts.verbose && !opts.jsonEnabled) {
+        const records = await job.getFailedResults();
+        if (records.length > 0) {
+          printBulkErrors(records);
+        }
+      }
+
+      if (['delete', 'hardDelete', 'upsert'].includes(opts.operation) && opts.jsonEnabled) {
+        opts.warnFn(
+          'Record failures will not be included in JSON output after March 2025, use `sf data bulk results` to get results instead.'
+        );
+        return {
+          jobId: jobInfo.id,
+          processedRecords: jobInfo.numberRecordsProcessed,
+          successfulRecords: jobInfo.numberRecordsProcessed - (jobInfo.numberRecordsFailed ?? 0),
+          failedRecords: jobInfo.numberRecordsFailed,
+        };
+      }
+
       throw messages.createError(
         'error.failedRecordDetails',
         [jobInfo.numberRecordsFailed],
@@ -172,12 +228,17 @@ export async function bulkIngest(opts: {
 export async function bulkIngestResume(opts: {
   cmdId: ResumeCommandIDs;
   stageTitle: string;
-  cache: BulkUpdateRequestCache;
+  cache: BulkUpdateRequestCache | BulkUpsertRequestCache;
   jobIdOrMostRecent: string | boolean;
   jsonEnabled: boolean;
   wait: Duration;
+  warnFn: (message: SfCommand.Warning) => void;
 }): Promise<BulkIngestInfo> {
-  const resumeOpts = await opts.cache.resolveResumeOptionsFromCache(opts.jobIdOrMostRecent);
+  const resumeOpts = await opts.cache.resolveResumeOptionsFromCache(
+    opts.jobIdOrMostRecent,
+    // skip cache validation for only for these 2 commands for backwards compatibility.
+    ['data upsert resume', 'data delete resume'].includes(opts.cmdId) ? true : false
+  );
 
   const conn = resumeOpts.options.connection;
 
@@ -204,8 +265,26 @@ export async function bulkIngestResume(opts: {
     // send last data update so job status/num. of records processed/failed represent the last update
     stages.update(jobInfo);
 
+    if (jobInfo.numberRecordsProcessed === 0) {
+      stages.error();
+      throw messages.createError('error.noProcessedRecords', [], [conn.getUsername(), jobInfo.id]);
+    }
+
     if (jobInfo.numberRecordsFailed) {
       stages.error();
+
+      if (['delete', 'hardDelete', 'upsert'].includes(jobInfo.operation) && opts.jsonEnabled) {
+        opts.warnFn(
+          'Record failures will not be included in JSON output after March 2025, use `sf data bulk results` to get results instead.'
+        );
+        return {
+          jobId: jobInfo.id,
+          processedRecords: jobInfo.numberRecordsProcessed,
+          successfulRecords: jobInfo.numberRecordsProcessed - (jobInfo.numberRecordsFailed ?? 0),
+          failedRecords: jobInfo.numberRecordsFailed,
+        };
+      }
+
       throw messages.createError(
         'error.failedRecordDetails',
         [jobInfo.numberRecordsFailed],
@@ -265,24 +344,128 @@ export async function createIngestJob(
     object: string;
     operation: JobInfoV2['operation'];
     lineEnding: JobInfoV2['lineEnding'];
+    externalIdFieldName?: JobInfoV2['externalIdFieldName'];
     columnDelimiter: JobInfoV2['columnDelimiter'];
   }
 ): Promise<IngestJobV2<Schema>> {
-  const job = conn.bulk2.createJob(jobOpts);
+  try {
+    const job = conn.bulk2.createJob(jobOpts);
 
-  // create the job in the org
-  await job.open();
+    // create the job in the org
+    await job.open();
 
-  // upload data
-  await job.uploadData(fs.createReadStream(csvFile));
+    // upload data
+    await job.uploadData(fs.createReadStream(csvFile));
 
-  // mark the job to be ready to be processed
-  await job.close();
+    // mark the job to be ready to be processed
+    await job.close();
 
-  return job;
+    return job;
+  } catch (err) {
+    if (jobOpts.operation === 'hardDelete' && err instanceof Error && err.name === 'FEATURENOTENABLED') {
+      throw messages.createError('error.hardDeletePermission');
+    }
+
+    throw err;
+  }
 }
 
 export const columnDelimiterFlag = Flags.option({
   summary: messages.getMessage('flags.column-delimiter.summary'),
   options: ['BACKQUOTE', 'CARET', 'COMMA', 'PIPE', 'SEMICOLON', 'TAB'] as const,
 })();
+
+export const lineEndingFlag = Flags.option({
+  summary: messages.getMessage('flags.line-ending.summary'),
+  dependsOn: ['file'],
+  options: ['CRLF', 'LF'] as const,
+})();
+
+/**
+ * @deprecated
+ */
+export const printBulkErrors = (failedResults: IngestJobV2FailedResults<Schema>): void => {
+  const ux = new Ux();
+  ux.log();
+  ux.table({
+    // eslint-disable-next-line camelcase
+    data: failedResults.map((f) => ({ id: 'Id' in f ? f.Id : '', sfId: f.sf__Id, error: f.sf__Error })),
+    columns: ['id', { key: 'sfId', name: 'Sf_Id' }, 'error'],
+    title: `Bulk Failures [${failedResults.length}]`,
+  });
+};
+
+/**
+ * Use only for commands that maintain sfdx compatibility.
+ *
+ * @deprecated
+ */
+export const baseUpsertDeleteFlags = {
+  ...orgFlags,
+  file: Flags.file({
+    char: 'f',
+    summary: messages.getMessage('flags.csvfile.summary'),
+    required: true,
+    exists: true,
+    aliases: ['csvfile'],
+    deprecateAliases: true,
+  }),
+  sobject: Flags.string({
+    char: 's',
+    summary: messages.getMessage('flags.sobject.summary'),
+    required: true,
+    aliases: ['sobjecttype'],
+    deprecateAliases: true,
+  }),
+  wait: Flags.duration({
+    char: 'w',
+    unit: 'minutes',
+    summary: messages.getMessage('flags.wait.summary'),
+    min: 0,
+    defaultValue: 0,
+    exclusive: ['async'],
+  }),
+  async: Flags.boolean({
+    char: 'a',
+    summary: messages.getMessage('flags.async.summary'),
+    exclusive: ['wait'],
+  }),
+  verbose: Flags.boolean({
+    summary: messages.getMessage('flags.verbose.summary'),
+    deprecated: {
+      message:
+        'The --verbose flag is deprecated and will be removed after March 2025, use "sf data bulk results" to get job results instead.',
+    },
+  }),
+};
+
+/**
+ * Should be used only for `data upsert/delete resume` (keep old flag aliases)
+ *
+ * @deprecated
+ */
+export const baseUpsertDeleteResumeFlags = {
+  'target-org': { ...optionalOrgFlagWithDeprecations, summary: messages.getMessage('flags.targetOrg.summary') },
+  'job-id': Flags.salesforceId({
+    length: 18,
+    char: 'i',
+    startsWith: '750',
+    summary: messages.getMessage('flags.jobid'),
+    aliases: ['jobid'],
+    deprecateAliases: true,
+  }),
+  'use-most-recent': Flags.boolean({
+    summary: messages.getMessage('flags.useMostRecent.summary'),
+    // don't use `exactlyOne` because this defaults to true
+    default: true,
+    exclusive: ['job-id'],
+  }),
+  wait: Flags.duration({
+    summary: messages.getMessage('flags.wait.summary'),
+    unit: 'minutes',
+    min: 0,
+    defaultValue: 5,
+  }),
+  'api-version': Flags.orgApiVersion(),
+  loglevel,
+};

@@ -45,19 +45,53 @@ describe('data import bulk NUTs', () => {
     expect(result?.failedRecords).to.equal(0);
   });
 
-  it('should import account records in csv format with PIPE delimiter', async () => {
+  describe('csv', () => {
+    it('should detect PIPE as the column separator', async () => {
+      const csvFile = await generateAccountsCsv(session.dir, 'PIPE');
+
+      const result = execCmd<DataImportBulkResult>(
+        `data import bulk --file ${csvFile} --sobject Account --wait 10 --json`,
+        { ensureExitCode: 0 }
+      ).jsonOutput?.result;
+
+      expect(result?.jobId).not.be.undefined;
+      expect(result?.jobId.length).to.equal(18);
+      expect(result?.processedRecords).to.equal(10_000);
+      expect(result?.successfulRecords).to.equal(10_000);
+      expect(result?.failedRecords).to.equal(0);
+    });
+  });
+
+  it('should import CSV exported by `data export bulk`', async () => {
     const csvFile = await generateAccountsCsv(session.dir, 'PIPE');
 
-    const result = execCmd<DataImportBulkResult>(
+    const importRes = execCmd<DataImportBulkResult>(
       `data import bulk --file ${csvFile} --sobject Account --wait 10 --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result;
 
-    expect(result?.jobId).not.be.undefined;
-    expect(result?.jobId.length).to.equal(18);
-    expect(result?.processedRecords).to.equal(10_000);
-    expect(result?.successfulRecords).to.equal(10_000);
-    expect(result?.failedRecords).to.equal(0);
+    expect(importRes?.jobId).not.be.undefined;
+    expect(importRes?.jobId.length).to.equal(18);
+    expect(importRes?.processedRecords).to.equal(10_000);
+    expect(importRes?.successfulRecords).to.equal(10_000);
+    expect(importRes?.failedRecords).to.equal(0);
+
+    execCmd<DataImportBulkResult>(
+      'data export bulk --output-file accounts.csv --query "select name,type,phone,website from account" --wait 10',
+      { ensureExitCode: 0 }
+    );
+
+    const lastImportRes = execCmd<DataImportBulkResult>(
+      'data import bulk --file accounts.csv --sobject Account --wait 10 --json',
+      { ensureExitCode: 0 }
+    ).jsonOutput?.result;
+
+    expect(lastImportRes?.jobId).not.be.undefined;
+    expect(lastImportRes?.jobId.length).to.equal(18);
+    // there might be additional records in the scratch org, here we ensure import processed the 10K in the CSV file)
+    expect(lastImportRes?.processedRecords).to.greaterThan(10_000);
+    expect(lastImportRes?.successfulRecords).to.greaterThan(10_000);
+    expect(lastImportRes?.failedRecords).to.equal(0);
   });
 
   it('should report error msg from a failed job', async () => {

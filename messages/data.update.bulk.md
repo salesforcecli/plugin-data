@@ -37,11 +37,3 @@ CSV file that contains the Salesforce object records you want to update.
 # flags.sobject.summary
 
 API name of the Salesforce object, either standard or custom, which you are updating.
-
-# flags.line-ending.summary
-
-Line ending used in the CSV file. Default value on Windows is `CRLF`; on macOS and Linux it's `LF`.
-
-# flags.column-delimiter.summary
-
-Column delimiter used in the CSV file. Default is COMMA.

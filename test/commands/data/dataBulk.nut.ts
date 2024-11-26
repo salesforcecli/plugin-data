@@ -56,7 +56,7 @@ const checkBulkStatusHumanResponse = (statusCommand: string): void => {
     ensureExitCode: 0,
   }).shellOutput.stdout.split(os.EOL);
   const jobState = statusResponse.find((line) => line.includes('Status'));
-  expect(jobState).to.include('Job Complete');
+  expect(jobState).to.include('JobComplete');
 };
 
 describe('data:bulk commands', () => {
@@ -137,11 +137,12 @@ describe('data:bulk commands', () => {
       fs.writeFileSync(path.join(testSession.project.dir, 'account.csv'), `Id${os.EOL}${accountId}`);
       const result = execCmd('data:delete:bulk --sobject Account --file account.csv --wait 10 --verbose', {
         ensureExitCode: 0,
-      }).shellOutput.stdout; // eslint-disable-next-line no-console
-      expect(result).to.include('| Status Job Complete | Records processed 1 | Records failed 0');
+      }).shellOutput.stdout;
+      expect(result).to.match(/Successful records: 1\s*Failed records: 0\s*Status: JobComplete/s);
+      expect(result).to.not.include('Bulk Failures');
     });
 
-    it('should have information in --json', () => {
+    it('bulk delete should have information in --json', () => {
       fs.writeFileSync(path.join(testSession.project.dir, 'data.csv'), `Id${os.EOL}001000000000000AAA`);
 
       const result = execCmd<BulkResultV2>(
@@ -180,6 +181,32 @@ describe('data:bulk commands', () => {
       // expect(result?.failedResults[0].sf__Error).to.equal('MALFORMED_ID:bad id       001000000000000AAA:--')
       expect(result?.failedResults[0].Id).to.equal('001000000000000AAA');
       expect(result?.successfulResults.length).to.equal(0);
+    });
+
+    it('bulk upsert should have information in --json', () => {
+      const result = execCmd<BulkResultV2>(
+        `data:upsert:bulk --sobject Account --file ${path.join(
+          '.',
+          'data',
+          'bulkUpsertBackquote.csv'
+        )} --external-id Id --wait 10 --json --column-delimiter BACKQUOTE`,
+        { ensureExitCode: 0 }
+      ).jsonOutput?.result.records;
+
+      expect(result?.successfulResults.length).to.equal(10);
+      expect(result?.failedResults.length).to.equal(0);
+      expect(result?.unprocessedRecords.length).to.equal(0);
+
+      expect(result?.successfulResults[0]).to.have.all.keys(
+        'sf__Id',
+        'sf__Created',
+        'ANNUALREVENUE',
+        'NAME',
+        'PHONE',
+        'TYPE',
+        'WEBSITE'
+      );
+      expect(result?.successfulResults[0].sf__Id?.length).to.equal(18);
     });
 
     it('should print verbose success with json', () => {
@@ -222,7 +249,9 @@ const queryAndBulkDelete = (): BulkResultV2 => {
 
   // Run bulk delete
   const deleteResponse: BulkResultV2 | undefined = execCmd<Awaited<BulkResultV2>>(
-    `data:delete:bulk --sobject Account --file ${idsFile} --json --wait 10`,
+    `data:delete:bulk --sobject Account --file ${idsFile} --json --wait 10 --line-ending ${
+      os.platform() === 'win32' ? 'CRLF' : 'LF'
+    }`,
     {
       ensureExitCode: 0,
     }
@@ -240,7 +269,7 @@ const bulkInsertAccounts = (): BulkResultV2 => {
     '.',
     'data',
     'bulkUpsert.csv'
-  )} --external-id Id --json --wait 10`;
+  )} --external-id Id --json --wait 10 --column-delimiter COMMA`;
   const rawResponse = execCmd(cmd);
   const response: BulkResultV2 | undefined = rawResponse.jsonOutput?.result as BulkResultV2;
   if (response?.records) {
