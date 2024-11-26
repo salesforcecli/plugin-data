@@ -67,9 +67,18 @@ export default class Upsert extends SfCommand<BulkResultV2> {
       process.exitCode = 1;
     }
 
+    const jobInfo = await job.check();
+
     return {
-      jobInfo: await job.check(),
-      records: transformResults(await job.getAllResults()),
+      jobInfo,
+      records:
+        jobInfo.state === 'JobComplete'
+          ? transformResults(await job.getAllResults())
+          : {
+              successfulResults: [],
+              failedResults: [],
+              unprocessedRecords: [],
+            },
     };
   }
 }
