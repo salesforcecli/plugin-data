@@ -1,3 +1,9 @@
+# [3.12.0](https://github.com/salesforcecli/plugin-data/compare/3.11.6...3.12.0) (2024-11-26)
+
+### Features
+
+- multi-stage-output/new csv flags ([#1110](https://github.com/salesforcecli/plugin-data/issues/1110)) ([1d2cf30](https://github.com/salesforcecli/plugin-data/commit/1d2cf30daf33b77d6e129f53d8301e3fde86e05b))
+
 ## [3.11.6](https://github.com/salesforcecli/plugin-data/compare/3.11.5...3.11.6) (2024-11-24)
 
 ### Bug Fixes

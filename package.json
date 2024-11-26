@@ -1,6 +1,6 @@
 {
   "name": "@salesforce/plugin-data",
-  "version": "3.11.6",
+  "version": "3.12.0",
   "description": "Plugin for salesforce data commands",
   "author": "Salesforce",
   "homepage": "https://github.com/salesforcecli/plugin-data",
@@ -119,7 +119,6 @@
   },
   "dependencies": {
     "@jsforce/jsforce-node": "^3.6.3",
-    "@oclif/multi-stage-output": "^0.7.5",
     "@oclif/multi-stage-output": "^0.7.12",
     "@salesforce/core": "^8.6.1",
     "@salesforce/kit": "^3.2.2",
