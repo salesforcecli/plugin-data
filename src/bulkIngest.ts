@@ -150,9 +150,7 @@ export async function bulkIngest(opts: {
 
     if (jobInfo.numberRecordsProcessed === 0) {
       stages.error();
-      // remove after W-17099874 gets fixed
-      // eslint-disable-next-line sf-plugin/no-missing-messages
-      throw messages.createError('error.noProcessedRecords');
+      throw messages.createError('error.noProcessedRecords', [], [conn.getUsername(), jobInfo.id]);
     }
 
     if (jobInfo.numberRecordsFailed) {
@@ -265,9 +263,7 @@ export async function bulkIngestResume(opts: {
 
     if (jobInfo.numberRecordsProcessed === 0) {
       stages.error();
-      // remove after W-17099874 gets fixed
-      // eslint-disable-next-line sf-plugin/no-missing-messages
-      throw messages.createError('error.noProcessedRecords');
+      throw messages.createError('error.noProcessedRecords', [], [conn.getUsername(), jobInfo.id]);
     }
 
     if (jobInfo.numberRecordsFailed) {
