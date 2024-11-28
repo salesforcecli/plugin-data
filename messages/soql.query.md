@@ -56,6 +56,10 @@ Include deleted records. By default, deleted records are not returned.
 
 Time to wait for the command to finish, in minutes.
 
+# flags.output-file.summary
+
+File where records are written.
+
 # displayQueryRecordsRetrieved
 
 Total number of records retrieved: %s.

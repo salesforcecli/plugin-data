@@ -5,6 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { EOL } from 'node:os';
+import * as fs from 'node:fs';
 import { Ux } from '@salesforce/sf-plugins-core';
 import { get, getNumber, isString } from '@salesforce/ts-types';
 import type { Record as jsforceRecord } from '@jsforce/jsforce-node';
@@ -13,8 +14,11 @@ import { getAggregateAliasOrName, maybeMassageAggregates } from './reporters.js'
 import { QueryReporter, logFields, isSubquery, isAggregate } from './reporters.js';
 
 export class CsvReporter extends QueryReporter {
-  public constructor(data: SoqlQueryResult, columns: Field[]) {
+  private outputFile: string | undefined;
+
+  public constructor(data: SoqlQueryResult, columns: Field[], outputFile?: string) {
     super(data, columns);
+    this.outputFile = outputFile;
   }
 
   public display(): void {
@@ -23,12 +27,16 @@ export class CsvReporter extends QueryReporter {
     const preppedData = this.data.result.records.map(maybeMassageAggregates(aggregates));
     const attributeNames = getColumns(preppedData)(fields);
     const ux = new Ux();
+
+    let fsWritable: fs.WriteStream | undefined;
+    if (this.outputFile) fsWritable = fs.createWriteStream(this.outputFile);
+
     [
       // header row
       attributeNames.map(escape).join(SEPARATOR),
       // data
       ...preppedData.map((row): string => attributeNames.map(getFieldValue(row)).join(SEPARATOR)),
-    ].map((line) => ux.log(line));
+    ].forEach((line) => (fsWritable ? fsWritable.write(line + EOL) : ux.log(line)));
   }
 }
 

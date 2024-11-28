@@ -10,6 +10,8 @@ import { strict as assert } from 'node:assert';
 import { Dictionary, getString } from '@salesforce/ts-types';
 import { config, expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
+import { validateCsv } from '../../../testUtil.js';
+import { DataQueryResult } from '../../../../src/commands/data/query.js';
 
 config.truncateThreshold = 0;
 
@@ -278,6 +280,38 @@ describe('data:query command', () => {
       expect(metadataObject).to.have.property('description');
     });
   });
+  describe('data:query --output-file', () => {
+    it('should output JSON to file', async () => {
+      const queryResult = execCmd<DataQueryResult>(
+        'data:query -q "SELECT Id,Name from Account LIMIT 3" --output-file accounts.json --result-format json --json',
+        {
+          ensureExitCode: 0,
+        }
+      ).jsonOutput;
+
+      expect(queryResult?.result.outputFile).equals('accounts.json');
+      const file = JSON.parse(
+        await fs.promises.readFile(path.join(testSession.project.dir, 'accounts.json'), 'utf8')
+      ) as DataQueryResult;
+
+      const { outputFile, ...result } = queryResult?.result as DataQueryResult;
+
+      expect(file).to.deep.equal(result);
+    });
+
+    it('should output CSV to file', async () => {
+      const queryResult = execCmd(
+        'data:query -q "SELECT Id,Name from Account LIMIT 3" --output-file accounts.csv --result-format csv',
+        {
+          ensureExitCode: 0,
+        }
+      );
+
+      expect(queryResult.shellOutput.stdout).includes('3 records written to accounts.csv');
+      await validateCsv(path.join(testSession.project.dir, 'accounts.csv'), 'COMMA', 3);
+    });
+  });
+
   describe('data:query --bulk', () => {
     it('should return Lead.owner.name (multi-level relationships)', () => {
       execCmd('data:create:record -s Lead -v "Company=Salesforce LastName=Astro"', { ensureExitCode: 0 });
