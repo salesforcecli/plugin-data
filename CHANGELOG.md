@@ -1,3 +1,9 @@
+## [3.12.2](https://github.com/salesforcecli/plugin-data/compare/3.12.1...3.12.2) (2024-12-01)
+
+### Bug Fixes
+
+- **deps:** bump csv-parse from 5.5.6 to 5.6.0 ([0053edc](https://github.com/salesforcecli/plugin-data/commit/0053edc517d85da20bdc38649bab55bb8275fcc9))
+
 ## [3.12.1](https://github.com/salesforcecli/plugin-data/compare/3.12.0...3.12.1) (2024-11-27)
 
 ### Bug Fixes
