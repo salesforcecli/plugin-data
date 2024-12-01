@@ -22,7 +22,6 @@ import {
   SObjectTreeFileContents,
   SObjectTreeInput,
 } from './types.js';
-import { hasUnresolvedRefs } from './api/data/tree/functions.js';
 import { ExportTreeResult } from './commands/data/export/tree.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -43,7 +42,11 @@ export type ExportConfig = {
 export type RefFromIdByType = Map<string, Map<string, string>>;
 
 /** only used internally, but a more useful structure than the original */
-type PlanFile = Omit<DataPlanPart, 'files'> & { contents: SObjectTreeFileContents; file: string; dir: string };
+type PlanFile = Omit<DataPlanPart, 'files' | 'saveRefs' | 'resolveRefs'> & {
+  contents: SObjectTreeFileContents;
+  file: string;
+  dir: string;
+};
 
 export const runExport = async (configInput: ExportConfig): Promise<ExportTreeResult> => {
   const { outputDir, plan, queries, conn, prefix, ux } = validate(configInput);
@@ -92,8 +95,6 @@ export const runExport = async (configInput: ExportConfig): Promise<ExportTreeRe
       ([sobject, records]): PlanFile => ({
         sobject,
         contents: { records },
-        saveRefs: shouldSaveRefs(records, [...planMap.values()].flat()),
-        resolveRefs: hasUnresolvedRefs(records),
         file: `${getPrefixedFileName(sobject, prefix)}.json`,
         dir: outputDir ?? '',
       })
@@ -143,18 +144,9 @@ export const runExport = async (configInput: ExportConfig): Promise<ExportTreeRe
   }
 };
 
-// TODO: remove the saveRefs/resolveRefs from the types and all associated code.  It's not used by the updated `import` command
-/** for records of an object type, at least one record has a ref to it */
-const shouldSaveRefs = (recordsOfType: SObjectTreeInput[], allRecords: SObjectTreeInput[]): boolean => {
-  const refs = new Set(recordsOfType.map((r) => `@${r.attributes.referenceId}`));
-  return allRecords.some((r) => Object.values(r).some((v) => typeof v === 'string' && refs.has(v)));
-};
-
 /** convert between types.  DataPlanPart is exported and part of the command's return type and file structure so we're stuck with it */
-const planFileToDataPartPlan = (p: PlanFile): DataPlanPart => ({
+const planFileToDataPartPlan = (p: PlanFile): Omit<DataPlanPart, 'saveRefs' | 'resolveRefs'> => ({
   sobject: p.sobject,
-  saveRefs: p.saveRefs,
-  resolveRefs: p.resolveRefs,
   files: [p.file],
 });
 
