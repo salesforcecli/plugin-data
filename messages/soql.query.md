@@ -58,7 +58,7 @@ Time to wait for the command to finish, in minutes.
 
 # flags.output-file.summary
 
-File where records are written.
+File where records are written; only CSV and JSON output formats are supported. 
 
 # displayQueryRecordsRetrieved
 
