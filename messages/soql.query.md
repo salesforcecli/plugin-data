@@ -16,9 +16,9 @@ When using --bulk, the command waits 3 minutes by default for the query to compl
 
   <%= config.bin %> <%= command.id %> --query "SELECT Id, Name, Account.Name FROM Contact"
 
-- Read the SOQL query from a file called "query.txt"; the command uses the org with alias "my-scratch":
+- Read the SOQL query from a file called "query.txt" and write the CSV-formatted output to a file; the command uses the org with alias "my-scratch":
 
-  <%= config.bin %> <%= command.id %> --file query.txt --target-org my-scratch
+  <%= config.bin %> <%= command.id %> --file query.txt --output-file output.csv --result-format csv --target-org my-scratch
 
 - Use Tooling API to run a query on the ApexTrigger Tooling API object:
 
@@ -58,7 +58,7 @@ Time to wait for the command to finish, in minutes.
 
 # flags.output-file.summary
 
-File where records are written; only CSV and JSON output formats are supported. 
+File where records are written; only CSV and JSON output formats are supported.
 
 # displayQueryRecordsRetrieved
 
