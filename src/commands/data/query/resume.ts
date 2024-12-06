@@ -29,6 +29,12 @@ export class BulkQueryReport extends SfCommand<unknown> {
   public static readonly examples = reportMessages.getMessages('examples');
   public static readonly aliases = ['force:data:soql:bulk:report'];
   public static readonly deprecateAliases = true;
+  public static state = 'deprecated';
+  public static readonly deprecationOptions = {
+    message: `Bulk mode for "data query" is deprecated, this command will be removed after March 2025.
+Use "data export bulk | data export resume" for bulk queries instead.
+`,
+  };
 
   public static readonly flags = {
     'target-org': { ...optionalOrgFlagWithDeprecations },
