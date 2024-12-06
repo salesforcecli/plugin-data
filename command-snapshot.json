@@ -213,6 +213,7 @@
       "flags-dir",
       "json",
       "loglevel",
+      "output-file",
       "perflog",
       "query",
       "result-format",
