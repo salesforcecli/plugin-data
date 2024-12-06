@@ -1,3 +1,13 @@
+# [3.13.0](https://github.com/salesforcecli/plugin-data/compare/3.12.3...3.13.0) (2024-12-06)
+
+### Bug Fixes
+
+- update command snapshot ([334f50b](https://github.com/salesforcecli/plugin-data/commit/334f50b632bbb86005a8369935972fcc4b240667))
+
+### Features
+
+- **data:query:** add `--output-file` flag ([324c5a4](https://github.com/salesforcecli/plugin-data/commit/324c5a4c920bccfa8664e642dcbb3584d3f59166))
+
 ## [3.12.3](https://github.com/salesforcecli/plugin-data/compare/3.12.2...3.12.3) (2024-12-01)
 
 ### Bug Fixes
