@@ -7,7 +7,7 @@
 import path from 'node:path';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
-import { ensureNumber } from '@salesforce/ts-types';
+import { ensureNumber, ensureString } from '@salesforce/ts-types';
 import { validateCsv, validateJson } from '../../../testUtil.js';
 import { DataExportBulkResult } from '../../../../src/commands/data/export/bulk.js';
 
@@ -42,6 +42,9 @@ describe('data export bulk NUTs', () => {
   });
 
   const soqlQuery = 'select id,name,phone, annualrevenue from account';
+  const soqlQueryFields = ['Id', 'Name', 'Phone', 'AnnualRevenue'];
+
+  const na40username = ensureString(process.env.TESTKIT_HUB_USERNAME);
 
   it('should export records in csv format', async () => {
     const outputFile = 'export-accounts.csv';
@@ -53,6 +56,34 @@ describe('data export bulk NUTs', () => {
     expect(result?.filePath).to.equal(outputFile);
 
     await validateCsv(path.join(session.dir, 'data-project', outputFile), 'COMMA', ensureNumber(result?.totalSize));
+  });
+
+  it('should export +1 million records in csv format', async () => {
+    const outputFile = 'export-scratch-info.csv';
+    const command = `data export bulk -q "select id,ExpirationDate from scratchorginfo" --output-file ${outputFile} --wait 10 --json -o ${na40username}`;
+
+    const result = execCmd<DataExportBulkResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
+
+    expect(result?.totalSize).to.be.greaterThan(1_000_000);
+    expect(result?.filePath).to.equal(outputFile);
+
+    await validateCsv(path.join(session.dir, 'data-project', outputFile), 'COMMA', ensureNumber(result?.totalSize));
+  });
+
+  it('should export +1 million records in json format', async () => {
+    const outputFile = 'export-scratch-info.json';
+    const command = `data export bulk -q "SELECT Id,ExpirationDate FROM scratchorginfo" --output-file ${outputFile} --wait 10 --json -o ${na40username} --result-format json`;
+
+    const result = execCmd<DataExportBulkResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
+
+    expect(result?.totalSize).to.be.greaterThan(1_000_000);
+    expect(result?.filePath).to.equal(outputFile);
+
+    await validateJson(
+      path.join(session.dir, 'data-project', outputFile),
+      ['Id', 'ExpirationDate'],
+      ensureNumber(result?.totalSize)
+    );
   });
 
   it('should export records in csv format with PIPE delimiter', async () => {
@@ -76,6 +107,10 @@ describe('data export bulk NUTs', () => {
     expect(result?.totalSize).to.equal(totalAccountRecords);
     expect(result?.filePath).to.equal(outputFile);
 
-    await validateJson(path.join(session.dir, 'data-project', outputFile), ensureNumber(totalAccountRecords));
+    await validateJson(
+      path.join(session.dir, 'data-project', outputFile),
+      soqlQueryFields,
+      ensureNumber(totalAccountRecords)
+    );
   });
 });
