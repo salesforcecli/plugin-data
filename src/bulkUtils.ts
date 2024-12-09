@@ -128,9 +128,9 @@ export async function exportRecords(
 
     if (outputInfo.format === 'json') {
       const jsonWritable = fs.createWriteStream(outputInfo.filePath, {
-        // Open file for reading and appending. The file is created if it does not exist but fails if the path exists.
+        // Open file for appending. The file is created if it does not exist.
         // https://nodejs.org/api/fs.html#file-system-flags
-        flags: 'ax+',
+        flags: 'a', // append mode
       });
 
       const totalRecords = jobInfo.numberRecordsProcessed;
@@ -166,6 +166,8 @@ export async function exportRecords(
           ? [
               Readable.from(res.body.slice(res.body.indexOf(EOL) + 1)),
               fs.createWriteStream(outputInfo.filePath, {
+                // Open file for appending. The file is created if it does not exist.
+                // https://nodejs.org/api/fs.html#file-system-flags
                 flags: 'a', // append mode
               }),
             ]
