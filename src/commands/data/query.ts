@@ -127,14 +127,10 @@ export class DataSoqlQueryCommand extends SfCommand<DataQueryResult> {
     this.logger = await Logger.child('data:soql:query');
     const flags = (await this.parse(DataSoqlQueryCommand)).flags;
 
-    if (flags.bulk === false && flags.wait) {
-      this.warn(`Using \`--wait\` without \`--bulk\` is deprecated and will be removed after January 1, 2025.
-You can safely remove \`--wait\` (it never had any effect on the command without \`--bulk\`).
-`);
-    }
-    if (flags.bulk === false && flags.async) {
-      this.warn(`Using \`--async\` without \`--bulk\` is deprecated and will be removed after January 1, 2025.
-You can safely remove \`--async\` (it never had any effect on the command without \`--bulk\`).
+    if (flags.bulk || flags.wait || flags.async) {
+      this
+        .warn(`Bulk mode for "data query" is deprecated, the following flags will be removed after April 2025: --bulk | --wait | --async.
+Use "data export bulk" for bulk queries instead.
 `);
     }
 
