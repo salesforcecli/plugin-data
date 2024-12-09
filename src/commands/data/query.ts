@@ -129,7 +129,7 @@ export class DataSoqlQueryCommand extends SfCommand<DataQueryResult> {
 
     if (flags.bulk || flags.wait || flags.async) {
       this
-        .warn(`Bulk mode for "data query" is deprecated, the following flags will be removed after March 2025: --bulk | --wait | --async.
+        .warn(`Bulk mode for "data query" is deprecated, the following flags will be removed after April 2025: --bulk | --wait | --async.
 Use "data export bulk" for bulk queries instead.
 `);
     }
