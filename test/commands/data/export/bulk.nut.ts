@@ -7,7 +7,7 @@
 import path from 'node:path';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
-import { ensureNumber, ensureString } from '@salesforce/ts-types';
+import { ensureNumber } from '@salesforce/ts-types';
 import { validateCsv, validateJson } from '../../../testUtil.js';
 import { DataExportBulkResult } from '../../../../src/commands/data/export/bulk.js';
 
@@ -44,8 +44,6 @@ describe('data export bulk NUTs', () => {
   const soqlQuery = 'select id,name,phone, annualrevenue from account';
   const soqlQueryFields = ['Id', 'Name', 'Phone', 'AnnualRevenue'];
 
-  const na40username = ensureString(process.env.TESTKIT_HUB_USERNAME);
-
   it('should export records in csv format', async () => {
     const outputFile = 'export-accounts.csv';
     const command = `data export bulk -q "${soqlQuery}" --output-file ${outputFile} --wait 10 --json`;
@@ -60,7 +58,7 @@ describe('data export bulk NUTs', () => {
 
   it('should export +1 million records in csv format', async () => {
     const outputFile = 'export-scratch-info.csv';
-    const command = `data export bulk -q "select id,ExpirationDate from scratchorginfo" --output-file ${outputFile} --wait 10 --json -o ${na40username}`;
+    const command = `data export bulk -q "select id,ExpirationDate from scratchorginfo" --output-file ${outputFile} --wait 10 --json -o ${session.hubOrg.username}`;
 
     const result = execCmd<DataExportBulkResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
 
@@ -72,7 +70,7 @@ describe('data export bulk NUTs', () => {
 
   it('should export +1 million records in json format', async () => {
     const outputFile = 'export-scratch-info.json';
-    const command = `data export bulk -q "SELECT Id,ExpirationDate FROM scratchorginfo" --output-file ${outputFile} --wait 10 --json -o ${na40username} --result-format json`;
+    const command = `data export bulk -q "SELECT Id,ExpirationDate FROM scratchorginfo" --output-file ${outputFile} --wait 10 --json -o ${session.hubOrg.username} --result-format json`;
 
     const result = execCmd<DataExportBulkResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
 
