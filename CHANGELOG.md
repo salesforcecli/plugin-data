@@ -1,3 +1,9 @@
+## [3.13.2](https://github.com/salesforcecli/plugin-data/compare/3.13.1...3.13.2) (2024-12-11)
+
+### Bug Fixes
+
+- **import:tree:** avoid recursion when resolving refs ([#1146](https://github.com/salesforcecli/plugin-data/issues/1146)) ([e6326dc](https://github.com/salesforcecli/plugin-data/commit/e6326dcfb4b67f17806d18d783fee14553e9fc93))
+
 ## [3.13.1](https://github.com/salesforcecli/plugin-data/compare/3.13.0...3.13.1) (2024-12-06)
 
 ### Bug Fixes
