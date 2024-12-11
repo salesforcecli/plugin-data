@@ -157,14 +157,19 @@ export const replaceRefsInTheSameFile = (
     : { ready: planPart };
 };
 
-/** recursively replace the `@ref` with the id, using the accumulated results objects */
+/** replace the `@ref` with the id, using the results objects */
 export const replaceRefs =
   (results: ImportResult[]) =>
   (records: SObjectTreeInput[]): SObjectTreeInput[] => {
     if (results.length === 0) return records;
-    const [head, ...tail] = results;
-    const updatedRecords = records.map(replaceRefWithId(head));
-    return tail.length ? replaceRefs(tail)(updatedRecords) : updatedRecords;
+
+    let updatedRecords = records;
+
+    for (const rec of results) {
+      updatedRecords = updatedRecords.map(replaceRefWithId(rec));
+    }
+
+    return updatedRecords;
   };
 
 /** replace 1 record with 1 ref for all of its fields */
