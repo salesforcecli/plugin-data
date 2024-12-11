@@ -47,7 +47,7 @@ describe('data:tree commands with more than 200 records are batches in safe grou
         ensureExitCode: 0,
       }
     );
-    expect(importResult.jsonOutput?.result.length).to.equal(265, 'Expected 265 records to be imported');
+    expect(importResult.jsonOutput?.result.length).to.equal(10000, 'Expected 10000 records to be imported');
 
     execCmd(
       `data:export:tree --query "${query}" --prefix ${prefix} --output-dir ${path.join(
@@ -75,8 +75,8 @@ describe('data:tree commands with more than 200 records are batches in safe grou
     }).jsonOutput;
 
     expect(queryResults?.result.totalSize).to.equal(
-      265,
-      `Expected 265 Account objects returned by the query to org: ${importAlias}`
+      10000,
+      `Expected 10000 Account objects returned by the query to org: ${importAlias}`
     );
   });
 });
