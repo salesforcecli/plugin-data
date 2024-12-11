@@ -6,10 +6,11 @@
  */
 
 import { Messages } from '@salesforce/core';
-import { Duration } from '@salesforce/kit';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { baseFlags, runBulkOperation } from '../../../bulkOperationBase.js';
+import { baseUpsertDeleteFlags, lineEndingFlag, bulkIngest } from '../../../bulkIngest.js';
+import { BulkDeleteRequestCache } from '../../../bulkDataRequestCache.js';
 import { BulkResultV2 } from '../../../types.js';
+import { transformResults } from '../../../bulkUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'bulkv2.delete');
@@ -20,7 +21,8 @@ export default class Delete extends SfCommand<BulkResultV2> {
   public static readonly description = messages.getMessage('description');
 
   public static readonly flags = {
-    ...baseFlags,
+    ...baseUpsertDeleteFlags,
+    'line-ending': lineEndingFlag,
     'hard-delete': Flags.boolean({
       summary: messages.getMessage('flags.hard-delete.summary'),
       description: messages.getMessage('flags.hard-delete.description'),
@@ -30,14 +32,49 @@ export default class Delete extends SfCommand<BulkResultV2> {
 
   public async run(): Promise<BulkResultV2> {
     const { flags } = await this.parse(Delete);
-    return runBulkOperation({
-      cmd: this,
-      sobject: flags.sobject,
-      csvFileName: flags.file,
-      connection: flags['target-org'].getConnection(flags['api-version']),
-      wait: flags.async ? Duration.minutes(0) : flags.wait,
-      verbose: flags.verbose,
+
+    const res = await bulkIngest({
+      resumeCmdId: 'data delete resume',
+      stageTitle: 'Deleting data',
+      object: flags.sobject,
       operation: flags['hard-delete'] ? 'hardDelete' : 'delete',
+      lineEnding: flags['line-ending'],
+      columnDelimiter: undefined,
+      conn: flags['target-org'].getConnection(flags['api-version']),
+      cache: await BulkDeleteRequestCache.create(),
+      async: flags.async,
+      wait: flags.wait,
+      file: flags.file,
+      jsonEnabled: this.jsonEnabled(),
+      verbose: flags.verbose,
+      logFn: (arg: string) => {
+        this.log(arg);
+      },
+      warnFn: (arg: SfCommand.Warning) => {
+        this.warn(arg);
+      },
     });
+
+    const job = flags['target-org'].getConnection(flags['api-version']).bulk2.job('ingest', {
+      id: res.jobId,
+    });
+
+    if (res.failedRecords && res.failedRecords > 0) {
+      process.exitCode = 1;
+    }
+
+    const jobInfo = await job.check();
+
+    return {
+      jobInfo,
+      records:
+        jobInfo.state === 'JobComplete'
+          ? transformResults(await job.getAllResults())
+          : {
+              successfulResults: [],
+              failedResults: [],
+              unprocessedRecords: [],
+            },
+    };
   }
 }

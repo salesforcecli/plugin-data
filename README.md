@@ -145,7 +145,7 @@ EXAMPLES
     $ sf data bulk results --job-id 7507i000fake341G --target-org my-scratch
 ```
 
-_See code: [src/commands/data/bulk/results.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/bulk/results.ts)_
+_See code: [src/commands/data/bulk/results.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/bulk/results.ts)_
 
 ## `sf data create file`
 
@@ -194,7 +194,7 @@ EXAMPLES
     $ sf data create file --file path/to/astro.png --parent-id a03fakeLoJWPIA3
 ```
 
-_See code: [src/commands/data/create/file.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/create/file.ts)_
+_See code: [src/commands/data/create/file.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/create/file.ts)_
 
 ## `sf data create record`
 
@@ -250,7 +250,7 @@ EXAMPLES
       TracedEntityId=01p17000000R6bLAAS"
 ```
 
-_See code: [src/commands/data/create/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/create/record.ts)_
+_See code: [src/commands/data/create/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/create/record.ts)_
 
 ## `sf data delete bulk`
 
@@ -258,22 +258,25 @@ Bulk delete records from an org using a CSV file. Uses Bulk API 2.0.
 
 ```
 USAGE
-  $ sf data delete bulk -o <value> -f <value> -s <value> [--json] [--flags-dir <value>] [--api-version <value>] [-w
-    <value> | -a] [--verbose] [--hard-delete]
+  $ sf data delete bulk -o <value> -s <value> [--json] [--flags-dir <value>] [--api-version <value>] [-w <value> | -a]
+    [--verbose] (--line-ending CRLF|LF -f <value>) [--hard-delete]
 
 FLAGS
-  -a, --async                Run the command asynchronously.
-  -f, --file=<value>         (required) CSV file that contains the IDs of the records to update or delete.
-  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
-                             configuration variable is already set.
-  -s, --sobject=<value>      (required) API name of the Salesforce object, either standard or custom, that you want to
-                             update or delete records from.
-  -w, --wait=<value>         [default: 0 minutes] Number of minutes to wait for the command to complete before
-                             displaying the results.
-      --api-version=<value>  Override the api version used for api requests made by this command
-      --hard-delete          Mark the records as immediately eligible for deletion by your org. If you don't specify
-                             this flag, the deleted records go into the Recycle Bin.
-      --verbose              Print verbose output of failed records if result is available.
+  -a, --async                 Run the command asynchronously.
+  -f, --file=<value>          (required) CSV file that contains the IDs of the records to update or delete.
+  -o, --target-org=<value>    (required) Username or alias of the target org. Not required if the `target-org`
+                              configuration variable is already set.
+  -s, --sobject=<value>       (required) API name of the Salesforce object, either standard or custom, that you want to
+                              update or delete records from.
+  -w, --wait=<value>          [default: 0 minutes] Number of minutes to wait for the command to complete before
+                              displaying the results.
+      --api-version=<value>   Override the api version used for api requests made by this command
+      --hard-delete           Mark the records as immediately eligible for deletion by your org. If you don't specify
+                              this flag, the deleted records go into the Recycle Bin.
+      --line-ending=<option>  Line ending used in the CSV file. Default value on Windows is `CRLF`; on macOS and Linux
+                              it's `LF`.
+                              <options: CRLF|LF>
+      --verbose               Print verbose output of failed records if result is available.
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
@@ -308,7 +311,7 @@ FLAG DESCRIPTIONS
     and can be enabled only by a system administrator.
 ```
 
-_See code: [src/commands/data/delete/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/delete/bulk.ts)_
+_See code: [src/commands/data/delete/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/delete/bulk.ts)_
 
 ## `sf data delete record`
 
@@ -369,7 +372,7 @@ EXAMPLES
     $ sf data delete record --use-tooling-api --sobject TraceFlag --record-id 7tf8c
 ```
 
-_See code: [src/commands/data/delete/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/delete/record.ts)_
+_See code: [src/commands/data/delete/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/delete/record.ts)_
 
 ## `sf data delete resume`
 
@@ -386,7 +389,7 @@ FLAGS
                              variable is already set.
       --api-version=<value>  Override the api version used for api requests made by this command
       --use-most-recent      Use the ID of the most recently-run bulk job.
-      --wait=<value>         [default: 0 minutes] Number of minutes to wait for the command to complete before
+      --wait=<value>         [default: 5 minutes] Number of minutes to wait for the command to complete before
                              displaying the results.
 
 GLOBAL FLAGS
@@ -408,7 +411,7 @@ EXAMPLES
     $ sf data delete resume --use-most-recent --target-org my-scratch
 ```
 
-_See code: [src/commands/data/delete/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/delete/resume.ts)_
+_See code: [src/commands/data/delete/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/delete/resume.ts)_
 
 ## `sf data export bulk`
 
@@ -482,7 +485,7 @@ EXAMPLES
       --result-format json --async
 ```
 
-_See code: [src/commands/data/export/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/export/bulk.ts)_
+_See code: [src/commands/data/export/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/export/bulk.ts)_
 
 ## `sf data export resume`
 
@@ -518,7 +521,7 @@ EXAMPLES
     $ sf data export resume --use-most-recent --target-org my-scratch
 ```
 
-_See code: [src/commands/data/export/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/export/resume.ts)_
+_See code: [src/commands/data/export/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/export/resume.ts)_
 
 ## `sf data export tree`
 
@@ -579,7 +582,7 @@ EXAMPLES
       my-scratch
 ```
 
-_See code: [src/commands/data/export/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/export/tree.ts)_
+_See code: [src/commands/data/export/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/export/tree.ts)_
 
 ## `sf data get record`
 
@@ -643,7 +646,7 @@ EXAMPLES
     $ sf data get record --use-tooling-api --sobject TraceFlag --record-id 7tf8c
 ```
 
-_See code: [src/commands/data/get/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/get/record.ts)_
+_See code: [src/commands/data/get/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/get/record.ts)_
 
 ## `sf data import bulk`
 
@@ -663,7 +666,7 @@ FLAGS
                                    you're importing records.
   -w, --wait=<value>               Time to wait for the command to finish, in minutes.
       --api-version=<value>        Override the api version used for api requests made by this command
-      --column-delimiter=<option>  Column delimiter used in the CSV file. Default is COMMA.
+      --column-delimiter=<option>  Column delimiter used in the CSV file.
                                    <options: BACKQUOTE|CARET|COMMA|PIPE|SEMICOLON|TAB>
       --line-ending=<option>       Line ending used in the CSV file. Default value on Windows is `CRLF`; on macOS and
                                    Linux it's `LF`.
@@ -701,7 +704,7 @@ EXAMPLES
     $ sf data import bulk --file accounts.csv --sobject Account --async
 ```
 
-_See code: [src/commands/data/import/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/import/bulk.ts)_
+_See code: [src/commands/data/import/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/import/bulk.ts)_
 
 ## `sf data import resume`
 
@@ -737,7 +740,7 @@ EXAMPLES
     $ sf data import resume --use-most-recent --target-org my-scratch
 ```
 
-_See code: [src/commands/data/import/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/import/resume.ts)_
+_See code: [src/commands/data/import/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/import/resume.ts)_
 
 ## `sf data import tree`
 
@@ -802,7 +805,7 @@ FLAG DESCRIPTIONS
     - files(array) - Files: An array of files paths to load
 ```
 
-_See code: [src/commands/data/import/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/import/tree.ts)_
+_See code: [src/commands/data/import/tree.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/import/tree.ts)_
 
 ## `sf data query`
 
@@ -811,7 +814,7 @@ Execute a SOQL query.
 ```
 USAGE
   $ sf data query -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-q <value>] [-f <value>]
-    [-t | -b] [-w <value> ] [--async ] [--all-rows] [-r human|csv|json]
+    [-t | -b] [-w <value> ] [--async ] [--all-rows] [-r human|csv|json] [--output-file <value>]
 
 FLAGS
   -b, --bulk                    Use Bulk API 2.0 to run the query.
@@ -826,6 +829,7 @@ FLAGS
       --all-rows                Include deleted records. By default, deleted records are not returned.
       --api-version=<value>     Override the api version used for api requests made by this command
       --async                   Use Bulk API 2.0, but don't wait for the job to complete.
+      --output-file=<value>     File where records are written; only CSV and JSON output formats are supported.
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
@@ -853,9 +857,10 @@ EXAMPLES
 
     $ sf data query --query "SELECT Id, Name, Account.Name FROM Contact"
 
-  Read the SOQL query from a file called "query.txt"; the command uses the org with alias "my-scratch":
+  Read the SOQL query from a file called "query.txt" and write the CSV-formatted output to a file; the command uses
+  the org with alias "my-scratch":
 
-    $ sf data query --file query.txt --target-org my-scratch
+    $ sf data query --file query.txt --output-file output.csv --result-format csv --target-org my-scratch
 
   Use Tooling API to run a query on the ApexTrigger Tooling API object:
 
@@ -866,7 +871,7 @@ EXAMPLES
     $ sf data query --query "SELECT Id FROM Contact" --bulk --wait 0
 ```
 
-_See code: [src/commands/data/query.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/query.ts)_
+_See code: [src/commands/data/query.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/query.ts)_
 
 ## `sf data query resume`
 
@@ -879,8 +884,7 @@ USAGE
 
 FLAGS
   -i, --bulk-query-id=<value>   Job ID of the bulk query.
-  -o, --target-org=<value>      Username or alias of the target org. Not required if the "target-org" configuration
-                                variable is already set.
+  -o, --target-org=<value>      Username or alias of the target org.
   -r, --result-format=<option>  [default: human] Format to display the results; the --json flag overrides this flag.
                                 <options: human|csv|json>
       --api-version=<value>     Override the api version used for api requests made by this command
@@ -904,7 +908,7 @@ EXAMPLES
     $ sf data query resume --bulk-query-id 7500x000005BdFzXXX
 ```
 
-_See code: [src/commands/data/query/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/query/resume.ts)_
+_See code: [src/commands/data/query/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/query/resume.ts)_
 
 ## `sf data resume`
 
@@ -941,7 +945,7 @@ EXAMPLES
     $ sf data resume --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA
 ```
 
-_See code: [src/commands/data/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/resume.ts)_
+_See code: [src/commands/data/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/resume.ts)_
 
 ## `sf data search`
 
@@ -991,7 +995,7 @@ EXAMPLES
     $ sf data search --file query.txt --target-org my-scratch --result-format csv
 ```
 
-_See code: [src/commands/data/search.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/search.ts)_
+_See code: [src/commands/data/search.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/search.ts)_
 
 ## `sf data update bulk`
 
@@ -1011,7 +1015,7 @@ FLAGS
                                    are updating.
   -w, --wait=<value>               Time to wait for the command to finish, in minutes.
       --api-version=<value>        Override the api version used for api requests made by this command
-      --column-delimiter=<option>  Column delimiter used in the CSV file. Default is COMMA.
+      --column-delimiter=<option>  Column delimiter used in the CSV file.
                                    <options: BACKQUOTE|CARET|COMMA|PIPE|SEMICOLON|TAB>
       --line-ending=<option>       Line ending used in the CSV file. Default value on Windows is `CRLF`; on macOS and
                                    Linux it's `LF`.
@@ -1052,7 +1056,7 @@ EXAMPLES
     $ sf data update bulk --file accounts.csv --sobject Account --async
 ```
 
-_See code: [src/commands/data/update/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/update/bulk.ts)_
+_See code: [src/commands/data/update/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/update/bulk.ts)_
 
 ## `sf data update record`
 
@@ -1114,7 +1118,7 @@ EXAMPLES
       "ExpirationDate=2017-12-01T00:58:04.000+0000"
 ```
 
-_See code: [src/commands/data/update/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/update/record.ts)_
+_See code: [src/commands/data/update/record.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/update/record.ts)_
 
 ## `sf data update resume`
 
@@ -1150,7 +1154,7 @@ EXAMPLES
     $ sf data update resume --use-most-recent --target-org my-scratch
 ```
 
-_See code: [src/commands/data/update/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/update/resume.ts)_
+_See code: [src/commands/data/update/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/update/resume.ts)_
 
 ## `sf data upsert bulk`
 
@@ -1158,21 +1162,27 @@ Bulk upsert records to an org from a CSV file. Uses Bulk API 2.0.
 
 ```
 USAGE
-  $ sf data upsert bulk -o <value> -f <value> -s <value> -i <value> [--json] [--flags-dir <value>] [--api-version
-    <value>] [-w <value> | -a] [--verbose]
+  $ sf data upsert bulk -o <value> -s <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>] [-w
+    <value> | -a] [--verbose] (--line-ending CRLF|LF -f <value>) [--column-delimiter
+    BACKQUOTE|CARET|COMMA|PIPE|SEMICOLON|TAB]
 
 FLAGS
-  -a, --async                Run the command asynchronously.
-  -f, --file=<value>         (required) CSV file that contains the IDs of the records to update or delete.
-  -i, --external-id=<value>  (required) Name of the external ID field, or the Id field.
-  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
-                             configuration variable is already set.
-  -s, --sobject=<value>      (required) API name of the Salesforce object, either standard or custom, that you want to
-                             update or delete records from.
-  -w, --wait=<value>         [default: 0 minutes] Number of minutes to wait for the command to complete before
-                             displaying the results.
-      --api-version=<value>  Override the api version used for api requests made by this command
-      --verbose              Print verbose output of failed records if result is available.
+  -a, --async                      Run the command asynchronously.
+  -f, --file=<value>               (required) CSV file that contains the IDs of the records to update or delete.
+  -i, --external-id=<value>        (required) Name of the external ID field, or the Id field.
+  -o, --target-org=<value>         (required) Username or alias of the target org. Not required if the `target-org`
+                                   configuration variable is already set.
+  -s, --sobject=<value>            (required) API name of the Salesforce object, either standard or custom, that you
+                                   want to update or delete records from.
+  -w, --wait=<value>               [default: 0 minutes] Number of minutes to wait for the command to complete before
+                                   displaying the results.
+      --api-version=<value>        Override the api version used for api requests made by this command
+      --column-delimiter=<option>  Column delimiter used in the CSV file.
+                                   <options: BACKQUOTE|CARET|COMMA|PIPE|SEMICOLON|TAB>
+      --line-ending=<option>       Line ending used in the CSV file. Default value on Windows is `CRLF`; on macOS and
+                                   Linux it's `LF`.
+                                   <options: CRLF|LF>
+      --verbose                    Print verbose output of failed records if result is available.
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
@@ -1203,7 +1213,7 @@ EXAMPLES
       my-scratch
 ```
 
-_See code: [src/commands/data/upsert/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/upsert/bulk.ts)_
+_See code: [src/commands/data/upsert/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/upsert/bulk.ts)_
 
 ## `sf data upsert resume`
 
@@ -1220,7 +1230,7 @@ FLAGS
                              variable is already set.
       --api-version=<value>  Override the api version used for api requests made by this command
       --use-most-recent      Use the ID of the most recently-run bulk job.
-      --wait=<value>         [default: 0 minutes] Number of minutes to wait for the command to complete before
+      --wait=<value>         [default: 5 minutes] Number of minutes to wait for the command to complete before
                              displaying the results.
 
 GLOBAL FLAGS
@@ -1242,7 +1252,7 @@ EXAMPLES
     $ sf data upsert resume --use-most-recent --target-org my-scratch
 ```
 
-_See code: [src/commands/data/upsert/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/data/upsert/resume.ts)_
+_See code: [src/commands/data/upsert/resume.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/data/upsert/resume.ts)_
 
 ## `sf force data bulk delete`
 
@@ -1289,7 +1299,7 @@ EXAMPLES
     $ sf force data bulk delete --sobject MyObject__c --file files/delete.csv --wait 5 --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/force/data/bulk/delete.ts)_
+_See code: [src/commands/force/data/bulk/delete.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/force/data/bulk/delete.ts)_
 
 ## `sf force data bulk status`
 
@@ -1326,7 +1336,7 @@ EXAMPLES
     $ sf force data bulk status --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/force/data/bulk/status.ts)_
+_See code: [src/commands/force/data/bulk/status.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/force/data/bulk/status.ts)_
 
 ## `sf force data bulk upsert`
 
@@ -1384,6 +1394,6 @@ EXAMPLES
       --target-org my-scratch
 ```
 
-_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/3.11.2/src/commands/force/data/bulk/upsert.ts)_
+_See code: [src/commands/force/data/bulk/upsert.ts](https://github.com/salesforcecli/plugin-data/blob/3.13.2/src/commands/force/data/bulk/upsert.ts)_
 
 <!-- commandsstop -->

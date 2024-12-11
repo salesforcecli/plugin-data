@@ -7,7 +7,7 @@
 
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
-import { bulkIngest, columnDelimiterFlag } from '../../../bulkIngest.js';
+import { bulkIngest, columnDelimiterFlag, lineEndingFlag } from '../../../bulkIngest.js';
 import { BulkUpdateRequestCache } from '../../../bulkDataRequestCache.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -48,11 +48,7 @@ export default class DataUpdateBulk extends SfCommand<DataUpdateBulkResult> {
     }),
     'api-version': Flags.orgApiVersion(),
     'target-org': Flags.requiredOrg(),
-    'line-ending': Flags.option({
-      summary: messages.getMessage('flags.line-ending.summary'),
-      dependsOn: ['file'],
-      options: ['CRLF', 'LF'] as const,
-    })(),
+    'line-ending': lineEndingFlag,
     'column-delimiter': columnDelimiterFlag,
   };
 
@@ -72,8 +68,12 @@ export default class DataUpdateBulk extends SfCommand<DataUpdateBulkResult> {
       wait: flags.wait,
       file: flags.file,
       jsonEnabled: this.jsonEnabled(),
-      logFn: (...args) => {
-        this.log(...args);
+      verbose: false,
+      logFn: (arg: string) => {
+        this.log(arg);
+      },
+      warnFn: (arg: SfCommand.Warning) => {
+        this.warn(arg);
       },
     });
   }

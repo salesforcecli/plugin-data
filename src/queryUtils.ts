@@ -10,17 +10,17 @@ import { FormatTypes, JsonReporter } from './reporters/query/reporters.js';
 import { CsvReporter } from './reporters/query/csvReporter.js';
 import { HumanReporter } from './reporters/query/humanReporter.js';
 
-export const displayResults = (queryResult: SoqlQueryResult, resultFormat: FormatTypes): void => {
+export const displayResults = (queryResult: SoqlQueryResult, resultFormat: FormatTypes, outputFile?: string): void => {
   let reporter: HumanReporter | JsonReporter | CsvReporter;
   switch (resultFormat) {
     case 'human':
       reporter = new HumanReporter(queryResult, queryResult.columns);
       break;
     case 'json':
-      reporter = new JsonReporter(queryResult, queryResult.columns);
+      reporter = new JsonReporter(queryResult, queryResult.columns, outputFile);
       break;
     case 'csv':
-      reporter = new CsvReporter(queryResult, queryResult.columns);
+      reporter = new CsvReporter(queryResult, queryResult.columns, outputFile);
       break;
   }
   // delegate to selected reporter

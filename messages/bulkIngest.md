@@ -37,6 +37,59 @@ Job has been aborted.
 - Get the job results by running: "sf data bulk results -o %s --job-id %s".
 - View the job in the org: "sf org open -o %s --path '/lightning/setup/AsyncApiJobStatus/page?address=%2F%s'".
 
+# error.hardDeletePermission
+
+You must have the "Bulk API Hard Delete" system permission to use the --hard-delete flag. This permission is disabled by default and can be enabled only by a system administrator.
+
+# error.noProcessedRecords
+
+Job finished successfully but it didn't process any record.
+
+# error.noProcessedRecords.actions
+
+- Check that the provided CSV file is valid.
+- View the job in the org: "sf org open -o %s --path '/lightning/setup/AsyncApiJobStatus/page?address=%2F%s'".
+
 # flags.column-delimiter.summary
 
-Column delimiter used in the CSV file. Default is COMMA.
+Column delimiter used in the CSV file.
+
+# flags.line-ending.summary
+
+Line ending used in the CSV file. Default value on Windows is `CRLF`; on macOS and Linux it's `LF`.
+
+# flags.sobject.summary
+
+API name of the Salesforce object, either standard or custom, that you want to update or delete records from.
+
+# flags.csvfile.summary
+
+CSV file that contains the IDs of the records to update or delete.
+
+# flags.wait.summary
+
+Number of minutes to wait for the command to complete before displaying the results.
+
+# flags.async.summary
+
+Run the command asynchronously.
+
+# flags.verbose.summary
+
+Print verbose output of failed records if result is available.
+
+# flags.jobid
+
+ID of the job you want to resume.
+
+# flags.useMostRecent.summary
+
+Use the ID of the most recently-run bulk job.
+
+# flags.targetOrg.summary
+
+Username or alias of the target org. Not required if the "target-org" configuration variable is already set.
+
+# flags.wait.summary
+
+Number of minutes to wait for the command to complete before displaying the results.

@@ -26,6 +26,11 @@ export const perflogFlag = Flags.boolean({
   },
 });
 
+/**
+ * Use only for commands that maintain sfdx compatibility.
+ *
+ * @deprecated
+ */
 export const orgFlags = {
   'target-org': requiredOrgFlagWithDeprecations,
   'api-version': orgApiVersionFlagWithDeprecations,

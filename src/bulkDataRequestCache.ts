@@ -5,9 +5,9 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { TTLConfig, Global, Logger, Messages, Org } from '@salesforce/core';
+import { TTLConfig, Global, Logger, Messages, Org, ConfigAggregator, OrgConfigProperties } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
-import type { ResumeBulkExportOptions, ResumeBulkImportOptions, ResumeOptions } from './types.js';
+import type { ResumeBulkExportOptions, ResumeBulkImportOptions } from './types.js';
 import { ColumnDelimiterKeys } from './bulkUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -64,61 +64,58 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
     Logger.childFromRoot('DataRequestCache').debug(`bulk cache saved for ${bulkRequestId}`);
   }
 
+  /**
+   * Resolve entries from the local cache.
+   *
+   * @param jobIdOrMostRecent job ID or boolean value to decide if it should return the most recent entry in the cache.
+   * @param skipCacheValidatation make this method not throw if you passed a job ID that's not in the cache
+   * This was only added for `data upsert/delete resume` for backwards compatibility and will be removed after March 2025.
+   */
   public async resolveResumeOptionsFromCache(
-    bulkJobId: string | undefined,
-    useMostRecent: boolean,
-    org: Org | undefined,
-    apiVersion: string | undefined
-  ): Promise<ResumeOptions> {
-    if (!useMostRecent && !bulkJobId) {
-      throw messages.createError('bulkRequestIdRequiredWhenNotUsingMostRecent');
-    }
-    const resumeOptions = {
-      operation: 'query',
-      query: '',
-      pollingOptions: { pollTimeout: 0, pollInterval: 0 },
-    } satisfies Pick<ResumeOptions['options'], 'operation' | 'query' | 'pollingOptions'>;
-
-    if (useMostRecent) {
+    jobIdOrMostRecent: string | boolean,
+    skipCacheValidatation = false
+  ): Promise<ResumeBulkImportOptions> {
+    if (typeof jobIdOrMostRecent === 'boolean') {
       const key = this.getLatestKey();
-      if (key) {
-        // key definitely exists because it came from the cache
-        const entry = this.get(key);
+      if (!key) {
+        throw messages.createError('error.missingCacheEntryError');
+      }
+      // key definitely exists because it came from the cache
+      const entry = this.get(key);
 
-        return {
-          jobInfo: { id: entry.jobId },
-          options: {
-            ...resumeOptions,
-            connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
-          },
-        };
-      }
-    }
-    if (bulkJobId) {
-      const entry = this.get(bulkJobId);
-      if (entry) {
-        return {
-          jobInfo: { id: entry.jobId },
-          options: {
-            ...resumeOptions,
-            connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
-          },
-        };
-      } else if (org) {
-        return {
-          jobInfo: { id: bulkJobId },
-          options: {
-            ...resumeOptions,
-            connection: org.getConnection(apiVersion),
-          },
-        };
-      } else {
-        throw messages.createError('cannotCreateResumeOptionsWithoutAnOrg');
-      }
-    } else if (useMostRecent) {
-      throw messages.createError('error.missingCacheEntryError');
+      return {
+        jobInfo: { id: entry.jobId },
+        options: {
+          connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(),
+        },
+      };
     } else {
-      throw messages.createError('bulkRequestIdRequiredWhenNotUsingMostRecent');
+      const entry = this.get(jobIdOrMostRecent);
+      if (!entry) {
+        if (skipCacheValidatation) {
+          const config = await ConfigAggregator.create();
+          const aliasOrUsername = config.getInfo(OrgConfigProperties.TARGET_ORG)?.value as string;
+          if (!aliasOrUsername) {
+            throw messages.createError('error.skipCacheValidateNoOrg', [jobIdOrMostRecent]);
+          }
+
+          return {
+            jobInfo: { id: jobIdOrMostRecent },
+            options: {
+              connection: (await Org.create({ aliasOrUsername })).getConnection(),
+            },
+          };
+        }
+
+        throw messages.createError('error.bulkRequestIdNotFound', [jobIdOrMostRecent]);
+      }
+
+      return {
+        jobInfo: { id: entry.jobId },
+        options: {
+          connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(),
+        },
+      };
     }
   }
 }
@@ -377,12 +374,6 @@ export class BulkExportRequestCache extends TTLConfig<TTLConfig.Options, BulkExp
     jobIdOrMostRecent: string | boolean,
     apiVersion: string | undefined
   ): Promise<ResumeBulkExportOptions> {
-    const resumeOptionsOptions = {
-      operation: 'query',
-      query: '',
-      pollingOptions: { pollTimeout: 0, pollInterval: 0 },
-    } satisfies Pick<ResumeOptions['options'], 'operation' | 'query' | 'pollingOptions'>;
-
     if (typeof jobIdOrMostRecent === 'boolean') {
       const key = this.getLatestKey();
       if (!key) {
@@ -399,7 +390,6 @@ export class BulkExportRequestCache extends TTLConfig<TTLConfig.Options, BulkExp
           columnDelimiter: entry.outputInfo.columnDelimiter,
         },
         options: {
-          ...resumeOptionsOptions,
           connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
         },
       };
@@ -413,7 +403,6 @@ export class BulkExportRequestCache extends TTLConfig<TTLConfig.Options, BulkExp
         jobInfo: { id: entry.jobId },
         outputInfo: entry.outputInfo,
         options: {
-          ...resumeOptionsOptions,
           connection: (await Org.create({ aliasOrUsername: entry.username })).getConnection(apiVersion),
         },
       };

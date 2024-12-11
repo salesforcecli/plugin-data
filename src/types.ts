@@ -95,13 +95,8 @@ export type BulkRecordsV2 = {
 
 export type StatusResult = BatchInfo[] | JobInfo;
 
-export type BulkOperation = 'query' | 'upsert' | 'delete';
-
 export type ResumeOptions = {
   options: {
-    operation: BulkOperation;
-    pollingOptions: { pollTimeout: number; pollInterval: number };
-    query: string;
     connection: Connection;
   };
   jobInfo: { id: string };
@@ -109,9 +104,6 @@ export type ResumeOptions = {
 
 export type ResumeBulkExportOptions = {
   options: {
-    operation: BulkOperation;
-    pollingOptions: { pollTimeout: number; pollInterval: number };
-    query: string;
     connection: Connection;
   };
   jobInfo: { id: string };

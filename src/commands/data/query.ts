@@ -29,7 +29,14 @@ import { BulkQueryRequestCache } from '../../bulkDataRequestCache.js';
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
 
-export class DataSoqlQueryCommand extends SfCommand<unknown> {
+export type DataQueryResult = {
+  records: jsforceRecord[];
+  totalSize: number;
+  done: boolean;
+  outputFile?: string;
+};
+
+export class DataSoqlQueryCommand extends SfCommand<DataQueryResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -81,6 +88,22 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
     }),
     'result-format': resultFormatFlag(),
     perflog: perflogFlag,
+    'output-file': Flags.file({
+      summary: messages.getMessage('flags.output-file.summary'),
+      relationships: [
+        {
+          type: 'some',
+          flags: [
+            {
+              name: 'result-format',
+              // eslint-disable-next-line @typescript-eslint/require-await
+              when: async (flags): Promise<boolean> =>
+                flags['result-format'] === 'csv' || flags['result-format'] === 'json',
+            },
+          ],
+        },
+      ],
+    }),
   };
 
   private logger!: Logger;
@@ -100,7 +123,7 @@ export class DataSoqlQueryCommand extends SfCommand<unknown> {
    * the command, which are necessary for reporter selection.
    *
    */
-  public async run(): Promise<unknown> {
+  public async run(): Promise<DataQueryResult> {
     this.logger = await Logger.child('data:soql:query');
     const flags = (await this.parse(DataSoqlQueryCommand)).flags;
 
@@ -134,10 +157,17 @@ You can safely remove \`--async\` (it never had any effect on the command withou
             this.configAggregator.getInfo('org-max-query-limit').value as number,
             flags['all-rows']
           );
-      if (!this.jsonEnabled()) {
-        displayResults({ ...queryResult }, flags['result-format']);
+
+      if (flags['output-file'] ?? !this.jsonEnabled()) {
+        displayResults({ ...queryResult }, flags['result-format'], flags['output-file']);
       }
-      return queryResult.result;
+
+      if (flags['output-file']) {
+        this.log(`${queryResult.result.totalSize} records written to ${flags['output-file']}`);
+        return { ...queryResult.result, outputFile: flags['output-file'] };
+      } else {
+        return queryResult.result;
+      }
     } finally {
       if (flags['result-format'] !== 'json') this.spinner.stop();
     }

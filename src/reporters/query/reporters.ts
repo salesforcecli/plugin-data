@@ -5,14 +5,10 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { Logger, Messages } from '@salesforce/core';
+import * as fs from 'node:fs';
+import { Logger } from '@salesforce/core';
 import { Ux } from '@salesforce/sf-plugins-core';
-import { JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
-import { capitalCase } from 'change-case';
 import { Field, FieldType, GenericObject, SoqlQueryResult } from '../../types.js';
-
-Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const reporterMessages = Messages.loadMessages('@salesforce/plugin-data', 'reporter');
 
 export abstract class QueryReporter {
   protected logger: Logger;
@@ -27,25 +23,25 @@ export abstract class QueryReporter {
 }
 
 export class JsonReporter extends QueryReporter {
-  public constructor(data: SoqlQueryResult, columns: Field[]) {
+  private outputFile: string | undefined;
+
+  public constructor(data: SoqlQueryResult, columns: Field[], outputFile?: string) {
     super(data, columns);
+    this.outputFile = outputFile;
   }
 
   public display(): void {
-    new Ux().styledJSON({ status: 0, result: this.data.result });
+    if (this.outputFile) {
+      const fsWritable = fs.createWriteStream(this.outputFile);
+      fsWritable.write(JSON.stringify(this.data.result, null, 2));
+    } else {
+      new Ux().styledJSON({ status: 0, result: this.data.result });
+    }
   }
 }
 
 export const formatTypes = ['human', 'csv', 'json'] as const;
 export type FormatTypes = (typeof formatTypes)[number];
-
-export const getResultMessage = (jobInfo: JobInfoV2): string =>
-  reporterMessages.getMessage('bulkV2Result', [
-    jobInfo.id,
-    capitalCase(jobInfo.state),
-    jobInfo.numberRecordsProcessed,
-    jobInfo.numberRecordsFailed,
-  ]);
 
 export const isAggregate = (field: Field): boolean => field.fieldType === FieldType.functionField;
 export const isSubquery = (field: Field): boolean => field.fieldType === FieldType.subqueryField;
