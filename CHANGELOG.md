@@ -1,3 +1,9 @@
+## [3.13.3](https://github.com/salesforcecli/plugin-data/compare/3.13.2...3.13.3) (2024-12-13)
+
+### Bug Fixes
+
+- **data:query:** deprecate bulk mode ([cbfa64b](https://github.com/salesforcecli/plugin-data/commit/cbfa64ba07fc096d72c7c131339aa4427b11c38e))
+
 ## [3.13.2](https://github.com/salesforcecli/plugin-data/compare/3.13.1...3.13.2) (2024-12-11)
 
 ### Bug Fixes
