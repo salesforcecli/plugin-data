@@ -15,6 +15,7 @@ describe('bulkUtils', () => {
       expect(await detectDelimiter('./test/test-files/csv/backquote.csv')).to.equal('BACKQUOTE');
       expect(await detectDelimiter('./test/test-files/csv/caret.csv')).to.equal('CARET');
       expect(await detectDelimiter('./test/test-files/csv/comma.csv')).to.equal('COMMA');
+      expect(await detectDelimiter('./test/test-files/csv/single-column.csv')).to.equal('COMMA');
       expect(await detectDelimiter('./test/test-files/csv/comma_wrapped_values.csv')).to.equal('COMMA');
       expect(await detectDelimiter('./test/test-files/csv/pipe.csv')).to.equal('PIPE');
       expect(await detectDelimiter('./test/test-files/csv/semicolon.csv')).to.equal('SEMICOLON');
