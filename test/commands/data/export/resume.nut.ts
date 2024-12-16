@@ -43,6 +43,7 @@ describe('data export resume NUTs', () => {
   });
 
   const soqlQuery = 'select id,name,phone, annualrevenue from account';
+  const soqlQueryFields = ['Id', 'Name', 'Phone', 'AnnualRevenue'];
 
   it('should resume export in csv format', async () => {
     const outputFile = 'export-accounts.csv';
@@ -85,6 +86,10 @@ describe('data export resume NUTs', () => {
     expect(exportResumeResult?.totalSize).to.be.equal(totalAccountRecords);
     expect(exportResumeResult?.filePath).to.equal(outputFile);
 
-    await validateJson(path.join(session.dir, 'data-project', outputFile), ensureNumber(totalAccountRecords));
+    await validateJson(
+      path.join(session.dir, 'data-project', outputFile),
+      soqlQueryFields,
+      ensureNumber(totalAccountRecords)
+    );
   });
 });
