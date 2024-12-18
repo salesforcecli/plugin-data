@@ -1,3 +1,21 @@
+## [3.13.5](https://github.com/salesforcecli/plugin-data/compare/3.13.4...3.13.5) (2024-12-16)
+
+### Bug Fixes
+
+- **bulk:** fallback `columnDelimtier` to `COMMA` ([#1151](https://github.com/salesforcecli/plugin-data/issues/1151)) ([82d1e5e](https://github.com/salesforcecli/plugin-data/commit/82d1e5ed6a077082c84e87d45df0be2ff8de19b4))
+
+## [3.13.4](https://github.com/salesforcecli/plugin-data/compare/3.13.3...3.13.4) (2024-12-15)
+
+### Bug Fixes
+
+- **deps:** bump ansis from 3.3.2 to 3.4.0 ([960eb94](https://github.com/salesforcecli/plugin-data/commit/960eb94eb6da63457abdee664c880dd515ddbf81))
+
+## [3.13.3](https://github.com/salesforcecli/plugin-data/compare/3.13.2...3.13.3) (2024-12-13)
+
+### Bug Fixes
+
+- **data:query:** deprecate bulk mode ([cbfa64b](https://github.com/salesforcecli/plugin-data/commit/cbfa64ba07fc096d72c7c131339aa4427b11c38e))
+
 ## [3.13.2](https://github.com/salesforcecli/plugin-data/compare/3.13.1...3.13.2) (2024-12-11)
 
 ### Bug Fixes
