@@ -1,3 +1,9 @@
+## [3.13.8](https://github.com/salesforcecli/plugin-data/compare/3.13.7...3.13.8) (2025-01-05)
+
+### Bug Fixes
+
+- **deps:** bump ansis from 3.5.2 to 3.6.0 ([e9b50fc](https://github.com/salesforcecli/plugin-data/commit/e9b50fcc6220205de89031dadd4cff695e16b516))
+
 ## [3.13.7](https://github.com/salesforcecli/plugin-data/compare/3.13.6...3.13.7) (2024-12-29)
 
 ### Bug Fixes
