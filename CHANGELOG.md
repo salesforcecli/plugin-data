@@ -1,3 +1,5 @@
+## [4.0.1](https://github.com/salesforcecli/plugin-data/compare/3.13.9...4.0.1) (2025-01-06)
+
 ## [3.13.9](https://github.com/salesforcecli/plugin-data/compare/3.13.8...3.13.9) (2025-01-05)
 
 ### Bug Fixes
