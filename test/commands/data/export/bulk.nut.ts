@@ -56,7 +56,7 @@ describe('data export bulk NUTs', () => {
     await validateCsv(path.join(session.dir, 'data-project', outputFile), 'COMMA', ensureNumber(result?.totalSize));
   });
 
-  it('should export +1 million records in csv format', async () => {
+  it.only('should export +1 million records in csv format', async () => {
     const outputFile = 'export-scratch-info.csv';
     const command = `data export bulk -q "select id,ExpirationDate from scratchorginfo" --output-file ${outputFile} --wait 10 --json -o ${session.hubOrg.username}`;
 

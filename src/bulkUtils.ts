@@ -9,7 +9,7 @@ import { Transform, Readable } from 'node:stream';
 import { createInterface } from 'node:readline';
 import { pipeline } from 'node:stream/promises';
 import * as fs from 'node:fs';
-import { EOL } from 'node:os';
+import { EOL, platform } from 'node:os';
 import { HttpApi } from '@jsforce/jsforce-node/lib/http-api.js';
 import { HttpResponse } from '@jsforce/jsforce-node';
 import {
@@ -96,6 +96,7 @@ export async function exportRecords(
   outputInfo: {
     filePath: string;
     format: 'csv' | 'json';
+    lineEnding: 'CRLF' | 'LF';
     columnDelimiter: ColumnDelimiterKeys;
   }
 ): Promise<QueryJobInfoV2> {
@@ -110,6 +111,11 @@ export async function exportRecords(
   if (jobInfo === undefined) {
     throw new Error('could not get job info after polling');
   }
+
+  const lineEndingsMap = {
+    CRLF: '\r\n',
+    LF: '\n',
+  };
 
   let locator: string | undefined;
 
@@ -164,14 +170,27 @@ export async function exportRecords(
       await pipeline(
         locator
           ? [
-              Readable.from(res.body.slice(res.body.indexOf(EOL) + 1, res.body.lastIndexOf('\n'))),
+              Readable.from(
+                res.body.slice(
+                  res.body.indexOf(EOL) + 1,
+                  platform() === 'win32' ? res.body.lastIndexOf(lineEndingsMap[outputInfo.lineEnding]) : undefined
+                )
+              ),
               fs.createWriteStream(outputInfo.filePath, {
                 // Open file for appending. The file is created if it does not exist.
                 // https://nodejs.org/api/fs.html#file-system-flags
                 flags: 'a', // append mode
               }),
             ]
-          : [Readable.from(res.body.slice(0, res.body.lastIndexOf('\n'))), fs.createWriteStream(outputInfo.filePath)]
+          : [
+              Readable.from(
+                res.body.slice(
+                  0,
+                  platform() === 'win32' ? res.body.lastIndexOf(lineEndingsMap[outputInfo.lineEnding]) : undefined
+                )
+              ),
+              fs.createWriteStream(outputInfo.filePath),
+            ]
       );
     }
 
