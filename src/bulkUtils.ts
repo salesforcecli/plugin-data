@@ -164,14 +164,14 @@ export async function exportRecords(
       await pipeline(
         locator
           ? [
-              Readable.from(res.body.slice(res.body.indexOf(EOL) + 1)),
+              Readable.from(res.body.slice(res.body.indexOf(EOL) + 1, res.body.lastIndexOf('\n'))),
               fs.createWriteStream(outputInfo.filePath, {
                 // Open file for appending. The file is created if it does not exist.
                 // https://nodejs.org/api/fs.html#file-system-flags
                 flags: 'a', // append mode
               }),
             ]
-          : [Readable.from(res.body), fs.createWriteStream(outputInfo.filePath)]
+          : [Readable.from(res.body.slice(0, res.body.lastIndexOf('\n'))), fs.createWriteStream(outputInfo.filePath)]
       );
     }
 
