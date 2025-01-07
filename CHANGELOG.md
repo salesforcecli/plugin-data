@@ -1,3 +1,53 @@
+## [4.0.1](https://github.com/salesforcecli/plugin-data/compare/3.13.9...4.0.1) (2025-01-06)
+
+## [3.13.9](https://github.com/salesforcecli/plugin-data/compare/3.13.8...3.13.9) (2025-01-05)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/multi-stage-output from 0.8.0 to 0.8.1 ([702f66c](https://github.com/salesforcecli/plugin-data/commit/702f66cab5f99e971eff93ecaf1b2fd93f21c8a4))
+
+## [3.13.8](https://github.com/salesforcecli/plugin-data/compare/3.13.7...3.13.8) (2025-01-05)
+
+### Bug Fixes
+
+- **deps:** bump ansis from 3.5.2 to 3.6.0 ([e9b50fc](https://github.com/salesforcecli/plugin-data/commit/e9b50fcc6220205de89031dadd4cff695e16b516))
+
+## [3.13.7](https://github.com/salesforcecli/plugin-data/compare/3.13.6...3.13.7) (2024-12-29)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/sf-plugins-core from 12.1.0 to 12.1.1 ([2f60866](https://github.com/salesforcecli/plugin-data/commit/2f60866f82e5cff624eefca9de55214e23c5613f))
+
+## [3.13.6](https://github.com/salesforcecli/plugin-data/compare/3.13.5...3.13.6) (2024-12-22)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/multi-stage-output from 0.7.15 to 0.8.0 ([e1bcddc](https://github.com/salesforcecli/plugin-data/commit/e1bcddcf4383df5c1a05a503ca82c624257b854c))
+
+## [3.13.5](https://github.com/salesforcecli/plugin-data/compare/3.13.4...3.13.5) (2024-12-16)
+
+### Bug Fixes
+
+- **bulk:** fallback `columnDelimtier` to `COMMA` ([#1151](https://github.com/salesforcecli/plugin-data/issues/1151)) ([82d1e5e](https://github.com/salesforcecli/plugin-data/commit/82d1e5ed6a077082c84e87d45df0be2ff8de19b4))
+
+## [3.13.4](https://github.com/salesforcecli/plugin-data/compare/3.13.3...3.13.4) (2024-12-15)
+
+### Bug Fixes
+
+- **deps:** bump ansis from 3.3.2 to 3.4.0 ([960eb94](https://github.com/salesforcecli/plugin-data/commit/960eb94eb6da63457abdee664c880dd515ddbf81))
+
+## [3.13.3](https://github.com/salesforcecli/plugin-data/compare/3.13.2...3.13.3) (2024-12-13)
+
+### Bug Fixes
+
+- **data:query:** deprecate bulk mode ([cbfa64b](https://github.com/salesforcecli/plugin-data/commit/cbfa64ba07fc096d72c7c131339aa4427b11c38e))
+
+## [3.13.2](https://github.com/salesforcecli/plugin-data/compare/3.13.1...3.13.2) (2024-12-11)
+
+### Bug Fixes
+
+- **import:tree:** avoid recursion when resolving refs ([#1146](https://github.com/salesforcecli/plugin-data/issues/1146)) ([e6326dc](https://github.com/salesforcecli/plugin-data/commit/e6326dcfb4b67f17806d18d783fee14553e9fc93))
+
 ## [3.13.1](https://github.com/salesforcecli/plugin-data/compare/3.13.0...3.13.1) (2024-12-06)
 
 ### Bug Fixes

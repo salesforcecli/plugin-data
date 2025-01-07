@@ -51,6 +51,9 @@ export type ImportResult = {
   id: string;
 }; /** like the original DataPlanPart but without the non-string options inside files */
 
-export type DataPlanPartFilesOnly = { sobject: string; files: string[] } & Partial<
-  Pick<DataPlanPart, 'saveRefs' | 'resolveRefs'>
->;
+export type DataPlanPartFilesOnly = {
+  sobject: string;
+  files: string[];
+  saveRefs: boolean;
+  resolveRefs: boolean;
+} & Partial<DataPlanPart>;
