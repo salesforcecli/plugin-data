@@ -173,7 +173,7 @@ export async function exportRecords(
               Readable.from(
                 res.body.slice(
                   res.body.indexOf(EOL) + 1,
-                  platform() === 'win32' ? res.body.lastIndexOf(lineEndingsMap['LF']) : undefined
+                  platform() === 'win32' ? res.body.lastIndexOf(lineEndingsMap[outputInfo.lineEnding]) : undefined
                 )
               ),
               fs.createWriteStream(outputInfo.filePath, {
@@ -184,7 +184,10 @@ export async function exportRecords(
             ]
           : [
               Readable.from(
-                res.body.slice(0, platform() === 'win32' ? res.body.lastIndexOf(lineEndingsMap['LF']) : undefined)
+                res.body.slice(
+                  0,
+                  platform() === 'win32' ? res.body.lastIndexOf(lineEndingsMap[outputInfo.lineEnding]) : undefined
+                )
               ),
               fs.createWriteStream(outputInfo.filePath),
             ]
