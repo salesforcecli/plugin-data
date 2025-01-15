@@ -181,7 +181,11 @@ export async function validateCsv(
 
   await pipeline(
     csvReadStream,
-    new csvParse({ columns: true, delimiter: ColumnDelimiter[columnDelimiter] }),
+    new csvParse({
+      columns: true,
+      delimiter: ColumnDelimiter[columnDelimiter],
+      skipEmptyLines: platform() === 'win32' ? true : false,
+    }),
     new PassThrough({
       objectMode: true,
       transform(_chunk, _encoding, callback) {
