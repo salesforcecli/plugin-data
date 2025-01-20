@@ -32,7 +32,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'batcher');
 type BatchEntry = Record<string, string>;
 type Batches = BatchEntry[][];
 
-type BulkResult = {
+export type BulkResult = {
   $: {
     xmlns: string;
   };
