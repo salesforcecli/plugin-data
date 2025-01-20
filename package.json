@@ -114,6 +114,7 @@
     "test:nuts:data:search": "nyc mocha \"./test/commands/data/search.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:nuts:data:create": "nyc mocha \"./test/commands/data/create/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:nuts:data:bulk-upsert-delete": "nyc mocha \"./test/commands/data/dataBulk.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
+    "test:nuts:force:data:bulk-upsert-delete-status": "nyc mocha \"./test/commands/force/data/bulk/dataBulk.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:only": "wireit",
     "version": "oclif readme"
   },
