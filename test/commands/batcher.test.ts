@@ -24,6 +24,7 @@ let ux: Ux;
 describe('batcher', () => {
   const $$ = sinon.createSandbox();
   describe('bulkBatchStatus', () => {
+    // @ts-ignore this test doesn't nedd all JobInfo props.
     const summary: JobInfo = { id: '123', operation: 'upsert', state: 'Closed', object: 'Account' };
     beforeEach(() => {
       const conn = $$.stub(Connection.prototype);
