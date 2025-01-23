@@ -1,3 +1,9 @@
+## [4.0.4](https://github.com/salesforcecli/plugin-data/compare/4.0.3...4.0.4) (2025-01-23)
+
+### Bug Fixes
+
+- **bulk-v1:** properly handle +1 job batches ([a791be9](https://github.com/salesforcecli/plugin-data/commit/a791be9daeaf0206c85806d00fa6b609fd890521))
+
 ## [4.0.3](https://github.com/salesforcecli/plugin-data/compare/4.0.2...4.0.3) (2025-01-19)
 
 ### Bug Fixes
