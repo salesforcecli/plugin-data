@@ -6,6 +6,7 @@
  */
 
 import { ReadStream } from 'node:fs';
+import { EOL } from 'node:os';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { Ux } from '@salesforce/sf-plugins-core';
 import type { Schema } from '@jsforce/jsforce-node';
@@ -31,7 +32,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'batcher');
 type BatchEntry = Record<string, string>;
 type Batches = BatchEntry[][];
 
-type BulkResult = {
+export type BulkResult = {
   $: {
     xmlns: string;
   };
@@ -58,18 +59,11 @@ export class Batcher {
    * @param jobId {string}
    * @param doneCallback
    */
-  public async fetchAndDisplayJobStatus(
-    jobId: string,
-    doneCallback?: (...args: [{ job: JobInfo }]) => void
-  ): Promise<JobInfo> {
+  public async fetchAndDisplayJobStatus(jobId: string): Promise<JobInfo> {
     const job = this.conn.bulk.job(jobId);
     const jobInfo = await job.check();
 
     this.bulkStatus(jobInfo, undefined, undefined, true);
-
-    if (doneCallback) {
-      doneCallback({ job: jobInfo });
-    }
 
     return jobInfo;
   }
@@ -120,8 +114,7 @@ export class Batcher {
     records: ReadStream,
     sobjectType: string,
     wait?: number
-  ): Promise<BulkResult[] | JobInfo[]> {
-    const batchesCompleted = 0;
+  ): Promise<BulkResult[] | JobInfo[] | undefined> {
     let batchesQueued = 0;
     const overallInfo = false;
 
@@ -130,7 +123,10 @@ export class Batcher {
     // The error handling for this gets quite tricky when there are multiple batches
     // Currently, we bail out early by calling an Error.exit
     // But, we might want to actually continue to the next batch.
-    return (await Promise.all(
+    //
+    // async: batches are created and return array of batch info.
+    // sync: batches are created, it waits until they all finish and Promise.all resolves `undefined`.
+    const batchInfos = (await Promise.all(
       batches.map(
         async (batch: Array<Record<string, string>>, i: number): Promise<BulkResult | BatchInfo | void | JobInfo> => {
           const newBatch = job.createBatch();
@@ -186,14 +182,16 @@ export class Batcher {
                 }
               );
             } else {
-              resolve(this.waitForCompletion(newBatch, batchesCompleted, overallInfo, i + 1, batches.length, wait));
+              resolve(this.waitForCompletion(newBatch, overallInfo, i + 1, wait));
             }
 
             void newBatch.execute(batch);
           });
         }
       )
-    )) as BulkResult[];
+    )) as BulkResult[] | undefined;
+
+    return wait ? [await this.fetchAndDisplayJobStatus(job.id!)] : batchInfos;
   }
 
   /**
@@ -229,12 +227,10 @@ export class Batcher {
    */
   private async waitForCompletion<J extends Schema, T extends BulkOperation>(
     newBatch: Batch<J, T>,
-    batchesCompleted: number,
     overallInfo: boolean,
     batchNum: number,
-    totalNumBatches: number,
     waitMins: number
-  ): Promise<JobInfo> {
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       void newBatch.on(
         'queue',
@@ -245,10 +241,10 @@ export class Batcher {
           if (result.state === 'Failed') {
             reject(result.stateMessage);
           } else if (!overallInfo) {
-            this.ux.log(messages.getMessage('PollingInfo', [POLL_FREQUENCY_MS / 1000, batchInfo.jobId]));
+            this.ux.log(messages.getMessage('PollingInfo', [POLL_FREQUENCY_MS / 1000, batchInfo.jobId, batchInfo.id]));
             overallInfo = true;
           }
-          this.ux.log(messages.getMessage('BatchQueued', [batchNum, batchInfo.id]));
+          this.ux.log(messages.getMessage('BatchQueued', [batchNum, batchInfo.id]), EOL);
           newBatch.poll(POLL_FREQUENCY_MS, waitMins * 60_000);
         }
       );
@@ -257,10 +253,7 @@ export class Batcher {
       void newBatch.on('response', async (results: BulkIngestBatchResult): Promise<void> => {
         const summary: BatchInfo = await newBatch.check();
         this.bulkStatus(summary, results, batchNum);
-        batchesCompleted++;
-        if (batchesCompleted === totalNumBatches) {
-          resolve(await this.fetchAndDisplayJobStatus(summary.jobId));
-        }
+        resolve();
       });
     });
   }

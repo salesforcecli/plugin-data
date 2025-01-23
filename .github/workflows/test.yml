@@ -31,6 +31,7 @@ jobs:
           - 'yarn test:nuts:data:record'
           - 'yarn test:nuts:data:search'
           - 'yarn test:nuts:data:tree'
+          - 'yarn test:nuts:force:data:bulk-upsert-delete-status'
       fail-fast: false
     with:
       os: ${{ matrix.os }}
