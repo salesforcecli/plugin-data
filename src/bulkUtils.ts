@@ -172,8 +172,8 @@ export async function exportRecords(
           ? [
               Readable.from(
                 res.body.slice(
-                  res.body.indexOf(EOL) + 1,
-                  platform() === 'win32' ? res.body.lastIndexOf(lineEndingsMap[outputInfo.lineEnding]) : undefined
+                  res.body.indexOf(EOL) + (outputInfo.lineEnding === 'LF' ? 1 : 2),
+                  platform() === 'win32' ? res.body.lastIndexOf('\n') : undefined
                 )
               ),
               fs.createWriteStream(outputInfo.filePath, {
