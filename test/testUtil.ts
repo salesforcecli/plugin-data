@@ -184,7 +184,6 @@ export async function validateCsv(
     new csvParse({
       columns: true,
       delimiter: ColumnDelimiter[columnDelimiter],
-      skipEmptyLines: platform() === 'win32' ? true : false,
     }),
     new PassThrough({
       objectMode: true,
