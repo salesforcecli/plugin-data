@@ -83,8 +83,6 @@ export default class DataExportResume extends SfCommand<DataExportResumeResult> 
     });
 
     try {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       const jobInfo = await exportRecords(resumeOpts.options.connection, queryJob, resumeOpts.outputInfo);
 
       ms.stop();

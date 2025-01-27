@@ -237,7 +237,6 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
       const jobInfo = await exportRecords(conn, queryJob, {
         filePath: flags['output-file'],
         format: flags['result-format'],
-        lineEnding,
         columnDelimiter,
       });
 

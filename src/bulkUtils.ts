@@ -96,7 +96,6 @@ export async function exportRecords(
   outputInfo: {
     filePath: string;
     format: 'csv' | 'json';
-    lineEnding: 'CRLF' | 'LF';
     columnDelimiter: ColumnDelimiterKeys;
   }
 ): Promise<QueryJobInfoV2> {
