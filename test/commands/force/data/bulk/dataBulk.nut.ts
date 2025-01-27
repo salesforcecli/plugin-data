@@ -10,9 +10,11 @@ import fs from 'node:fs';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { sleep } from '@salesforce/kit';
-import { BatcherReturnType } from '../../../../../src/batcher.js';
+import { JobInfo } from '@jsforce/jsforce-node/lib/api/bulk.js';
+import { BatcherReturnType, BulkResult } from '../../../../../src/batcher.js';
 import { StatusResult } from '../../../../../src/types.js';
 import { QueryResult } from '../../../data/query/query.nut.js';
+import { DataExportBulkResult } from '../../../../../src/commands/data/export/bulk.js';
 
 let testSession: TestSession;
 
@@ -121,6 +123,55 @@ describe('force:data:bulk commands', () => {
         checkBulkStatusJsonResponse(bulkDeleteResult.jobId, bulkDeleteResult.id);
       });
 
+      // Bulk v1 batch limit is 10K records so this NUT ensures we handle multiple batches correctly.
+      it('should upsert, query and delete 60K accounts (sync)', async () => {
+        // bulk v1 upsert
+        const cmdRes = execCmd<BatcherReturnType>(
+          `force:data:bulk:upsert --sobject Account --file ${path.join(
+            '.',
+            'data',
+            'bulkUpsertLarge.csv'
+          )} --externalid Id --wait 10 --json`,
+          { ensureExitCode: 0 }
+        ).jsonOutput?.result;
+        assert.equal(cmdRes?.length, 1);
+        // guaranteed by the assertion, done for ts
+        const upsertJobResult = cmdRes[0];
+
+        if (isBulkJob(upsertJobResult)) {
+          assert.equal(upsertJobResult.numberBatchesCompleted, '8');
+          assert.equal(upsertJobResult.numberBatchesFailed, '0');
+          assert.equal(upsertJobResult.numberRecordsProcessed, '76380');
+        } else {
+          assert.fail('upsertJobResult does not contain bulk job info.');
+        }
+
+        // bulk v2 export to get IDs of accounts to delete
+        const outputFile = 'export-accounts.csv';
+        const result = execCmd<DataExportBulkResult>(
+          `data export bulk -q "select id from account where phone = '415-555-0000'" --output-file ${outputFile} --wait 10 --json`,
+          { ensureExitCode: 0 }
+        ).jsonOutput?.result;
+        expect(result?.totalSize).to.equal(76_380);
+        expect(result?.filePath).to.equal(outputFile);
+
+        // bulk v1 delete
+        const cmdDeleteRes = execCmd<BatcherReturnType>(
+          `force:data:bulk:delete --sobject Account --file ${outputFile} --wait 10 --json`,
+          { ensureExitCode: 0 }
+        ).jsonOutput?.result;
+        assert.equal(cmdDeleteRes?.length, 1);
+        // guaranteed by the assertion, done for ts
+        const deleteJobResult = cmdDeleteRes[0];
+        if (isBulkJob(deleteJobResult)) {
+          assert.equal(deleteJobResult.numberBatchesCompleted, '8');
+          assert.equal(deleteJobResult.numberBatchesFailed, '0');
+          assert.equal(deleteJobResult.numberRecordsProcessed, '76380');
+        } else {
+          assert.fail('deleteJobResult does not contain bulk job info.');
+        }
+      });
+
       it('should upsert, query, and delete 10 accounts all serially', async () => {
         const bulkUpsertResult = bulkInsertAccounts();
         await isCompleted(
@@ -195,3 +246,7 @@ const bulkInsertAccounts = () => {
   assert('jobId' in bulkUpsertResult);
   return bulkUpsertResult;
 };
+
+function isBulkJob(info: JobInfo | BulkResult): info is JobInfo {
+  return (info as JobInfo).numberBatchesCompleted !== undefined;
+}

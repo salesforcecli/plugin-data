@@ -18,7 +18,7 @@ Batch Status
 
 Will poll the batch statuses every %s seconds.
 To fetch the status on your own, press CTRL+C and use the command:
-sf force data bulk status -i %s -b [<batchId>]
+sf force data bulk status -i %s -b %s
 
 # ExternalIdRequired
 

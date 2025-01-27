@@ -1,3 +1,21 @@
+## [4.0.6](https://github.com/salesforcecli/plugin-data/compare/4.0.5...4.0.6) (2025-01-26)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/core from 8.8.0 to 8.8.2 ([ea31bd8](https://github.com/salesforcecli/plugin-data/commit/ea31bd8ce6d0df873d2a6ac66f539b109a217641))
+
+## [4.0.5](https://github.com/salesforcecli/plugin-data/compare/4.0.4...4.0.5) (2025-01-26)
+
+### Bug Fixes
+
+- **deps:** bump ansis from 3.8.1 to 3.9.0 ([fcefcae](https://github.com/salesforcecli/plugin-data/commit/fcefcaeb231250c57dcb3f9c5be43457d6635bdc))
+
+## [4.0.4](https://github.com/salesforcecli/plugin-data/compare/4.0.3...4.0.4) (2025-01-23)
+
+### Bug Fixes
+
+- **bulk-v1:** properly handle +1 job batches ([a791be9](https://github.com/salesforcecli/plugin-data/commit/a791be9daeaf0206c85806d00fa6b609fd890521))
+
 ## [4.0.3](https://github.com/salesforcecli/plugin-data/compare/4.0.2...4.0.3) (2025-01-19)
 
 ### Bug Fixes
