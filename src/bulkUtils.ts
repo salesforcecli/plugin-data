@@ -165,6 +165,10 @@ export async function exportRecords(
       await pipeline(
         locator
           ? [
+              // Skip the 1st row (CSV header) by finding the index of the first `LF`
+              // occurence and move the position 1 char ahead.
+              //
+              // CSVs using `CRLF` are still handled correctly because `CR` and `LF` are different chars in the string.
               Readable.from(res.body.slice(res.body.indexOf('\n') + 1)),
               fs.createWriteStream(outputInfo.filePath, {
                 // Open file for appending. The file is created if it does not exist.
