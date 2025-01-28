@@ -1,3 +1,15 @@
+## [4.0.7](https://github.com/salesforcecli/plugin-data/compare/4.0.6...4.0.7) (2025-01-28)
+
+### Bug Fixes
+
+- crlf uses 2 chars ([dc6dde8](https://github.com/salesforcecli/plugin-data/commit/dc6dde8530a50ec5aa6be0fd17b2c80539a019af))
+- only look for LF ([6f43acc](https://github.com/salesforcecli/plugin-data/commit/6f43accf1627ca98087b3a3d734fe49168ddae1b))
+- skip last EOL from csv payload ([f85bf19](https://github.com/salesforcecli/plugin-data/commit/f85bf1974e0f25564682fd3ca1c24dc619d9b60e))
+
+### Reverts
+
+- Revert "test: strip LF ending on windows" ([f95149c](https://github.com/salesforcecli/plugin-data/commit/f95149cb1bdcfd59073b6f292a9efc8d20434ff7))
+
 ## [4.0.6](https://github.com/salesforcecli/plugin-data/compare/4.0.5...4.0.6) (2025-01-26)
 
 ### Bug Fixes
