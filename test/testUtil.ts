@@ -181,7 +181,10 @@ export async function validateCsv(
 
   await pipeline(
     csvReadStream,
-    new csvParse({ columns: true, delimiter: ColumnDelimiter[columnDelimiter] }),
+    new csvParse({
+      columns: true,
+      delimiter: ColumnDelimiter[columnDelimiter],
+    }),
     new PassThrough({
       objectMode: true,
       transform(_chunk, _encoding, callback) {
@@ -201,16 +204,17 @@ export async function validateCsv(
 }
 
 /**
- * Validate that a JSON file has X records
+ * Validate that a JSON file has an array of records (and props)
+ *
+ * @param filePath JSON file to validate
+ * @param props Array of props each record should have
+ * @param totalqty Total amount of records in the file
  */
-export async function validateJson(filePath: string, totalqty: number): Promise<void> {
+export async function validateJson(filePath: string, props: string[], totalqty: number): Promise<void> {
   // check records have expected fields
-  const fieldsRes = await exec(
-    `jq 'map(has("Id") and has("Name") and has("Phone") and has("AnnualRevenue")) | all' ${filePath}`,
-    {
-      shell: 'pwsh',
-    }
-  );
+  const fieldsRes = await exec(`jq 'map(${props.map((field) => `has("${field}")`).join(' and ')}) | all' ${filePath}`, {
+    shell: 'pwsh',
+  });
   expect(fieldsRes.stdout.trim()).equal('true');
 
   // check all records were written
