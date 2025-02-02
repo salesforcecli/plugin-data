@@ -1,3 +1,9 @@
+## [4.0.8](https://github.com/salesforcecli/plugin-data/compare/4.0.7...4.0.8) (2025-02-02)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/multi-stage-output from 0.8.5 to 0.8.6 ([d38c044](https://github.com/salesforcecli/plugin-data/commit/d38c044f92a91a20242ef47455aa009852512226))
+
 ## [4.0.7](https://github.com/salesforcecli/plugin-data/compare/4.0.6...4.0.7) (2025-01-28)
 
 ### Bug Fixes
