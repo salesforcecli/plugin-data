@@ -1,6 +1,6 @@
 {
   "name": "@salesforce/plugin-data",
-  "version": "4.0.9",
+  "version": "4.0.10",
   "description": "Plugin for salesforce data commands",
   "author": "Salesforce",
   "homepage": "https://github.com/salesforcecli/plugin-data",

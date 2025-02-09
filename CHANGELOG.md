@@ -1,3 +1,9 @@
+## [4.0.10](https://github.com/salesforcecli/plugin-data/compare/4.0.9...4.0.10) (2025-02-09)
+
+### Bug Fixes
+
+- **deps:** bump ansis from 3.9.0 to 3.10.0 ([ef1afb4](https://github.com/salesforcecli/plugin-data/commit/ef1afb4767639202fda778ee274d1011b42a144e))
+
 ## [4.0.9](https://github.com/salesforcecli/plugin-data/compare/4.0.8...4.0.9) (2025-02-02)
 
 ### Bug Fixes
