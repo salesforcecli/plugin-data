@@ -5,12 +5,13 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { Messages } from '@salesforce/core';
+import { Messages, SfError } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
+import { isObject } from '@salesforce/ts-types';
 import { importFromPlan } from '../../../api/data/tree/importPlan.js';
 import { importFromFiles } from '../../../api/data/tree/importFiles.js';
 import { orgFlags } from '../../../flags.js';
-import type { ImportResult } from '../../../api/data/tree/importTypes.js';
+import type { ImportResult, TreeResponse } from '../../../api/data/tree/importTypes.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.import');
@@ -18,7 +19,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.import')
 /**
  * Command that provides data import capability via the SObject Tree Save API.
  */
-export default class Import extends SfCommand<ImportResult[]> {
+export default class Import extends SfCommand<ImportResult[] | undefined> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -45,23 +46,61 @@ export default class Import extends SfCommand<ImportResult[]> {
     }),
   };
 
-  public async run(): Promise<ImportResult[]> {
+  public async run(): Promise<ImportResult[] | undefined> {
     const { flags } = await this.parse(Import);
 
     const conn = flags['target-org'].getConnection(flags['api-version']);
-    const results = flags.plan
-      ? await importFromPlan(conn, flags.plan)
-      : await importFromFiles(conn, flags.files ?? []);
 
-    this.table({
-      data: results,
-      columns: [
-        { key: 'refId', name: 'Reference ID' },
-        { key: 'type', name: 'Type' },
-        { key: 'id', name: 'ID' },
-      ],
-      title: 'Import Results',
-    });
-    return results;
+    try {
+      const results = flags.plan
+        ? await importFromPlan(conn, flags.plan)
+        : await importFromFiles(conn, flags.files ?? []);
+
+      this.table({
+        data: results,
+        columns: [
+          { key: 'refId', name: 'Reference ID' },
+          { key: 'type', name: 'Type' },
+          { key: 'id', name: 'ID' },
+        ],
+        title: 'Import Results',
+      });
+      return results;
+    } catch (err) {
+      const error = err as SfError;
+      if (
+        error.cause &&
+        error.cause instanceof Error &&
+        'data' in error.cause &&
+        isObject(error.cause.data) &&
+        'message' in error.cause.data
+      ) {
+        const errorData = JSON.parse(error.cause.data.message as string) as TreeResponse;
+
+        if (errorData.hasErrors) {
+          const errorResults = errorData.results
+            .map((result) =>
+              result.errors.map((errors) => ({
+                referenceId: result.referenceId,
+                StatusCode: errors.statusCode,
+                Message: errors.message,
+                fields: errors.fields.join(', ') || 'N/A',
+              }))
+            )
+            .flat();
+
+          this.table({
+            data: errorResults,
+            columns: [
+              { key: 'referenceId', name: 'Reference ID' },
+              { key: 'StatusCode', name: 'Status Code' },
+              { key: 'Message', name: 'Error Message' },
+              { key: 'fields', name: 'Fields' },
+            ],
+            title: 'import Errors',
+          });
+        }
+      }
+    }
   }
 }
