@@ -7,7 +7,7 @@
 
 import { Messages, SfError } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { isObject } from '@salesforce/ts-types';
+import { ensureString, isObject } from '@salesforce/ts-types';
 import { importFromPlan } from '../../../api/data/tree/importPlan.js';
 import { importFromFiles } from '../../../api/data/tree/importFiles.js';
 import { orgFlags } from '../../../flags.js';
@@ -16,10 +16,23 @@ import type { ImportResult, TreeResponse } from '../../../api/data/tree/importTy
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.import');
 
+export const isErrorCause = (error: Error | SfError): boolean => {
+  if (
+    error.cause &&
+    error.cause instanceof Error &&
+    'data' in error.cause &&
+    isObject(error.cause.data) &&
+    'message' in error.cause.data
+  ) {
+    return true;
+  }
+  return false;
+};
+
 /**
  * Command that provides data import capability via the SObject Tree Save API.
  */
-export default class Import extends SfCommand<ImportResult[] | undefined> {
+export default class Import extends SfCommand<ImportResult[]> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -46,7 +59,7 @@ export default class Import extends SfCommand<ImportResult[] | undefined> {
     }),
   };
 
-  public async run(): Promise<ImportResult[] | undefined> {
+  public async run(): Promise<ImportResult[]> {
     const { flags } = await this.parse(Import);
 
     const conn = flags['target-org'].getConnection(flags['api-version']);
@@ -67,7 +80,7 @@ export default class Import extends SfCommand<ImportResult[] | undefined> {
       });
       return results;
     } catch (err) {
-      const error = err as SfError;
+      const error = err as Error;
       if (
         error.cause &&
         error.cause instanceof Error &&
@@ -75,7 +88,7 @@ export default class Import extends SfCommand<ImportResult[] | undefined> {
         isObject(error.cause.data) &&
         'message' in error.cause.data
       ) {
-        const errorData = JSON.parse(error.cause.data.message as string) as TreeResponse;
+        const errorData = JSON.parse(ensureString(error.cause.data.message)) as TreeResponse;
 
         if (errorData.hasErrors) {
           const errorResults = errorData.results
@@ -97,10 +110,14 @@ export default class Import extends SfCommand<ImportResult[] | undefined> {
               { key: 'Message', name: 'Error Message' },
               { key: 'fields', name: 'Fields' },
             ],
-            title: 'import Errors',
+            title: 'Tree import errors',
           });
+          if (errorData.hasErrors) {
+            process.exitCode = 1;
+          }
         }
       }
+      throw error;
     }
   }
 }
