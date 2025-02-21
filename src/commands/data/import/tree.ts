@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { Messages } from '@salesforce/core';
+import { Messages, SfError } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { ensureString, isObject } from '@salesforce/ts-types';
 import { importFromPlan } from '../../../api/data/tree/importPlan.js';
@@ -88,7 +88,6 @@ export default class Import extends SfCommand<ImportResult[]> {
               }))
             )
             .flat();
-
           this.table({
             data: errorResults,
             columns: [
@@ -99,7 +98,7 @@ export default class Import extends SfCommand<ImportResult[]> {
             ],
             title: 'Tree import errors',
           });
-          process.exitCode = 1;
+          throw new SfError('Data Import failed');
         }
       }
       throw error;
