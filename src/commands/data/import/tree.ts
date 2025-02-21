@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { Messages, SfError } from '@salesforce/core';
+import { Messages } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { ensureString, isObject } from '@salesforce/ts-types';
 import { importFromPlan } from '../../../api/data/tree/importPlan.js';
@@ -15,19 +15,6 @@ import type { ImportResult, TreeResponse } from '../../../api/data/tree/importTy
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.import');
-
-export const isErrorCause = (error: Error | SfError): boolean => {
-  if (
-    error.cause &&
-    error.cause instanceof Error &&
-    'data' in error.cause &&
-    isObject(error.cause.data) &&
-    'message' in error.cause.data
-  ) {
-    return true;
-  }
-  return false;
-};
 
 /**
  * Command that provides data import capability via the SObject Tree Save API.
@@ -112,9 +99,7 @@ export default class Import extends SfCommand<ImportResult[]> {
             ],
             title: 'Tree import errors',
           });
-          if (errorData.hasErrors) {
-            process.exitCode = 1;
-          }
+          process.exitCode = 1;
         }
       }
       throw error;
