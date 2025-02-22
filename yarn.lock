@@ -1415,12 +1415,12 @@
     strip-ansi "^7.1.0"
     wrap-ansi "^9.0.0"
 
-"@oclif/test@^4.1.9":
-  version "4.1.9"
-  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-4.1.9.tgz#3cc2254178a196a40affc04054aff992a13a37a3"
-  integrity sha512-bfh3uskNNUsK2LBU+/NOAG9dDZkOLOY29E233aRBwEIGvNSxyPs4LOYqdH9E/5N8Z1kBKCVC9tfHdE/B0Z8qCQ==
+"@oclif/test@^4.1.10":
+  version "4.1.10"
+  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-4.1.10.tgz#2eccf034141f95fa1a7b1af0e8cfd68ebbc2d78b"
+  integrity sha512-46Uu4hXOa2JKrivE9b14R+QzV15z/d8ig4ZGyjhzf2oOV2b11HV6H7ZEXsupVLPS6Dp5TmIlVXo7/kdrlXmAHQ==
   dependencies:
-    ansis "^3.10.0"
+    ansis "^3.14.0"
     debug "^4.4.0"
 
 "@pkgjs/parseargs@^0.11.0":
