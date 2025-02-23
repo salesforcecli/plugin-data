@@ -1356,13 +1356,13 @@
     react "^18.3.1"
     wrap-ansi "^9.0.0"
 
-"@oclif/plugin-command-snapshot@^5.2.34":
-  version "5.2.34"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-command-snapshot/-/plugin-command-snapshot-5.2.34.tgz#c0fb2b61ee9583c0ae8f0ee3ff25ca4b09285b36"
-  integrity sha512-SsDJ0IweYvZezlaQ87Pela7UY+uLuDaP7ajdzfaRqsRiHYm4Uya6ALnXm3H+D5AcmHpRfoLRtqQtMCN3dMhUfA==
+"@oclif/plugin-command-snapshot@^5.2.35":
+  version "5.2.35"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-command-snapshot/-/plugin-command-snapshot-5.2.35.tgz#19eacd8180772d9f172606edf3d6c99522fecbb3"
+  integrity sha512-8A7iJ7tg2ZvyMG63sBOvdPIPq7RmggIdeACA0p6NfwzDI9mRL94v78m/6whqJKTUuzcERIIO+L2hwxPbBKwdGw==
   dependencies:
     "@oclif/core" "^4"
-    ansis "^3.10.0"
+    ansis "^3.14.0"
     globby "^14.1.0"
     just-diff "^5.2.0"
     lodash.difference "^4.5.0"
