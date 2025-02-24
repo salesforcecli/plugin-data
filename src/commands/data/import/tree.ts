@@ -98,7 +98,9 @@ export default class Import extends SfCommand<ImportResult[]> {
             ],
             title: 'Tree import errors',
           });
-          throw new SfError('Data Import failed');
+          const errors = new SfError('Data Import failed');
+          errors.setData(errorResults);
+          throw errors;
         }
       }
       throw error;
