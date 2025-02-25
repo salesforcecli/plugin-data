@@ -1,3 +1,9 @@
+## [4.0.16](https://github.com/salesforcecli/plugin-data/compare/4.0.15...4.0.16) (2025-02-25)
+
+### Bug Fixes
+
+- render `data import tree` errors in a table ([#1190](https://github.com/salesforcecli/plugin-data/issues/1190)) ([313a731](https://github.com/salesforcecli/plugin-data/commit/313a7312373434913327a420ec310a262bd07c4b))
+
 ## [4.0.15](https://github.com/salesforcecli/plugin-data/compare/4.0.14...4.0.15) (2025-02-23)
 
 ### Bug Fixes
