@@ -75,7 +75,18 @@ export default class Import extends SfCommand<ImportResult[]> {
         isObject(error.cause.data) &&
         'message' in error.cause.data
       ) {
-        const errorData = JSON.parse(ensureString(error.cause.data.message)) as TreeResponse;
+        const getTreeResponse = (payload: string): TreeResponse => {
+          try {
+            return JSON.parse(payload) as TreeResponse;
+          } catch (parseErr) {
+            // throw original error on invalid JSON payload
+            if (parseErr instanceof Error && parseErr.name === 'SyntaxError') {
+              throw error;
+            }
+            throw parseErr;
+          }
+        };
+        const errorData = getTreeResponse(ensureString(error.cause.data.message));
 
         if (errorData.hasErrors) {
           const errorResults = errorData.results
