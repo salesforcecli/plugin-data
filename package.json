@@ -105,15 +105,15 @@
     "prepare": "sf-install",
     "test": "wireit",
     "test:nuts": "nyc mocha \"./test/**/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
-    "test:nuts:bulk:import": "nyc mocha \"./test/commands/data/import/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:nuts:bulk:export": "nyc mocha \"./test/commands/data/export/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
+    "test:nuts:bulk:import": "nyc mocha \"./test/commands/data/import/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:nuts:bulk:update": "nyc mocha \"./test/commands/data/update/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
-    "test:nuts:data:tree": "nyc mocha \"./test/commands/data/tree/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
+    "test:nuts:data:bulk-upsert-delete": "nyc mocha \"./test/commands/data/dataBulk.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
+    "test:nuts:data:create": "nyc mocha \"./test/commands/data/create/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:nuts:data:query": "nyc mocha \"./test/commands/data/query/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:nuts:data:record": "nyc mocha \"./test/commands/data/record/dataRecord.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:nuts:data:search": "nyc mocha \"./test/commands/data/search.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
-    "test:nuts:data:create": "nyc mocha \"./test/commands/data/create/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
-    "test:nuts:data:bulk-upsert-delete": "nyc mocha \"./test/commands/data/dataBulk.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
+    "test:nuts:data:tree": "nyc mocha \"./test/commands/data/tree/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:nuts:force:data:bulk-upsert-delete-status": "nyc mocha \"./test/commands/force/data/bulk/dataBulk.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:only": "wireit",
     "version": "oclif readme"
@@ -137,7 +137,7 @@
     "@oclif/plugin-command-snapshot": "^5.2.35",
     "@oclif/test": "^4.1.11",
     "@salesforce/cli-plugins-testkit": "^5.3.39",
-    "@salesforce/dev-scripts": "^10.2.11",
+    "@salesforce/dev-scripts": "^10.2.12",
     "@salesforce/plugin-command-reference": "^3.1.38",
     "@salesforce/types": "^1.3.0",
     "eslint-plugin-sf-plugin": "^1.20.14",
@@ -254,7 +254,7 @@
       "output": []
     },
     "link-check": {
-      "command": "node -e \"process.exit(process.env.CI ? 0 : 1)\" || linkinator \"**/*.md\" --skip \"CHANGELOG.md|node_modules|test/|confluence.internal.salesforce.com|my.salesforce.com|%s\" --markdown --retry --directory-listing --verbosity error",
+      "command": "node -e \"process.exit(process.env.CI ? 0 : 1)\" || linkinator \"**/*.md\" --skip \"CHANGELOG.md|node_modules|test/|confluence.internal.salesforce.com|my.salesforce.com|localhost|%s\" --markdown --retry --directory-listing --verbosity error",
       "files": [
         "./*.md",
         "./!(CHANGELOG).md",
