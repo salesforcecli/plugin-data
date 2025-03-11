@@ -49,7 +49,6 @@
       "loglevel",
       "sobject",
       "target-org",
-      "verbose",
       "wait"
     ],
     "plugin": "@salesforce/plugin-data"
@@ -294,7 +293,6 @@
       "loglevel",
       "sobject",
       "target-org",
-      "verbose",
       "wait"
     ],
     "plugin": "@salesforce/plugin-data"

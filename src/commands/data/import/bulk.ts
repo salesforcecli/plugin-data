@@ -74,7 +74,6 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
       wait: flags.wait,
       file: flags.file,
       jsonEnabled: this.jsonEnabled(),
-      verbose: false,
       logFn: (arg: string) => {
         this.log(arg);
       },

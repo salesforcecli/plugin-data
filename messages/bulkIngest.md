@@ -74,10 +74,6 @@ Number of minutes to wait for the command to complete before displaying the resu
 
 Run the command asynchronously.
 
-# flags.verbose.summary
-
-Print verbose output of failed records if result is available.
-
 # flags.jobid
 
 ID of the job you want to resume.
