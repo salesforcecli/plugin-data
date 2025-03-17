@@ -40,7 +40,7 @@ export default class DeleteResume extends SfCommand<BulkResultV2> {
 
     const {
       options: { connection: conn },
-    } = await cache.resolveResumeOptionsFromCache(flags['job-id'] ?? flags['use-most-recent'], true);
+    } = await cache.resolveResumeOptionsFromCache(flags['job-id'] ?? flags['use-most-recent']);
 
     const job = conn.bulk2.job('ingest', {
       id: res.jobId,

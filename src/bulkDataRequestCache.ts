@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { TTLConfig, Global, Logger, Messages, Org, ConfigAggregator, OrgConfigProperties } from '@salesforce/core';
+import { TTLConfig, Global, Logger, Messages, Org } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import type { ResumeBulkExportOptions, ResumeBulkImportOptions } from './types.js';
 import { ColumnDelimiterKeys } from './bulkUtils.js';
@@ -71,10 +71,7 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
    * @param skipCacheValidatation make this method not throw if you passed a job ID that's not in the cache
    * This was only added for `data upsert/delete resume` for backwards compatibility and will be removed after March 2025.
    */
-  public async resolveResumeOptionsFromCache(
-    jobIdOrMostRecent: string | boolean,
-    skipCacheValidatation = false
-  ): Promise<ResumeBulkImportOptions> {
+  public async resolveResumeOptionsFromCache(jobIdOrMostRecent: string | boolean): Promise<ResumeBulkImportOptions> {
     if (typeof jobIdOrMostRecent === 'boolean') {
       const key = this.getLatestKey();
       if (!key) {
@@ -92,21 +89,6 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
     } else {
       const entry = this.get(jobIdOrMostRecent);
       if (!entry) {
-        if (skipCacheValidatation) {
-          const config = await ConfigAggregator.create();
-          const aliasOrUsername = config.getInfo(OrgConfigProperties.TARGET_ORG)?.value as string;
-          if (!aliasOrUsername) {
-            throw messages.createError('error.skipCacheValidateNoOrg', [jobIdOrMostRecent]);
-          }
-
-          return {
-            jobInfo: { id: jobIdOrMostRecent },
-            options: {
-              connection: (await Org.create({ aliasOrUsername })).getConnection(),
-            },
-          };
-        }
-
         throw messages.createError('error.bulkRequestIdNotFound', [jobIdOrMostRecent]);
       }
 
