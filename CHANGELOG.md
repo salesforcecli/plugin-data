@@ -1,3 +1,9 @@
+## [4.0.21](https://github.com/salesforcecli/plugin-data/compare/4.0.20...4.0.21) (2025-03-17)
+
+### Bug Fixes
+
+- remove --verbose flag W-18014732 ([#1206](https://github.com/salesforcecli/plugin-data/issues/1206)) ([4f65502](https://github.com/salesforcecli/plugin-data/commit/4f6550212140265d958443eed980e24b8cf515c3))
+
 ## [4.0.20](https://github.com/salesforcecli/plugin-data/compare/4.0.19...4.0.20) (2025-03-16)
 
 ### Bug Fixes
