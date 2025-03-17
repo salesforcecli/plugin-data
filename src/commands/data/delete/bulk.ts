@@ -46,7 +46,6 @@ export default class Delete extends SfCommand<BulkResultV2> {
       wait: flags.wait,
       file: flags.file,
       jsonEnabled: this.jsonEnabled(),
-      verbose: flags.verbose,
       logFn: (arg: string) => {
         this.log(arg);
       },

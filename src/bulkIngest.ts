@@ -7,8 +7,8 @@
 
 import * as fs from 'node:fs';
 import { platform } from 'node:os';
-import { Flags, SfCommand, Ux, optionalOrgFlagWithDeprecations, loglevel } from '@salesforce/sf-plugins-core';
-import { IngestJobV2, IngestJobV2FailedResults, JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
+import { Flags, SfCommand, optionalOrgFlagWithDeprecations, loglevel } from '@salesforce/sf-plugins-core';
+import { IngestJobV2, JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { Schema } from '@jsforce/jsforce-node';
 import { Duration } from '@salesforce/kit';
@@ -53,7 +53,6 @@ export async function bulkIngest(opts: {
   wait: Duration;
   file: string;
   jsonEnabled: boolean;
-  verbose: boolean;
   logFn: (message: string) => void;
   warnFn: (message: SfCommand.Warning) => void;
 }): Promise<BulkIngestInfo> {
@@ -62,10 +61,6 @@ export async function bulkIngest(opts: {
   // validation
   if (opts.externalId && opts.operation !== 'upsert') {
     throw new SfError('External ID is only required for `sf data upsert bulk`.');
-  }
-
-  if (opts.verbose && !['delete', 'hardDelete', 'upsert'].includes(opts.operation)) {
-    throw new SfError('Verbose mode is limited for `sf data delete/upsert bulk` and will be removed after March 2025.');
   }
 
   const timeout = opts.async ? Duration.minutes(0) : opts.wait ?? Duration.minutes(0);
@@ -155,12 +150,6 @@ export async function bulkIngest(opts: {
 
     if (jobInfo.numberRecordsFailed) {
       stages.error();
-      if (opts.verbose && !opts.jsonEnabled) {
-        const records = await job.getFailedResults();
-        if (records.length > 0) {
-          printBulkErrors(records);
-        }
-      }
 
       if (['delete', 'hardDelete', 'upsert'].includes(opts.operation) && opts.jsonEnabled) {
         opts.warnFn(
@@ -382,20 +371,6 @@ export const lineEndingFlag = Flags.option({
 })();
 
 /**
- * @deprecated
- */
-export const printBulkErrors = (failedResults: IngestJobV2FailedResults<Schema>): void => {
-  const ux = new Ux();
-  ux.log();
-  ux.table({
-    // eslint-disable-next-line camelcase
-    data: failedResults.map((f) => ({ id: 'Id' in f ? f.Id : '', sfId: f.sf__Id, error: f.sf__Error })),
-    columns: ['id', { key: 'sfId', name: 'Sf_Id' }, 'error'],
-    title: `Bulk Failures [${failedResults.length}]`,
-  });
-};
-
-/**
  * Use only for commands that maintain sfdx compatibility.
  *
  * @deprecated
@@ -429,13 +404,6 @@ export const baseUpsertDeleteFlags = {
     char: 'a',
     summary: messages.getMessage('flags.async.summary'),
     exclusive: ['wait'],
-  }),
-  verbose: Flags.boolean({
-    summary: messages.getMessage('flags.verbose.summary'),
-    deprecated: {
-      message:
-        'The --verbose flag is deprecated and will be removed after March 2025, use "sf data bulk results" to get job results instead.',
-    },
   }),
 };
 

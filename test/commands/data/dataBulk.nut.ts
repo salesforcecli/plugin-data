@@ -12,9 +12,8 @@ import { expect, config as chaiConfig } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { sleep } from '@salesforce/kit';
 import { ensurePlainObject } from '@salesforce/ts-types';
-import type { SaveResult } from '@jsforce/jsforce-node';
-import { BulkResultV2 } from '../../../src/types.js';
-import { QueryResult } from '../data/query/query.nut.js';
+import type { BulkResultV2 } from '../../../src/types.js';
+import type { QueryResult } from '../data/query/query.nut.js';
 
 chaiConfig.truncateThreshold = 0;
 
@@ -98,89 +97,14 @@ describe('data:bulk commands', () => {
     });
   });
 
-  describe('bulk data commands with --verbose', () => {
-    it('should print table because of --verbose and errors', () => {
-      fs.writeFileSync(path.join(testSession.project.dir, 'data.csv'), `Id${os.EOL}001000000000000AAA`);
-
-      const result = execCmd('data:delete:bulk --sobject Account --file data.csv --wait 10 --verbose', {
-        ensureExitCode: 1,
-      }).shellOutput;
-      // Bulk Failures [1]
-      // ┌────────────────────┬────────────────────┬───────────────────────────────────────────────────────────┐
-      // │ Id                 │ Sf_Id              │ Error                                                     │
-      // ├────────────────────┼────────────────────┼───────────────────────────────────────────────────────────┤
-      // │ 001000000000000AAA │ 001000000000000AAA │ INVALID_CROSS_REFERENCE_KEY:invalid cross reference id:-- │
-      // └────────────────────┴────────────────────┴───────────────────────────────────────────────────────────┘
-
-      expect(result).to.include('Bulk Failures [1]');
-      expect(result).to.include('Id');
-      expect(result).to.include('Sf_Id');
-      expect(result).to.include('Error');
-      expect(result).to.include('INVALID_CROSS_REFERENCE_KEY:invalid cross reference id');
-      // expect(result).to.include('MALFORMED_ID:bad id')
-    });
-
-    it('should not print table because of errors and missing --verbose', () => {
+  describe('bulk data commands', () => {
+    it('should not print table because of errors', () => {
       fs.writeFileSync(path.join(testSession.project.dir, 'data.csv'), `Id${os.EOL}001000000000000AAA`);
 
       const result = execCmd('data:delete:bulk --sobject Account --file data.csv --wait 10', { ensureExitCode: 1 })
         .shellOutput.stdout;
 
       expect(result).to.not.include('Bulk Failures [1]');
-    });
-
-    it('should not print error table when there are no errors', () => {
-      // insert account
-      const accountId = execCmd<SaveResult>('data:create:record -s Account  --values Name=test --json', {
-        ensureExitCode: 0,
-      }).jsonOutput?.result.id;
-      fs.writeFileSync(path.join(testSession.project.dir, 'account.csv'), `Id${os.EOL}${accountId}`);
-      const result = execCmd('data:delete:bulk --sobject Account --file account.csv --wait 10 --verbose', {
-        ensureExitCode: 0,
-      }).shellOutput.stdout;
-      expect(result).to.match(/Successful records: 1\s*Failed records: 0\s*Status: JobComplete/s);
-      expect(result).to.not.include('Bulk Failures');
-    });
-
-    it('bulk delete should have information in --json', () => {
-      fs.writeFileSync(path.join(testSession.project.dir, 'data.csv'), `Id${os.EOL}001000000000000AAA`);
-
-      const result = execCmd<BulkResultV2>(
-        'data:delete:bulk --sobject Account --file data.csv --wait 10 --verbose --json',
-        { ensureExitCode: 1 }
-      ).jsonOutput?.result.records;
-      /*
-        {
-          "status": 1,
-          "result": {
-            "jobInfo": {
-              "id": "<ID>",
-              "operation": "delete",
-              "object": "Account",
-              // ...
-            },
-            "records": {
-              "successfulResults": [],
-              "failedResults": [
-                {
-                  "sf__Id": "",
-                  "sf__Error": "MALFORMED_ID:malformed id 001000000000000AAA:--",
-                  "Id": "001000000000000AAA"
-
-              ],
-              "unprocessedRecords": []
-            }
-          },
-          "warnings": []
-        }
-      */
-
-      expect(result?.failedResults[0]).to.have.all.keys('sf__Id', 'sf__Error', 'Id');
-      expect(result?.failedResults[0].sf__Id).to.equal('001000000000000AAA');
-      expect(result?.failedResults[0].sf__Error).to.equal('INVALID_CROSS_REFERENCE_KEY:invalid cross reference id:--');
-      // expect(result?.failedResults[0].sf__Error).to.equal('MALFORMED_ID:bad id       001000000000000AAA:--')
-      expect(result?.failedResults[0].Id).to.equal('001000000000000AAA');
-      expect(result?.successfulResults.length).to.equal(0);
     });
 
     it('bulk upsert should have information in --json', () => {
@@ -207,24 +131,6 @@ describe('data:bulk commands', () => {
         'WEBSITE'
       );
       expect(result?.successfulResults[0].sf__Id?.length).to.equal(18);
-    });
-
-    it('should print verbose success with json', () => {
-      // insert account
-      const accountId = execCmd<SaveResult>('data:create:record -s Account --values Name=test --json', {
-        ensureExitCode: 0,
-      }).jsonOutput?.result.id;
-      fs.writeFileSync(path.join(testSession.project.dir, 'account.csv'), `Id${os.EOL}${accountId}`);
-
-      const result = execCmd<BulkResultV2>(
-        'data:delete:bulk --sobject Account --file account.csv --wait 10 --verbose --json',
-        { ensureExitCode: 0 }
-      ).jsonOutput?.result.records;
-      expect(result?.successfulResults[0]).to.have.all.keys('sf__Id', 'sf__Created', 'Id');
-      expect(result?.successfulResults[0].sf__Id).to.equal(accountId);
-      expect(result?.successfulResults[0].sf__Created).to.equal('false');
-      expect(result?.successfulResults[0].Id).to.equal(accountId);
-      expect(result?.failedResults.length).to.equal(0);
     });
   });
 });
