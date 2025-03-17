@@ -7,8 +7,8 @@
 
 import * as fs from 'node:fs';
 import { platform } from 'node:os';
-import { Flags, SfCommand, Ux, optionalOrgFlagWithDeprecations, loglevel } from '@salesforce/sf-plugins-core';
-import { IngestJobV2, IngestJobV2FailedResults, JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
+import { Flags, SfCommand, optionalOrgFlagWithDeprecations, loglevel } from '@salesforce/sf-plugins-core';
+import { IngestJobV2, JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { Schema } from '@jsforce/jsforce-node';
 import { Duration } from '@salesforce/kit';
@@ -369,20 +369,6 @@ export const lineEndingFlag = Flags.option({
   dependsOn: ['file'],
   options: ['CRLF', 'LF'] as const,
 })();
-
-/**
- * @deprecated
- */
-export const printBulkErrors = (failedResults: IngestJobV2FailedResults<Schema>): void => {
-  const ux = new Ux();
-  ux.log();
-  ux.table({
-    // eslint-disable-next-line camelcase
-    data: failedResults.map((f) => ({ id: 'Id' in f ? f.Id : '', sfId: f.sf__Id, error: f.sf__Error })),
-    columns: ['id', { key: 'sfId', name: 'Sf_Id' }, 'error'],
-    title: `Bulk Failures [${failedResults.length}]`,
-  });
-};
 
 /**
  * Use only for commands that maintain sfdx compatibility.
