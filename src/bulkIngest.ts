@@ -121,20 +121,6 @@ export async function bulkIngest(opts: {
   stages.setupJobListeners(job);
   stages.processingJob();
 
-  //  cache.resolveResumeOptionsFromCache for `delete/upsert resume --job-id <ID>`
-  //  will not throw if the ID isn't in the cache to support the following scenario:
-  //
-  // `sf data delete bulk --wait 10` -> sync operation (successful or not) never created a cache
-  // `sf data delete resume -i <job-id>` worked b/c the cache resolver returned the ID as a cache entry
-  // `sf data delete resume --use-most-recent` was never supported for sync runs.
-  //
-  //  We plan to remove this behavior in March 2025 (only these 2 commands supported this, `resume` commands should only resume jobs started by `sf`)
-  if (['upsert', 'delete', 'hardDelete'].includes(operation)) {
-    opts.warnFn(
-      'Resuming a synchronous operation via `sf data upsert/delete resume` will not be supported after March 2025.'
-    );
-  }
-
   try {
     await job.poll(5000, timeout.milliseconds);
 
@@ -150,18 +136,6 @@ export async function bulkIngest(opts: {
 
     if (jobInfo.numberRecordsFailed) {
       stages.error();
-
-      if (['delete', 'hardDelete', 'upsert'].includes(opts.operation) && opts.jsonEnabled) {
-        opts.warnFn(
-          'Record failures will not be included in JSON output after March 2025, use `sf data bulk results` to get results instead.'
-        );
-        return {
-          jobId: jobInfo.id,
-          processedRecords: jobInfo.numberRecordsProcessed,
-          successfulRecords: jobInfo.numberRecordsProcessed - (jobInfo.numberRecordsFailed ?? 0),
-          failedRecords: jobInfo.numberRecordsFailed,
-        };
-      }
 
       throw messages.createError(
         'error.failedRecordDetails',
@@ -223,11 +197,7 @@ export async function bulkIngestResume(opts: {
   wait: Duration;
   warnFn: (message: SfCommand.Warning) => void;
 }): Promise<BulkIngestInfo> {
-  const resumeOpts = await opts.cache.resolveResumeOptionsFromCache(
-    opts.jobIdOrMostRecent,
-    // skip cache validation for only for these 2 commands for backwards compatibility.
-    ['data upsert resume', 'data delete resume'].includes(opts.cmdId) ? true : false
-  );
+  const resumeOpts = await opts.cache.resolveResumeOptionsFromCache(opts.jobIdOrMostRecent);
 
   const conn = resumeOpts.options.connection;
 
