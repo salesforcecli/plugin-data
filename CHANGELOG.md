@@ -1,3 +1,9 @@
+## [4.0.22](https://github.com/salesforcecli/plugin-data/compare/4.0.21...4.0.22) (2025-03-18)
+
+### Bug Fixes
+
+- remove deprecations W-18057437 ([#1209](https://github.com/salesforcecli/plugin-data/issues/1209)) ([1330d07](https://github.com/salesforcecli/plugin-data/commit/1330d07759aa46b2008382f6c2c960daad3cf355))
+
 ## [4.0.21](https://github.com/salesforcecli/plugin-data/compare/4.0.20...4.0.21) (2025-03-17)
 
 ### Bug Fixes
