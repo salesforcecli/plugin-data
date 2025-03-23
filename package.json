@@ -143,7 +143,7 @@
     "eslint-plugin-sf-plugin": "^1.20.15",
     "oclif": "^4.17.38",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.8.2"
   },
   "resolutions": {
     "@jsforce/jsforce-node/node-fetch/whatwg-url": "^14.0.0"
