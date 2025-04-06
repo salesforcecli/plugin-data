@@ -1315,13 +1315,13 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@oclif/core@^4", "@oclif/core@^4.0.27", "@oclif/core@^4.2.4", "@oclif/core@^4.2.8":
-  version "4.2.8"
-  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-4.2.8.tgz#6e71c76b8ea91064ffc8390a3fd2502c5d32a3db"
-  integrity sha512-OWv4Va6bERxIhrYcnUGzyhGRqktc64lJO6cZ3UwkzJDpfR8ZrbCxRfKRBBah1i8kzUlOAeAXnpbMBMah3skKwA==
+"@oclif/core@^4", "@oclif/core@^4.0.27", "@oclif/core@^4.2.10", "@oclif/core@^4.2.8":
+  version "4.2.10"
+  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-4.2.10.tgz#31dfb7481c79887c3e672e10c981fcc01fcbaeb3"
+  integrity sha512-fAqcXgqkUm4v5FYy7qWP4w1HaOlVSVJveah+yVTo5Nm5kTiXhmD5mQQ7+knGeBaStyrtQy6WardoC2xSic9rlQ==
   dependencies:
     ansi-escapes "^4.3.2"
-    ansis "^3.16.0"
+    ansis "^3.17.0"
     clean-stack "^3.0.1"
     cli-spinners "^2.9.2"
     debug "^4.4.0"
@@ -1461,7 +1461,7 @@
     strip-ansi "6.0.1"
     ts-retry-promise "^0.8.1"
 
-"@salesforce/core@^8.5.1", "@salesforce/core@^8.8.0", "@salesforce/core@^8.8.6", "@salesforce/core@^8.8.7":
+"@salesforce/core@^8.5.1", "@salesforce/core@^8.8.0", "@salesforce/core@^8.8.5", "@salesforce/core@^8.8.6", "@salesforce/core@^8.8.7":
   version "8.8.7"
   resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-8.8.7.tgz#ac307e8f10934affa7bcf33ccb65993669cd8f12"
   integrity sha512-AuPSmb/GZ7F8eV5GO6NcfFq3YSOVnPL4sssEQEvKduOSJMs8RTJ92kEefrId/tgFBYfw4b7UzndjFtdgrGGeoA==
@@ -1571,16 +1571,16 @@
     string-width "^7.2.0"
     terminal-link "^3.0.0"
 
-"@salesforce/sf-plugins-core@^12.1.4":
-  version "12.1.4"
-  resolved "https://registry.yarnpkg.com/@salesforce/sf-plugins-core/-/sf-plugins-core-12.1.4.tgz#c73829c7f12bdc96a2e2746ce7f574a604e8efb4"
-  integrity sha512-inSWsy9omNc4dIULVpoOJPX6DdEaqkA4CxmzTVrylc7P08jCbsv6LpS79wUaYC7Ah3krBQvbopP4wR9f3XvLeQ==
+"@salesforce/sf-plugins-core@^12.2.1":
+  version "12.2.1"
+  resolved "https://registry.yarnpkg.com/@salesforce/sf-plugins-core/-/sf-plugins-core-12.2.1.tgz#1048a5d1245f07f0e864f0f76e8818fd21a84fe6"
+  integrity sha512-b3eRSzGO0weBLL1clHaJNgNP1aKkD1Qy2DQEc0ieteEm+fh1FfPA0QpJ9rh/hdmkJRip2x2R2zz9tflJ0wflbg==
   dependencies:
     "@inquirer/confirm" "^3.1.22"
     "@inquirer/password" "^2.2.0"
-    "@oclif/core" "^4.2.4"
+    "@oclif/core" "^4.2.10"
     "@oclif/table" "^0.4.6"
-    "@salesforce/core" "^8.5.1"
+    "@salesforce/core" "^8.8.5"
     "@salesforce/kit" "^3.2.3"
     "@salesforce/ts-types" "^2.0.12"
     ansis "^3.3.2"
