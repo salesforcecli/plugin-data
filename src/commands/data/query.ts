@@ -76,12 +76,6 @@ export class DataSoqlQueryCommand extends SfCommand<DataQueryResult> {
       char: 'w',
       summary: messages.getMessage('flags.wait.summary'),
       dependsOn: ['bulk'],
-      exclusive: ['async'],
-    }),
-    async: Flags.boolean({
-      summary: messages.getMessage('flags.async.summary'),
-      dependsOn: ['bulk'],
-      exclusive: ['wait'],
     }),
     'all-rows': Flags.boolean({
       summary: messages.getMessage('flags.all-rows.summary'),
@@ -127,9 +121,9 @@ export class DataSoqlQueryCommand extends SfCommand<DataQueryResult> {
     this.logger = await Logger.child('data:soql:query');
     const flags = (await this.parse(DataSoqlQueryCommand)).flags;
 
-    if (flags.bulk || flags.wait || flags.async) {
+    if (flags.bulk || flags.wait) {
       this
-        .warn(`Bulk mode for "data query" is deprecated, the following flags will be removed after April 2025: --bulk | --wait | --async.
+        .warn(`Bulk mode for "data query" is deprecated, the following flags will be removed after April 2025: --bulk | --wait.
 Use "data export bulk" for bulk queries instead.
 `);
     }
@@ -140,12 +134,7 @@ Use "data export bulk" for bulk queries instead.
       const conn = flags['target-org'].getConnection(flags['api-version']);
       if (flags['result-format'] !== 'json') this.spinner.start(messages.getMessage('queryRunningMessage'));
       const queryResult = flags.bulk
-        ? await this.runBulkSoqlQuery(
-            conn,
-            queryString,
-            flags.async ? Duration.minutes(0) : flags.wait ?? Duration.minutes(0),
-            flags['all-rows'] === true
-          )
+        ? await this.runBulkSoqlQuery(conn, queryString, flags.wait ?? Duration.minutes(0), flags['all-rows'] === true)
         : await this.runSoqlQuery(
             flags['use-tooling-api'] ? conn.tooling : conn,
             queryString,

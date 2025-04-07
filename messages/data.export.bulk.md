@@ -6,9 +6,9 @@ Bulk export records from an org into a file using a SOQL query. Uses Bulk API 2.
 
 You can use this command to export millions of records from an org, either to migrate data or to back it up.
 
-Use a SOQL query to specify the fields of a standard or custom object that you want to export. Specify the SOQL query either at the command line with the --query flag or read it from a file with the --query-file flag; you can't specify both flags. The --output-file flag is required, which means you can only write the records to a file, in either CSV or JSON format. 
+Use a SOQL query to specify the fields of a standard or custom object that you want to export. Specify the SOQL query either at the command line with the --query flag or read it from a file with the --query-file flag; you can't specify both flags. The --output-file flag is required, which means you can only write the records to a file, in either CSV or JSON format.
 
-Bulk exports can take a while, depending on how many records are returned by the SOQL query. If the command times out, or you specified the --async flag, the command displays the job ID. To see the status and get the results of the job, run "sf data export resume" and pass the job ID to the --job-id flag.
+Bulk exports can take a while, depending on how many records are returned by the SOQL query. If the command times out the command displays the job ID. To see the status and get the results of the job, run "sf data export resume" and pass the job ID to the --job-id flag.
 
 IMPORTANT: This command uses Bulk API 2.0, which limits the type of SOQL queries you can run. For example, you can't use aggregate functions such as count(). For the complete list of limitations, see the "SOQL Considerations" section in the "Bulk API 2.0 and Bulk API Developer Guide" (https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/queries.htm).
 
@@ -24,15 +24,11 @@ IMPORTANT: This command uses Bulk API 2.0, which limits the type of SOQL queries
 
 - Export asynchronously; the command immediately returns a job ID that you then pass to the "sf data export resume" command:
 
-  <%= config.bin %> <%= command.id %> --query "SELECT Id, Name, Account.Name FROM Contact" --output-file export-accounts.json --result-format json --async
+  <%= config.bin %> <%= command.id %> --query "SELECT Id, Name, Account.Name FROM Contact" --output-file export-accounts.json --result-format json
 
 # flags.wait.summary
 
 Time to wait for the command to finish, in minutes.
-
-# flags.async.summary
-
-Don't wait for the job to complete.
 
 # flags.query.summary
 

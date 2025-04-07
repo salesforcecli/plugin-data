@@ -8,7 +8,7 @@ You can use this command to import millions of records into the object from a fi
 
 All the records in the CSV file must be for the same Salesforce object. Specify the object with the `--sobject` flag.
 
-Bulk imports can take a while, depending on how many records are in the CSV file. If the command times out, or you specified the --async flag, the command displays the job ID. To see the status and get the results of the job, run "sf data import resume" and pass the job ID to the --job-id flag.
+Bulk imports can take a while, depending on how many records are in the CSV file. If the command times out the command displays the job ID. To see the status and get the results of the job, run "sf data import resume" and pass the job ID to the --job-id flag.
 
 For information and examples about how to prepare your CSV files, see "Prepare Data to Ingest" in the "Bulk API 2.0 and Bulk API Developer Guide" (https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/datafiles_prepare_data.htm).
 
@@ -20,11 +20,7 @@ For information and examples about how to prepare your CSV files, see "Prepare D
 
 - Import asynchronously and use the default org; the command immediately returns a job ID that you then pass to the "sf data import resume" command:
 
-  <%= config.bin %> <%= command.id %> --file accounts.csv --sobject Account --async
-
-# flags.async.summary
-
-Don't wait for the command to complete.
+  <%= config.bin %> <%= command.id %> --file accounts.csv --sobject Account
 
 # flags.file.summary
 

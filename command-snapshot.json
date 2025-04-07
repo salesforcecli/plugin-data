@@ -37,10 +37,9 @@
     "alias": [],
     "command": "data:delete:bulk",
     "flagAliases": ["apiversion", "csvfile", "sobjecttype", "targetusername", "u"],
-    "flagChars": ["a", "f", "o", "s", "w"],
+    "flagChars": ["f", "o", "s", "w"],
     "flags": [
       "api-version",
-      "async",
       "file",
       "flags-dir",
       "hard-delete",
@@ -88,7 +87,6 @@
     "flags": [
       "all-rows",
       "api-version",
-      "async",
       "column-delimiter",
       "flags-dir",
       "json",
@@ -141,10 +139,9 @@
     "alias": [],
     "command": "data:import:bulk",
     "flagAliases": [],
-    "flagChars": ["a", "f", "o", "s", "w"],
+    "flagChars": ["f", "o", "s", "w"],
     "flags": [
       "api-version",
-      "async",
       "column-delimiter",
       "file",
       "flags-dir",
@@ -180,7 +177,6 @@
     "flags": [
       "all-rows",
       "api-version",
-      "async",
       "bulk",
       "file",
       "flags-dir",
@@ -233,10 +229,9 @@
     "alias": [],
     "command": "data:update:bulk",
     "flagAliases": [],
-    "flagChars": ["a", "f", "o", "s", "w"],
+    "flagChars": ["f", "o", "s", "w"],
     "flags": [
       "api-version",
-      "async",
       "column-delimiter",
       "file",
       "flags-dir",
@@ -280,10 +275,9 @@
     "alias": [],
     "command": "data:upsert:bulk",
     "flagAliases": ["apiversion", "csvfile", "externalid", "sobjecttype", "targetusername", "u"],
-    "flagChars": ["a", "f", "i", "o", "s", "w"],
+    "flagChars": ["f", "i", "o", "s", "w"],
     "flags": [
       "api-version",
-      "async",
       "column-delimiter",
       "external-id",
       "file",

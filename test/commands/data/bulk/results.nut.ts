@@ -63,7 +63,7 @@ describe('data bulk results NUTs', () => {
     const csvFile = await generateAccountsCsv(session.project.dir, 5000);
 
     const bulkImportAsync = execCmd<DataImportBulkResult>(
-      `data import bulk --file ${csvFile} --sobject account --async --json`,
+      `data import bulk --file ${csvFile} --sobject account --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result as DataImportBulkResult;
 

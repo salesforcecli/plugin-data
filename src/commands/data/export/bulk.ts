@@ -38,11 +38,6 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
       char: 'w',
       helpValue: '<minutes>',
       unit: 'minutes',
-      exclusive: ['async'],
-    }),
-    async: Flags.boolean({
-      summary: messages.getMessage('flags.async.summary'),
-      exclusive: ['wait'],
     }),
     query: Flags.string({
       summary: messages.getMessage('flags.query.summary'),
@@ -107,7 +102,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
 
     const conn = flags['target-org'].getConnection(flags['api-version']);
 
-    const timeout = flags.async ? Duration.minutes(0) : flags.wait ?? Duration.minutes(0);
+    const timeout = flags.wait ?? Duration.minutes(0);
 
     // `flags['query-file']` will be present if `flags.query` isn't. oclif's `exclusive` isn't quite that clever
     const soqlQuery = flags.query ?? fs.readFileSync(flags['query-file'] as string, 'utf8');

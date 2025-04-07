@@ -70,10 +70,6 @@ CSV file that contains the IDs of the records to update or delete.
 
 Number of minutes to wait for the command to complete before displaying the results.
 
-# flags.async.summary
-
-Run the command asynchronously.
-
 # flags.jobid
 
 ID of the job you want to resume.

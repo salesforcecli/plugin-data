@@ -26,11 +26,6 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
   public static readonly examples = messages.getMessages('examples');
 
   public static readonly flags = {
-    async: Flags.boolean({
-      summary: messages.getMessage('flags.async.summary'),
-      char: 'a',
-      exclusive: ['wait'],
-    }),
     file: Flags.file({
       summary: messages.getMessage('flags.file.summary'),
       char: 'f',
@@ -47,7 +42,6 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
       summary: messages.getMessage('flags.wait.summary'),
       char: 'w',
       unit: 'minutes',
-      exclusive: ['async'],
     }),
     'target-org': Flags.requiredOrg(),
     'line-ending': Flags.option({
@@ -70,7 +64,6 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
       columnDelimiter: flags['column-delimiter'],
       conn: flags['target-org'].getConnection(flags['api-version']),
       cache: await BulkImportRequestCache.create(),
-      async: flags.async,
       wait: flags.wait,
       file: flags.file,
       jsonEnabled: this.jsonEnabled(),

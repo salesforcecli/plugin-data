@@ -258,11 +258,10 @@ Bulk delete records from an org using a CSV file. Uses Bulk API 2.0.
 
 ```
 USAGE
-  $ sf data delete bulk -o <value> -s <value> [--json] [--flags-dir <value>] [--api-version <value>] [-w <value> | -a]
+  $ sf data delete bulk -o <value> -s <value> [--json] [--flags-dir <value>] [--api-version <value>] [-w <value>]
     (--line-ending CRLF|LF -f <value>) [--hard-delete]
 
 FLAGS
-  -a, --async                 Run the command asynchronously.
   -f, --file=<value>          (required) CSV file that contains the IDs of the records to update or delete.
   -o, --target-org=<value>    (required) Username or alias of the target org. Not required if the `target-org`
                               configuration variable is already set.
@@ -419,7 +418,7 @@ Bulk export records from an org into a file using a SOQL query. Uses Bulk API 2.
 ```
 USAGE
   $ sf data export bulk -o <value> --output-file <value> -r csv|json [--json] [--flags-dir <value>] [--api-version
-    <value>] [-w <minutes> | --async] [-q <value> | --query-file <value>] [--all-rows] [--column-delimiter
+    <value>] [-w <minutes>] [-q <value> | --query-file <value>] [--all-rows] [--column-delimiter
     BACKQUOTE|CARET|COMMA|PIPE|SEMICOLON|TAB] [--line-ending LF|CRLF]
 
 FLAGS
@@ -432,7 +431,6 @@ FLAGS
       --all-rows                   Include records that have been soft-deleted due to a merge or delete. By default,
                                    deleted records are not returned.
       --api-version=<value>        Override the api version used for api requests made by this command
-      --async                      Don't wait for the job to complete.
       --column-delimiter=<option>  Column delimiter to be used when writing CSV output. Default is COMMA.
                                    <options: BACKQUOTE|CARET|COMMA|PIPE|SEMICOLON|TAB>
       --line-ending=<option>       Line ending to be used when writing CSV output. Default value on Windows is is
@@ -455,8 +453,7 @@ DESCRIPTION
   both flags. The --output-file flag is required, which means you can only write the records to a file, in either CSV or
   JSON format.
 
-  Bulk exports can take a while, depending on how many records are returned by the SOQL query. If the command times out,
-  or you specified the --async flag, the command displays the job ID. To see the status and get the results of the job,
+  Bulk exports can take a while, depending on how many records are returned by the SOQL query. If the command times out the command displays the job ID. To see the status and get the results of the job,
   run "sf data export resume" and pass the job ID to the --job-id flag.
 
   IMPORTANT: This command uses Bulk API 2.0, which limits the type of SOQL queries you can run. For example, you can't
@@ -481,7 +478,7 @@ EXAMPLES
   command:
 
     $ sf data export bulk --query "SELECT Id, Name, Account.Name FROM Contact" --output-file export-accounts.json \
-      --result-format json --async
+      --result-format json
 ```
 
 _See code: [src/commands/data/export/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/4.0.25/src/commands/data/export/bulk.ts)_
@@ -506,7 +503,7 @@ GLOBAL FLAGS
 DESCRIPTION
   Resume a bulk export job that you previously started. Uses Bulk API 2.0.
 
-  When the original "data export bulk" command either times out or is run with the --async flag, it displays a job ID.
+  When the original "data export bulk" command times out it displays a job ID.
   To see the status and get the results of the bulk export, run this command by either passing it the job ID or using
   the --use-most-recent flag to specify the most recent bulk export job.
 
@@ -656,7 +653,6 @@ USAGE
     (--line-ending CRLF|LF -f <value>) [--column-delimiter BACKQUOTE|CARET|COMMA|PIPE|SEMICOLON|TAB]
 
 FLAGS
-  -a, --async                      Don't wait for the command to complete.
   -f, --file=<value>               (required) CSV file that contains the Salesforce object records you want to import.
   -o, --target-org=<value>         (required) Username or alias of the target org. Not required if the `target-org`
                                    configuration variable is already set.
@@ -682,8 +678,7 @@ DESCRIPTION
 
   All the records in the CSV file must be for the same Salesforce object. Specify the object with the `--sobject` flag.
 
-  Bulk imports can take a while, depending on how many records are in the CSV file. If the command times out, or you
-  specified the --async flag, the command displays the job ID. To see the status and get the results of the job, run "sf
+  Bulk imports can take a while, depending on how many records are in the CSV file. If the command times out the command displays the job ID. To see the status and get the results of the job, run "sf
   data import resume" and pass the job ID to the --job-id flag.
 
   For information and examples about how to prepare your CSV files, see "Prepare Data to Ingest" in the "Bulk API 2.0
@@ -699,7 +694,7 @@ EXAMPLES
   Import asynchronously and use the default org; the command immediately returns a job ID that you then pass to the
   "sf data import resume" command:
 
-    $ sf data import bulk --file accounts.csv --sobject Account --async
+    $ sf data import bulk --file accounts.csv --sobject Account
 ```
 
 _See code: [src/commands/data/import/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/4.0.25/src/commands/data/import/bulk.ts)_
@@ -724,7 +719,7 @@ GLOBAL FLAGS
 DESCRIPTION
   Resume a bulk import job that you previously started. Uses Bulk API 2.0.
 
-  When the original "sf data import bulk" command either times out or is run with the --async flag, it displays a job
+  When the original "sf data import bulk" command times out it displays a job
   ID. To see the status and get the results of the bulk import, run this command by either passing it the job ID or
   using the --use-most-recent flag to specify the most recent bulk import job.
 
@@ -811,7 +806,7 @@ Execute a SOQL query.
 ```
 USAGE
   $ sf data query -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-q <value>] [-f <value>]
-    [-t | -b] [-w <value> ] [--async ] [--all-rows] [-r human|csv|json] [--output-file <value>]
+    [-t | -b] [-w <value> ] [--all-rows] [-r human|csv|json] [--output-file <value>]
 
 FLAGS
   -b, --bulk                    Use Bulk API 2.0 to run the query.
@@ -825,7 +820,6 @@ FLAGS
   -w, --wait=<value>            Time to wait for the command to finish, in minutes.
       --all-rows                Include deleted records. By default, deleted records are not returned.
       --api-version=<value>     Override the api version used for api requests made by this command
-      --async                   Use Bulk API 2.0, but don't wait for the job to complete.
       --output-file=<value>     File where records are written; only CSV and JSON output formats are supported.
 
 GLOBAL FLAGS
@@ -842,7 +836,7 @@ DESCRIPTION
 
   When using --bulk, the command waits 3 minutes by default for the query to complete. Use the --wait parameter to
   specify a different number of minutes to wait, or set --wait to 0 to immediately return control to the terminal. If
-  you set --wait to 0, or you use the --async flag, or the command simply times out, the command displays an ID. Pass
+  you set --wait to 0, or the command simply times out, the command displays an ID. Pass
   this ID to the the "data query resume" command using the --bulk-query-id flag to get the results; pass the ID to the
   "data resume" command to get the job status.
 
@@ -1004,7 +998,6 @@ USAGE
     (--line-ending CRLF|LF -f <value>) [--column-delimiter BACKQUOTE|CARET|COMMA|PIPE|SEMICOLON|TAB]
 
 FLAGS
-  -a, --async                      Don't wait for the command to complete.
   -f, --file=<value>               (required) CSV file that contains the Salesforce object records you want to update.
   -o, --target-org=<value>         (required) Username or alias of the target org. Not required if the `target-org`
                                    configuration variable is already set.
@@ -1033,8 +1026,7 @@ DESCRIPTION
   contain only existing records; if a record in the file doesn't currently exist in the Salesforce object, the command
   fails. Consider using "sf data upsert bulk" if you also want to insert new records.
 
-  Bulk updates can take a while, depending on how many records are in the CSV file. If the command times out, or you
-  specified the --async flag, the command displays the job ID. To see the status and get the results of the job, run "sf
+  Bulk updates can take a while, depending on how many records are in the CSV file. If the command times out the command displays the job ID. To see the status and get the results of the job, run "sf
   data update resume" and pass the job ID to the --job-id flag.
 
   For information and examples about how to prepare your CSV files, see "Prepare Data to Ingest" in the "Bulk API 2.0
@@ -1050,7 +1042,7 @@ EXAMPLES
   Update asynchronously and use the default org; the command immediately returns a job ID that you then pass to the
   "sf data update resume" command:
 
-    $ sf data update bulk --file accounts.csv --sobject Account --async
+    $ sf data update bulk --file accounts.csv --sobject Account
 ```
 
 _See code: [src/commands/data/update/bulk.ts](https://github.com/salesforcecli/plugin-data/blob/4.0.25/src/commands/data/update/bulk.ts)_
@@ -1137,7 +1129,7 @@ GLOBAL FLAGS
 DESCRIPTION
   Resume a bulk update job that you previously started. Uses Bulk API 2.0.
 
-  When the original "sf data update bulk" command either times out or is run with the --async flag, it displays a job
+  When the original "sf data update bulk" command times out it displays a job
   ID. To see the status and get the results of the bulk update, run this command by either passing it the job ID or
   using the --use-most-recent flag to specify the most recent bulk update job.
 
@@ -1159,11 +1151,9 @@ Bulk upsert records to an org from a CSV file. Uses Bulk API 2.0.
 
 ```
 USAGE
-  $ sf data upsert bulk -o <value> -s <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>] [-w
-    <value> | -a] (--line-ending CRLF|LF -f <value>) [--column-delimiter BACKQUOTE|CARET|COMMA|PIPE|SEMICOLON|TAB]
+  $ sf data upsert bulk -o <value> -s <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>] [-w <value>] (--line-ending CRLF|LF -f <value>) [--column-delimiter BACKQUOTE|CARET|COMMA|PIPE|SEMICOLON|TAB]
 
 FLAGS
-  -a, --async                      Run the command asynchronously.
   -f, --file=<value>               (required) CSV file that contains the IDs of the records to update or delete.
   -i, --external-id=<value>        (required) Name of the external ID field, or the Id field.
   -o, --target-org=<value>         (required) Username or alias of the target org. Not required if the `target-org`
