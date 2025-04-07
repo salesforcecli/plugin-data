@@ -8,7 +8,7 @@ You can use this command to update millions of Salesforce object records based o
 
 All the records in the CSV file must be for the same Salesforce object. Specify the object with the `--sobject` flag. The first column of every line in the CSV file must be an ID of the record you want to update. The CSV file can contain only existing records; if a record in the file doesn't currently exist in the Salesforce object, the command fails. Consider using "sf data upsert bulk" if you also want to insert new records.
 
-Bulk updates can take a while, depending on how many records are in the CSV file. If the command times out the command displays the job ID. To see the status and get the results of the job, run "sf data update resume" and pass the job ID to the --job-id flag.
+Bulk updates can take a while, depending on how many records are in the CSV file. For this reason, the command is asynchronous by default and immediately displays the "sf data update resume" command that you run to see the status and get the results of the job; the command includes the job ID. You can use the --wait flag to wait a specific number of minutes for this command to complete.
 
 For information and examples about how to prepare your CSV files, see "Prepare Data to Ingest" in the "Bulk API 2.0 and Bulk API Developer Guide" (https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/datafiles_prepare_data.htm).
 
