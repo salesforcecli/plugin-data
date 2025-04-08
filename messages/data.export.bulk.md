@@ -8,7 +8,7 @@ You can use this command to export millions of records from an org, either to mi
 
 Use a SOQL query to specify the fields of a standard or custom object that you want to export. Specify the SOQL query either at the command line with the --query flag or read it from a file with the --query-file flag; you can't specify both flags. The --output-file flag is required, which means you can only write the records to a file, in either CSV or JSON format.
 
-Bulk exports can take a while, depending on how many records are returned by the SOQL query. If the command times out the command displays the job ID. To see the status and get the results of the job, run "sf data export resume" and pass the job ID to the --job-id flag.
+Bulk exports can take a while, depending on how many records are returned by the SOQL query. For this reason, the command is asynchronous by default and immediately displays the "sf data export resume" command that you run to see the status and get the results of the job; the command includes the job ID. You can use the --wait flag to wait a specific number of minutes for this command to complete.
 
 IMPORTANT: This command uses Bulk API 2.0, which limits the type of SOQL queries you can run. For example, you can't use aggregate functions such as count(). For the complete list of limitations, see the "SOQL Considerations" section in the "Bulk API 2.0 and Bulk API Developer Guide" (https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/queries.htm).
 

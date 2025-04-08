@@ -4,7 +4,7 @@ Resume a bulk import job that you previously started. Uses Bulk API 2.0.
 
 # description
 
-When the original "sf data import bulk" command times out it displays a job ID. To see the status and get the results of the bulk import, run this command by either passing it the job ID or using the --use-most-recent flag to specify the most recent bulk import job.
+When the original "sf data import bulk" command times out, it displays a job ID. To see the status and get the results of the bulk import, run this command by either passing it the job ID or using the --use-most-recent flag to specify the most recent bulk import job.
 
 # examples
 
