@@ -82,6 +82,7 @@ export class DataSoqlQueryCommand extends SfCommand<DataQueryResult> {
       summary: messages.getMessage('flags.async.summary'),
       dependsOn: ['bulk'],
       exclusive: ['wait'],
+      deprecated: true,
     }),
     'all-rows': Flags.boolean({
       summary: messages.getMessage('flags.all-rows.summary'),

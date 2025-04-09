@@ -43,6 +43,7 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
     async: Flags.boolean({
       summary: messages.getMessage('flags.async.summary'),
       exclusive: ['wait'],
+      deprecated: true,
     }),
     query: Flags.string({
       summary: messages.getMessage('flags.query.summary'),
