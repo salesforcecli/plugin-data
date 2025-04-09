@@ -1,3 +1,9 @@
+## [4.0.26](https://github.com/salesforcecli/plugin-data/compare/4.0.25...4.0.26) (2025-04-09)
+
+### Bug Fixes
+
+- deprecate --async flag on async-by-default commands ([#1222](https://github.com/salesforcecli/plugin-data/issues/1222)) ([6a6b5a9](https://github.com/salesforcecli/plugin-data/commit/6a6b5a931b729f7050cf3f71a9c7f4c436b5a974))
+
 ## [4.0.25](https://github.com/salesforcecli/plugin-data/compare/4.0.24...4.0.25) (2025-04-07)
 
 ### Bug Fixes
