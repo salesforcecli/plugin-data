@@ -29,6 +29,7 @@ export default class DataUpdateBulk extends SfCommand<DataUpdateBulkResult> {
     async: Flags.boolean({
       summary: messages.getMessage('flags.async.summary'),
       char: 'a',
+      deprecated: true,
     }),
     wait: Flags.duration({
       summary: messages.getMessage('flags.wait.summary'),

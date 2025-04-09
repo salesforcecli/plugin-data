@@ -374,6 +374,7 @@ export const baseUpsertDeleteFlags = {
     char: 'a',
     summary: messages.getMessage('flags.async.summary'),
     exclusive: ['wait'],
+    deprecated: true,
   }),
 };
 

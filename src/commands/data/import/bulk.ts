@@ -30,6 +30,7 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
       summary: messages.getMessage('flags.async.summary'),
       char: 'a',
       exclusive: ['wait'],
+      deprecated: true,
     }),
     file: Flags.file({
       summary: messages.getMessage('flags.file.summary'),
