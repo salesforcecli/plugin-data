@@ -6,7 +6,7 @@
  */
 
 import fs from 'node:fs';
-import { Connection, Logger, Messages, SfError } from '@salesforce/core';
+import { Connection, Logger, Messages } from '@salesforce/core';
 import type { Record as jsforceRecord } from '@jsforce/jsforce-node';
 import {
   AnyJson,
@@ -18,13 +18,10 @@ import {
   JsonArray,
   toJsonMap,
 } from '@salesforce/ts-types';
-import { Duration } from '@salesforce/kit';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { BulkV2, QueryJobV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { orgFlags, perflogFlag, resultFormatFlag } from '../../flags.js';
 import { Field, FieldType, SoqlQueryResult } from '../../types.js';
-import { displayResults, transformBulkResults } from '../../queryUtils.js';
-import { BulkQueryRequestCache } from '../../bulkDataRequestCache.js';
+import { displayResults } from '../../queryUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'soql.query');
@@ -63,26 +60,6 @@ export class DataSoqlQueryCommand extends SfCommand<DataQueryResult> {
       summary: messages.getMessage('flags.use-tooling-api.summary'),
       aliases: ['usetoolingapi'],
       deprecateAliases: true,
-      exclusive: ['bulk'],
-    }),
-    bulk: Flags.boolean({
-      char: 'b',
-      default: false,
-      summary: messages.getMessage('flags.bulk.summary'),
-      exclusive: ['use-tooling-api'],
-    }),
-    wait: Flags.duration({
-      unit: 'minutes',
-      char: 'w',
-      summary: messages.getMessage('flags.wait.summary'),
-      dependsOn: ['bulk'],
-      exclusive: ['async'],
-    }),
-    async: Flags.boolean({
-      summary: messages.getMessage('flags.async.summary'),
-      dependsOn: ['bulk'],
-      exclusive: ['wait'],
-      deprecated: true,
     }),
     'all-rows': Flags.boolean({
       summary: messages.getMessage('flags.all-rows.summary'),
@@ -128,32 +105,18 @@ export class DataSoqlQueryCommand extends SfCommand<DataQueryResult> {
     this.logger = await Logger.child('data:soql:query');
     const flags = (await this.parse(DataSoqlQueryCommand)).flags;
 
-    if (flags.bulk || flags.wait || flags.async) {
-      this
-        .warn(`Bulk mode for "data query" is deprecated, the following flags will be removed after April 2025: --bulk | --wait | --async.
-Use "data export bulk" for bulk queries instead.
-`);
-    }
-
     try {
       // --file will be present if flags.query isn't. Oclif exactlyOne isn't quite that clever
       const queryString = flags.query ?? fs.readFileSync(flags.file as string, 'utf8');
       const conn = flags['target-org'].getConnection(flags['api-version']);
       if (flags['result-format'] !== 'json') this.spinner.start(messages.getMessage('queryRunningMessage'));
-      const queryResult = flags.bulk
-        ? await this.runBulkSoqlQuery(
-            conn,
-            queryString,
-            flags.async ? Duration.minutes(0) : flags.wait ?? Duration.minutes(0),
-            flags['all-rows'] === true
-          )
-        : await this.runSoqlQuery(
-            flags['use-tooling-api'] ? conn.tooling : conn,
-            queryString,
-            this.logger,
-            this.configAggregator.getInfo('org-max-query-limit').value as number,
-            flags['all-rows']
-          );
+      const queryResult = await this.runSoqlQuery(
+        flags['use-tooling-api'] ? conn.tooling : conn,
+        queryString,
+        this.logger,
+        this.configAggregator.getInfo('org-max-query-limit').value as number,
+        flags['all-rows']
+      );
 
       if (flags['output-file'] ?? !this.jsonEnabled()) {
         displayResults({ ...queryResult }, flags['result-format'], flags['output-file']);
@@ -167,48 +130,6 @@ Use "data export bulk" for bulk queries instead.
       }
     } finally {
       if (flags['result-format'] !== 'json') this.spinner.stop();
-    }
-  }
-  /**
-   * Executes a SOQL query using the bulk 2.0 API
-   *
-   * @param connection
-   * @param query
-   * @param timeout
-   */
-  private async runBulkSoqlQuery(
-    connection: Connection,
-    query: string,
-    timeout: Duration,
-    allRows: boolean | undefined = false
-  ): Promise<SoqlQueryResult> {
-    if (timeout.milliseconds === 0) {
-      const job = new QueryJobV2(connection, {
-        bodyParams: {
-          query,
-          operation: allRows ? 'queryAll' : 'query',
-        },
-        pollingOptions: { pollTimeout: timeout.milliseconds, pollInterval: 5000 },
-      });
-      const info = await job.open();
-      return prepareAsyncQueryResponse(connection)(this)({ query, jobId: info.id });
-    }
-    try {
-      const bulk2 = new BulkV2(connection);
-      const res =
-        (await bulk2.query(query, {
-          pollTimeout: timeout.milliseconds ?? Duration.minutes(5).milliseconds,
-          pollInterval: 5000,
-          ...(allRows ? { scanAll: true } : {}),
-        })) ?? [];
-      return transformBulkResults((await res.toArray()) as jsforceRecord[], query);
-    } catch (e) {
-      if (e instanceof Error && e.name === 'JobPollingTimeout' && 'jobId' in e && typeof e.jobId === 'string') {
-        process.exitCode = 69;
-        return prepareAsyncQueryResponse(connection)(this)({ query, jobId: e.jobId });
-      } else {
-        throw e instanceof Error || typeof e === 'string' ? SfError.wrap(e) : e;
-      }
     }
   }
 
@@ -247,22 +168,6 @@ Use "data export bulk" for bulk queries instead.
     };
   }
 }
-
-const prepareAsyncQueryResponse =
-  (connection: Connection) =>
-  (cmd: SfCommand<unknown>) =>
-  async ({ query, jobId }: { query: string; jobId: string }): Promise<SoqlQueryResult> => {
-    const cache = await BulkQueryRequestCache.create();
-    await cache.createCacheEntryForRequest(jobId, connection.getUsername(), connection.getApiVersion());
-    cmd.log(messages.getMessage('bulkQueryTimeout', [jobId, jobId, connection.getUsername()]));
-    return buildEmptyQueryResult({ query, jobId });
-  };
-
-const buildEmptyQueryResult = ({ query, jobId }: { query: string; jobId: string }): SoqlQueryResult => ({
-  columns: [],
-  result: { done: false, records: [], totalSize: 0, id: jobId },
-  query,
-});
 
 const searchSubColumnsRecursively = (parent: AnyJson): string[] => {
   const column = ensureJsonMap(parent);

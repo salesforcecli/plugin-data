@@ -40,21 +40,9 @@ Use Tooling API so you can run queries on Tooling API objects.
 
 File that contains the SOQL query.
 
-# flags.bulk.summary
-
-Use Bulk API 2.0 to run the query.
-
-# flags.async.summary
-
-Use Bulk API 2.0, but don't wait for the job to complete.
-
 # flags.all-rows.summary
 
 Include deleted records. By default, deleted records are not returned.
-
-# flags.wait.summary
-
-Time to wait for the command to finish, in minutes.
 
 # flags.output-file.summary
 
