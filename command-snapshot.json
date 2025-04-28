@@ -176,12 +176,10 @@
     "alias": ["force:data:soql:query"],
     "command": "data:query",
     "flagAliases": ["apiversion", "resultformat", "soqlqueryfile", "targetusername", "u", "usetoolingapi"],
-    "flagChars": ["b", "f", "o", "q", "r", "t", "w"],
+    "flagChars": ["f", "o", "q", "r", "t"],
     "flags": [
       "all-rows",
       "api-version",
-      "async",
-      "bulk",
       "file",
       "flags-dir",
       "json",
@@ -191,25 +189,7 @@
       "query",
       "result-format",
       "target-org",
-      "use-tooling-api",
-      "wait"
-    ],
-    "plugin": "@salesforce/plugin-data"
-  },
-  {
-    "alias": ["force:data:soql:bulk:report"],
-    "command": "data:query:resume",
-    "flagAliases": ["apiversion", "bulkqueryid", "resultformat", "targetusername", "u"],
-    "flagChars": ["i", "o", "r"],
-    "flags": [
-      "api-version",
-      "bulk-query-id",
-      "flags-dir",
-      "json",
-      "loglevel",
-      "result-format",
-      "target-org",
-      "use-most-recent"
+      "use-tooling-api"
     ],
     "plugin": "@salesforce/plugin-data"
   },
