@@ -1,3 +1,9 @@
+## [4.0.29](https://github.com/salesforcecli/plugin-data/compare/4.0.28...4.0.29) (2025-04-29)
+
+### Bug Fixes
+
+- remove deprecated command/flags W-18384354 ([#1237](https://github.com/salesforcecli/plugin-data/issues/1237)) ([e4e62d3](https://github.com/salesforcecli/plugin-data/commit/e4e62d3a481c7cbf20eb328ec12dc2a7c748d5fc))
+
 ## [4.0.28](https://github.com/salesforcecli/plugin-data/compare/4.0.27...4.0.28) (2025-04-27)
 
 ### Bug Fixes
