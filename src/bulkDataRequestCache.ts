@@ -102,27 +102,6 @@ export abstract class BulkDataRequestCache extends TTLConfig<TTLConfig.Options, 
   }
 }
 
-export class BulkQueryRequestCache extends BulkDataRequestCache {
-  public static getDefaultOptions(): TTLConfig.Options {
-    return {
-      isGlobal: true,
-      isState: true,
-      filename: BulkQueryRequestCache.getFileName(),
-      stateFolder: Global.SF_STATE_FOLDER,
-      ttl: Duration.days(3),
-    };
-  }
-
-  public static getFileName(): string {
-    return 'bulk-data-query-cache.json';
-  }
-
-  public static async unset(key: string): Promise<void> {
-    const cache = await BulkQueryRequestCache.create();
-    cache.unset(key);
-    await cache.write();
-  }
-}
 export class BulkDeleteRequestCache extends BulkDataRequestCache {
   public static getDefaultOptions(): TTLConfig.Options {
     return {
