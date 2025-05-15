@@ -1,3 +1,10 @@
+## [4.0.33](https://github.com/salesforcecli/plugin-data/compare/4.0.32...4.0.33) (2025-05-15)
+
+### Bug Fixes
+
+- ensure no static root logger for test ([072d475](https://github.com/salesforcecli/plugin-data/commit/072d47578bee62293a739ed3b28d55860f9c52c0))
+- remove the 'eslint-disable/messages' line ([b9fd5ef](https://github.com/salesforcecli/plugin-data/commit/b9fd5ef831c6e18b8ca8ac60bb8683a7f905e107))
+
 ## [4.0.32](https://github.com/salesforcecli/plugin-data/compare/4.0.31...4.0.32) (2025-05-11)
 
 ### Bug Fixes
