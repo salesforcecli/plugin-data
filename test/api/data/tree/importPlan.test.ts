@@ -105,6 +105,10 @@ describe('importPlan', () => {
     });
   });
   describe('plan validation', () => {
+    // ensure no static rootLogger
+    // @ts-expect-error private stuff
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    Logger.rootLogger = undefined;
     const logger = new Logger({ name: 'importPlanTest', useMemoryLogger: true });
     afterEach(() => {
       // @ts-expect-error private stuff
