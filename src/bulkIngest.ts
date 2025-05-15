@@ -140,9 +140,7 @@ export async function bulkIngest(opts: {
       throw messages.createError(
         'error.failedRecordDetails',
         [jobInfo.numberRecordsFailed],
-        // remove after W-17099874 gets fixed
-        // eslint-disable-next-line sf-plugin/no-missing-messages
-        [conn.getUsername(), job.id]
+        [conn.getUsername(), job.id, conn.getUsername(), job.id]
       );
     }
 
@@ -167,14 +165,16 @@ export async function bulkIngest(opts: {
 
     if (jobInfo.state === 'Failed') {
       stages.error();
-      // eslint-disable-next-line sf-plugin/no-missing-messages
-      throw messages.createError('error.jobFailed', [jobInfo.errorMessage], [conn.getUsername(), job.id]);
+      throw messages.createError(
+        'error.jobFailed',
+        [jobInfo.errorMessage],
+        [conn.getUsername(), job.id, conn.getUsername(), job.id]
+      );
     }
 
     if (jobInfo.state === 'Aborted') {
       stages.stop('aborted');
-      // eslint-disable-next-line sf-plugin/no-missing-messages
-      throw messages.createError('error.jobAborted', [], [conn.getUsername(), job.id]);
+      throw messages.createError('error.jobAborted', [], [conn.getUsername(), job.id, conn.getUsername(), job.id]);
     }
 
     throw err;
@@ -247,8 +247,7 @@ export async function bulkIngestResume(opts: {
       throw messages.createError(
         'error.failedRecordDetails',
         [jobInfo.numberRecordsFailed],
-        // eslint-disable-next-line sf-plugin/no-missing-messages
-        [conn.getUsername(), job.id]
+        [conn.getUsername(), job.id, conn.getUsername(), job.id]
       );
     }
 
@@ -276,16 +275,20 @@ export async function bulkIngestResume(opts: {
       throw messages.createError(
         'error.jobFailed',
         [jobInfo.errorMessage],
-        // eslint-disable-next-line sf-plugin/no-missing-messages
-        [conn.getUsername(), job.id],
+        [conn.getUsername(), job.id, conn.getUsername(), job.id],
         err as Error
       );
     }
 
     if (jobInfo.state === 'Aborted') {
       stages.stop('aborted');
-      // eslint-disable-next-line sf-plugin/no-missing-messages
-      throw messages.createError('error.jobAborted', [], [conn.getUsername(), job.id], err as Error);
+
+      throw messages.createError(
+        'error.jobAborted',
+        [],
+        [conn.getUsername(), job.id, conn.getUsername(), job.id],
+        err as Error
+      );
     }
 
     throw err;
