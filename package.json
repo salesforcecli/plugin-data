@@ -135,7 +135,7 @@
   },
   "devDependencies": {
     "@oclif/core": "^4.3.0",
-    "@oclif/plugin-command-snapshot": "^5.2.39",
+    "@oclif/plugin-command-snapshot": "^5.2.40",
     "@oclif/test": "^4.1.13",
     "@salesforce/cli-plugins-testkit": "^5.3.39",
     "@salesforce/dev-scripts": "^11.0.2",
