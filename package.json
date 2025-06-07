@@ -130,7 +130,7 @@
     "change-case": "^5.4.4",
     "csv-parse": "^5.6.0",
     "csv-stringify": "^6.5.2",
-    "form-data": "^4.0.2",
+    "form-data": "^4.0.3",
     "terminal-link": "^3.0.0"
   },
   "devDependencies": {
