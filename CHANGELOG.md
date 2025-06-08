@@ -1,3 +1,9 @@
+## [4.0.39](https://github.com/salesforcecli/plugin-data/compare/4.0.38...4.0.39) (2025-06-08)
+
+### Bug Fixes
+
+- **deps:** bump form-data from 4.0.2 to 4.0.3 ([2860551](https://github.com/salesforcecli/plugin-data/commit/2860551013fcb121b4632be6fd3c317027cbee5f))
+
 ## [4.0.38](https://github.com/salesforcecli/plugin-data/compare/4.0.37...4.0.38) (2025-06-08)
 
 ### Bug Fixes
