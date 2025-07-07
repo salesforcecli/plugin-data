@@ -1,3 +1,9 @@
+## [4.0.44](https://github.com/salesforcecli/plugin-data/compare/4.0.43...4.0.44) (2025-07-07)
+
+### Bug Fixes
+
+- update bulk resume command examples ([#1277](https://github.com/salesforcecli/plugin-data/issues/1277)) ([16ec59e](https://github.com/salesforcecli/plugin-data/commit/16ec59e650444750bd525a4405dea1ff598fdc64))
+
 ## [4.0.43](https://github.com/salesforcecli/plugin-data/compare/4.0.42...4.0.43) (2025-07-06)
 
 ### Bug Fixes
