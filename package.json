@@ -129,7 +129,7 @@
     "ansis": "^3.16.0",
     "change-case": "^5.4.4",
     "csv-parse": "^5.6.0",
-    "csv-stringify": "^6.5.2",
+    "csv-stringify": "^6.6.0",
     "form-data": "^4.0.3",
     "terminal-link": "^3.0.0"
   },
