@@ -5958,10 +5958,10 @@ object.values@^1.1.7:
     define-properties "^1.2.0"
     es-abstract "^1.22.1"
 
-oclif@^4.20.4:
-  version "4.20.4"
-  resolved "https://registry.yarnpkg.com/oclif/-/oclif-4.20.4.tgz#24a4f61ebf5aca205f9b0b3f28fe5ab1691cda5c"
-  integrity sha512-0M6N81LXCcF/rXyghCwYMT3kVadXWTBKCUp6XzDjC7gcZxl0GTUYXa/QENaE2sAsAcYQZKxbMDx7jrWPdDGggQ==
+oclif@^4.20.5:
+  version "4.20.5"
+  resolved "https://registry.yarnpkg.com/oclif/-/oclif-4.20.5.tgz#f588930804f910cf6517824bdb79e54adf1dfe35"
+  integrity sha512-7zPeQG/Y2os8ybjXKFGFza97utG339tnYHoovCBEz4ZaF9z53NK9NucUjjiRBs2ZZSGjrqW52JIdF2NY4IRQTA==
   dependencies:
     "@aws-sdk/client-cloudfront" "^3.840.0"
     "@aws-sdk/client-s3" "^3.842.0"
