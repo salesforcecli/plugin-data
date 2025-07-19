@@ -121,7 +121,7 @@
   },
   "dependencies": {
     "@jsforce/jsforce-node": "^3.9.1",
-    "@oclif/multi-stage-output": "^0.8.16",
+    "@oclif/multi-stage-output": "^0.8.18",
     "@salesforce/core": "^8.18.1",
     "@salesforce/kit": "^3.2.2",
     "@salesforce/sf-plugins-core": "^12.2.3",
