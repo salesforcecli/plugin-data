@@ -344,7 +344,7 @@ export const lineEndingFlag = Flags.option({
 })();
 
 /**
- * Use only for commands that maintain sfdx compatibility.
+ * Use only for commands that maintain sfdx compatibility.1
  *
  * @deprecated
  */
@@ -371,13 +371,6 @@ export const baseUpsertDeleteFlags = {
     summary: messages.getMessage('flags.wait.summary'),
     min: 0,
     defaultValue: 0,
-    exclusive: ['async'],
-  }),
-  async: Flags.boolean({
-    char: 'a',
-    summary: messages.getMessage('flags.async.summary'),
-    exclusive: ['wait'],
-    deprecated: true,
   }),
 };
 

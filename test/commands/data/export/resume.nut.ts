@@ -47,7 +47,7 @@ describe('data export resume NUTs', () => {
 
   it('should resume export in csv format', async () => {
     const outputFile = 'export-accounts.csv';
-    const command = `data export bulk -q "${soqlQuery}" --output-file ${outputFile} --async --json`;
+    const command = `data export bulk -q "${soqlQuery}" --output-file ${outputFile} --json`;
 
     const exportAsyncResult = execCmd<DataExportBulkResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
 
@@ -71,7 +71,7 @@ describe('data export resume NUTs', () => {
 
   it('should resume export in json format', async () => {
     const outputFile = 'export-accounts.json';
-    const command = `data export bulk -q "${soqlQuery}" --output-file ${outputFile} --async --result-format json --json`;
+    const command = `data export bulk -q "${soqlQuery}" --output-file ${outputFile} --result-format json --json`;
 
     const exportAsyncResult = execCmd<DataExportBulkResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
 

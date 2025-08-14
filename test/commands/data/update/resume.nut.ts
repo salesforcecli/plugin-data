@@ -60,7 +60,7 @@ describe('data update resume NUTs', () => {
     );
 
     const dataUpdateAsyncRes = execCmd<DataUpdateBulkResult>(
-      `data update bulk --file ${updatedCsv} --sobject account --async --json`,
+      `data update bulk --file ${updatedCsv} --sobject account  --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result;
 
