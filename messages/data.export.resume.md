@@ -4,7 +4,7 @@ Resume a bulk export job that you previously started. Uses Bulk API 2.0.
 
 # description
 
-When the original "data export bulk" command either times out, it displays a job ID. To see the status and get the results of the bulk export, run this command by either passing it the job ID or using the --use-most-recent flag to specify the most recent bulk export job.
+When the original "data export bulk" command times out, it displays a job ID. To see the status and get the results of the bulk export, run this command by either passing it the job ID or using the --use-most-recent flag to specify the most recent bulk export job.
 
 Using either `--job-id` or `--use-most-recent` will properly resolve to the correct org where the bulk job was started based on the cached data by "data export bulk".
 
