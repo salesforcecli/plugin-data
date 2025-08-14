@@ -10,7 +10,6 @@ import { EOL } from 'node:os';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 import { ensureString } from '@salesforce/ts-types';
-import { Duration, sleep } from '@salesforce/kit';
 import { validateCsv } from '../../../testUtil.js';
 import { DataImportBulkResult } from '../../../../src/commands/data/import/bulk.js';
 import { DataBulkResultsResult } from '../../../../src/commands/data/bulk/results.js';
@@ -63,16 +62,12 @@ describe('data bulk results NUTs', () => {
     const csvFile = await generateAccountsCsv(session.project.dir, 5000);
 
     const bulkImportAsync = execCmd<DataImportBulkResult>(
-      `data import bulk --file ${csvFile} --sobject account --async --json`,
+      `data import bulk --file ${csvFile} --sobject account --wait 3 --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result as DataImportBulkResult;
 
     expect(bulkImportAsync.jobId).not.to.be.undefined;
     expect(bulkImportAsync.jobId).to.be.length(18);
-
-    // wait 2 minutes for the async bulk import above to finish.
-    // we can't use `data import resume` because we expect record failures to happen.
-    await sleep(Duration.minutes(2));
 
     const results = execCmd<DataBulkResultsResult>(`data bulk results --job-id ${bulkImportAsync.jobId} --json`, {
       ensureExitCode: 0,

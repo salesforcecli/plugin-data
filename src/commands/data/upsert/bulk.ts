@@ -46,7 +46,7 @@ export default class Upsert extends SfCommand<BulkResultV2> {
       externalId: flags['external-id'],
       conn: flags['target-org'].getConnection(flags['api-version']),
       cache: await BulkUpsertRequestCache.create(),
-      async: flags.async,
+      async: false,
       wait: flags.wait,
       file: flags.file,
       jsonEnabled: this.jsonEnabled(),

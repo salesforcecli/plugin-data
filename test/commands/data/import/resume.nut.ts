@@ -35,7 +35,7 @@ describe('data import resume NUTs', () => {
     const csvFile = await generateAccountsCsv(session.dir);
 
     const importAsyncRes = execCmd<DataImportBulkResult>(
-      `data import bulk --file ${csvFile} --sobject account --async --json`,
+      `data import bulk --file ${csvFile} --sobject account --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result;
 
@@ -59,7 +59,7 @@ describe('data import resume NUTs', () => {
   it('should resume bulk import via--use-most-recent', async () => {
     const csvFile = await generateAccountsCsv(session.dir);
 
-    const command = `data import bulk --file ${csvFile} --sobject account --async --json`;
+    const command = `data import bulk --file ${csvFile} --sobject account --json`;
 
     const exportAsyncResult = execCmd<DataImportBulkResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
 
