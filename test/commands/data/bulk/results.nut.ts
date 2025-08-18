@@ -9,7 +9,7 @@ import path from 'node:path';
 import { EOL } from 'node:os';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
-import { ensureString } from '@salesforce/ts-types';
+import { AnyJson, ensureString } from '@salesforce/ts-types';
 import { validateCsv } from '../../../testUtil.js';
 import { DataImportBulkResult } from '../../../../src/commands/data/import/bulk.js';
 import { DataBulkResultsResult } from '../../../../src/commands/data/bulk/results.js';
@@ -61,15 +61,22 @@ describe('data bulk results NUTs', () => {
   it('should get success/failure results from a bulk import', async () => {
     const csvFile = await generateAccountsCsv(session.project.dir, 5000);
 
-    const bulkImportAsync = execCmd<DataImportBulkResult>(
-      `data import bulk --file ${csvFile} --sobject account --wait 3 --json`,
-      { ensureExitCode: 0 }
-    ).jsonOutput?.result as DataImportBulkResult;
+    type bulkImportErrResponse = AnyJson & {
+      data: {
+        jobId: string;
+        state: string;
+      };
+    };
 
-    expect(bulkImportAsync.jobId).not.to.be.undefined;
-    expect(bulkImportAsync.jobId).to.be.length(18);
+    // the CSV will have 5000 wrong rows so the command is expected to fail, we just need the job ID from the response to get results
+    const bulkImportErr = execCmd(`data import bulk --file ${csvFile} --sobject account --wait 5 --json`, {
+      ensureExitCode: 1,
+    }).jsonOutput as unknown as bulkImportErrResponse;
 
-    const results = execCmd<DataBulkResultsResult>(`data bulk results --job-id ${bulkImportAsync.jobId} --json`, {
+    expect(bulkImportErr.data.jobId).not.to.be.undefined;
+    expect(bulkImportErr.data.jobId).to.be.length(18);
+
+    const results = execCmd<DataBulkResultsResult>(`data bulk results --job-id ${bulkImportErr.data.jobId} --json`, {
       ensureExitCode: 0,
     }).jsonOutput?.result as DataBulkResultsResult;
 
