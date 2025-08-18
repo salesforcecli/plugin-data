@@ -4,7 +4,7 @@ Resume a bulk update job that you previously started. Uses Bulk API 2.0.
 
 # description
 
-When the original "sf data update bulk" command either times out or is run with the --async flag, it displays a job ID. To see the status and get the results of the bulk update, run this command by either passing it the job ID or using the --use-most-recent flag to specify the most recent bulk update job.
+When the original "sf data update bulk" command times out, it displays a job ID. To see the status and get the results of the bulk update, run this command by either passing it the job ID or using the --use-most-recent flag to specify the most recent bulk update job.
 
 Using either `--job-id` or `--use-most-recent` will properly resolve to the correct org where the bulk job was started based on the cached data by "data update bulk".
 

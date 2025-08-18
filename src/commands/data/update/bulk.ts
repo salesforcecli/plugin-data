@@ -26,11 +26,6 @@ export default class DataUpdateBulk extends SfCommand<DataUpdateBulkResult> {
   public static readonly examples = messages.getMessages('examples');
 
   public static readonly flags = {
-    async: Flags.boolean({
-      summary: messages.getMessage('flags.async.summary'),
-      char: 'a',
-      deprecated: true,
-    }),
     wait: Flags.duration({
       summary: messages.getMessage('flags.wait.summary'),
       char: 'w',
@@ -65,7 +60,6 @@ export default class DataUpdateBulk extends SfCommand<DataUpdateBulkResult> {
       columnDelimiter: flags['column-delimiter'],
       conn: flags['target-org'].getConnection(flags['api-version']),
       cache: await BulkUpdateRequestCache.create(),
-      async: flags.async,
       wait: flags.wait,
       file: flags.file,
       jsonEnabled: this.jsonEnabled(),
