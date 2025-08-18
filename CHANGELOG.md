@@ -1,3 +1,9 @@
+## [4.0.53](https://github.com/salesforcecli/plugin-data/compare/4.0.52...4.0.53) (2025-08-18)
+
+### Bug Fixes
+
+- remove deprecated async flags @W-19337263@ ([#1303](https://github.com/salesforcecli/plugin-data/issues/1303)) ([e755b4e](https://github.com/salesforcecli/plugin-data/commit/e755b4e0c087e119ceb1cf825e30c49859761132))
+
 ## [4.0.52](https://github.com/salesforcecli/plugin-data/compare/4.0.51...4.0.52) (2025-08-17)
 
 ### Bug Fixes
