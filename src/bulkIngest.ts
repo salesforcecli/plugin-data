@@ -135,11 +135,18 @@ export async function bulkIngest(opts: {
     if (jobInfo.numberRecordsFailed) {
       stages.error();
 
-      throw messages.createError(
+      const err = messages.createError(
         'error.failedRecordDetails',
         [jobInfo.numberRecordsFailed],
         [conn.getUsername(), job.id, conn.getUsername(), job.id]
       );
+
+      err.setData({
+        jobId: jobInfo.id,
+        state: jobInfo.state,
+      });
+
+      throw err;
     }
 
     stages.stop();
@@ -242,11 +249,18 @@ export async function bulkIngestResume(opts: {
         };
       }
 
-      throw messages.createError(
+      const err = messages.createError(
         'error.failedRecordDetails',
         [jobInfo.numberRecordsFailed],
         [conn.getUsername(), job.id, conn.getUsername(), job.id]
       );
+
+      err.setData({
+        jobId: jobInfo.id,
+        state: jobInfo.state,
+      });
+
+      throw err;
     }
 
     stages.stop();
