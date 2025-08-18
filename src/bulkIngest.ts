@@ -38,7 +38,6 @@ type ResumeCommandIDs = 'data import resume' | 'data update resume' | 'data upse
  *
  * It will create the specified bulk ingest job, set up the oclif/MSO stages and return the job info.
  * */
-// eslint-disable-next-line complexity
 export async function bulkIngest(opts: {
   resumeCmdId: ResumeCommandIDs;
   stageTitle: string;
@@ -49,7 +48,6 @@ export async function bulkIngest(opts: {
   externalId?: JobInfoV2['externalIdFieldName'];
   conn: Connection;
   cache: BulkUpdateRequestCache | BulkImportRequestCache | BulkUpsertRequestCache;
-  async: boolean;
   wait: Duration;
   file: string;
   jsonEnabled: boolean;
@@ -63,7 +61,7 @@ export async function bulkIngest(opts: {
     throw new SfError('External ID is only required for `sf data upsert bulk`.');
   }
 
-  const timeout = opts.async ? Duration.minutes(0) : opts.wait ?? Duration.minutes(0);
+  const timeout = opts.wait ?? Duration.minutes(0);
   const async = timeout.milliseconds === 0;
 
   // CSV file for `delete/HardDelete` operations only have 1 column (ID), we set it to `COMMA` if not specified but any delimiter works.

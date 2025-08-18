@@ -64,7 +64,6 @@ export default class DataImportBulk extends SfCommand<DataImportBulkResult> {
       columnDelimiter: flags['column-delimiter'],
       conn: flags['target-org'].getConnection(flags['api-version']),
       cache: await BulkImportRequestCache.create(),
-      async: false,
       wait: flags.wait,
       file: flags.file,
       jsonEnabled: this.jsonEnabled(),

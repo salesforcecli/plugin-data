@@ -42,7 +42,6 @@ export default class Delete extends SfCommand<BulkResultV2> {
       columnDelimiter: undefined,
       conn: flags['target-org'].getConnection(flags['api-version']),
       cache: await BulkDeleteRequestCache.create(),
-      async: false,
       wait: flags.wait,
       file: flags.file,
       jsonEnabled: this.jsonEnabled(),

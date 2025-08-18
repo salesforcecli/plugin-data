@@ -60,7 +60,6 @@ export default class DataUpdateBulk extends SfCommand<DataUpdateBulkResult> {
       columnDelimiter: flags['column-delimiter'],
       conn: flags['target-org'].getConnection(flags['api-version']),
       cache: await BulkUpdateRequestCache.create(),
-      async: false,
       wait: flags.wait,
       file: flags.file,
       jsonEnabled: this.jsonEnabled(),
