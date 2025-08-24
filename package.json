@@ -121,7 +121,7 @@
     "version": "oclif readme"
   },
   "dependencies": {
-    "@jsforce/jsforce-node": "^3.9.4",
+    "@jsforce/jsforce-node": "^3.10.4",
     "@oclif/multi-stage-output": "^0.8.20",
     "@salesforce/core": "^8.21.2",
     "@salesforce/kit": "^3.2.2",
