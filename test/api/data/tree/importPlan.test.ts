@@ -17,7 +17,7 @@
 
 import { expect, assert } from 'chai';
 import { shouldThrowSync } from '@salesforce/core/testSetup';
-import { Logger } from '@salesforce/core';
+import { StubDisplay } from '../../../stubs/stub-display.js';
 import {
   replaceRefsInTheSameFile,
   EnrichedPlanPart,
@@ -114,15 +114,10 @@ describe('importPlan', () => {
     });
   });
   describe('plan validation', () => {
-    // ensure no static rootLogger
-    // @ts-expect-error private stuff
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    Logger.rootLogger = undefined;
-    const logger = new Logger({ name: 'importPlanTest', useMemoryLogger: true });
-    afterEach(() => {
-      // @ts-expect-error private stuff
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      logger.memoryLogger.loggedData = [];
+    let stubDisplay: StubDisplay;
+
+    beforeEach(() => {
+      stubDisplay = new StubDisplay();
     });
 
     it('good plan in classic format, one file', () => {
@@ -135,8 +130,9 @@ describe('importPlan', () => {
         },
       ];
 
-      expect(_validatePlanContents(logger, 'some/path', plan)).to.deep.equal(plan);
-      expect(getLogMessages(logger)).to.include('saveRefs');
+      expect(_validatePlanContents(stubDisplay, 'some/path', plan)).to.deep.equal(plan);
+      expect(stubDisplay.getDisplayedWarnings()).to.be.length(1);
+      expect(stubDisplay.getDisplayedWarnings()[0]).to.include('saveRefs');
     });
 
     it('good plan in classic format, multiple files', () => {
@@ -149,8 +145,9 @@ describe('importPlan', () => {
         },
       ];
 
-      expect(_validatePlanContents(logger, 'some/path', plan)).to.deep.equal(plan);
-      expect(getLogMessages(logger)).to.include('saveRefs');
+      expect(_validatePlanContents(stubDisplay, 'some/path', plan)).to.deep.equal(plan);
+      expect(stubDisplay.getDisplayedWarnings()).to.be.length(1);
+      expect(stubDisplay.getDisplayedWarnings()[0]).to.include('saveRefs');
     });
 
     it('throws on bad plan (missing sobject property)', () => {
@@ -163,7 +160,7 @@ describe('importPlan', () => {
       ];
 
       try {
-        shouldThrowSync(() => _validatePlanContents(logger, 'some/path', plan));
+        shouldThrowSync(() => _validatePlanContents(stubDisplay, 'some/path', plan));
       } catch (e) {
         assert(e instanceof Error);
         expect(e.name).to.equal('InvalidDataImportError');
@@ -179,7 +176,7 @@ describe('importPlan', () => {
         },
       ];
       try {
-        shouldThrowSync(() => _validatePlanContents(logger, 'some/plan', plan));
+        shouldThrowSync(() => _validatePlanContents(stubDisplay, 'some/plan', plan));
       } catch (e) {
         assert(e instanceof Error);
         expect(e.message).to.include('The `files` property of the plan objects must contain only strings');
@@ -192,14 +189,8 @@ describe('importPlan', () => {
           files: ['Account.json'],
         },
       ];
-      expect(_validatePlanContents(logger, 'some/path', plan)).to.deep.equal(plan);
-      expect(getLogMessages(logger)).to.not.include('saveRefs');
+      expect(_validatePlanContents(stubDisplay, 'some/path', plan)).to.deep.equal(plan);
+      expect(stubDisplay.getDisplayedWarnings()).to.be.length(0);
     });
   });
 });
-
-const getLogMessages = (logger: Logger): string =>
-  logger
-    .getBufferedRecords()
-    .map((i) => i.msg)
-    .join('/n');

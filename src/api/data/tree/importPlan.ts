@@ -22,6 +22,7 @@ import { isString } from '@salesforce/ts-types';
 import { Logger, Connection, Messages } from '@salesforce/core';
 import type { DataPlanPart, GenericObject, SObjectTreeInput } from '../../../types.js';
 import { DataImportPlanArraySchema, DataImportPlanArray } from '../../../schema/dataImportPlan.js';
+import { Display } from '../../../ux/Display.js';
 import type { ImportResult } from './importTypes.js';
 import {
   getResultsIfNoError,
@@ -51,12 +52,16 @@ type ResultsSoFar = {
 const TREE_API_LIMIT = 200;
 
 const refRegex = (object: string): RegExp => new RegExp(`^@${object}Ref\\d+$`);
-export const importFromPlan = async (conn: Connection, planFilePath: string): Promise<ImportResult[]> => {
+export const importFromPlan = async (
+  conn: Connection,
+  planFilePath: string,
+  display: Display
+): Promise<ImportResult[]> => {
   const resolvedPlanPath = path.resolve(process.cwd(), planFilePath);
   const logger = Logger.childFromRoot('data:import:tree:importFromPlan');
 
   const planContents = await Promise.all(
-    _validatePlanContents(logger, resolvedPlanPath, JSON.parse(fs.readFileSync(resolvedPlanPath, 'utf-8')))
+    _validatePlanContents(display, resolvedPlanPath, JSON.parse(fs.readFileSync(resolvedPlanPath, 'utf-8')))
       .flatMap((planPart) =>
         planPart.files.map((f) => ({ ...planPart, filePath: path.resolve(path.dirname(resolvedPlanPath), f) }))
       )
@@ -186,9 +191,7 @@ const replaceRefWithId =
     ) as SObjectTreeInput;
 
 // eslint-disable-next-line no-underscore-dangle
-export function _validatePlanContents(logger: Logger, planPath: string, planContents: unknown): DataImportPlanArray {
-  const childLogger: Logger = logger.child('validatePlanContents');
-
+export function _validatePlanContents(display: Display, planPath: string, planContents: unknown): DataImportPlanArray {
   const parseResults = DataImportPlanArraySchema.safeParse(planContents);
 
   if (parseResults.error) {
@@ -201,7 +204,7 @@ export function _validatePlanContents(logger: Logger, planPath: string, planCont
 
   for (const parsedPlan of parsedPlans) {
     if (parsedPlan.saveRefs !== undefined || parsedPlan.resolveRefs !== undefined) {
-      childLogger.warn(
+      display.displayWarning(
         "The plan contains the 'saveRefs' and/or 'resolveRefs' properties. These properties will be ignored and can be removed."
       );
     }
