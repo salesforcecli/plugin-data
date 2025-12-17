@@ -15,13 +15,13 @@
  */
 import path from 'node:path';
 import { EOL } from 'node:os';
-import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import { createHash } from 'node:crypto';
 
-import { AnyJson, isString } from '@salesforce/ts-types';
-import { Logger, SchemaValidator, SfError, Connection, Messages } from '@salesforce/core';
+import { isString } from '@salesforce/ts-types';
+import { Logger, Connection, Messages } from '@salesforce/core';
 import type { GenericObject, SObjectTreeInput } from '../../../types.js';
+import { DataImportPlanArraySchema, DataImportPlanArray } from '../../../schema/dataImportPlan.js';
 import type { DataPlanPartFilesOnly, ImportResult } from './importTypes.js';
 import {
   getResultsIfNoError,
@@ -56,14 +56,10 @@ export const importFromPlan = async (conn: Connection, planFilePath: string): Pr
   const logger = Logger.childFromRoot('data:import:tree:importFromPlan');
 
   const planContents = await Promise.all(
-    (
-      await validatePlanContents(logger)(
-        resolvedPlanPath,
-        (await JSON.parse(fs.readFileSync(resolvedPlanPath, 'utf8'))) as DataPlanPartFilesOnly[]
+    _validatePlanContents(logger, resolvedPlanPath, JSON.parse(fs.readFileSync(resolvedPlanPath, 'utf-8')))
+      .flatMap((planPart) =>
+        planPart.files.map((f) => ({ ...planPart, filePath: path.resolve(path.dirname(resolvedPlanPath), f) }))
       )
-    )
-      // there *shouldn't* be multiple files for the same sobject in a plan, but the legacy code allows that
-      .flatMap((dpp) => dpp.files.map((f) => ({ ...dpp, filePath: path.resolve(path.dirname(resolvedPlanPath), f) })))
       .map(async (i) => ({
         ...i,
         records: parseDataFileContents(i.filePath)(await fs.promises.readFile(i.filePath, 'utf-8')),
@@ -189,53 +185,34 @@ const replaceRefWithId =
       Object.entries(record).map(([k, v]) => [k, v === `@${ref.refId}` ? ref.id : v])
     ) as SObjectTreeInput;
 
-export const validatePlanContents =
-  (logger: Logger) =>
-  async (planPath: string, planContents: unknown): Promise<DataPlanPartFilesOnly[]> => {
-    const childLogger = logger.child('validatePlanContents');
-    const planSchema = path.join(
-      path.dirname(fileURLToPath(import.meta.url)),
-      '..',
-      '..',
-      '..',
-      '..',
-      'schema',
-      'dataImportPlanSchema.json'
-    );
+// eslint-disable-next-line no-underscore-dangle
+export function _validatePlanContents(logger: Logger, planPath: string, planContents: unknown): DataImportPlanArray {
+  const childLogger: Logger = logger.child('validatePlanContents');
 
-    const val = new SchemaValidator(childLogger, planSchema);
-    try {
-      await val.validate(planContents as AnyJson);
-      const output = planContents as DataPlanPartFilesOnly[];
-      if (hasRefs(output)) {
-        childLogger.warn(
-          "The plan contains the 'saveRefs' and/or 'resolveRefs' properties.  These properties will be ignored and can be removed."
-        );
-      }
-      if (!hasOnlySimpleFiles(output)) {
-        throw messages.createError('error.NonStringFiles');
-      }
-      return planContents as DataPlanPartFilesOnly[];
-    } catch (err) {
-      if (err instanceof Error && err.name === 'ValidationSchemaFieldError') {
-        throw messages.createError('error.InvalidDataImport', [planPath, err.message]);
-      } else if (err instanceof Error) {
-        throw SfError.wrap(err);
-      }
-      throw err;
+  const parseResults = DataImportPlanArraySchema.safeParse(planContents);
+
+  if (parseResults.error) {
+    throw messages.createError('error.InvalidDataImport', [
+      planPath,
+      parseResults.error.issues.map((e) => e.message).join('\n'),
+    ]);
+  }
+  const parsedPlans: DataImportPlanArray = parseResults.data;
+
+  for (const parsedPlan of parsedPlans) {
+    if (parsedPlan.saveRefs !== undefined || parsedPlan.resolveRefs !== undefined) {
+      childLogger.warn(
+        "The plan contains the 'saveRefs' and/or 'resolveRefs' properties. These properties will be ignored and can be removed."
+      );
     }
-  };
+  }
+  return parsedPlans;
+}
 
 const matchesRefFilter =
   (unresolvedRefRegex: RegExp) =>
   (v: unknown): boolean =>
     typeof v === 'string' && unresolvedRefRegex.test(v);
-
-const hasOnlySimpleFiles = (planParts: DataPlanPartFilesOnly[]): boolean =>
-  planParts.every((p) => p.files.every((f) => typeof f === 'string'));
-
-const hasRefs = (planParts: DataPlanPartFilesOnly[]): boolean =>
-  planParts.some((p) => p.saveRefs !== undefined || p.resolveRefs !== undefined);
 
 // TODO: change this implementation to use Object.groupBy when it's on all supported node versions
 const filterUnresolved = (

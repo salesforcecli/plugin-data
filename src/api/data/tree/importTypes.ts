@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { Dictionary } from '@salesforce/ts-types';
 import type { DataPlanPart } from '../../../types.js';
 
 /*
@@ -47,11 +46,6 @@ type TreeResponseError = {
 export type ResponseRefs = {
   referenceId: string;
   id: string;
-};
-export type ImportResults = {
-  responseRefs?: ResponseRefs[];
-  sobjectTypes?: Dictionary;
-  errors?: string[];
 };
 
 export type ImportResult = {
