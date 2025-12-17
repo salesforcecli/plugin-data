@@ -20,9 +20,9 @@ import { createHash } from 'node:crypto';
 
 import { isString } from '@salesforce/ts-types';
 import { Logger, Connection, Messages } from '@salesforce/core';
-import type { GenericObject, SObjectTreeInput } from '../../../types.js';
+import type { DataPlanPart, GenericObject, SObjectTreeInput } from '../../../types.js';
 import { DataImportPlanArraySchema, DataImportPlanArray } from '../../../schema/dataImportPlan.js';
-import type { DataPlanPartFilesOnly, ImportResult } from './importTypes.js';
+import type { ImportResult } from './importTypes.js';
 import {
   getResultsIfNoError,
   parseDataFileContents,
@@ -37,7 +37,7 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
 // the "new" type for these.  We're ignoring saveRefs/resolveRefs
-export type EnrichedPlanPart = Omit<DataPlanPartFilesOnly, 'saveRefs' | 'resolveRefs'> & {
+export type EnrichedPlanPart = Partial<DataPlanPart> & {
   filePath: string;
   sobject: string;
   records: SObjectTreeInput[];
