@@ -37,9 +37,8 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
 // the "new" type for these.  We're ignoring saveRefs/resolveRefs
-export type EnrichedPlanPart = Partial<DataPlanPart> & {
+export type EnrichedPlanPart = DataPlanPart & {
   filePath: string;
-  sobject: string;
   records: SObjectTreeInput[];
 };
 /** an accumulator for api results.  Fingerprints exist to break recursion */
