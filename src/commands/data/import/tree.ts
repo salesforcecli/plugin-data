@@ -61,9 +61,12 @@ export default class Import extends SfCommand<ImportResult[]> {
     const conn = flags['target-org'].getConnection(flags['api-version']);
 
     try {
-      const results = flags.plan
+      const { results, warnings } = flags.plan
         ? await importFromPlan(conn, flags.plan)
         : await importFromFiles(conn, flags.files ?? []);
+      for (const warning of warnings) {
+        this.warn(warning);
+      }
 
       this.table({
         data: results,

@@ -15,14 +15,14 @@
  */
 import path from 'node:path';
 import { EOL } from 'node:os';
-import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import { createHash } from 'node:crypto';
 
-import { AnyJson, isString } from '@salesforce/ts-types';
-import { Logger, SchemaValidator, SfError, Connection, Messages } from '@salesforce/core';
-import type { GenericObject, SObjectTreeInput } from '../../../types.js';
-import type { DataPlanPartFilesOnly, ImportResult } from './importTypes.js';
+import { isString } from '@salesforce/ts-types';
+import { Logger, Connection, Messages } from '@salesforce/core';
+import type { DataPlanPart, GenericObject, SObjectTreeInput } from '../../../types.js';
+import { DataImportPlanArraySchema, DataImportPlanArray } from '../../../schema/dataImportPlan.js';
+import type { ImportResult, ImportStatus } from './importTypes.js';
 import {
   getResultsIfNoError,
   parseDataFileContents,
@@ -37,7 +37,7 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
 // the "new" type for these.  We're ignoring saveRefs/resolveRefs
-export type EnrichedPlanPart = Omit<DataPlanPartFilesOnly, 'saveRefs' | 'resolveRefs'> & {
+export type EnrichedPlanPart = Partial<DataPlanPart> & {
   filePath: string;
   sobject: string;
   records: SObjectTreeInput[];
@@ -51,19 +51,17 @@ type ResultsSoFar = {
 const TREE_API_LIMIT = 200;
 
 const refRegex = (object: string): RegExp => new RegExp(`^@${object}Ref\\d+$`);
-export const importFromPlan = async (conn: Connection, planFilePath: string): Promise<ImportResult[]> => {
+export const importFromPlan = async (conn: Connection, planFilePath: string): Promise<ImportStatus> => {
   const resolvedPlanPath = path.resolve(process.cwd(), planFilePath);
   const logger = Logger.childFromRoot('data:import:tree:importFromPlan');
-
+  const warnings: string[] = [];
+  const planResultObj = validatePlanContents(resolvedPlanPath, JSON.parse(fs.readFileSync(resolvedPlanPath, 'utf-8')));
+  warnings.push(...planResultObj.warnings);
   const planContents = await Promise.all(
-    (
-      await validatePlanContents(logger)(
-        resolvedPlanPath,
-        (await JSON.parse(fs.readFileSync(resolvedPlanPath, 'utf8'))) as DataPlanPartFilesOnly[]
+    planResultObj.parsedPlans
+      .flatMap((planPart) =>
+        planPart.files.map((f) => ({ ...planPart, filePath: path.resolve(path.dirname(resolvedPlanPath), f) }))
       )
-    )
-      // there *shouldn't* be multiple files for the same sobject in a plan, but the legacy code allows that
-      .flatMap((dpp) => dpp.files.map((f) => ({ ...dpp, filePath: path.resolve(path.dirname(resolvedPlanPath), f) })))
       .map(async (i) => ({
         ...i,
         records: parseDataFileContents(i.filePath)(await fs.promises.readFile(i.filePath, 'utf-8')),
@@ -72,7 +70,7 @@ export const importFromPlan = async (conn: Connection, planFilePath: string): Pr
   // using recursion to sequentially send the requests so we get refs back from each round
   const { results } = await getResults(conn)(logger)({ results: [], fingerprints: new Set() })(planContents);
 
-  return results;
+  return { results, warnings };
 };
 
 /** recursively splits files (for size or unresolved refs) and makes API calls, storing results for subsequent calls */
@@ -189,53 +187,36 @@ const replaceRefWithId =
       Object.entries(record).map(([k, v]) => [k, v === `@${ref.refId}` ? ref.id : v])
     ) as SObjectTreeInput;
 
-export const validatePlanContents =
-  (logger: Logger) =>
-  async (planPath: string, planContents: unknown): Promise<DataPlanPartFilesOnly[]> => {
-    const childLogger = logger.child('validatePlanContents');
-    const planSchema = path.join(
-      path.dirname(fileURLToPath(import.meta.url)),
-      '..',
-      '..',
-      '..',
-      '..',
-      'schema',
-      'dataImportPlanSchema.json'
-    );
+export function validatePlanContents(
+  planPath: string,
+  planContents: unknown
+): { parsedPlans: DataImportPlanArray; warnings: string[] } {
+  const warnings: string[] = [];
+  const parseResults = DataImportPlanArraySchema.safeParse(planContents);
 
-    const val = new SchemaValidator(childLogger, planSchema);
-    try {
-      await val.validate(planContents as AnyJson);
-      const output = planContents as DataPlanPartFilesOnly[];
-      if (hasRefs(output)) {
-        childLogger.warn(
-          "The plan contains the 'saveRefs' and/or 'resolveRefs' properties.  These properties will be ignored and can be removed."
-        );
-      }
-      if (!hasOnlySimpleFiles(output)) {
-        throw messages.createError('error.NonStringFiles');
-      }
-      return planContents as DataPlanPartFilesOnly[];
-    } catch (err) {
-      if (err instanceof Error && err.name === 'ValidationSchemaFieldError') {
-        throw messages.createError('error.InvalidDataImport', [planPath, err.message]);
-      } else if (err instanceof Error) {
-        throw SfError.wrap(err);
-      }
-      throw err;
+  if (parseResults.error) {
+    throw messages.createError('error.InvalidDataImport', [
+      planPath,
+      parseResults.error.issues.map((e) => e.message).join('\n'),
+    ]);
+  }
+  const parsedPlans: DataImportPlanArray = parseResults.data;
+
+  for (const parsedPlan of parsedPlans) {
+    if (parsedPlan.saveRefs !== undefined || parsedPlan.resolveRefs !== undefined) {
+      warnings.push(
+        "The plan contains the 'saveRefs' and/or 'resolveRefs' properties. These properties will be ignored and can be removed."
+      );
+      break;
     }
-  };
+  }
+  return { parsedPlans, warnings };
+}
 
 const matchesRefFilter =
   (unresolvedRefRegex: RegExp) =>
   (v: unknown): boolean =>
     typeof v === 'string' && unresolvedRefRegex.test(v);
-
-const hasOnlySimpleFiles = (planParts: DataPlanPartFilesOnly[]): boolean =>
-  planParts.every((p) => p.files.every((f) => typeof f === 'string'));
-
-const hasRefs = (planParts: DataPlanPartFilesOnly[]): boolean =>
-  planParts.some((p) => p.saveRefs !== undefined || p.resolveRefs !== undefined);
 
 // TODO: change this implementation to use Object.groupBy when it's on all supported node versions
 const filterUnresolved = (

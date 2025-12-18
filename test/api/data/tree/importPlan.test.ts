@@ -16,8 +16,7 @@
 /* eslint-disable camelcase */ // for salesforce __c style fields
 
 import { expect, assert } from 'chai';
-import { shouldThrow } from '@salesforce/core/testSetup';
-import { Logger } from '@salesforce/core';
+import { shouldThrowSync } from '@salesforce/core/testSetup';
 import {
   replaceRefsInTheSameFile,
   EnrichedPlanPart,
@@ -114,18 +113,7 @@ describe('importPlan', () => {
     });
   });
   describe('plan validation', () => {
-    // ensure no static rootLogger
-    // @ts-expect-error private stuff
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    Logger.rootLogger = undefined;
-    const logger = new Logger({ name: 'importPlanTest', useMemoryLogger: true });
-    afterEach(() => {
-      // @ts-expect-error private stuff
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      logger.memoryLogger.loggedData = [];
-    });
-    const validator = validatePlanContents(logger);
-    it('good plan in classic format', async () => {
+    it('good plan in classic format, one file', () => {
       const plan = [
         {
           sobject: 'Account',
@@ -134,10 +122,14 @@ describe('importPlan', () => {
           files: ['Account.json'],
         },
       ];
-      expect(await validator('some/path', plan)).to.equal(plan);
-      expect(getLogMessages(logger)).to.include('saveRefs');
+
+      const { parsedPlans, warnings } = validatePlanContents('some/path', plan);
+      expect(parsedPlans).to.deep.equal(plan);
+      expect(warnings).to.be.length(1);
+      expect(warnings[0]).to.include('saveRefs');
     });
-    it('good plan in classic format', async () => {
+
+    it('good plan in classic format, multiple files', () => {
       const plan = [
         {
           sobject: 'Account',
@@ -146,9 +138,14 @@ describe('importPlan', () => {
           files: ['Account.json', 'Account2.json'],
         },
       ];
-      expect(await validator('some/path', plan)).to.equal(plan);
+
+      const { parsedPlans, warnings } = validatePlanContents('some/path', plan);
+      expect(parsedPlans).to.deep.equal(plan);
+      expect(warnings).to.be.length(1);
+      expect(warnings[0]).to.include('saveRefs');
     });
-    it('throws on bad plan (missing the object)', async () => {
+
+    it('throws on bad plan (missing sobject property)', () => {
       const plan = [
         {
           saveRefs: true,
@@ -156,15 +153,15 @@ describe('importPlan', () => {
           files: ['Account.json', 'Account2.json'],
         },
       ];
+
       try {
-        await shouldThrow(validator('some/path', plan));
+        shouldThrowSync(() => validatePlanContents('some/path', plan));
       } catch (e) {
         assert(e instanceof Error);
         expect(e.name).to.equal('InvalidDataImportError');
       }
     });
-    // TODO: remove this test when schema moves to simple files only
-    it('throws when files are an object that meets current schema', async () => {
+    it('throws when files property contains non-strings', () => {
       const plan = [
         {
           sobject: 'Account',
@@ -174,27 +171,22 @@ describe('importPlan', () => {
         },
       ];
       try {
-        await shouldThrow(validator('some/path', plan));
+        shouldThrowSync(() => validatePlanContents('some/plan', plan));
       } catch (e) {
         assert(e instanceof Error);
-        expect(e.name, JSON.stringify(e)).to.equal('NonStringFilesError');
+        expect(e.message).to.include('The `files` property of the plan objects must contain only strings');
       }
     });
-    it('good plan in new format is valid and produces no warnings', async () => {
+    it('good plan in new format', () => {
       const plan = [
         {
           sobject: 'Account',
           files: ['Account.json'],
         },
       ];
-      expect(await validator('some/path', plan)).to.equal(plan);
-      expect(getLogMessages(logger)).to.not.include('saveRefs');
+      const { parsedPlans, warnings } = validatePlanContents('some/path', plan);
+      expect(parsedPlans).to.deep.equal(plan);
+      expect(warnings).to.be.length(0);
     });
   });
 });
-
-const getLogMessages = (logger: Logger): string =>
-  logger
-    .getBufferedRecords()
-    .map((i) => i.msg)
-    .join('/n');
