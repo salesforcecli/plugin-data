@@ -62,7 +62,7 @@ export type SObjectTreeInput = Omit<BasicRecord, 'attributes'> & {
 };
 export type DataPlanPart = {
   sobject: string;
-  files: Array<string | (DataPlanPart & { file: string })>;
+  files: string[];
 };
 
 export type SObjectTreeFileContents = {

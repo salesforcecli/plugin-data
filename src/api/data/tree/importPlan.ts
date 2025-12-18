@@ -37,9 +37,8 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'importApi');
 
 // the "new" type for these.  We're ignoring saveRefs/resolveRefs
-export type EnrichedPlanPart = Partial<DataPlanPart> & {
+export type EnrichedPlanPart = DataPlanPart & {
   filePath: string;
-  sobject: string;
   records: SObjectTreeInput[];
 };
 /** an accumulator for api results.  Fingerprints exist to break recursion */
@@ -51,6 +50,7 @@ type ResultsSoFar = {
 const TREE_API_LIMIT = 200;
 
 const refRegex = (object: string): RegExp => new RegExp(`^@${object}Ref\\d+$`);
+
 export const importFromPlan = async (conn: Connection, planFilePath: string): Promise<ImportStatus> => {
   const resolvedPlanPath = path.resolve(process.cwd(), planFilePath);
   const logger = Logger.childFromRoot('data:import:tree:importFromPlan');
@@ -197,7 +197,7 @@ export function validatePlanContents(
   if (parseResults.error) {
     throw messages.createError('error.InvalidDataImport', [
       planPath,
-      parseResults.error.issues.map((e) => e.message).join('\n'),
+      parseResults.error.issues.map((e) => JSON.stringify(e, null, 2)).join('\n'),
     ]);
   }
   const parsedPlans: DataImportPlanArray = parseResults.data;
