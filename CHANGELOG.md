@@ -1,3 +1,9 @@
+## [4.0.67](https://github.com/salesforcecli/plugin-data/compare/4.0.66...4.0.67) (2025-12-18)
+
+### Bug Fixes
+
+- improve error message for schema problems W-20495414 ([#1363](https://github.com/salesforcecli/plugin-data/issues/1363)) ([54add09](https://github.com/salesforcecli/plugin-data/commit/54add097fa695d13162713a91a46ac81289205d1))
+
 ## [4.0.66](https://github.com/salesforcecli/plugin-data/compare/4.0.65...4.0.66) (2025-12-07)
 
 ### Bug Fixes
