@@ -20,7 +20,7 @@ Data plan file %s did not validate against the schema. Errors: %s.
 
 - Make sure you're importing a plan definition file.
 
-- Get help with the import plan schema by running "sf data import beta tree --help".
+- Get help with the import plan schema by running "sf data import tree --help".
 
 # error.NonStringFiles
 
