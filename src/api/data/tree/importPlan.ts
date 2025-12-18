@@ -50,6 +50,7 @@ type ResultsSoFar = {
 const TREE_API_LIMIT = 200;
 
 const refRegex = (object: string): RegExp => new RegExp(`^@${object}Ref\\d+$`);
+
 export const importFromPlan = async (conn: Connection, planFilePath: string): Promise<ImportStatus> => {
   const resolvedPlanPath = path.resolve(process.cwd(), planFilePath);
   const logger = Logger.childFromRoot('data:import:tree:importFromPlan');
@@ -194,9 +195,10 @@ export function validatePlanContents(
   const parseResults = DataImportPlanArraySchema.safeParse(planContents);
 
   if (parseResults.error) {
+    // console.log(parseResults);
     throw messages.createError('error.InvalidDataImport', [
       planPath,
-      parseResults.error.issues.map((e) => e.message).join('\n'),
+      parseResults.error.issues.map((e) => JSON.stringify(e, null, 2)).join('\n'),
     ]);
   }
   const parsedPlans: DataImportPlanArray = parseResults.data;
