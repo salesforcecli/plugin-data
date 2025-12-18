@@ -195,7 +195,6 @@ export function validatePlanContents(
   const parseResults = DataImportPlanArraySchema.safeParse(planContents);
 
   if (parseResults.error) {
-    // console.log(parseResults);
     throw messages.createError('error.InvalidDataImport', [
       planPath,
       parseResults.error.issues.map((e) => JSON.stringify(e, null, 2)).join('\n'),
