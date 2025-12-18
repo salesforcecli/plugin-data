@@ -25,7 +25,7 @@ import {
   getResultsIfNoError,
   transformRecordTypeEntries,
 } from './importCommon.js';
-import type { ImportResult, ResponseRefs, TreeResponse } from './importTypes.js';
+import type { ImportResult, ImportStatus, ResponseRefs, TreeResponse } from './importTypes.js';
 import { hasUnresolvedRefs } from './functions.js';
 
 export type FileInfo = {
@@ -35,7 +35,7 @@ export type FileInfo = {
   sobject: string;
 };
 
-export const importFromFiles = async (conn: Connection, dataFilePaths: string[]): Promise<ImportResult[]> => {
+export const importFromFiles = async (conn: Connection, dataFilePaths: string[]): Promise<ImportStatus> => {
   const logger = Logger.childFromRoot('data:import:tree:importSObjectTreeFile');
   const fileInfos = (await Promise.all(dataFilePaths.map(parseFile))).map(logFileInfo(logger)).map(validateNoRefs);
   await Promise.all(fileInfos.map(async (fi) => transformRecordTypeEntries(conn, fi.records)));
@@ -43,7 +43,10 @@ export const importFromFiles = async (conn: Connection, dataFilePaths: string[])
   const results = await Promise.allSettled(
     fileInfos.map((fi) => sendSObjectTreeRequest(conn)(fi.sobject)(JSON.stringify({ records: fi.records })))
   );
-  return results.map(getSuccessOrThrow).flatMap(getValueOrThrow(fileInfos)).map(addObjectTypes(refMap));
+  return {
+    results: results.map(getSuccessOrThrow).flatMap(getValueOrThrow(fileInfos)).map(addObjectTypes(refMap)),
+    warnings: [],
+  };
 };
 
 const getSuccessOrThrow = (result: PromiseSettledResult<TreeResponse>): PromiseFulfilledResult<TreeResponse> =>

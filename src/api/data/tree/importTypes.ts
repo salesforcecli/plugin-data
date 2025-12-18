@@ -40,6 +40,11 @@ export type ResponseRefs = {
   id: string;
 };
 
+export type ImportStatus = {
+  results: ImportResult[];
+  warnings: string[];
+};
+
 export type ImportResult = {
   refId: string;
   type: string;

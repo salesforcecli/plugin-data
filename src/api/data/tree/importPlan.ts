@@ -22,8 +22,7 @@ import { isString } from '@salesforce/ts-types';
 import { Logger, Connection, Messages } from '@salesforce/core';
 import type { DataPlanPart, GenericObject, SObjectTreeInput } from '../../../types.js';
 import { DataImportPlanArraySchema, DataImportPlanArray } from '../../../schema/dataImportPlan.js';
-import { Display } from '../../../ux/Display.js';
-import type { ImportResult } from './importTypes.js';
+import type { ImportResult, ImportStatus } from './importTypes.js';
 import {
   getResultsIfNoError,
   parseDataFileContents,
@@ -52,16 +51,14 @@ type ResultsSoFar = {
 const TREE_API_LIMIT = 200;
 
 const refRegex = (object: string): RegExp => new RegExp(`^@${object}Ref\\d+$`);
-export const importFromPlan = async (
-  conn: Connection,
-  planFilePath: string,
-  display: Display
-): Promise<ImportResult[]> => {
+export const importFromPlan = async (conn: Connection, planFilePath: string): Promise<ImportStatus> => {
   const resolvedPlanPath = path.resolve(process.cwd(), planFilePath);
   const logger = Logger.childFromRoot('data:import:tree:importFromPlan');
-
+  const warnings: string[] = [];
+  const planResultObj = _validatePlanContents(resolvedPlanPath, JSON.parse(fs.readFileSync(resolvedPlanPath, 'utf-8')));
+  warnings.push(...planResultObj.warnings);
   const planContents = await Promise.all(
-    _validatePlanContents(display, resolvedPlanPath, JSON.parse(fs.readFileSync(resolvedPlanPath, 'utf-8')))
+    planResultObj.parsedPlans
       .flatMap((planPart) =>
         planPart.files.map((f) => ({ ...planPart, filePath: path.resolve(path.dirname(resolvedPlanPath), f) }))
       )
@@ -73,7 +70,7 @@ export const importFromPlan = async (
   // using recursion to sequentially send the requests so we get refs back from each round
   const { results } = await getResults(conn)(logger)({ results: [], fingerprints: new Set() })(planContents);
 
-  return results;
+  return { results, warnings };
 };
 
 /** recursively splits files (for size or unresolved refs) and makes API calls, storing results for subsequent calls */
@@ -191,7 +188,11 @@ const replaceRefWithId =
     ) as SObjectTreeInput;
 
 // eslint-disable-next-line no-underscore-dangle
-export function _validatePlanContents(display: Display, planPath: string, planContents: unknown): DataImportPlanArray {
+export function _validatePlanContents(
+  planPath: string,
+  planContents: unknown
+): { parsedPlans: DataImportPlanArray; warnings: string[] } {
+  const warnings: string[] = [];
   const parseResults = DataImportPlanArraySchema.safeParse(planContents);
 
   if (parseResults.error) {
@@ -204,12 +205,13 @@ export function _validatePlanContents(display: Display, planPath: string, planCo
 
   for (const parsedPlan of parsedPlans) {
     if (parsedPlan.saveRefs !== undefined || parsedPlan.resolveRefs !== undefined) {
-      display.displayWarning(
+      warnings.push(
         "The plan contains the 'saveRefs' and/or 'resolveRefs' properties. These properties will be ignored and can be removed."
       );
+      break;
     }
   }
-  return parsedPlans;
+  return { parsedPlans, warnings };
 }
 
 const matchesRefFilter =

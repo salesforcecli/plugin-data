@@ -17,7 +17,6 @@
 
 import { expect, assert } from 'chai';
 import { shouldThrowSync } from '@salesforce/core/testSetup';
-import { StubDisplay } from '../../../stubs/stub-display.js';
 import {
   replaceRefsInTheSameFile,
   EnrichedPlanPart,
@@ -114,12 +113,6 @@ describe('importPlan', () => {
     });
   });
   describe('plan validation', () => {
-    let stubDisplay: StubDisplay;
-
-    beforeEach(() => {
-      stubDisplay = new StubDisplay();
-    });
-
     it('good plan in classic format, one file', () => {
       const plan = [
         {
@@ -130,9 +123,10 @@ describe('importPlan', () => {
         },
       ];
 
-      expect(_validatePlanContents(stubDisplay, 'some/path', plan)).to.deep.equal(plan);
-      expect(stubDisplay.getDisplayedWarnings()).to.be.length(1);
-      expect(stubDisplay.getDisplayedWarnings()[0]).to.include('saveRefs');
+      const { parsedPlans, warnings } = _validatePlanContents('some/path', plan);
+      expect(parsedPlans).to.deep.equal(plan);
+      expect(warnings).to.be.length(1);
+      expect(warnings[0]).to.include('saveRefs');
     });
 
     it('good plan in classic format, multiple files', () => {
@@ -145,9 +139,10 @@ describe('importPlan', () => {
         },
       ];
 
-      expect(_validatePlanContents(stubDisplay, 'some/path', plan)).to.deep.equal(plan);
-      expect(stubDisplay.getDisplayedWarnings()).to.be.length(1);
-      expect(stubDisplay.getDisplayedWarnings()[0]).to.include('saveRefs');
+      const { parsedPlans, warnings } = _validatePlanContents('some/path', plan);
+      expect(parsedPlans).to.deep.equal(plan);
+      expect(warnings).to.be.length(1);
+      expect(warnings[0]).to.include('saveRefs');
     });
 
     it('throws on bad plan (missing sobject property)', () => {
@@ -160,7 +155,7 @@ describe('importPlan', () => {
       ];
 
       try {
-        shouldThrowSync(() => _validatePlanContents(stubDisplay, 'some/path', plan));
+        shouldThrowSync(() => _validatePlanContents('some/path', plan));
       } catch (e) {
         assert(e instanceof Error);
         expect(e.name).to.equal('InvalidDataImportError');
@@ -176,7 +171,7 @@ describe('importPlan', () => {
         },
       ];
       try {
-        shouldThrowSync(() => _validatePlanContents(stubDisplay, 'some/plan', plan));
+        shouldThrowSync(() => _validatePlanContents('some/plan', plan));
       } catch (e) {
         assert(e instanceof Error);
         expect(e.message).to.include('The `files` property of the plan objects must contain only strings');
@@ -189,8 +184,9 @@ describe('importPlan', () => {
           files: ['Account.json'],
         },
       ];
-      expect(_validatePlanContents(stubDisplay, 'some/path', plan)).to.deep.equal(plan);
-      expect(stubDisplay.getDisplayedWarnings()).to.be.length(0);
+      const { parsedPlans, warnings } = _validatePlanContents('some/path', plan);
+      expect(parsedPlans).to.deep.equal(plan);
+      expect(warnings).to.be.length(0);
     });
   });
 });

@@ -19,7 +19,6 @@ import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { ensureString, isObject } from '@salesforce/ts-types';
 import { importFromPlan } from '../../../api/data/tree/importPlan.js';
 import { importFromFiles } from '../../../api/data/tree/importFiles.js';
-import { Displayable, UxDisplay } from '../../../ux/Display.js';
 import { orgFlags } from '../../../flags.js';
 import type { ImportResult, TreeResponse } from '../../../api/data/tree/importTypes.js';
 
@@ -29,7 +28,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.import')
 /**
  * Command that provides data import capability via the SObject Tree Save API.
  */
-export default class Import extends SfCommand<ImportResult[]> implements Displayable {
+export default class Import extends SfCommand<ImportResult[]> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -62,9 +61,12 @@ export default class Import extends SfCommand<ImportResult[]> implements Display
     const conn = flags['target-org'].getConnection(flags['api-version']);
 
     try {
-      const results = flags.plan
-        ? await importFromPlan(conn, flags.plan, new UxDisplay(this))
+      const { results, warnings } = flags.plan
+        ? await importFromPlan(conn, flags.plan)
         : await importFromFiles(conn, flags.files ?? []);
+      for (const warning of warnings) {
+        this.warn(warning);
+      }
 
       this.table({
         data: results,
