@@ -55,7 +55,7 @@ export const importFromPlan = async (conn: Connection, planFilePath: string): Pr
   const resolvedPlanPath = path.resolve(process.cwd(), planFilePath);
   const logger = Logger.childFromRoot('data:import:tree:importFromPlan');
   const warnings: string[] = [];
-  const planResultObj = _validatePlanContents(resolvedPlanPath, JSON.parse(fs.readFileSync(resolvedPlanPath, 'utf-8')));
+  const planResultObj = validatePlanContents(resolvedPlanPath, JSON.parse(fs.readFileSync(resolvedPlanPath, 'utf-8')));
   warnings.push(...planResultObj.warnings);
   const planContents = await Promise.all(
     planResultObj.parsedPlans
@@ -187,8 +187,7 @@ const replaceRefWithId =
       Object.entries(record).map(([k, v]) => [k, v === `@${ref.refId}` ? ref.id : v])
     ) as SObjectTreeInput;
 
-// eslint-disable-next-line no-underscore-dangle
-export function _validatePlanContents(
+export function validatePlanContents(
   planPath: string,
   planContents: unknown
 ): { parsedPlans: DataImportPlanArray; warnings: string[] } {

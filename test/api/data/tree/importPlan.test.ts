@@ -22,7 +22,7 @@ import {
   EnrichedPlanPart,
   replaceRefs,
   fileSplitter,
-  _validatePlanContents,
+  validatePlanContents,
 } from '../../../../src/api/data/tree/importPlan.js';
 
 describe('importPlan', () => {
@@ -123,7 +123,7 @@ describe('importPlan', () => {
         },
       ];
 
-      const { parsedPlans, warnings } = _validatePlanContents('some/path', plan);
+      const { parsedPlans, warnings } = validatePlanContents('some/path', plan);
       expect(parsedPlans).to.deep.equal(plan);
       expect(warnings).to.be.length(1);
       expect(warnings[0]).to.include('saveRefs');
@@ -139,7 +139,7 @@ describe('importPlan', () => {
         },
       ];
 
-      const { parsedPlans, warnings } = _validatePlanContents('some/path', plan);
+      const { parsedPlans, warnings } = validatePlanContents('some/path', plan);
       expect(parsedPlans).to.deep.equal(plan);
       expect(warnings).to.be.length(1);
       expect(warnings[0]).to.include('saveRefs');
@@ -155,7 +155,7 @@ describe('importPlan', () => {
       ];
 
       try {
-        shouldThrowSync(() => _validatePlanContents('some/path', plan));
+        shouldThrowSync(() => validatePlanContents('some/path', plan));
       } catch (e) {
         assert(e instanceof Error);
         expect(e.name).to.equal('InvalidDataImportError');
@@ -171,7 +171,7 @@ describe('importPlan', () => {
         },
       ];
       try {
-        shouldThrowSync(() => _validatePlanContents('some/plan', plan));
+        shouldThrowSync(() => validatePlanContents('some/plan', plan));
       } catch (e) {
         assert(e instanceof Error);
         expect(e.message).to.include('The `files` property of the plan objects must contain only strings');
@@ -184,7 +184,7 @@ describe('importPlan', () => {
           files: ['Account.json'],
         },
       ];
-      const { parsedPlans, warnings } = _validatePlanContents('some/path', plan);
+      const { parsedPlans, warnings } = validatePlanContents('some/path', plan);
       expect(parsedPlans).to.deep.equal(plan);
       expect(warnings).to.be.length(0);
     });
