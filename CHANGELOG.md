@@ -1,3 +1,10 @@
+## [4.0.68](https://github.com/salesforcecli/plugin-data/compare/4.0.67...4.0.68) (2026-02-11)
+
+### Bug Fixes
+
+- enable PDP events via o11y for PFT ([eb69936](https://github.com/salesforcecli/plugin-data/commit/eb699368ccd83840a3a1322dd0aa2c7a947a6ca2))
+- update license for 2026 ([a03062f](https://github.com/salesforcecli/plugin-data/commit/a03062f50ba35733797b13792c660f4c5c43e814))
+
 ## [4.0.67](https://github.com/salesforcecli/plugin-data/compare/4.0.66...4.0.67) (2025-12-18)
 
 ### Bug Fixes
