@@ -7938,7 +7938,7 @@ yoga-wasm-web@~0.3.3:
   resolved "https://registry.yarnpkg.com/yoga-wasm-web/-/yoga-wasm-web-0.3.3.tgz#eb8e9fcb18e5e651994732f19a220cb885d932ba"
   integrity sha512-N+d4UJSJbt/R3wqY7Coqs5pcV0aUj2j9IaQ3rNj9bVCLld8tTGKRa2USARjnvZJWVx1NDmQev8EknoczaOQDOA==
 
-zod@^4.1.12, zod@^4.2.1:
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/zod/-/zod-4.2.1.tgz#07f0388c7edbfd5f5a2466181cb4adf5b5dbd57b"
-  integrity sha512-0wZ1IRqGGhMP76gLqz8EyfBXKk0J2qo2+H3fi4mcUP/KtTocoX08nmIAHl1Z2kJIZbZee8KOpBCSNPRgauucjw==
+zod@^4.1.12, zod@^4.3.6:
+  version "4.3.6"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-4.3.6.tgz#89c56e0aa7d2b05107d894412227087885ab112a"
+  integrity sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==
