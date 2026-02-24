@@ -78,10 +78,12 @@ export type ColumnDelimiterKeys = keyof typeof ColumnDelimiter;
 /**
  * Transform stream that skips the first line of CSV data (the header row).
  * Used when processing subsequent bulk result pages to avoid duplicate headers.
+ *
+ * Optimized to work directly with Buffers without string conversion for better memory efficiency.
  */
 export class SkipFirstLineTransform extends Transform {
   private firstLineSkipped = false;
-  private buffer = '';
+  private buffer: Buffer = Buffer.alloc(0);
 
   public constructor() {
     super();
@@ -95,9 +97,11 @@ export class SkipFirstLineTransform extends Transform {
     }
 
     // Buffer incoming data until we find the first newline
-    this.buffer += chunk.toString('utf8');
+    // Work directly with Buffers to avoid string conversion overhead
+    this.buffer = Buffer.concat([this.buffer, chunk]);
 
-    const newlineIndex = this.buffer.indexOf('\n');
+    // Find newline byte (0x0A for \n)
+    const newlineIndex = this.buffer.indexOf(0x0a);
 
     if (newlineIndex === -1) {
       // No newline yet, keep buffering
@@ -106,16 +110,16 @@ export class SkipFirstLineTransform extends Transform {
     }
 
     // Found the newline, skip everything up to and including it
-    const remainingData = this.buffer.slice(newlineIndex + 1);
+    const remainingData = this.buffer.subarray(newlineIndex + 1);
     this.firstLineSkipped = true;
-    this.buffer = ''; // Clear buffer to free memory
+    this.buffer = Buffer.alloc(0); // Clear buffer to free memory
 
-    callback(null, Buffer.from(remainingData, 'utf8'));
+    callback(null, remainingData);
   }
 
   public _flush(callback: TransformCallback): void {
     // If we reach the end without finding a newline, clear buffer and finish
-    this.buffer = '';
+    this.buffer = Buffer.alloc(0);
     callback();
   }
 }
