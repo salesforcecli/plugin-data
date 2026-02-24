@@ -245,6 +245,4 @@ const addFingerprint =
   };
 
 const hashObject = (obj: GenericObject): string =>
-  createHash('sha256')
-    .update(Buffer.from(JSON.stringify(obj)))
-    .digest('hex');
+  createHash('sha256').update(JSON.stringify(obj), 'utf8').digest('hex');
