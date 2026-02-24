@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { Transform, Readable } from 'node:stream';
+import { Transform, Readable, TransformCallback } from 'node:stream';
 import { createInterface } from 'node:readline';
 import { pipeline } from 'node:stream/promises';
 import * as fs from 'node:fs';
 import { EOL } from 'node:os';
-import { HttpApi } from '@jsforce/jsforce-node/lib/http-api.js';
+import { fetch } from 'undici';
 import { HttpResponse } from '@jsforce/jsforce-node';
 import {
   IngestJobV2Results,
@@ -75,28 +75,91 @@ export enum ColumnDelimiter {
 
 export type ColumnDelimiterKeys = keyof typeof ColumnDelimiter;
 
-async function bulkRequest(conn: Connection, url: string): Promise<{ body: string; headers: HttpResponse['headers'] }> {
-  const httpApi = new HttpApi(conn, {
-    responseType: 'text/plain', // this ensures jsforce doesn't try parsing the body
-  });
+/**
+ * Transform stream that skips the first line of CSV data (the header row).
+ * Used when processing subsequent bulk result pages to avoid duplicate headers.
+ */
+export class SkipFirstLineTransform extends Transform {
+  private firstLineSkipped = false;
+  private buffer = '';
 
-  let headers: HttpResponse['headers'] | undefined;
+  public constructor() {
+    super();
+  }
 
-  httpApi.on('response', (response: HttpResponse) => {
-    headers = response.headers;
-  });
+  public _transform(chunk: Buffer, _encoding: BufferEncoding, callback: TransformCallback): void {
+    if (this.firstLineSkipped) {
+      // After first line is skipped, pass through all subsequent data
+      callback(null, chunk);
+      return;
+    }
 
-  const body = await httpApi.request<string>({
-    url: conn.normalizeUrl(url),
-    method: 'GET',
-  });
+    // Buffer incoming data until we find the first newline
+    this.buffer += chunk.toString('utf8');
 
-  if (!headers) throw new Error('failed to get HTTP headers for bulk query');
+    const newlineIndex = this.buffer.indexOf('\n');
 
-  return {
-    body,
-    headers,
+    if (newlineIndex === -1) {
+      // No newline yet, keep buffering
+      callback();
+      return;
+    }
+
+    // Found the newline, skip everything up to and including it
+    const remainingData = this.buffer.slice(newlineIndex + 1);
+    this.firstLineSkipped = true;
+    this.buffer = ''; // Clear buffer to free memory
+
+    callback(null, Buffer.from(remainingData, 'utf8'));
+  }
+
+  public _flush(callback: TransformCallback): void {
+    // If we reach the end without finding a newline, clear buffer and finish
+    this.buffer = '';
+    callback();
+  }
+}
+
+async function bulkRequest(
+  conn: Connection,
+  url: string
+): Promise<{ stream: Readable; headers: HttpResponse['headers'] }> {
+  // Bypass jsforce entirely and use undici fetch to avoid any buffering.
+  // jsforce's Transport.httpRequest() adds a 'complete' listener which triggers readAll() buffering.
+  // Using undici fetch directly gives us the raw response stream without any intermediate buffering.
+
+  const normalizedUrl = conn.normalizeUrl(url);
+
+  // Prepare request headers with authorization
+  const headers: { [name: string]: string } = {
+    'content-Type': 'text/csv',
   };
+
+  if (conn.accessToken) {
+    headers.Authorization = `Bearer ${conn.accessToken}`;
+  }
+
+  const response = await fetch(normalizedUrl, {
+    method: 'GET',
+    headers,
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  }
+
+  if (!response.body) {
+    throw new Error('No body was returned');
+  }
+  const stream = Readable.fromWeb(response.body);
+
+  // Extract headers in the format jsforce expects
+  const responseHeaders: HttpResponse['headers'] = {};
+  response.headers.forEach((value: string, key: string) => {
+    responseHeaders[key] = value;
+  });
+
+  return { stream, headers: responseHeaders };
 }
 
 export async function exportRecords(
@@ -123,6 +186,9 @@ export async function exportRecords(
   let locator: string | undefined;
 
   let recordsWritten = 0;
+
+  // refresh here because `bulkRequest` uses undici for fetching results.
+  await conn.refreshAuth();
 
   while (locator !== 'null') {
     // we can't parallelize this because we:
@@ -151,7 +217,7 @@ export async function exportRecords(
 
       // eslint-disable-next-line no-await-in-loop
       await pipeline(
-        Readable.from(res.body),
+        res.stream,
         new csvParse({ columns: true, delimiter: ColumnDelimiter[outputInfo.columnDelimiter] }),
         new Transform({
           objectMode: true,
@@ -173,18 +239,15 @@ export async function exportRecords(
       await pipeline(
         locator
           ? [
-              // Skip the 1st row (CSV header) by finding the index of the first `LF`
-              // occurence and move the position 1 char ahead.
-              //
-              // CSVs using `CRLF` are still handled correctly because `CR` and `LF` are different chars in the string.
-              Readable.from(res.body.slice(res.body.indexOf('\n') + 1)),
+              res.stream,
+              new SkipFirstLineTransform(),
               fs.createWriteStream(outputInfo.filePath, {
                 // Open file for appending. The file is created if it does not exist.
                 // https://nodejs.org/api/fs.html#file-system-flags
                 flags: 'a', // append mode
               }),
             ]
-          : [Readable.from(res.body), fs.createWriteStream(outputInfo.filePath)]
+          : [res.stream, fs.createWriteStream(outputInfo.filePath)]
       );
     }
 
