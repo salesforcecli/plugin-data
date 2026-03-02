@@ -139,6 +139,9 @@ async function bulkRequest(
     'content-Type': 'text/csv',
   };
 
+  // ensure undici gets a valid access token
+  await conn.refreshAuth();
+
   if (conn.accessToken) {
     headers.Authorization = `Bearer ${conn.accessToken}`;
   }
@@ -190,9 +193,6 @@ export async function exportRecords(
   let locator: string | undefined;
 
   let recordsWritten = 0;
-
-  // refresh here because `bulkRequest` uses undici for fetching results.
-  await conn.refreshAuth();
 
   while (locator !== 'null') {
     // we can't parallelize this because we:
