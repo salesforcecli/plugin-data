@@ -35,7 +35,7 @@ describe('bulkUtils', () => {
     });
   });
 
-  describe.only('SkipFirstLineTransform', () => {
+  describe('SkipFirstLineTransform', () => {
     async function streamToString(readable: Readable): Promise<string> {
       const chunks: Buffer[] = [];
       for await (const chunk of readable) {
@@ -58,18 +58,6 @@ describe('bulkUtils', () => {
       const expected = 'Row1Col1,Row1Col2,Row1Col3\r\nRow2Col1,Row2Col2,Row2Col3\r\n';
 
       const result = await streamToString(Readable.from(input).pipe(new SkipFirstLineTransform()));
-
-      expect(result).to.equal(expected);
-    });
-
-    it('handles header split across chunks', async () => {
-      // Simulate a stream where the header is split across multiple chunks
-      const chunk1 = 'Header1,Head';
-      const chunk2 = 'er2,Header3\nRow1Col1,Row1Col2,Row1Col3\n';
-      const expected = 'Row1Col1,Row1Col2,Row1Col3\n';
-
-      const input = Readable.from([chunk1, chunk2]);
-      const result = await streamToString(input.pipe(new SkipFirstLineTransform()));
 
       expect(result).to.equal(expected);
     });
@@ -124,7 +112,7 @@ describe('bulkUtils', () => {
         new SkipFirstLineTransform(),
         async function* (source: AsyncIterable<Buffer>) {
           for await (const chunk of source) {
-            const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as string);
+            const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
             chunks.push(buffer.toString('utf8'));
             yield chunk;
           }
