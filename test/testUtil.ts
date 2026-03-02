@@ -63,7 +63,7 @@ const createBaseFakeEmitter = function (): EventEmitter {
     getMaxListeners(): number {
       return 10;
     },
-    listeners(event: string): Function[] {
+    listeners(event: string): Array<(...args: any[]) => void> {
       return [];
     },
     listenerCount(event: string): number {
