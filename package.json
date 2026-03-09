@@ -1,6 +1,6 @@
 {
   "name": "@salesforce/plugin-data",
-  "version": "4.0.75",
+  "version": "4.0.73",
   "description": "Plugin for salesforce data commands",
   "author": "Salesforce",
   "homepage": "https://github.com/salesforcecli/plugin-data",
@@ -108,8 +108,8 @@
     "test:nuts": "nyc mocha \"./test/**/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:nuts:bulk:export": "nyc mocha \"./test/commands/data/export/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:nuts:bulk:import": "nyc mocha \"./test/commands/data/import/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
-    "test:nuts:bulk:results": "nyc mocha \"./test/commands/data/bulk/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:nuts:bulk:update": "nyc mocha \"./test/commands/data/update/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
+    "test:nuts:bulk:results": "nyc mocha \"./test/commands/data/bulk/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:nuts:data:bulk-upsert-delete": "nyc mocha \"./test/commands/data/dataBulk.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:nuts:data:create": "nyc mocha \"./test/commands/data/create/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
     "test:nuts:data:query": "nyc mocha \"./test/commands/data/query/*.nut.ts\" --slow 4500 --timeout 600000 --parallel --jobs 20",
@@ -125,7 +125,7 @@
   "dependencies": {
     "@jsforce/jsforce-node": "^3.10.14",
     "@oclif/multi-stage-output": "^0.8.30",
-    "@salesforce/core": "^8.26.3",
+    "@salesforce/core": "^8.26.0",
     "@salesforce/kit": "^3.2.2",
     "@salesforce/sf-plugins-core": "^12.2.6",
     "@salesforce/ts-types": "^2.0.11",
@@ -138,16 +138,15 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@oclif/core": "^4.8.2",
-    "@oclif/plugin-command-snapshot": "^5.3.11",
+    "@oclif/core": "^4.8.0",
+    "@oclif/plugin-command-snapshot": "^5.3.8",
     "@oclif/test": "^4.1.16",
     "@salesforce/cli-plugins-testkit": "^5.3.41",
     "@salesforce/dev-scripts": "^11.0.4",
-    "@salesforce/plugin-command-reference": "^3.1.81",
+    "@salesforce/plugin-command-reference": "^3.1.79",
     "@salesforce/types": "^1.6.0",
-    "@types/node": "^25.3.5",
     "eslint-plugin-sf-plugin": "^1.20.33",
-    "oclif": "^4.22.85",
+    "oclif": "^4.22.77",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
