@@ -146,14 +146,14 @@
     "@salesforce/dev-scripts": "^11.0.4",
     "@salesforce/plugin-command-reference": "^3.1.81",
     "@salesforce/types": "^1.6.0",
-    "@types/node": "^25.3.5",
     "eslint-plugin-sf-plugin": "^1.20.33",
     "oclif": "^4.22.85",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "resolutions": {
-    "@jsforce/jsforce-node/node-fetch/whatwg-url": "^14.0.0"
+    "@jsforce/jsforce-node/node-fetch/whatwg-url": "^14.0.0",
+    "@salesforce/cli-plugins-testkit/@types/shelljs/@types/node": "^18"
   },
   "wireit": {
     "build": {
