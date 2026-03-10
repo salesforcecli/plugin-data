@@ -1,3 +1,10 @@
+## [4.0.77](https://github.com/salesforcecli/plugin-data/compare/4.0.75...4.0.77) (2026-03-10)
+
+### Bug Fixes
+
+- **bulk2:** bypass jsforce response buffering W-21348168 ([#1388](https://github.com/salesforcecli/plugin-data/issues/1388)) ([ace72a4](https://github.com/salesforcecli/plugin-data/commit/ace72a4996c8724014d56d9d24dd4baa5db5bfd0))
+- resolve types/node to v18 instead of v25 @W-21530824@ ([#1395](https://github.com/salesforcecli/plugin-data/issues/1395)) ([7444fd2](https://github.com/salesforcecli/plugin-data/commit/7444fd2e29c9d9af84097933ff0413de3ffa3f10))
+
 ## [4.0.75](https://github.com/salesforcecli/plugin-data/compare/4.0.74...4.0.75) (2026-02-28)
 
 ### Bug Fixes
