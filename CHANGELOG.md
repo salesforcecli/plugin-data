@@ -1,3 +1,9 @@
+## [4.0.78](https://github.com/salesforcecli/plugin-data/compare/4.0.77...4.0.78) (2026-03-11)
+
+### Bug Fixes
+
+- pinned minipass dependency @W-21548732@ ([#1396](https://github.com/salesforcecli/plugin-data/issues/1396)) ([71f8dbd](https://github.com/salesforcecli/plugin-data/commit/71f8dbd57e19648e111b8e041b33f272dedacb55))
+
 ## [4.0.77](https://github.com/salesforcecli/plugin-data/compare/4.0.75...4.0.77) (2026-03-10)
 
 ### Bug Fixes
