@@ -153,7 +153,8 @@
   },
   "resolutions": {
     "@jsforce/jsforce-node/node-fetch/whatwg-url": "^14.0.0",
-    "@salesforce/cli-plugins-testkit/@types/shelljs/@types/node": "^18"
+    "@salesforce/cli-plugins-testkit/@types/shelljs/@types/node": "^18",
+    "minipass": "7.1.2"
   },
   "wireit": {
     "build": {
