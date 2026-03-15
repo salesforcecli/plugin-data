@@ -139,7 +139,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@oclif/core": "^4.8.2",
+    "@oclif/core": "^4.9.0",
     "@oclif/plugin-command-snapshot": "^5.3.12",
     "@oclif/test": "^4.1.16",
     "@salesforce/cli-plugins-testkit": "^5.3.41",
