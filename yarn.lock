@@ -7972,10 +7972,10 @@ undici-types@~6.21.0:
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.21.0.tgz#691d00af3909be93a7faa13be61b3a5b50ef12cb"
   integrity sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==
 
-undici@^7.24.2:
-  version "7.24.2"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-7.24.2.tgz#017c31f68ff12ac49aa6116b4d7b3f38c0c0d7f3"
-  integrity sha512-P9J1HWYV/ajFr8uCqk5QixwiRKmB1wOamgS0e+o2Z4A44Ej2+thFVRLG/eA7qprx88XXhnV5Bl8LHXTURpzB3Q==
+undici@^7.24.5:
+  version "7.24.5"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-7.24.5.tgz#7debcf5623df2d1cb469b6face01645d9c852ae2"
+  integrity sha512-3IWdCpjgxp15CbJnsi/Y9TCDE7HWVN19j1hmzVhoAkY/+CJx449tVxT5wZc1Gwg8J+P0LWvzlBzxYRnHJ+1i7Q==
 
 unicorn-magic@^0.3.0:
   version "0.3.0"
