@@ -1,3 +1,9 @@
+## [4.0.83](https://github.com/salesforcecli/plugin-data/compare/4.0.82...4.0.83) (2026-03-22)
+
+### Bug Fixes
+
+- **deps:** bump undici from 7.24.2 to 7.24.5 ([6deef08](https://github.com/salesforcecli/plugin-data/commit/6deef08f3c9209da55571d8ec93fb862ed6b3362))
+
 ## [4.0.82](https://github.com/salesforcecli/plugin-data/compare/4.0.81...4.0.82) (2026-03-22)
 
 ### Bug Fixes
