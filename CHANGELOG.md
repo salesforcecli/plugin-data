@@ -1,3 +1,9 @@
+## [4.0.81](https://github.com/salesforcecli/plugin-data/compare/4.0.80...4.0.81) (2026-03-22)
+
+### Bug Fixes
+
+- **deps:** bump flatted from 3.4.1 to 3.4.2 ([bc02ce4](https://github.com/salesforcecli/plugin-data/commit/bc02ce4b3074d16839a0b116ea44f885465811b2))
+
 ## [4.0.80](https://github.com/salesforcecli/plugin-data/compare/4.0.79...4.0.80) (2026-03-15)
 
 ### Bug Fixes
