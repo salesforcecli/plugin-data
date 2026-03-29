@@ -1,3 +1,9 @@
+## [4.0.85](https://github.com/salesforcecli/plugin-data/compare/4.0.84...4.0.85) (2026-03-29)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/kit from 3.2.4 to 3.2.6 ([0061e28](https://github.com/salesforcecli/plugin-data/commit/0061e2883e832830e715738dc0e1af4c24c1cb60))
+
 ## [4.0.84](https://github.com/salesforcecli/plugin-data/compare/4.0.83...4.0.84) (2026-03-27)
 
 ### Bug Fixes
