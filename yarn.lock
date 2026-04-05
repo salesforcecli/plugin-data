@@ -1438,16 +1438,16 @@
     ansis "^3.17.0"
     fast-levenshtein "^3.0.0"
 
-"@oclif/plugin-warn-if-update-available@^3.1.55":
-  version "3.1.55"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-warn-if-update-available/-/plugin-warn-if-update-available-3.1.55.tgz#abe4e166506f8399b561bf6fea3763960935b336"
-  integrity sha512-VIEBoaoMOCjl3y+w/kdfZMODi0mVMnDuM0vkBf3nqeidhRXVXq87hBqYDdRwN1XoD+eDfE8tBbOP7qtSOONztQ==
+"@oclif/plugin-warn-if-update-available@^3.1.57":
+  version "3.1.59"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-warn-if-update-available/-/plugin-warn-if-update-available-3.1.59.tgz#5e5c658ad475ffb481a260440933d7ef75df5d08"
+  integrity sha512-eQcgRUUiPJ7w8InUl1W5msEtKJxZG6o/8HTbpTfiB9FWnI1oEArWG98RggFMdeoyJUY0xaNTdHATMcGqg4yr+g==
   dependencies:
     "@oclif/core" "^4"
     ansis "^3.17.0"
     debug "^4.4.3"
     http-call "^5.2.2"
-    lodash "^4.17.23"
+    lodash "^4.18.1"
     registry-auth-token "^5.1.1"
 
 "@oclif/table@^0.5.0":
@@ -5744,7 +5744,7 @@ lodash.upperfirst@^4.3.1:
   resolved "https://registry.yarnpkg.com/lodash.upperfirst/-/lodash.upperfirst-4.3.1.tgz#1365edf431480481ef0d1c68957a5ed99d49f7ce"
   integrity sha512-sReKOYJIJf74dhJONhU4e0/shzi1trVbSWDOhKYE5XV2O+H7Sb2Dihwuc7xWxVl+DgFPyTqIN3zMfT9cq5iWDg==
 
-lodash@^4.17.15, lodash@^4.17.21, lodash@^4.17.23:
+lodash@^4.17.15, lodash@^4.17.21, lodash@^4.17.23, lodash@^4.18.1:
   version "4.18.1"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.18.1.tgz#ff2b66c1f6326d59513de2407bf881439812771c"
   integrity sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==
@@ -6306,10 +6306,10 @@ object.values@^1.2.1:
     define-properties "^1.2.1"
     es-object-atoms "^1.0.0"
 
-oclif@^4.22.95:
-  version "4.22.95"
-  resolved "https://registry.yarnpkg.com/oclif/-/oclif-4.22.95.tgz#702cabd3d348cd6747045553b49c6c8c2c81ebb7"
-  integrity sha512-EOeZmbtMqED56n1OSDw/EKoVYwcioowuEB6gn59E/8EKRhG3A/2iE3AcOFpETt5XkHZaXikLC0ezXEVOA0YN2Q==
+oclif@^4.22.96:
+  version "4.22.96"
+  resolved "https://registry.yarnpkg.com/oclif/-/oclif-4.22.96.tgz#a5adc7d64947c65df17b31c5f05463d187707efa"
+  integrity sha512-aWM9cMb7Q3KW09qi5Mkw0Hq9sIM7DjVlyMAUl8Q2FP3+e5afBlUU9vmL3EJazVPhqcbg5u18E3z+6kCMk72KYw==
   dependencies:
     "@aws-sdk/client-cloudfront" "3.1009.0"
     "@aws-sdk/client-s3" "3.1014.0"
@@ -6319,7 +6319,7 @@ oclif@^4.22.95:
     "@oclif/core" "4.9.0"
     "@oclif/plugin-help" "^6.2.38"
     "@oclif/plugin-not-found" "^3.2.76"
-    "@oclif/plugin-warn-if-update-available" "^3.1.55"
+    "@oclif/plugin-warn-if-update-available" "^3.1.57"
     ansis "^3.16.0"
     async-retry "^1.3.3"
     change-case "^4"
