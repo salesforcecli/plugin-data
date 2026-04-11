@@ -124,7 +124,7 @@
   "o11yUploadEndpoint": "https://794testsite.my.site.com/byolwr/webruntime/log/metrics",
   "dependencies": {
     "@jsforce/jsforce-node": "^3.10.14",
-    "@oclif/multi-stage-output": "^0.8.34",
+    "@oclif/multi-stage-output": "^0.8.36",
     "@salesforce/core": "^8.28.1",
     "@salesforce/kit": "^3.2.6",
     "@salesforce/sf-plugins-core": "^12.2.6",
