@@ -74,7 +74,7 @@ const logFileInfo =
     return fileInfo;
   };
 
-/** check the tree files for references, throw error telling user they are only supported with `--plan */
+/** check the tree files for references, throw error telling user they are only supported with `--plan` */
 export const validateNoRefs = (fileInfo: FileInfo): FileInfo => {
   if (hasUnresolvedRefs(fileInfo.records)) {
     Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);

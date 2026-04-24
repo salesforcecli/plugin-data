@@ -365,7 +365,7 @@ export const lineEndingFlag = Flags.option({
 })();
 
 /**
- * Use only for commands that maintain sfdx compatibility.1
+ * Use only for commands that maintain sfdx compatibility.
  *
  * @deprecated
  */
