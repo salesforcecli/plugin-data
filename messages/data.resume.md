@@ -12,7 +12,7 @@ Run this command using the job ID or batch ID returned from the "<%= config.bin 
 
   <%= config.bin %> <%= command.id %> --job-id 750xx000000005sAAA
 
-- View the status of a bulk load job and a specific batches:
+- View the status of a bulk load job and a specific batch:
 
   <%= config.bin %> <%= command.id %> --job-id 750xx000000005sAAA --batch-id 751xx000000005nAAA
 
