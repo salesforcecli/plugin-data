@@ -142,7 +142,7 @@
     "@oclif/core": "^4.10.5",
     "@oclif/plugin-command-snapshot": "^5.3.16",
     "@oclif/test": "^4.1.18",
-    "@salesforce/cli-plugins-testkit": "^5.3.53",
+    "@salesforce/cli-plugins-testkit": "^5.3.54",
     "@salesforce/dev-scripts": "^11.0.4",
     "@salesforce/plugin-command-reference": "^3.1.91",
     "@salesforce/types": "^1.6.0",
