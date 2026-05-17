@@ -123,7 +123,7 @@
   "enableO11y": true,
   "o11yUploadEndpoint": "https://794testsite.my.site.com/byolwr/webruntime/log/metrics",
   "dependencies": {
-    "@jsforce/jsforce-node": "^3.10.14",
+    "@jsforce/jsforce-node": "^3.10.15",
     "@oclif/multi-stage-output": "^0.8.41",
     "@salesforce/core": "^8.29.1",
     "@salesforce/kit": "^3.2.6",
