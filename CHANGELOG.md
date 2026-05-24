@@ -1,3 +1,9 @@
+## [4.0.103](https://github.com/salesforcecli/plugin-data/compare/4.0.102...4.0.103) (2026-05-24)
+
+### Bug Fixes
+
+- **deps:** bump ws from 8.19.0 to 8.21.0 ([50ce9f9](https://github.com/salesforcecli/plugin-data/commit/50ce9f91d03f51a8679c9410febece61cf9f5f22))
+
 ## [4.0.102](https://github.com/salesforcecli/plugin-data/compare/4.0.101...4.0.102) (2026-05-24)
 
 ### Bug Fixes
