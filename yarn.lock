@@ -1202,10 +1202,10 @@
     react "^18.3.1"
     wrap-ansi "^9.0.2"
 
-"@oclif/plugin-command-snapshot@^5.3.16":
-  version "5.3.16"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-command-snapshot/-/plugin-command-snapshot-5.3.16.tgz#d4d45298a8be71c20ba8b6a850edc82b31000184"
-  integrity sha512-pwTKWQRDrK9eOz1VVUTKm9q3tKf9Kihunu3R53LfcPXPpEhIJ6N+2zmCYqeuifrvjBqLT1VhAKpVgTfHXxURHg==
+"@oclif/plugin-command-snapshot@^5.3.22":
+  version "5.3.22"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-command-snapshot/-/plugin-command-snapshot-5.3.22.tgz#266853b2e4f327b9051720c444e8d3f15f3058e7"
+  integrity sha512-rbJ8+lTTAPr1CAoqpsRoKBkyMMCwWojSaf+8T8Q7tFltBxCrmNavKTzWKqL7GTTMXKme7jYleZVOxSM2T1A5xg==
   dependencies:
     "@oclif/core" "^4"
     ansis "^3.17.0"
@@ -1214,7 +1214,7 @@
     lodash.difference "^4.5.0"
     lodash.get "^4.4.2"
     lodash.sortby "^4.7.0"
-    semver "^7.7.4"
+    semver "^7.8.1"
     ts-json-schema-generator "^1.5.1"
 
 "@oclif/plugin-help@^6.2.49":
