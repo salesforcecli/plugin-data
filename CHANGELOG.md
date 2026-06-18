@@ -1,3 +1,9 @@
+## [4.0.108](https://github.com/salesforcecli/plugin-data/compare/4.0.107...4.0.108) (2026-06-18)
+
+### Bug Fixes
+
+- **deps:** bump @babel/core from 7.29.0 to 7.29.7 ([34296a2](https://github.com/salesforcecli/plugin-data/commit/34296a23095901c99ba1f4bc4e1aea1c8307e877))
+
 ## [4.0.107](https://github.com/salesforcecli/plugin-data/compare/4.0.106...4.0.107) (2026-06-18)
 
 ### Bug Fixes
