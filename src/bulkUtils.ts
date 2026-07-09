@@ -324,11 +324,11 @@ export async function detectDelimiter(filePath: string): Promise<ColumnDelimiter
   }
 
   // default to `COMMA` if no delimiter was found in the CSV file (1 column)
-  const columDelimiter = delimiterMap.get(detectedDelimiter ?? ',');
+  const columnDelimiter = delimiterMap.get(detectedDelimiter ?? ',');
 
-  if (columDelimiter === undefined) {
+  if (columnDelimiter === undefined) {
     throw new SfError(`Failed to detect column delimiter used in ${filePath}.`);
   }
 
-  return columDelimiter;
+  return columnDelimiter;
 }
