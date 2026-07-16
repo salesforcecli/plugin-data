@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/ContentVersion",
+  "definitions": {
+    "ContentVersion": {
+      "type": "object",
+      "properties": {
+        "Id": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "required": ["type", "url"]
+        },
+        "Title": {
+          "type": "string"
+        },
+        "FileExtension": {
+          "type": "string"
+        },
+        "VersionData": {
+          "type": "string"
+        },
+        "ContentDocumentId": {
+          "type": "string",
+          "description": "this could be undefined outside of our narrow use case (created files)"
+        }
+      },
+      "required": ["ContentDocumentId", "FileExtension", "Title", "VersionData"]
+    }
+  }
+}

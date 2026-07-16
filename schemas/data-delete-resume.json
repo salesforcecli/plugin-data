@@ -1,0 +1,166 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/BulkResultV2",
+  "definitions": {
+    "BulkResultV2": {
+      "type": "object",
+      "properties": {
+        "jobInfo": {
+          "$ref": "#/definitions/JobInfoV2"
+        },
+        "records": {
+          "$ref": "#/definitions/BulkRecordsV2"
+        }
+      },
+      "required": ["jobInfo"],
+      "additionalProperties": false
+    },
+    "JobInfoV2": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "apexProcessingTime": {
+          "type": "number"
+        },
+        "apiActiveProcessingTime": {
+          "type": "number"
+        },
+        "assignmentRuleId": {
+          "type": "string"
+        },
+        "contentUrl": {
+          "type": "string"
+        },
+        "errorMessage": {
+          "type": "string"
+        },
+        "externalIdFieldName": {
+          "type": "string"
+        },
+        "jobType": {
+          "type": "string",
+          "enum": ["BigObjectIngest", "Classic", "V2Ingest"]
+        },
+        "operation": {
+          "$ref": "#/definitions/IngestOperation"
+        },
+        "state": {
+          "type": "string",
+          "enum": ["Open", "UploadComplete", "InProgress", "JobComplete", "Aborted", "Failed"]
+        },
+        "numberRecordsFailed": {
+          "type": "number"
+        },
+        "id": {
+          "type": "string"
+        },
+        "object": {
+          "type": "string"
+        },
+        "createdById": {
+          "type": "string"
+        },
+        "createdDate": {
+          "type": "string"
+        },
+        "systemModstamp": {
+          "type": "string"
+        },
+        "apiVersion": {
+          "type": "number"
+        },
+        "lineEnding": {
+          "type": "string",
+          "enum": ["LF", "CRLF"]
+        },
+        "columnDelimiter": {
+          "type": "string",
+          "enum": ["BACKQUOTE", "CARET", "COMMA", "PIPE", "SEMICOLON", "TAB"]
+        },
+        "concurrencyMode": {
+          "type": "string",
+          "const": "Parallel"
+        },
+        "contentType": {
+          "type": "string",
+          "const": "CSV"
+        },
+        "numberRecordsProcessed": {
+          "type": "number"
+        },
+        "retries": {
+          "type": "number"
+        },
+        "totalProcessingTime": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "apexProcessingTime",
+        "apiActiveProcessingTime",
+        "apiVersion",
+        "columnDelimiter",
+        "concurrencyMode",
+        "contentType",
+        "contentUrl",
+        "createdById",
+        "createdDate",
+        "id",
+        "jobType",
+        "lineEnding",
+        "numberRecordsFailed",
+        "numberRecordsProcessed",
+        "object",
+        "operation",
+        "retries",
+        "state",
+        "systemModstamp",
+        "totalProcessingTime"
+      ]
+    },
+    "IngestOperation": {
+      "type": "string",
+      "enum": ["insert", "update", "upsert", "delete", "hardDelete"]
+    },
+    "BulkRecordsV2": {
+      "type": "object",
+      "properties": {
+        "successfulResults": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BulkProcessedRecordV2"
+          }
+        },
+        "failedResults": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BulkProcessedRecordV2"
+          }
+        },
+        "unprocessedRecords": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BulkProcessedRecordV2"
+          }
+        },
+        "unparsed": {
+          "type": "string"
+        }
+      },
+      "required": ["successfulResults", "failedResults", "unprocessedRecords"],
+      "additionalProperties": false
+    },
+    "BulkProcessedRecordV2": {
+      "type": "object",
+      "properties": {
+        "sf__Created": {
+          "type": "string",
+          "enum": ["true", "false"]
+        },
+        "sf__Id": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

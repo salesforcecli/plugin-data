@@ -50,3 +50,5 @@ export type ImportResult = {
   type: string;
   id: string;
 }; /** like the original DataPlanPart but without the non-string options inside files */
+
+export type ImportResults = ImportResult[];

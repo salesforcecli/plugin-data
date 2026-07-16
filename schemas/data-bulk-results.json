@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/DataBulkResultsResult",
+  "definitions": {
+    "DataBulkResultsResult": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["Open", "UploadComplete", "InProgress", "JobComplete", "Aborted", "Failed"]
+        },
+        "operation": {
+          "$ref": "#/definitions/IngestOperation"
+        },
+        "object": {
+          "type": "string"
+        },
+        "processedRecords": {
+          "type": "number"
+        },
+        "successfulRecords": {
+          "type": "number"
+        },
+        "failedRecords": {
+          "type": "number"
+        },
+        "successFilePath": {
+          "type": "string"
+        },
+        "failedFilePath": {
+          "type": "string"
+        },
+        "unprocessedFilePath": {
+          "type": "string"
+        }
+      },
+      "required": ["status", "operation", "object", "processedRecords", "successFilePath"],
+      "additionalProperties": false
+    },
+    "IngestOperation": {
+      "type": "string",
+      "enum": ["insert", "update", "upsert", "delete", "hardDelete"]
+    }
+  }
+}

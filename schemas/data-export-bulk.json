@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/DataExportBulkResult",
+  "definitions": {
+    "DataExportBulkResult": {
+      "type": "object",
+      "properties": {
+        "jobId": {
+          "type": "string"
+        },
+        "totalSize": {
+          "type": "number"
+        },
+        "filePath": {
+          "type": "string"
+        }
+      },
+      "required": ["filePath"],
+      "additionalProperties": false
+    }
+  }
+}

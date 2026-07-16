@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/ExportTreeResult",
+  "definitions": {
+    "ExportTreeResult": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DataPlanPart"
+          }
+        },
+        {
+          "$ref": "#/definitions/SObjectTreeFileContents"
+        }
+      ]
+    },
+    "DataPlanPart": {
+      "type": "object",
+      "properties": {
+        "sobject": {
+          "type": "string"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["sobject", "files"],
+      "additionalProperties": false
+    },
+    "SObjectTreeFileContents": {
+      "type": "object",
+      "properties": {
+        "records": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SObjectTreeInput"
+          }
+        }
+      },
+      "required": ["records"],
+      "additionalProperties": false
+    },
+    "SObjectTreeInput": {
+      "type": "object",
+      "properties": {
+        "attributes": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "referenceId": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            }
+          },
+          "required": ["referenceId", "type"]
+        }
+      },
+      "required": ["attributes"]
+    }
+  }
+}
