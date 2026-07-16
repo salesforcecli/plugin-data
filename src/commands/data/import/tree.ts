@@ -20,7 +20,7 @@ import { ensureString, isObject } from '@salesforce/ts-types';
 import { importFromPlan } from '../../../api/data/tree/importPlan.js';
 import { importFromFiles } from '../../../api/data/tree/importFiles.js';
 import { orgFlags } from '../../../flags.js';
-import type { ImportResult, TreeResponse } from '../../../api/data/tree/importTypes.js';
+import type { ImportResults, TreeResponse } from '../../../api/data/tree/importTypes.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.import');
@@ -28,7 +28,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-data', 'tree.import')
 /**
  * Command that provides data import capability via the SObject Tree Save API.
  */
-export default class Import extends SfCommand<ImportResult[]> {
+export default class Import extends SfCommand<ImportResults> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -55,7 +55,7 @@ export default class Import extends SfCommand<ImportResult[]> {
     }),
   };
 
-  public async run(): Promise<ImportResult[]> {
+  public async run(): Promise<ImportResults> {
     const { flags } = await this.parse(Import);
 
     const conn = flags['target-org'].getConnection(flags['api-version']);

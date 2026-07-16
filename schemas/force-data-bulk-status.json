@@ -1,0 +1,159 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/StatusResult",
+  "definitions": {
+    "StatusResult": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BatchInfo"
+          }
+        },
+        {
+          "$ref": "#/definitions/JobInfo"
+        }
+      ]
+    },
+    "BatchInfo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "jobId": {
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/definitions/BatchState"
+        },
+        "stateMessage": {
+          "type": "string"
+        },
+        "numberRecordsProcessed": {
+          "type": "string"
+        },
+        "numberRecordsFailed": {
+          "type": "string"
+        },
+        "totalProcessingTime": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jobId",
+        "state",
+        "stateMessage",
+        "numberRecordsProcessed",
+        "numberRecordsFailed",
+        "totalProcessingTime"
+      ],
+      "additionalProperties": false
+    },
+    "BatchState": {
+      "type": "string",
+      "enum": ["Queued", "InProgress", "Completed", "Failed", "NotProcessed"]
+    },
+    "JobInfo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object": {
+          "type": "string"
+        },
+        "operation": {
+          "$ref": "#/definitions/BulkOperation"
+        },
+        "state": {
+          "$ref": "#/definitions/JobState"
+        },
+        "createdById": {
+          "type": "string"
+        },
+        "createdDate": {
+          "type": "string"
+        },
+        "systemModstamp": {
+          "type": "string"
+        },
+        "concurrencyMode": {
+          "type": "string"
+        },
+        "contentType": {
+          "type": "string"
+        },
+        "numberBatchesQueued": {
+          "type": "string"
+        },
+        "numberBatchesInProgress": {
+          "type": "string"
+        },
+        "numberBatchesCompleted": {
+          "type": "string"
+        },
+        "numberBatchesFailed": {
+          "type": "string"
+        },
+        "numberBatchesTotal": {
+          "type": "string"
+        },
+        "numberRecordsProcessed": {
+          "type": "string"
+        },
+        "numberRetries": {
+          "type": "string"
+        },
+        "apiVersion": {
+          "type": "string"
+        },
+        "numberRecordsFailed": {
+          "type": "string"
+        },
+        "totalProcessingTime": {
+          "type": "string"
+        },
+        "apiActiveProcessingTime": {
+          "type": "string"
+        },
+        "apexProcessingTime": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "object",
+        "operation",
+        "state",
+        "createdById",
+        "createdDate",
+        "systemModstamp",
+        "concurrencyMode",
+        "contentType",
+        "numberBatchesQueued",
+        "numberBatchesInProgress",
+        "numberBatchesCompleted",
+        "numberBatchesFailed",
+        "numberBatchesTotal",
+        "numberRecordsProcessed",
+        "numberRetries",
+        "apiVersion",
+        "numberRecordsFailed",
+        "totalProcessingTime",
+        "apiActiveProcessingTime",
+        "apexProcessingTime"
+      ],
+      "additionalProperties": false
+    },
+    "BulkOperation": {
+      "type": "string",
+      "enum": ["insert", "update", "upsert", "delete", "hardDelete", "query", "queryAll"]
+    },
+    "JobState": {
+      "type": "string",
+      "enum": ["Open", "Closed", "Aborted", "Failed", "Unknown", "NotProcessed"]
+    }
+  }
+}

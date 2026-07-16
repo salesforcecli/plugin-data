@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/DataImportBulkResult",
+  "definitions": {
+    "DataImportBulkResult": {
+      "type": "object",
+      "properties": {
+        "jobId": {
+          "type": "string"
+        },
+        "processedRecords": {
+          "type": "number"
+        },
+        "successfulRecords": {
+          "type": "number"
+        },
+        "failedRecords": {
+          "type": "number"
+        }
+      },
+      "required": ["jobId"],
+      "additionalProperties": false
+    }
+  }
+}

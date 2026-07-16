@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/ImportResults",
+  "definitions": {
+    "ImportResults": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ImportResult"
+      }
+    },
+    "ImportResult": {
+      "type": "object",
+      "properties": {
+        "refId": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": ["refId", "type", "id"],
+      "additionalProperties": false
+    }
+  }
+}
