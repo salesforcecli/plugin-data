@@ -147,7 +147,7 @@
     "@salesforce/plugin-command-reference": "^3.1.122",
     "@salesforce/types": "^1.8.0",
     "eslint-plugin-sf-plugin": "^1.20.33",
-    "oclif": "^4.23.27",
+    "oclif": "^4.23.29",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
