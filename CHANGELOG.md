@@ -1,3 +1,13 @@
+# [5.0.0](https://github.com/salesforcecli/plugin-data/compare/4.0.115...5.0.0) (2026-07-30)
+
+- feat!: require Node >=22, drop EOL Node versions @W-23480655@ (#1486) ([3b170a6](https://github.com/salesforcecli/plugin-data/commit/3b170a68a8922f68e3ace28156dc852991ca0509)), closes [#1486](https://github.com/salesforcecli/plugin-data/issues/1486)
+
+### BREAKING CHANGES
+
+- engines.node raised to >=22.0.0, dropping support for Node 18 and 20
+
+- chore: remove accidentally committed omniscript test fixtures
+
 ## [4.0.115](https://github.com/salesforcecli/plugin-data/compare/4.0.114...4.0.115) (2026-07-26)
 
 ### Bug Fixes
