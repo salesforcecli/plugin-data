@@ -1,3 +1,9 @@
+## [5.0.1](https://github.com/salesforcecli/plugin-data/compare/5.0.0...5.0.1) (2026-08-03)
+
+### Bug Fixes
+
+- **deps:** bump undici from 7.28.0 to 7.29.0 ([2db92da](https://github.com/salesforcecli/plugin-data/commit/2db92dab28c9c264faae7e9e4da410a5a79ac95e))
+
 # [5.0.0](https://github.com/salesforcecli/plugin-data/compare/4.0.115...5.0.0) (2026-07-30)
 
 - feat!: require Node >=22, drop EOL Node versions @W-23480655@ (#1486) ([3b170a6](https://github.com/salesforcecli/plugin-data/commit/3b170a68a8922f68e3ace28156dc852991ca0509)), closes [#1486](https://github.com/salesforcecli/plugin-data/issues/1486)
