@@ -262,6 +262,91 @@ describe('data:record commands', () => {
     });
   });
 
+  describe('no-assignment-rules flag', () => {
+    // The Case assignment rule in the test project routes Cases whose Subject starts with
+    // "AssignmentRuleTest" to TestCaseQueue. When --no-assignment-rules is passed, the record
+    // should stay owned by the running user instead of being reassigned to the queue.
+    type CaseRecord = { Id: string; OwnerId: string; Subject: string };
+    type QueueRecord = { records: Array<{ Id: string }> };
+
+    let queueId: string;
+    let runningUserId: string;
+
+    before(() => {
+      const queue = execCmd<QueueRecord>(
+        "data:query --query \"SELECT Id FROM Group WHERE Type='Queue' AND DeveloperName='TestCaseQueue'\" --json",
+        { ensureExitCode: 0 }
+      ).jsonOutput?.result;
+      assert(queue?.records?.[0]?.Id, 'TestCaseQueue must exist in the scratch org');
+      queueId = queue.records[0].Id;
+
+      // Determine the running user by creating a Case that does NOT match the assignment rule
+      // and reading its OwnerId — avoids brittle username/alias lookups.
+      const seed = execCmd<SaveResult>(
+        `data:create:record --sobject Case --values "Subject='NoRuleMatchSeed-${genUniqueString()}'" --json`,
+        { ensureExitCode: 0 }
+      ).jsonOutput?.result;
+      assert(seed?.id);
+      const seedRecord = execCmd<CaseRecord>(`data:get:record --sobject Case --record-id ${seed.id} --json`, {
+        ensureExitCode: 0,
+      }).jsonOutput?.result;
+      assert(seedRecord?.OwnerId);
+      runningUserId = seedRecord.OwnerId;
+    });
+
+    it('assigns Case to the queue when --no-assignment-rules is NOT set', () => {
+      const subject = `AssignmentRuleTest-${genUniqueString()}`;
+      const createResponse = execCmd<SaveResult>(
+        `data:create:record --sobject Case --values "Subject='${subject}'" --json`,
+        { ensureExitCode: 0 }
+      ).jsonOutput?.result;
+      assert(createResponse?.id);
+
+      const getResponse = execCmd<CaseRecord>(
+        `data:get:record --sobject Case --record-id ${createResponse.id} --json`,
+        { ensureExitCode: 0 }
+      ).jsonOutput?.result;
+      expect(getResponse).to.have.property('OwnerId', queueId);
+    });
+
+    it('leaves Case owned by the running user when --no-assignment-rules is set on create', () => {
+      const subject = `AssignmentRuleTest-${genUniqueString()}`;
+      const createResponse = execCmd<SaveResult>(
+        `data:create:record --sobject Case --values "Subject='${subject}'" --no-assignment-rules --json`,
+        { ensureExitCode: 0 }
+      ).jsonOutput?.result;
+      assert(createResponse?.id);
+
+      const getResponse = execCmd<CaseRecord>(
+        `data:get:record --sobject Case --record-id ${createResponse.id} --json`,
+        { ensureExitCode: 0 }
+      ).jsonOutput?.result;
+      expect(getResponse).to.have.property('OwnerId', runningUserId);
+    });
+
+    it('leaves Case owner unchanged on update when --no-assignment-rules is set', () => {
+      // Seed a Case that does NOT match the rule (so it's owned by the running user).
+      const seedSubject = `NoRuleMatch-${genUniqueString()}`;
+      const seed = execCmd<SaveResult>(
+        `data:create:record --sobject Case --values "Subject='${seedSubject}'" --no-assignment-rules --json`,
+        { ensureExitCode: 0 }
+      ).jsonOutput?.result;
+      assert(seed?.id);
+
+      // Update to a subject that would match the assignment rule, but suppress it.
+      const newSubject = `AssignmentRuleTest-${genUniqueString()}`;
+      execCmd<SaveResult>(
+        `data:update:record --sobject Case --record-id ${seed.id} --values "Subject='${newSubject}'" --no-assignment-rules --json`,
+        { ensureExitCode: 0 }
+      );
+
+      const getResponse = execCmd<CaseRecord>(`data:get:record --sobject Case --record-id ${seed.id} --json`, {
+        ensureExitCode: 0,
+      }).jsonOutput?.result;
+      expect(getResponse).to.have.property('OwnerId', runningUserId);
+    });
+  });
+
   describe('json parsing', () => {
     it('will parse JSON correctly for update', () => {
       const result = execCmd<{ records: Array<{ Id: string }> }>(
