@@ -16,7 +16,7 @@ By default, the job runs the batches in parallel, which we recommend. You can ru
 
 - Bulk upsert records to the Contact object in your default org:
 
-  <%= config.bin %> --sobject Contact --file files/contacts.csv --external-id Id
+  <%= config.bin %> <%= command.id %> --sobject Contact --file files/contacts.csv --external-id Id
 
 - Bulk upsert records to a custom object in an org with alias my-scratch and wait 5 minutes for the command to complete:
 
