@@ -72,6 +72,9 @@ export default class Update extends SfCommand<SaveResult> {
         version: '57',
       },
     }),
+    'no-assignment-rules': Flags.boolean({
+      summary: messages.getMessage('flags.no-assignment-rules.summary'),
+    }),
   };
 
   public async run(): Promise<SaveResult> {
@@ -86,7 +89,9 @@ export default class Update extends SfCommand<SaveResult> {
     const sObjectId = flags['record-id'] ?? ((await query(conn, flags.sobject, flags.where as string)).Id as string);
     try {
       const updateObject = { ...stringToDictionary(flags.values), Id: sObjectId };
-      const result = await conn.sobject(flags.sobject).update(updateObject);
+      const result = await conn
+        .sobject(flags.sobject)
+        .update(updateObject, flags['no-assignment-rules'] ? { headers: { 'Sforce-Auto-Assign': 'FALSE' } } : {});
       if (result.success) {
         this.log(messages.getMessage('updateSuccess', [sObjectId]));
       } else {
