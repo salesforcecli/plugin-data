@@ -70,9 +70,18 @@ describe('data:create:record', () => {
     expect(capturedHeaders).to.not.have.property('Sforce-Auto-Assign');
   });
 
-  it('should send Sforce-Auto-Assign: FALSE when --skip-rule-assignment is set', async () => {
+  it('should send Sforce-Auto-Assign: FALSE when --skip-assignment-rules is set', async () => {
     const cmd = new Create(
-      ['--target-org', 'test@org.com', '--sobject', 'Account', '-v', '"Name=Acme"', '--skip-rule-assignment', '--json'],
+      [
+        '--target-org',
+        'test@org.com',
+        '--sobject',
+        'Account',
+        '-v',
+        '"Name=Acme"',
+        '--skip-assignment-rules',
+        '--json',
+      ],
       config
     );
 

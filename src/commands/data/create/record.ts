@@ -50,8 +50,8 @@ export default class Create extends SfCommand<SaveResult> {
       deprecateAliases: true,
     }),
     perflog: perflogFlag,
-    'skip-rule-assignment': Flags.boolean({
-      summary: messages.getMessage('flags.skip-rule-assignment.summary'),
+    'skip-assignment-rules': Flags.boolean({
+      summary: messages.getMessage('flags.skip-assignment-rules.summary'),
     }),
   };
 
@@ -67,7 +67,7 @@ export default class Create extends SfCommand<SaveResult> {
     const values = stringToDictionary(flags.values);
     const result = await sobject.insert(
       values,
-      flags['skip-rule-assignment'] ? { headers: { 'Sforce-Auto-Assign': 'FALSE' } } : {}
+      flags['skip-assignment-rules'] ? { headers: { 'Sforce-Auto-Assign': 'FALSE' } } : {}
     );
     if (result.success) {
       this.log(messages.getMessage('createSuccess', [result.id || 'unknown id']));
