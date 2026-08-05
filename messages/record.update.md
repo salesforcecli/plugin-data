@@ -30,7 +30,7 @@ Use Tooling API so you can update a record in a Tooling API object.
 
 Fields that you're updating, in the format of <fieldName>=<value> pairs.
 
-# flags.no-assignment-rules.summary
+# flags.skip-rule-assignment.summary
 
 Don't apply active assignment rules when updating the record; applies to Account, Case, and Lead records.
 

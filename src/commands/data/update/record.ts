@@ -72,8 +72,8 @@ export default class Update extends SfCommand<SaveResult> {
         version: '57',
       },
     }),
-    'no-assignment-rules': Flags.boolean({
-      summary: messages.getMessage('flags.no-assignment-rules.summary'),
+    'skip-rule-assignment': Flags.boolean({
+      summary: messages.getMessage('flags.skip-rule-assignment.summary'),
     }),
   };
 
@@ -91,7 +91,7 @@ export default class Update extends SfCommand<SaveResult> {
       const updateObject = { ...stringToDictionary(flags.values), Id: sObjectId };
       const result = await conn
         .sobject(flags.sobject)
-        .update(updateObject, flags['no-assignment-rules'] ? { headers: { 'Sforce-Auto-Assign': 'FALSE' } } : {});
+        .update(updateObject, flags['skip-rule-assignment'] ? { headers: { 'Sforce-Auto-Assign': 'FALSE' } } : {});
       if (result.success) {
         this.log(messages.getMessage('updateSuccess', [sObjectId]));
       } else {

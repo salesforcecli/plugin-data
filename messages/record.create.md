@@ -22,7 +22,7 @@ Values for the flags in the form <fieldName>=<value>, separate multiple pairs wi
 
 Use Tooling API so you can insert a record in a Tooling API object.
 
-# flags.no-assignment-rules.summary
+# flags.skip-rule-assignment.summary
 
 Don't apply active assignment rules when creating the record; applies to Account, Case, and Lead records.
 

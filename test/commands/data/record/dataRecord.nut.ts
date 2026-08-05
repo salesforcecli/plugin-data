@@ -262,9 +262,9 @@ describe('data:record commands', () => {
     });
   });
 
-  describe('no-assignment-rules flag', () => {
+  describe('skip-rule-assignment flag', () => {
     // The Case assignment rule in the test project routes Cases whose Subject starts with
-    // "AssignmentRuleTest" to TestCaseQueue. When --no-assignment-rules is passed, the record
+    // "AssignmentRuleTest" to TestCaseQueue. When --skip-rule-assignment is passed, the record
     // should stay owned by the running user instead of being reassigned to the queue.
     type CaseRecord = { Id: string; OwnerId: string; Subject: string };
     type QueueRecord = { records: Array<{ Id: string }> };
@@ -294,7 +294,7 @@ describe('data:record commands', () => {
       runningUserId = seedRecord.OwnerId;
     });
 
-    it('assigns Case to the queue when --no-assignment-rules is NOT set', () => {
+    it('assigns Case to the queue when --skip-rule-assignment is NOT set', () => {
       const subject = `AssignmentRuleTest-${genUniqueString()}`;
       const createResponse = execCmd<SaveResult>(
         `data:create:record --sobject Case --values "Subject='${subject}'" --json`,
@@ -309,10 +309,10 @@ describe('data:record commands', () => {
       expect(getResponse).to.have.property('OwnerId', queueId);
     });
 
-    it('leaves Case owned by the running user when --no-assignment-rules is set on create', () => {
+    it('leaves Case owned by the running user when --skip-rule-assignment is set on create', () => {
       const subject = `AssignmentRuleTest-${genUniqueString()}`;
       const createResponse = execCmd<SaveResult>(
-        `data:create:record --sobject Case --values "Subject='${subject}'" --no-assignment-rules --json`,
+        `data:create:record --sobject Case --values "Subject='${subject}'" --skip-rule-assignment --json`,
         { ensureExitCode: 0 }
       ).jsonOutput?.result;
       assert(createResponse?.id);
@@ -324,11 +324,11 @@ describe('data:record commands', () => {
       expect(getResponse).to.have.property('OwnerId', runningUserId);
     });
 
-    it('leaves Case owner unchanged on update when --no-assignment-rules is set', () => {
+    it('leaves Case owner unchanged on update when --skip-rule-assignment is set', () => {
       // Seed a Case that does NOT match the rule (so it's owned by the running user).
       const seedSubject = `NoRuleMatch-${genUniqueString()}`;
       const seed = execCmd<SaveResult>(
-        `data:create:record --sobject Case --values "Subject='${seedSubject}'" --no-assignment-rules --json`,
+        `data:create:record --sobject Case --values "Subject='${seedSubject}'" --skip-rule-assignment --json`,
         { ensureExitCode: 0 }
       ).jsonOutput?.result;
       assert(seed?.id);
@@ -336,7 +336,7 @@ describe('data:record commands', () => {
       // Update to a subject that would match the assignment rule, but suppress it.
       const newSubject = `AssignmentRuleTest-${genUniqueString()}`;
       execCmd<SaveResult>(
-        `data:update:record --sobject Case --record-id ${seed.id} --values "Subject='${newSubject}'" --no-assignment-rules --json`,
+        `data:update:record --sobject Case --record-id ${seed.id} --values "Subject='${newSubject}'" --skip-rule-assignment --json`,
         { ensureExitCode: 0 }
       );
 

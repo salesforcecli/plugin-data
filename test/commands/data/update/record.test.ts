@@ -153,7 +153,7 @@ describe('data:update:record', () => {
     expect(capturedHeaders).to.not.have.property('Sforce-Auto-Assign');
   });
 
-  it('should send Sforce-Auto-Assign: FALSE when --no-assignment-rules is set', async () => {
+  it('should send Sforce-Auto-Assign: FALSE when --skip-rule-assignment is set', async () => {
     let capturedHeaders: Record<string, string> | undefined;
     $$.fakeConnectionRequest = (request: AnyJson): Promise<AnyJson> => {
       const requestMap = ensureJsonMap(request);
@@ -177,7 +177,7 @@ describe('data:update:record', () => {
         sObjectId,
         '-v',
         '"Name=NewName"',
-        '--no-assignment-rules',
+        '--skip-rule-assignment',
         '--json',
       ],
       config
