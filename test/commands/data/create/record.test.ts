@@ -30,13 +30,16 @@ describe('data:create:record', () => {
   const config = new Config({
     root: resolve(dirname(fileURLToPath(import.meta.url)), '../../../package.json'),
   });
+  let capturedHeaders: Record<string, string> | undefined;
 
   beforeEach(async () => {
     await $$.stubAuths(testOrg);
     await config.load();
+    capturedHeaders = undefined;
     $$.fakeConnectionRequest = (request: AnyJson): Promise<SaveResult> => {
       const requestWithUrl = ensureJsonMap(request);
       if (request && ensureString(requestWithUrl.url).includes('Account')) {
+        capturedHeaders = requestWithUrl.headers as Record<string, string> | undefined;
         return Promise.resolve({
           id: sObjectId,
           success: true,
@@ -55,5 +58,34 @@ describe('data:create:record', () => {
 
     const result = await cmd.run();
     expect(result.id).to.equal(sObjectId);
+  });
+
+  it('should not send the Sforce-Auto-Assign header by default', async () => {
+    const cmd = new Create(
+      ['--target-org', 'test@org.com', '--sobject', 'Account', '-v', '"Name=Acme"', '--json'],
+      config
+    );
+
+    await cmd.run();
+    expect(capturedHeaders).to.not.have.property('Sforce-Auto-Assign');
+  });
+
+  it('should send Sforce-Auto-Assign: FALSE when --skip-assignment-rules is set', async () => {
+    const cmd = new Create(
+      [
+        '--target-org',
+        'test@org.com',
+        '--sobject',
+        'Account',
+        '-v',
+        '"Name=Acme"',
+        '--skip-assignment-rules',
+        '--json',
+      ],
+      config
+    );
+
+    await cmd.run();
+    expect(capturedHeaders).to.have.property('Sforce-Auto-Assign', 'FALSE');
   });
 });

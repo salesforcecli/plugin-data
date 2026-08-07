@@ -121,6 +121,71 @@ describe('data:update:record', () => {
     }
   });
 
+  it('should not send the Sforce-Auto-Assign header by default', async () => {
+    let capturedHeaders: Record<string, string> | undefined;
+    $$.fakeConnectionRequest = (request: AnyJson): Promise<AnyJson> => {
+      const requestMap = ensureJsonMap(request);
+      if (ensureString(requestMap.url).includes('query')) {
+        return Promise.resolve({ records: [{ Id: sObjectId }] });
+      }
+      if (ensureString(requestMap.url).includes('Account')) {
+        capturedHeaders = requestMap.headers as Record<string, string> | undefined;
+        return Promise.resolve({ id: sObjectId, success: true, errors: [] });
+      }
+      return Promise.resolve({});
+    };
+
+    const cmd = new Update(
+      [
+        '--target-org',
+        'test@org.com',
+        '--sobject',
+        'Account',
+        '--record-id',
+        sObjectId,
+        '-v',
+        '"Name=NewName"',
+        '--json',
+      ],
+      config
+    );
+    await cmd.run();
+    expect(capturedHeaders).to.not.have.property('Sforce-Auto-Assign');
+  });
+
+  it('should send Sforce-Auto-Assign: FALSE when --skip-assignment-rules is set', async () => {
+    let capturedHeaders: Record<string, string> | undefined;
+    $$.fakeConnectionRequest = (request: AnyJson): Promise<AnyJson> => {
+      const requestMap = ensureJsonMap(request);
+      if (ensureString(requestMap.url).includes('query')) {
+        return Promise.resolve({ records: [{ Id: sObjectId }] });
+      }
+      if (ensureString(requestMap.url).includes('Account')) {
+        capturedHeaders = requestMap.headers as Record<string, string> | undefined;
+        return Promise.resolve({ id: sObjectId, success: true, errors: [] });
+      }
+      return Promise.resolve({});
+    };
+
+    const cmd = new Update(
+      [
+        '--target-org',
+        'test@org.com',
+        '--sobject',
+        'Account',
+        '--record-id',
+        sObjectId,
+        '-v',
+        '"Name=NewName"',
+        '--skip-assignment-rules',
+        '--json',
+      ],
+      config
+    );
+    await cmd.run();
+    expect(capturedHeaders).to.have.property('Sforce-Auto-Assign', 'FALSE');
+  });
+
   it('should throw an error if both --where and --record-id are provided', async () => {
     const cmd = new Update(
       [

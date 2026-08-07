@@ -50,6 +50,9 @@ export default class Create extends SfCommand<SaveResult> {
       deprecateAliases: true,
     }),
     perflog: perflogFlag,
+    'skip-assignment-rules': Flags.boolean({
+      summary: messages.getMessage('flags.skip-assignment-rules.summary'),
+    }),
   };
 
   public async run(): Promise<SaveResult> {
@@ -62,7 +65,10 @@ export default class Create extends SfCommand<SaveResult> {
         : flags['target-org'].getConnection(flags['api-version'])
     ).sobject(flags.sobject);
     const values = stringToDictionary(flags.values);
-    const result = await sobject.insert(values);
+    const result = await sobject.insert(
+      values,
+      flags['skip-assignment-rules'] ? { headers: { 'Sforce-Auto-Assign': 'FALSE' } } : {}
+    );
     if (result.success) {
       this.log(messages.getMessage('createSuccess', [result.id || 'unknown id']));
       this.spinner.stop();
