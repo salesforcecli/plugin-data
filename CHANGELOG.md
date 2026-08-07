@@ -1,3 +1,9 @@
+# [5.1.0](https://github.com/salesforcecli/plugin-data/compare/5.0.2...5.1.0) (2026-08-07)
+
+### Features
+
+- **W-23687514:** add --skip-assignment-rules to data create/update record ([#1492](https://github.com/salesforcecli/plugin-data/issues/1492)) ([fae509b](https://github.com/salesforcecli/plugin-data/commit/fae509b5ef444d2ec2e70332cd8b9fdb6ae64358))
+
 ## [5.0.2](https://github.com/salesforcecli/plugin-data/compare/5.0.1...5.0.2) (2026-08-06)
 
 ### Bug Fixes
