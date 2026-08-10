@@ -258,7 +258,7 @@ const recursivelyFindColumns = (data: JsonArray): Field[] => {
       }
       columns.push(field);
     } else {
-      columns.push({ fieldType: FieldType.field, name } as Field);
+      columns.push({ fieldType: FieldType.field, name });
     }
   }
   return columns;

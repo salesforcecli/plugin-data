@@ -79,7 +79,7 @@ describe('data:update:record', () => {
       ],
       config
     );
-    const result = (await cmd.run()) as unknown as SaveResult;
+    const result = await cmd.run();
     expect(result.id).to.equal('0011100001zhhyUAAQ');
   });
 
