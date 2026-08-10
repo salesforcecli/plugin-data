@@ -86,7 +86,7 @@ export default class Update extends SfCommand<SaveResult> {
       ? flags['target-org'].getConnection(flags['api-version']).tooling
       : flags['target-org'].getConnection(flags['api-version']);
     // oclif isn't smart of enough to know that if record-id is not set, then where is set
-    const sObjectId = flags['record-id'] ?? ((await query(conn, flags.sobject, flags.where as string)).Id as string);
+    const sObjectId = flags['record-id'] ?? ((await query(conn, flags.sobject, flags.where as string)).Id);
     try {
       const updateObject = { ...stringToDictionary(flags.values), Id: sObjectId };
       const result = await conn

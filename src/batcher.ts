@@ -141,7 +141,7 @@ export class Batcher {
           const newBatch = job.createBatch();
 
           return new Promise((resolve, reject) => {
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+             
             newBatch.on('error', (err: Error) => {
               // reword no external id error message to direct it to org user rather than api user
               if (err.message.startsWith('External ID was blank')) {
@@ -175,7 +175,7 @@ export class Batcher {
             );
 
             if (!wait) {
-              // eslint-disable-next-line @typescript-eslint/no-floating-promises
+               
               newBatch.on(
                 'queue',
                 // we're using an async method on an event listener which doesn't fit the .on method parameter types

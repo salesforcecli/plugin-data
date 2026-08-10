@@ -278,7 +278,7 @@ describe('data:query command', () => {
 
       // the Metadata object parsed correctly
       // @ts-expect-error typescript doesn't know the shape of the Metadata object
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const metadataObject = result?.records[0].Metadata;
       expect(metadataObject).to.have.property('disableProtocolSecurity');
       expect(metadataObject).to.have.property('isActive');

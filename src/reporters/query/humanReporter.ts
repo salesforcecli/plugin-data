@@ -84,10 +84,10 @@ function prepData(
     const row: Record<string, unknown> = {};
     fields.forEach((field) => {
       if (field in record) {
-        row[field] = (record[field] as string) ?? '';
+        row[field] = (record[field]) ?? '';
       } else {
         // if not, try to find it query
-        row[field] = (get(record, field) as string) ?? '';
+        row[field] = (get(record, field)) ?? '';
       }
     });
     return row;
