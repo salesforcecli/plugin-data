@@ -70,10 +70,10 @@ export default class Get extends SfCommand<Record> {
       ? flags['target-org'].getConnection(flags['api-version']).tooling
       : flags['target-org'].getConnection(flags['api-version']);
     try {
-      const sObjectId = flags['record-id'] ?? ((await query(conn, flags.sobject, flags.where as string)).Id as string);
+      const sObjectId = flags['record-id'] ?? ((await query(conn, flags.sobject, flags.where as string)).Id);
       const result = await conn.sobject(flags.sobject).retrieve(sObjectId);
       if (!this.jsonEnabled()) {
-        logNestedObject(new Ux({ jsonEnabled: this.jsonEnabled() }), result as never);
+        logNestedObject(new Ux({ jsonEnabled: this.jsonEnabled() }), result);
       }
       this.spinner.stop();
       return toAnyJson(result) as Record;
