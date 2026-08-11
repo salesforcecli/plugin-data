@@ -401,6 +401,7 @@ describe('replaceParentReferences', () => {
   });
 
   it('no changes when there is not parent Id field on the record', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { AccountId, ...caseWithNoParent } = caseRecord;
     const result = fnToTest(caseWithNoParent);
     expect(result).to.deep.equal(caseWithNoParent);
@@ -437,6 +438,7 @@ describe('removeChildren', () => {
     expect(result).to.not.have.property('Cases');
     expect(result).to.not.have.property('Contacts');
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { Cases, Contacts, ...originalForComparison } = record;
     expect(result).to.deep.equal(originalForComparison);
   });
@@ -447,6 +449,7 @@ describe('removeChildren', () => {
     const result = removeChildren(record);
     expect(result).to.not.have.property('Bars');
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { Bars, Cases, Contacts, ...originalForComparison } = record;
     expect(result).to.deep.equal(originalForComparison);
   });

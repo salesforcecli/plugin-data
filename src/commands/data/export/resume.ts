@@ -76,7 +76,7 @@ export default class DataExportResume extends SfCommand<DataExportResumeResult> 
           label: 'Status',
           type: 'dynamic-key-value',
           bold: true,
-          get: (data) => data?.state,
+          get: (data): string | undefined => data?.state,
         },
       ],
     });

@@ -209,9 +209,7 @@ export class ExportApi {
 
     if (parentRef && this.config.plan) {
       const parentFieldName = parentRef.fieldName;
-      if (!treeRecord[parentFieldName]) {
-        treeRecord[parentFieldName] = parentRef.id;
-      }
+      treeRecord[parentFieldName] ??= parentRef.id;
     }
     // add record to tree
     sobjectTree.records.push(treeRecord);

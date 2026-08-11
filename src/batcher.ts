@@ -141,7 +141,6 @@ export class Batcher {
           const newBatch = job.createBatch();
 
           return new Promise((resolve, reject) => {
-             
             newBatch.on('error', (err: Error) => {
               // reword no external id error message to direct it to org user rather than api user
               if (err.message.startsWith('External ID was blank')) {
@@ -175,7 +174,6 @@ export class Batcher {
             );
 
             if (!wait) {
-               
               newBatch.on(
                 'queue',
                 // we're using an async method on an event listener which doesn't fit the .on method parameter types
@@ -184,7 +182,7 @@ export class Batcher {
                   this.ux.log(messages.getMessage('CheckStatusCommand', [i + 1, batchInfo.jobId, batchInfo.id]));
                   const result = await newBatch.check();
                   if (result.state === 'Failed') {
-                    reject(result.stateMessage);
+                    reject(new SfError(result.stateMessage));
                   } else {
                     resolve(batchInfo);
                   }
@@ -248,7 +246,7 @@ export class Batcher {
         async (batchInfo: BatchInfo): Promise<void> => {
           const result = await newBatch.check();
           if (result.state === 'Failed') {
-            reject(result.stateMessage);
+            reject(new SfError(result.stateMessage));
           } else if (!overallInfo) {
             this.ux.log(messages.getMessage('PollingInfo', [POLL_FREQUENCY_MS / 1000, batchInfo.jobId, batchInfo.id]));
             overallInfo = true;

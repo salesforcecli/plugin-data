@@ -301,6 +301,7 @@ describe('data:query command', () => {
         await fs.promises.readFile(path.join(testSession.project.dir, 'accounts.json'), 'utf8')
       ) as DataQueryResult;
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { outputFile, ...result } = queryResult?.result as DataQueryResult;
 
       expect(file).to.deep.equal(result);

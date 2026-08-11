@@ -46,8 +46,6 @@ export default class DataCreateFile extends SfCommand<ContentVersion> {
       required: true,
       exists: true,
     }),
-    // it really could be most any valid ID
-    // eslint-disable-next-line sf-plugin/id-flag-suggestions
     'parent-id': Flags.salesforceId({
       summary: messages.getMessage('flags.parent-id.summary'),
       char: 'i',

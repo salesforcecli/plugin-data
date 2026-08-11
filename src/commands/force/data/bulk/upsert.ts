@@ -15,7 +15,7 @@
  */
 import fs from 'node:fs';
 
-import { Messages } from '@salesforce/core';
+import { Messages, SfError } from '@salesforce/core';
 import { Flags, SfCommand, Ux } from '@salesforce/sf-plugins-core';
 import { orgFlags } from '../../../../flags.js';
 import { Batcher, BatcherReturnType } from '../../../../batcher.js';
@@ -85,7 +85,7 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       job.on('error', (err): void => {
-        reject(err);
+        reject(SfError.wrap(err));
       });
 
       try {
@@ -93,7 +93,7 @@ export default class Upsert extends SfCommand<BatcherReturnType> {
         this.spinner.stop();
       } catch (e) {
         this.spinner.stop('error');
-        reject(e);
+        reject(SfError.wrap(e));
       }
     });
   }

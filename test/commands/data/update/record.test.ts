@@ -22,7 +22,6 @@ import { expect } from 'chai';
 import { TestContext, MockTestOrgData, shouldThrow } from '@salesforce/core/testSetup';
 import { Config } from '@oclif/core/config';
 import { SfError } from '@salesforce/core/sfError';
-import type { SaveResult } from '@jsforce/jsforce-node';
 import Update from '../../../../src/commands/data/update/record.js';
 
 const sObjectId = '0011100001zhhyUAAQ';
@@ -87,11 +86,12 @@ describe('data:update:record', () => {
     $$.fakeConnectionRequest = (request: AnyJson): Promise<AnyJson> => {
       const requestMap = ensureJsonMap(request);
       if (ensureString(requestMap.url).includes('Account')) {
-        return Promise.reject({
-          errorCode: 'FIELD_CUSTOM_VALIDATION_EXCEPTION',
-          message: 'name cannot start with x',
-          fields: [],
-        });
+        return Promise.reject(
+          Object.assign(new Error('name cannot start with x'), {
+            errorCode: 'FIELD_CUSTOM_VALIDATION_EXCEPTION',
+            fields: [],
+          })
+        );
       }
       return Promise.resolve({});
     };
@@ -205,7 +205,7 @@ describe('data:update:record', () => {
     );
     try {
       await shouldThrow(cmd.run());
-    } catch (e) {
+    } catch {
       // failed as expected
     }
   });
