@@ -60,7 +60,7 @@ export const validateSobjectType = async (sobjectType: string, connection: Conne
     await connection.sobject(sobjectType).describe();
     return sobjectType;
   } catch (e) {
-    throw new Error(messages.getMessage('invalidSobject', [sobjectType, (e as Error).message]));
+    throw new Error(messages.getMessage('invalidSobject', [sobjectType, (e as Error).message]), { cause: e });
   }
 };
 

@@ -135,13 +135,13 @@ export default class DataExportBulk extends SfCommand<DataExportBulkResult> {
           label: 'Status',
           type: 'dynamic-key-value',
           bold: true,
-          get: (data) => data?.state,
+          get: (data): string | undefined => data?.state,
         },
         {
           label: 'Job Id',
           type: 'dynamic-key-value',
           bold: true,
-          get: (data) =>
+          get: (data): string | undefined =>
             data?.id &&
             terminalLink(
               data.id,

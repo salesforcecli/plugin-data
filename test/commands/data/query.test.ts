@@ -196,7 +196,7 @@ describe('Execute a SOQL statement', (): void => {
         // @ts-expect-error stubbing for testing
         soqlQuerySpy = $$.SANDBOX.stub(DataSoqlQueryCommand.prototype, 'runSoqlQuery')
           // aggregate query types are wrong in jsforce
-          .resolves(soqlQueryExemplars.queryWithAggregates.soqlQueryResult as unknown as SoqlQueryResult);
+          .resolves(soqlQueryExemplars.queryWithAggregates.soqlQueryResult);
       });
       afterEach(() => {
         $$.SANDBOX.restore();

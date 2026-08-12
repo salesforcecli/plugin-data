@@ -16,7 +16,7 @@
 import fs from 'node:fs';
 import { ReadStream } from 'node:fs';
 
-import { Connection, Messages } from '@salesforce/core';
+import { Connection, Messages, SfError } from '@salesforce/core';
 import { Flags, SfCommand, Ux } from '@salesforce/sf-plugins-core';
 import { orgFlags } from '../../../../flags.js';
 import { Batcher, BatcherReturnType } from '../../../../batcher.js';
@@ -79,7 +79,7 @@ export default class Delete extends SfCommand<BatcherReturnType> {
         this.spinner.stop();
       } catch (e) {
         this.spinner.stop('error');
-        reject(e);
+        reject(SfError.wrap(e));
       }
     });
   }

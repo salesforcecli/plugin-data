@@ -278,7 +278,7 @@ describe('data:query command', () => {
 
       // the Metadata object parsed correctly
       // @ts-expect-error typescript doesn't know the shape of the Metadata object
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const metadataObject = result?.records[0].Metadata;
       expect(metadataObject).to.have.property('disableProtocolSecurity');
       expect(metadataObject).to.have.property('isActive');
@@ -301,6 +301,7 @@ describe('data:query command', () => {
         await fs.promises.readFile(path.join(testSession.project.dir, 'accounts.json'), 'utf8')
       ) as DataQueryResult;
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { outputFile, ...result } = queryResult?.result as DataQueryResult;
 
       expect(file).to.deep.equal(result);

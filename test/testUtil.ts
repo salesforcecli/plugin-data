@@ -36,7 +36,6 @@ import EventEmitter = NodeJS.EventEmitter;
 const exec = promisify(execSync);
 
 // needs an external _listeners object since its not included in the type definition
-/* eslint-disable @typescript-eslint/no-unsafe-return,@typescript-eslint/ban-types */
 const createBaseFakeEmitter = function (): EventEmitter {
   return {
     on(event: string, listener: Function): EventEmitter {
@@ -86,7 +85,6 @@ const createBaseFakeEmitter = function (): EventEmitter {
     },
   };
 };
-/* eslint-enable @typescript-eslint/no-unsafe-return */
 
 export const createFakeConnection = function (): Connection {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return

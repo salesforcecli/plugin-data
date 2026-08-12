@@ -22,7 +22,6 @@ import { ensureJsonMap, ensureString, AnyJson } from '@salesforce/ts-types';
 import { expect } from 'chai';
 import { Config } from '@oclif/core/config';
 
-import type { SaveResult } from '@jsforce/jsforce-node';
 import Delete from '../../../../src/commands/data/delete/record.js';
 
 const sObjectId = '0011100001zhhyUAAQ';
@@ -70,7 +69,7 @@ describe('data:delete:record', () => {
       ['--target-org', 'test@org.com', '--sobject', 'Account', '--record-id', sObjectId, '--json'],
       config
     );
-    const result = (await cmd.run()) as unknown as SaveResult;
+    const result = await cmd.run();
     expect(result?.id).to.equal('0011100001zhhyUAAQ');
   });
 
@@ -93,7 +92,7 @@ describe('data:delete:record', () => {
     );
     try {
       await shouldThrow(cmd.run());
-    } catch (e) {
+    } catch {
       // expected an error
     }
   });
