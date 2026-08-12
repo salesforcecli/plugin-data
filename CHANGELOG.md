@@ -1,3 +1,9 @@
+## [5.1.3](https://github.com/salesforcecli/plugin-data/compare/5.1.2...5.1.3) (2026-08-12)
+
+### Bug Fixes
+
+- eslint 10 + type fixes @W-23474629@ ([9d2b0d2](https://github.com/salesforcecli/plugin-data/commit/9d2b0d232c1fb2eaa95cf31f29f32d01c5b98aaf))
+
 ## [5.1.2](https://github.com/salesforcecli/plugin-data/compare/5.1.1...5.1.2) (2026-08-09)
 
 ### Bug Fixes
