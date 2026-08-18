@@ -19,7 +19,7 @@ import { createInterface } from 'node:readline';
 import { pipeline } from 'node:stream/promises';
 import * as fs from 'node:fs';
 import { EOL } from 'node:os';
-import { fetch } from 'undici';
+import { fetch, ProxyAgent } from 'undici';
 import { HttpResponse } from '@jsforce/jsforce-node';
 import {
   IngestJobV2Results,
@@ -146,9 +146,13 @@ async function bulkRequest(
     headers.Authorization = `Bearer ${conn.accessToken}`;
   }
 
+  const httpProxy =
+    process.env.https_proxy ?? process.env.http_proxy ?? process.env.HTTPS_PROXY ?? process.env.HTTP_PROXY;
+
   const response = await fetch(normalizedUrl, {
     method: 'GET',
     headers,
+    dispatcher: httpProxy ? new ProxyAgent(httpProxy) : undefined,
   });
 
   if (!response.ok) {
