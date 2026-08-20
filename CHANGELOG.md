@@ -1,3 +1,10 @@
+## [5.1.6](https://github.com/salesforcecli/plugin-data/compare/5.1.5...5.1.6) (2026-08-20)
+
+### Bug Fixes
+
+- reworking eslint config (W-23928423) ([#1508](https://github.com/salesforcecli/plugin-data/issues/1508)) ([8975b85](https://github.com/salesforcecli/plugin-data/commit/8975b85823dc4b1978ec17fb3af9bc639a8466ad))
+- use ProxyAgent for bulk export results download @W-23816212@ ([#1507](https://github.com/salesforcecli/plugin-data/issues/1507)) ([30f4885](https://github.com/salesforcecli/plugin-data/commit/30f48853e38c82b0943f15f1988220747905edae))
+
 ## [5.1.5](https://github.com/salesforcecli/plugin-data/compare/5.1.4...5.1.5) (2026-08-17)
 
 ### Bug Fixes
