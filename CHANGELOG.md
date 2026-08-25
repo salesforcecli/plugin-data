@@ -1,3 +1,5 @@
+## [5.1.7](https://github.com/salesforcecli/plugin-data/compare/5.1.6...5.1.7) (2026-08-25)
+
 ## [5.1.6](https://github.com/salesforcecli/plugin-data/compare/5.1.5...5.1.6) (2026-08-20)
 
 ### Bug Fixes
