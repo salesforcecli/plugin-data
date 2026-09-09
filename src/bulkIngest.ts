@@ -401,7 +401,10 @@ export const baseUpsertDeleteFlags = {
  * @deprecated
  */
 export const baseUpsertDeleteResumeFlags = {
-  'target-org': { ...optionalOrgFlagWithDeprecations, summary: messages.getMessage('flags.targetOrg.summary') },
+  'target-org': {
+    ...optionalOrgFlagWithDeprecations,
+    summary: messages.getMessage('flags.targetOrg.summary'),
+  } as typeof optionalOrgFlagWithDeprecations,
   'job-id': Flags.salesforceId({
     length: 18,
     char: 'i',

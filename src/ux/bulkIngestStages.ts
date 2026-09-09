@@ -18,7 +18,8 @@ import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { IngestJobV2, JobInfoV2 } from '@jsforce/jsforce-node/lib/api/bulk2.js';
 import { Schema } from '@jsforce/jsforce-node';
 import terminalLink from 'terminal-link';
-import { StageStatus } from 'node_modules/@oclif/multi-stage-output/lib/stage-tracker.js';
+
+type StageStatus = Parameters<MultiStageOutput<JobInfoV2>['stop']>[0];
 
 type Options = {
   resume: boolean;

@@ -5,10 +5,10 @@
     "rootDir": "src",
     "skipLibCheck": true,
     "declaration": false,
-    "baseUrl": ".",
     "paths": {
-      "@salesforce/kit": ["node_modules/@salesforce/kit"]
-    }
+      "@salesforce/kit": ["./node_modules/@salesforce/kit"]
+    },
+    "types": ["mocha"]
   },
   "include": ["./src/**/*.ts"]
 }
