@@ -4,9 +4,9 @@
   "compilerOptions": {
     "skipLibCheck": true,
     "sourceMap": true,
-    "baseUrl": "..",
     "paths": {
-      "@salesforce/kit": ["node_modules/@salesforce/kit"]
-    }
+      "@salesforce/kit": ["../node_modules/@salesforce/kit"]
+    },
+    "types": ["mocha"]
   }
 }
