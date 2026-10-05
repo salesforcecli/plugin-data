@@ -1,3 +1,10 @@
+## [5.1.10](https://github.com/salesforcecli/plugin-data/compare/5.1.9...5.1.10) (2026-10-05)
+
+### Bug Fixes
+
+- **deps:** bump fast-uri from 3.1.5 to 3.1.8 ([b7e9ff5](https://github.com/salesforcecli/plugin-data/commit/b7e9ff5158dfcd20b30f20b968db54425e5e127c))
+- **deps:** bump undici from 7.29.0 to 7.30.0 ([f4fe575](https://github.com/salesforcecli/plugin-data/commit/f4fe57558e89bc669c5689c5bdddbed1833fb787))
+
 ## [5.1.9](https://github.com/salesforcecli/plugin-data/compare/5.1.8...5.1.9) (2026-09-30)
 
 ### Bug Fixes
