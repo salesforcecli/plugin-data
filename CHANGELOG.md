@@ -1,3 +1,9 @@
+## [5.1.12](https://github.com/salesforcecli/plugin-data/compare/5.1.11...5.1.12) (2026-10-09)
+
+### Bug Fixes
+
+- **deps:** bump fast-copy from 3.0.2 to 3.1.0 ([917f7c8](https://github.com/salesforcecli/plugin-data/commit/917f7c83a4ce9141e430b3d9b2013aba225d08cd))
+
 ## [5.1.11](https://github.com/salesforcecli/plugin-data/compare/5.1.10...5.1.11) (2026-10-09)
 
 ### Bug Fixes
