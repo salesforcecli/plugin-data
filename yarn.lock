@@ -1025,7 +1025,7 @@
     undici "^8.5.0"
     xml2js "^0.6.2"
 
-"@jsforce/jsforce-node@^3.10.24", "@jsforce/jsforce-node@^3.10.25":
+"@jsforce/jsforce-node@^3.10.25":
   version "3.10.25"
   resolved "https://registry.yarnpkg.com/@jsforce/jsforce-node/-/jsforce-node-3.10.25.tgz#19a457a8d0b5217188576507139134cfae836eef"
   integrity sha512-L4GfTOzmGBypjG1O7aTxwbk4DTKitU7yvnnqQE7wypFyEyHH9VR6cVZxi4+Gfk7cmItHRHAV7MyBTFfrP5DaHA==
@@ -1038,6 +1038,22 @@
     form-data "^4.0.4"
     multistream "^3.1.0"
     undici "^8.5.0"
+    xml2js "^0.6.2"
+
+"@jsforce/jsforce-node@^3.10.29":
+  version "3.10.29"
+  resolved "https://registry.yarnpkg.com/@jsforce/jsforce-node/-/jsforce-node-3.10.29.tgz#06708b86b79026c411d9cbf4493dbc5fd9d09ddb"
+  integrity sha512-N3TRPYGSrhEQuAJbxvOo/L4Zz12fhBG8og99SaYER2+3tVw8HeXcf7NlNCn56jbhPIaj8iHpQK+AE+xW1s3KNQ==
+  dependencies:
+    "@sindresorhus/is" "^4"
+    base64url "^3.0.1"
+    cross-spawn "^7.0.6"
+    csv-parse "^7.0.2"
+    csv-stringify "^6.8.3"
+    faye "^1.4.2"
+    form-data "^4.0.6"
+    multistream "^3.1.0"
+    undici "^8.11.0"
     xml2js "^0.6.2"
 
 "@jsonjoy.com/base64@^1.1.2":
@@ -1290,12 +1306,12 @@
     ts-retry-promise "^0.8.1"
     zod "^4.1.12"
 
-"@salesforce/core@^9.1.11", "@salesforce/core@^9.1.4", "@salesforce/core@^9.1.9":
-  version "9.1.11"
-  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-9.1.11.tgz#dd2226ac1d67434575aac92eaa3ad9c1a12dcc2e"
-  integrity sha512-EE4oGYsoKThank4dQ1mVIzJjS9yP6C6s7JzKDx+ki8AFAxgpposzLc6GYwZZq1tS0XaOfBL2x+8RrgEgZvXwnw==
+"@salesforce/core@^9.1.10", "@salesforce/core@^9.1.11", "@salesforce/core@^9.1.9":
+  version "9.3.6"
+  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-9.3.6.tgz#d9166f7f36abc048d800e436cac7946f2b462dda"
+  integrity sha512-2LuJVv8b4Yf3o8hKXQXZHfhP8LpyKQL5YRncPzVvE1AwLvbwabzLHc2NrELt2t+vpXiD3UURbP8KVMDjJn1KaA==
   dependencies:
-    "@jsforce/jsforce-node" "^3.10.24"
+    "@jsforce/jsforce-node" "^3.10.29"
     "@salesforce/kit" "^4.0.0"
     "@salesforce/ts-types" "^3.2.0"
     ajv "^8.18.0"
@@ -1389,18 +1405,18 @@
   resolved "https://registry.yarnpkg.com/@salesforce/prettier-config/-/prettier-config-0.0.4.tgz#fc84ea1585b2eb4bf156514911bac17b7f7e434c"
   integrity sha512-GBjR7f/jv7rcSrTvNgbkWvOykXg/PZqL7TztylKwaogWdrCbypJE8qEfBy9nILkICrwmDbQApOC8TqoO3bQKSw==
 
-"@salesforce/sf-plugins-core@^13.0.4":
-  version "13.0.4"
-  resolved "https://registry.yarnpkg.com/@salesforce/sf-plugins-core/-/sf-plugins-core-13.0.4.tgz#cd0fe99fdebe8b481a49eb41705c20c603afeb3b"
-  integrity sha512-AChjRg6dx2/njPjvGTa+leY4i1oBfQb6pIgLaP0EXVNKA1aByAzLZIhcnMS0Z2mr38vFzD4IySBMcYg3fupunA==
+"@salesforce/sf-plugins-core@^13.0.4", "@salesforce/sf-plugins-core@^13.0.5":
+  version "13.0.5"
+  resolved "https://registry.yarnpkg.com/@salesforce/sf-plugins-core/-/sf-plugins-core-13.0.5.tgz#e785e78986e859270a86f3b178a7019536c4c9ce"
+  integrity sha512-jBgsz99Jgmg565gE+FmimQt9mTverxzZowN7dwoyEvCAv7b6MghpYK/qM6Z2mIdXpg2+Q9yxdAqC9vDReYTIgQ==
   dependencies:
     "@inquirer/confirm" "^6.1.1"
     "@inquirer/password" "^5.1.1"
     "@oclif/core" "^5.0.0"
     "@oclif/table" "^1.0.0"
-    "@salesforce/core" "^9.1.4"
+    "@salesforce/core" "^9.1.10"
     "@salesforce/kit" "^4.0.0"
-    "@salesforce/ts-types" "^3.0.0"
+    "@salesforce/ts-types" "^3.2.0"
     ansis "^3.3.2"
     cli-progress "^3.12.0"
     terminal-link "^3.0.0"
@@ -1410,12 +1426,7 @@
   resolved "https://registry.yarnpkg.com/@salesforce/ts-types/-/ts-types-2.0.12.tgz#60420622812a7ec7e46d220667bc29b42dc247ff"
   integrity sha512-BIJyduJC18Kc8z+arUm5AZ9VkPRyw1KKAm+Tk+9LT99eOzhNilyfKzhZ4t+tG2lIGgnJpmytZfVDZ0e2kFul8g==
 
-"@salesforce/ts-types@^3.0.0":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@salesforce/ts-types/-/ts-types-3.0.1.tgz#e57ae9ab0c29aac98e4b247b841164c472b60827"
-  integrity sha512-NWkveMYT2I3O7EAYwWHi6/ba2YUwp9MFi/zJzA+czK5MVqJfdD6FZbiQrTbALZNvFzgFSdq9BvHm6ygRmtROzw==
-
-"@salesforce/ts-types@^3.2.0":
+"@salesforce/ts-types@^3.0.0", "@salesforce/ts-types@^3.2.0":
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/@salesforce/ts-types/-/ts-types-3.2.0.tgz#9e0393cab10d763b89562f0f94515e3cf1efbbe7"
   integrity sha512-3xdKt4nlthDC8nCHVWpVDwM5mmPlk8kDyJ1E3dWMk7FLRdQqhLgaHZgS+AMqcowWiKUC1l1d5YIhGhQM7dw3Bw==
@@ -3302,6 +3313,16 @@ faye@^1.4.0, faye@^1.4.1:
     csprng "*"
     faye-websocket ">=0.9.1"
     safe-buffer "*"
+    tough-cookie "*"
+    tunnel-agent "*"
+
+faye@^1.4.2:
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/faye/-/faye-1.4.3.tgz#00ac170e0d45b872726f883c68333eb3c521d5d6"
+  integrity sha512-MVbPkUDW31a8tWgdGppHrkuV8+/9eq5u5T5AnrS95HU52YJyy9sx1DYGY7xRL0u/suckuctgxRMunTXIDdxRTg==
+  dependencies:
+    csprng "*"
+    faye-websocket ">=0.9.1"
     tough-cookie "*"
     tunnel-agent "*"
 
@@ -6418,6 +6439,11 @@ undici@^7.30.0:
   version "7.30.0"
   resolved "https://registry.yarnpkg.com/undici/-/undici-7.30.0.tgz#64a947266eb7e21dbeac8b99f8720feef308bbe0"
   integrity sha512-dkrQXeHSaoamnItlYbmzG0wFYrM0ZwDxCIg0A7aKjTyyhh9svRzCNFEzV+Vm05/yehjCzjDZ31KXfGEjYSztDQ==
+
+undici@^8.11.0:
+  version "8.11.2"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-8.11.2.tgz#b8f6f6504384ae535c8e46f8403fd8075f011d46"
+  integrity sha512-u4UB2/IrKdU6lFxumHmmo1a3fCQO5tzQllRorfoRS63txhrB7xTpSn1PftwC4qEHkOaqP95fCWW4lJzwErwzhQ==
 
 undici@^8.5.0:
   version "8.7.0"
