@@ -1,3 +1,9 @@
+## [5.1.17](https://github.com/salesforcecli/plugin-data/compare/5.1.16...5.1.17) (2026-10-15)
+
+### Bug Fixes
+
+- bump undici ([#1550](https://github.com/salesforcecli/plugin-data/issues/1550)) ([848feef](https://github.com/salesforcecli/plugin-data/commit/848feef038398115361a56ed2fe1aa592d20f119))
+
 ## [5.1.16](https://github.com/salesforcecli/plugin-data/compare/5.1.15...5.1.16) (2026-10-12)
 
 ### Bug Fixes
