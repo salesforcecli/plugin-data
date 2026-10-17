@@ -2717,10 +2717,10 @@ csv-parse@^7.0.3:
   resolved "https://registry.yarnpkg.com/csv-parse/-/csv-parse-7.0.3.tgz#eece4221023f8f67029518af928a225a1ea3ccad"
   integrity sha512-YFd3QM/yo17vH91L1IOZuvl09zM0zEEtdfTcOCKWcMdM++MNaQSyp09slXyFCLaPXvHstQFx/xC8myiFHSMUvw==
 
-csv-stringify@^6.6.0, csv-stringify@^6.8.3:
-  version "6.8.3"
-  resolved "https://registry.yarnpkg.com/csv-stringify/-/csv-stringify-6.8.3.tgz#ecaf80acb5fc6deddf3a0c6b2bf2d919ffba382a"
-  integrity sha512-gIeSCvq5F4VtXV3naV3VAewLhBkiZBz+PPhTOA8H3Y8h/ELa+R1ml0GZck/4/Nzo9ep2lvOluilJ6MJlbZsKMA==
+csv-stringify@^6.6.0, csv-stringify@^6.9.0:
+  version "6.9.0"
+  resolved "https://registry.yarnpkg.com/csv-stringify/-/csv-stringify-6.9.0.tgz#e92dd2905f6d67f33ec9c413b02080362989e8ca"
+  integrity sha512-6b3e29CILFfSQ2nDRuZMRROzQOpPuJ+s8zPB5H7eK5ncXBbFOyVuRLU5Sx/zAUmVri3Ly49GyC8NEme4SVSAbA==
 
 dargs@^7.0.0:
   version "7.0.0"
