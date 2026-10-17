@@ -1431,10 +1431,10 @@
   resolved "https://registry.yarnpkg.com/@salesforce/ts-types/-/ts-types-3.2.0.tgz#9e0393cab10d763b89562f0f94515e3cf1efbbe7"
   integrity sha512-3xdKt4nlthDC8nCHVWpVDwM5mmPlk8kDyJ1E3dWMk7FLRdQqhLgaHZgS+AMqcowWiKUC1l1d5YIhGhQM7dw3Bw==
 
-"@salesforce/types@^1.8.0":
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/@salesforce/types/-/types-1.8.0.tgz#8d1d0be300129d8a97055f3e10f1ebf8d5e1fe48"
-  integrity sha512-sliQcoI0XeR3YYUElIV3z93l7ZL9lDtnegVGbknBFbQKjN/oxH/PQSiM4imnXnModhFQSoe/V3mGXniASoLNvA==
+"@salesforce/types@^1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/types/-/types-1.9.0.tgz#2fe0099ff60278c849a34693fbfb9c449ddd7e9c"
+  integrity sha512-+VECX78jTYpeAHkv80C6uy86fbrNO/RplqxeLuasLV/rJF1NIYyFtrtAVqFlMvI8YwjQnyuprWOyzI8VF+Wi7g==
 
 "@shikijs/engine-oniguruma@^3.23.0":
   version "3.23.0"
