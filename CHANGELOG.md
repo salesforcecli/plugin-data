@@ -1,3 +1,9 @@
+## [5.1.18](https://github.com/salesforcecli/plugin-data/compare/5.1.17...5.1.18) (2026-10-18)
+
+### Bug Fixes
+
+- **deps:** bump csv-stringify from 6.8.3 to 6.9.0 ([adc812b](https://github.com/salesforcecli/plugin-data/commit/adc812b9810d0170e978892e18f084d228c70dc0))
+
 ## [5.1.17](https://github.com/salesforcecli/plugin-data/compare/5.1.16...5.1.17) (2026-10-15)
 
 ### Bug Fixes
