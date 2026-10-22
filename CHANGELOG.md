@@ -1,3 +1,9 @@
+## [5.1.20](https://github.com/salesforcecli/plugin-data/compare/5.1.19...5.1.20) (2026-10-22)
+
+### Bug Fixes
+
+- **deps:** bump markdown-it from 14.3.1 to 14.3.3 ([fef37b4](https://github.com/salesforcecli/plugin-data/commit/fef37b49783b580954230003e747bcc120d95c6c))
+
 ## [5.1.19](https://github.com/salesforcecli/plugin-data/compare/5.1.18...5.1.19) (2026-10-18)
 
 ### Bug Fixes
