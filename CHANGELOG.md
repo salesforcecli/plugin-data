@@ -1,3 +1,9 @@
+## [5.1.21](https://github.com/salesforcecli/plugin-data/compare/5.1.20...5.1.21) (2026-10-25)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/ts-types from 3.2.0 to 3.2.2 ([a11f413](https://github.com/salesforcecli/plugin-data/commit/a11f413eb1454450fc9791c0946ea191103d6215))
+
 ## [5.1.20](https://github.com/salesforcecli/plugin-data/compare/5.1.19...5.1.20) (2026-10-22)
 
 ### Bug Fixes
