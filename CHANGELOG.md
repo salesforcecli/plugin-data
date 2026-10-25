@@ -1,3 +1,9 @@
+## [5.1.23](https://github.com/salesforcecli/plugin-data/compare/5.1.22...5.1.23) (2026-10-25)
+
+### Bug Fixes
+
+- **deps:** bump undici from 8.12.2 to 8.12.3 ([a0fc662](https://github.com/salesforcecli/plugin-data/commit/a0fc662ceea0117d85a3f7c8e0f6bdb2d290decc))
+
 ## [5.1.22](https://github.com/salesforcecli/plugin-data/compare/5.1.21...5.1.22) (2026-10-25)
 
 ### Bug Fixes
