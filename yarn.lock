@@ -1681,9 +1681,9 @@
     "@types/node" "*"
 
 "@types/node@*":
-  version "26.6.5"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-26.6.5.tgz#cb35209e7767c503551b5fa42a48231c7441d979"
-  integrity sha512-uMzsv9stDdofIZBx4UGh4Z9ZgXnGC9seRDscilBcTHAeOFk67MZg/k9bWVfO+bk4qZmG+l52hRnLwUiH2LnJTg==
+  version "26.6.6"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-26.6.6.tgz#9ed7b5817e728ed9216ef7c5b7d373fe3b777104"
+  integrity sha512-MzQj+8Kx3XI40OmUAE6Qoh58ZMNstNNMwn2nfd3qWsfe7nDNSqJNzes4njhz6AHwrSHOffSLwXU6yb474Q4aog==
   dependencies:
     undici-types "~8.9.0"
 
@@ -3063,10 +3063,10 @@ eslint-plugin-jsdoc@^63.3.2:
     spdx-expression-parse "^5.0.0"
     to-valid-identifier "^1.0.0"
 
-eslint-plugin-sf-plugin@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-sf-plugin/-/eslint-plugin-sf-plugin-3.0.1.tgz#13a26efd7b545883930a0da1f18a31f16d946397"
-  integrity sha512-NxaAotRkq9vj63HJY5ByKokGYd5PNBKxvdfYaffb+KTeiEwohuXFY5K3ZaSOaKgUtTq2tbobCcZzGWQEzpw/wg==
+eslint-plugin-sf-plugin@^3.0.4:
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-sf-plugin/-/eslint-plugin-sf-plugin-3.0.4.tgz#91004b5240a38d92479445897d9a0cdf39fb13cb"
+  integrity sha512-3wLqmwRaDbsGlSfooHNl2x/j6WL5MWu81JELziTb2GxxbiEvn+9g0ACHoTBti5JDjHPbCCiLv9TQOnzwl4O6wg==
   dependencies:
     "@salesforce/core" "^8.23.1"
     "@typescript-eslint/utils" "^8.33.1"
