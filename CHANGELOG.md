@@ -1,3 +1,9 @@
+## [5.1.26](https://github.com/salesforcecli/plugin-data/compare/5.1.25...5.1.26) (2026-11-01)
+
+### Bug Fixes
+
+- **deps:** bump picomatch from 2.3.1 to 2.3.2 ([82f4685](https://github.com/salesforcecli/plugin-data/commit/82f468580d6e556ce4e238b563f777958e669e37))
+
 ## [5.1.25](https://github.com/salesforcecli/plugin-data/compare/5.1.24...5.1.25) (2026-11-01)
 
 ### Bug Fixes
