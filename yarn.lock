@@ -1423,7 +1423,7 @@
     ts-retry-promise "^0.8.1"
     zod "^4.1.12"
 
-"@salesforce/core@^9.1.11", "@salesforce/core@^9.1.4", "@salesforce/core@^9.1.9", "@salesforce/core@^9.4.1":
+"@salesforce/core@^9.1.10", "@salesforce/core@^9.1.11", "@salesforce/core@^9.1.9", "@salesforce/core@^9.4.1":
   version "9.4.5"
   resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-9.4.5.tgz#329b20db1a6574094cc8d1b00dc8c09f37e1d983"
   integrity sha512-NgISjMzdImzkMMIJvcFQ80vWNR0A5h8nxNL/0GWX1x6gd/yo67BICSSl58d9Rq9ebeySExjo8cWE3MUSrM4xnA==
@@ -1522,18 +1522,18 @@
   resolved "https://registry.yarnpkg.com/@salesforce/prettier-config/-/prettier-config-0.0.4.tgz#fc84ea1585b2eb4bf156514911bac17b7f7e434c"
   integrity sha512-GBjR7f/jv7rcSrTvNgbkWvOykXg/PZqL7TztylKwaogWdrCbypJE8qEfBy9nILkICrwmDbQApOC8TqoO3bQKSw==
 
-"@salesforce/sf-plugins-core@^13.0.4":
-  version "13.0.4"
-  resolved "https://registry.yarnpkg.com/@salesforce/sf-plugins-core/-/sf-plugins-core-13.0.4.tgz#cd0fe99fdebe8b481a49eb41705c20c603afeb3b"
-  integrity sha512-AChjRg6dx2/njPjvGTa+leY4i1oBfQb6pIgLaP0EXVNKA1aByAzLZIhcnMS0Z2mr38vFzD4IySBMcYg3fupunA==
+"@salesforce/sf-plugins-core@^13.0.4", "@salesforce/sf-plugins-core@^13.0.8":
+  version "13.0.8"
+  resolved "https://registry.yarnpkg.com/@salesforce/sf-plugins-core/-/sf-plugins-core-13.0.8.tgz#41c61a1f8d49543c3fbe09445f1521991b29b5e0"
+  integrity sha512-Q20dYNsyCLztStPFqWVkLSumIRs1Jttd5/ZkjOkZ3lyyjfuBPFrEubR4aKaXQPWpdx1UvcZ6vHPupoUkuRLFSg==
   dependencies:
     "@inquirer/confirm" "^6.1.1"
     "@inquirer/password" "^5.1.1"
     "@oclif/core" "^5.0.0"
     "@oclif/table" "^1.0.0"
-    "@salesforce/core" "^9.1.4"
+    "@salesforce/core" "^9.1.10"
     "@salesforce/kit" "^4.0.0"
-    "@salesforce/ts-types" "^3.0.0"
+    "@salesforce/ts-types" "^3.2.0"
     ansis "^3.3.2"
     cli-progress "^3.12.0"
     terminal-link "^3.0.0"
@@ -1543,7 +1543,7 @@
   resolved "https://registry.yarnpkg.com/@salesforce/ts-types/-/ts-types-2.0.12.tgz#60420622812a7ec7e46d220667bc29b42dc247ff"
   integrity sha512-BIJyduJC18Kc8z+arUm5AZ9VkPRyw1KKAm+Tk+9LT99eOzhNilyfKzhZ4t+tG2lIGgnJpmytZfVDZ0e2kFul8g==
 
-"@salesforce/ts-types@^3.0.0", "@salesforce/ts-types@^3.2.0", "@salesforce/ts-types@^3.2.3", "@salesforce/ts-types@^3.2.4":
+"@salesforce/ts-types@^3.2.0", "@salesforce/ts-types@^3.2.3", "@salesforce/ts-types@^3.2.4":
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/@salesforce/ts-types/-/ts-types-3.2.4.tgz#783db051f0f95a23647934efc521cf1ad31dcdbd"
   integrity sha512-kTzgXQbOdon0gJFwdHQ+A+UvMR/E3zzlj6O1Wyl5//waq7OSNjspB49y9LrZefIyqHV+ACfB9/aWBJ9aSKMrvQ==
