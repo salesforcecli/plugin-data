@@ -1,3 +1,9 @@
+## [5.1.28](https://github.com/salesforcecli/plugin-data/compare/5.1.27...5.1.28) (2026-11-08)
+
+### Bug Fixes
+
+- **deps:** bump @jsforce/jsforce-node from 3.10.25 to 3.13.1 ([668542e](https://github.com/salesforcecli/plugin-data/commit/668542e631540c732a085c7c119b61566714df74))
+
 ## [5.1.27](https://github.com/salesforcecli/plugin-data/compare/5.1.26...5.1.27) (2026-11-08)
 
 ### Bug Fixes
