@@ -1382,14 +1382,14 @@
     "@pnpm/network.ca-file" "^1.0.1"
     config-chain "^1.1.11"
 
-"@salesforce/cli-plugins-testkit@^5.3.90":
-  version "5.3.90"
-  resolved "https://registry.yarnpkg.com/@salesforce/cli-plugins-testkit/-/cli-plugins-testkit-5.3.90.tgz#45bc035b804a80082c83cf55024688a0b49b081a"
-  integrity sha512-NzPMxSmM/1d6N97xf2nTGNf/DtitEp+9RWEG8tEQZF6kvx/2dAUHF11sHvdTCgmzB1L5evAUDoNHRq6gZTjBgw==
+"@salesforce/cli-plugins-testkit@^5.3.93":
+  version "5.3.93"
+  resolved "https://registry.yarnpkg.com/@salesforce/cli-plugins-testkit/-/cli-plugins-testkit-5.3.93.tgz#e6ad3ee0b39ba03af7127d001924230a146c8d64"
+  integrity sha512-vrgVyloI9X6udHbRz5C9ncGRXK7C1Py3Jt+mJ7ItgjZgRj+uWKsIS6PWaB4AI9LIc/+xTLL+y+Fgm6LGbqIw6Q==
   dependencies:
-    "@salesforce/core" "^9.4.1"
-    "@salesforce/kit" "^4.0.8"
-    "@salesforce/ts-types" "^3.2.3"
+    "@salesforce/core" "^9.4.4"
+    "@salesforce/kit" "^4.0.9"
+    "@salesforce/ts-types" "^3.2.4"
     "@types/shelljs" "^0.10.0"
     debug "^4.4.3"
     jszip "^3.10.2"
@@ -1423,10 +1423,10 @@
     ts-retry-promise "^0.8.1"
     zod "^4.1.12"
 
-"@salesforce/core@^9.1.10", "@salesforce/core@^9.1.11", "@salesforce/core@^9.4.1":
-  version "9.4.5"
-  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-9.4.5.tgz#329b20db1a6574094cc8d1b00dc8c09f37e1d983"
-  integrity sha512-NgISjMzdImzkMMIJvcFQ80vWNR0A5h8nxNL/0GWX1x6gd/yo67BICSSl58d9Rq9ebeySExjo8cWE3MUSrM4xnA==
+"@salesforce/core@^9.1.10", "@salesforce/core@^9.1.11", "@salesforce/core@^9.4.1", "@salesforce/core@^9.4.4":
+  version "9.4.6"
+  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-9.4.6.tgz#20a65181d477bffc9e5c0c9c2b5240881b7cd688"
+  integrity sha512-ph6zETeGRegICHLbP5OjHqiry7RdWpCf+NihuIEsKYhqgcxkeOSEiuznlLm2F4lmo4/y61ogF5kOBAKwOK+ynQ==
   dependencies:
     "@jsforce/jsforce-node" "^3.12.0"
     "@salesforce/kit" "^4.0.0"
@@ -1446,7 +1446,7 @@
     proper-lockfile "^4.1.2"
     semver "^7.8.0"
     ts-retry-promise "^0.8.1"
-    zod "^4.1.12"
+    zod "^4.6.6"
 
 "@salesforce/dev-config@^4.3.3":
   version "4.3.3"
@@ -1496,7 +1496,7 @@
   dependencies:
     "@salesforce/ts-types" "^2.0.12"
 
-"@salesforce/kit@^4.0.0", "@salesforce/kit@^4.0.8":
+"@salesforce/kit@^4.0.0", "@salesforce/kit@^4.0.8", "@salesforce/kit@^4.0.9":
   version "4.0.10"
   resolved "https://registry.yarnpkg.com/@salesforce/kit/-/kit-4.0.10.tgz#1d85a4d6733f1e2edc0b7aa158117716dab92a5f"
   integrity sha512-LXCswafab7AYmpaEvjHmpI3Ueg4dk9c/vFfHSEenVyx/dF1ABlxmf8kpVyox6iRBBh3RvM5/LkQMtXUv7iSd7w==
@@ -1543,7 +1543,7 @@
   resolved "https://registry.yarnpkg.com/@salesforce/ts-types/-/ts-types-2.0.12.tgz#60420622812a7ec7e46d220667bc29b42dc247ff"
   integrity sha512-BIJyduJC18Kc8z+arUm5AZ9VkPRyw1KKAm+Tk+9LT99eOzhNilyfKzhZ4t+tG2lIGgnJpmytZfVDZ0e2kFul8g==
 
-"@salesforce/ts-types@^3.2.0", "@salesforce/ts-types@^3.2.2", "@salesforce/ts-types@^3.2.3", "@salesforce/ts-types@^3.2.4":
+"@salesforce/ts-types@^3.2.0", "@salesforce/ts-types@^3.2.2", "@salesforce/ts-types@^3.2.4":
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/@salesforce/ts-types/-/ts-types-3.2.4.tgz#783db051f0f95a23647934efc521cf1ad31dcdbd"
   integrity sha512-kTzgXQbOdon0gJFwdHQ+A+UvMR/E3zzlj6O1Wyl5//waq7OSNjspB49y9LrZefIyqHV+ACfB9/aWBJ9aSKMrvQ==
@@ -1797,24 +1797,17 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*":
-  version "26.6.6"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-26.6.6.tgz#9ed7b5817e728ed9216ef7c5b7d373fe3b777104"
-  integrity sha512-MzQj+8Kx3XI40OmUAE6Qoh58ZMNstNNMwn2nfd3qWsfe7nDNSqJNzes4njhz6AHwrSHOffSLwXU6yb474Q4aog==
-  dependencies:
-    undici-types "~8.9.0"
-
-"@types/node@20.5.1":
-  version "20.5.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.5.1.tgz#178d58ee7e4834152b0e8b4d30cbfab578b9bb30"
-  integrity sha512-4tT2UrL5LBqDwoed9wZ6N3umC4Yhz3W3FloMmiiG4JwmUJWpie0c7lcnUNd4gtMKuDEO4wRVS8B6Xa0uMRsMKg==
-
-"@types/node@^18":
+"@types/node@*", "@types/node@^18":
   version "18.19.130"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-18.19.130.tgz#da4c6324793a79defb7a62cba3947ec5add00d59"
   integrity sha512-GRaXQx6jGfL8sKfaIDD6OupbIHBr9jv7Jnaml9tB7l4v068PAOXqfcujMMo5PhbIs6ggR1XODELqahT2R8v0fg==
   dependencies:
     undici-types "~5.26.4"
+
+"@types/node@20.5.1":
+  version "20.5.1"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.5.1.tgz#178d58ee7e4834152b0e8b4d30cbfab578b9bb30"
+  integrity sha512-4tT2UrL5LBqDwoed9wZ6N3umC4Yhz3W3FloMmiiG4JwmUJWpie0c7lcnUNd4gtMKuDEO4wRVS8B6Xa0uMRsMKg==
 
 "@types/node@^22.5.5":
   version "22.19.15"
@@ -6556,11 +6549,6 @@ undici-types@~6.21.0:
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.21.0.tgz#691d00af3909be93a7faa13be61b3a5b50ef12cb"
   integrity sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==
 
-undici-types@~8.9.0:
-  version "8.9.0"
-  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-8.9.0.tgz#e240d97c8b5d85e5347ce73d25865c7906c1ec9f"
-  integrity sha512-KTDyRTYX8sWmKXAikPHHSyc63CRPETMctyjKFupcC6OBLXT3xsN0e9aF7m+mIXutFWpUXuedtowG7iLOzp0kQg==
-
 undici@^8.11.0, undici@^8.12.3:
   version "8.12.4"
   resolved "https://registry.yarnpkg.com/undici/-/undici-8.12.4.tgz#0c0cabeafd9a9c3139f9ace62ee9436c0d355c72"
@@ -6966,7 +6954,7 @@ yoga-wasm-web@~0.3.3:
   resolved "https://registry.yarnpkg.com/yoga-wasm-web/-/yoga-wasm-web-0.3.3.tgz#eb8e9fcb18e5e651994732f19a220cb885d932ba"
   integrity sha512-N+d4UJSJbt/R3wqY7Coqs5pcV0aUj2j9IaQ3rNj9bVCLld8tTGKRa2USARjnvZJWVx1NDmQev8EknoczaOQDOA==
 
-zod@^4.1.12, zod@^4.6.7:
+zod@^4.1.12, zod@^4.6.6, zod@^4.6.7:
   version "4.6.7"
   resolved "https://registry.yarnpkg.com/zod/-/zod-4.6.7.tgz#e806cf64a7f4e37635ce9f2f52c04c3766f75e5b"
   integrity sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==
