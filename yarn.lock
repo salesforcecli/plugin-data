@@ -1395,13 +1395,13 @@
     "@pnpm/network.ca-file" "^1.0.1"
     config-chain "^1.1.11"
 
-"@salesforce/cli-plugins-testkit@^5.3.93":
-  version "5.3.93"
-  resolved "https://registry.yarnpkg.com/@salesforce/cli-plugins-testkit/-/cli-plugins-testkit-5.3.93.tgz#e6ad3ee0b39ba03af7127d001924230a146c8d64"
-  integrity sha512-vrgVyloI9X6udHbRz5C9ncGRXK7C1Py3Jt+mJ7ItgjZgRj+uWKsIS6PWaB4AI9LIc/+xTLL+y+Fgm6LGbqIw6Q==
+"@salesforce/cli-plugins-testkit@^5.3.95":
+  version "5.3.95"
+  resolved "https://registry.yarnpkg.com/@salesforce/cli-plugins-testkit/-/cli-plugins-testkit-5.3.95.tgz#a9f9102a44a4fbe095c70e224d9ca050cac5b323"
+  integrity sha512-sYCQQexG9mnRmGp/uC/Mxpw1Gzsg/Dd0ybQ3VEh1MW/Xw0VAPDJDJ+vhBbb8RSHCCGrPHAR2nyAvn6STsRcSUQ==
   dependencies:
-    "@salesforce/core" "^9.4.4"
-    "@salesforce/kit" "^4.0.9"
+    "@salesforce/core" "^9.4.6"
+    "@salesforce/kit" "^4.0.10"
     "@salesforce/ts-types" "^3.2.4"
     "@types/shelljs" "^0.10.0"
     debug "^4.4.3"
@@ -1436,10 +1436,10 @@
     ts-retry-promise "^0.8.1"
     zod "^4.1.12"
 
-"@salesforce/core@^9.1.10", "@salesforce/core@^9.4.1", "@salesforce/core@^9.4.4", "@salesforce/core@^9.5.0":
-  version "9.5.0"
-  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-9.5.0.tgz#8f4f026818ba7f4b78062aac145b8afda21978ea"
-  integrity sha512-18OsyaRZfnXKLNPAc0eVTsqLQh+q+YsjrjUEocWtfjl9wZNn6Owc255IhjBb0LZ+GXPKFNmlh4ufY/r2zAi1VA==
+"@salesforce/core@^9.1.10", "@salesforce/core@^9.4.1", "@salesforce/core@^9.4.6", "@salesforce/core@^9.5.0":
+  version "9.6.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-9.6.0.tgz#7b5427beb5693c5555dbbdd900df332db9f94bd5"
+  integrity sha512-zaKpx/G5ECPPTAD/V9qHsYEXA7Q74KmuUHUyKNMDZts5L6j4SwcJOIjSkOSQQNstQQt0sbaVuY8vEUne+xYjKw==
   dependencies:
     "@jsforce/jsforce-node" "^3.12.0"
     "@salesforce/kit" "^4.0.0"
@@ -1509,7 +1509,7 @@
   dependencies:
     "@salesforce/ts-types" "^2.0.12"
 
-"@salesforce/kit@^4.0.0", "@salesforce/kit@^4.0.8", "@salesforce/kit@^4.0.9":
+"@salesforce/kit@^4.0.0", "@salesforce/kit@^4.0.10", "@salesforce/kit@^4.0.8":
   version "4.0.10"
   resolved "https://registry.yarnpkg.com/@salesforce/kit/-/kit-4.0.10.tgz#1d85a4d6733f1e2edc0b7aa158117716dab92a5f"
   integrity sha512-LXCswafab7AYmpaEvjHmpI3Ueg4dk9c/vFfHSEenVyx/dF1ABlxmf8kpVyox6iRBBh3RvM5/LkQMtXUv7iSd7w==
