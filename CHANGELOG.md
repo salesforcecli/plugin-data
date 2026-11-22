@@ -1,3 +1,9 @@
+## [5.1.30](https://github.com/salesforcecli/plugin-data/compare/5.1.29...5.1.30) (2026-11-22)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/core from 9.4.6 to 9.5.0 ([9e5000f](https://github.com/salesforcecli/plugin-data/commit/9e5000ffad658a03d698a12da764af680b542f67))
+
 ## [5.1.29](https://github.com/salesforcecli/plugin-data/compare/5.1.28...5.1.29) (2026-11-15)
 
 ### Bug Fixes
